@@ -1607,6 +1607,64 @@
       font-size: 11px;
     }
 
+    .inventory-block {
+      display: grid;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .inv-line {
+      display: grid;
+      gap: 3px;
+      padding: 7px;
+      font-size: 11px;
+      line-height: 1.35;
+      background: #ffffff;
+      box-shadow:
+        inset -1px -1px var(--win-light),
+        inset 1px 1px var(--win-dark),
+        inset -2px -2px var(--win-mid),
+        inset 2px 2px var(--win-black);
+    }
+
+    .inv-line strong {
+      font-size: 11px;
+    }
+
+    .inv-wear {
+      height: 7px;
+      margin-top: 2px;
+      background: #c0c0c0;
+      box-shadow: inset 1px 1px var(--win-black), inset -1px -1px var(--win-light);
+    }
+
+    .inv-wear-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0b7d7d, #23b9a6);
+    }
+
+    .inv-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+    }
+
+    .inv-chip {
+      padding: 2px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #08311f;
+      background: #6cf0b0;
+      box-shadow:
+        inset -1px -1px rgba(0, 0, 0, 0.3),
+        inset 1px 1px rgba(255, 255, 255, 0.6);
+    }
+
+    .inv-empty {
+      font-size: 10px;
+      color: #707070;
+    }
+
     .win95-strip {
       display: flex;
       justify-content: space-between;
@@ -4878,6 +4936,12 @@
       const focusedProject = getFocusedProject();
       const buildings = visibleBuildings(city);
       const inCityHint = buildings.includes(hint.building) ? hint.building : null;
+      const wornWardrobe = gameState.wardrobeTier ? WARDROBES.find((w) => w.tier === gameState.wardrobeTier) : null;
+      const ownedGear = [
+        gameState.equipment.camera && localize({ he: "מצלמת כתף", en: "Shoulder camera" }),
+        gameState.equipment.studio && localize({ he: "עמדת עריכה", en: "Edit station" }),
+        gameState.equipment.insurance && localize({ he: "סאונד ותאורה", en: "Sound & light" })
+      ].filter(Boolean);
       dom.boardStage.innerHTML = `
         <div class="win95-shell">
           <section class="win95-status">
@@ -4897,6 +4961,20 @@
             <div class="win95-note">
               <strong>${t("housing")}</strong>
               <span>${localize(HOUSING[gameState.housing].name)}</span>
+            </div>
+            <div class="inventory-block">
+              <div class="win95-panel-title">${localize({ he: "מה שיש לי", en: "What I own" })}</div>
+              <div class="inv-line">
+                <strong>${localize({ he: "לבוש", en: "Wearing" })}</strong>
+                <span>${wornWardrobe ? localize(wornWardrobe.name) : localize({ he: "הבגדים שלי, בלי שדרוג", en: "My own clothes, no upgrade" })}</span>
+                ${wornWardrobe ? `<div class="inv-wear"><div class="inv-wear-fill" style="width:${Math.max(0, Math.min(100, gameState.wardrobeWear))}%;"></div></div>` : ""}
+              </div>
+              <div class="inv-line">
+                <strong>${localize({ he: "ציוד שקניתי", en: "Gear I bought" })}</strong>
+                <div class="inv-chips">
+                  ${ownedGear.length ? ownedGear.map((g) => `<span class="inv-chip">${g}</span>`).join("") : `<span class="inv-empty">${localize({ he: "עוד אין ציוד", en: "No gear yet" })}</span>`}
+                </div>
+              </div>
             </div>
           </section>
           <section class="win95-main">
