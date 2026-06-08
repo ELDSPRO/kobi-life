@@ -1937,6 +1937,7 @@
     .npc-row.bad  .npc-rel { color: #b13c3c; }
     .npc-row-role { font-size: 10px; color: #444; }
     .npc-row-status { font-size: 10px; color: #2a4ba0; }
+    .npc-row-links { font-size: 10px; color: #555; opacity: 0.85; font-style: italic; }
     .roster-group li.muted {
       color: #888;
       font-style: italic;
@@ -5000,6 +5001,50 @@
       }
     };
 
+    /*
+     * NPC_LINKS — undirected social ties between recurring characters.
+     * When a player's relationship with one NPC moves, a fraction of
+     * that delta ripples to the linked NPC (same sign — friends of
+     * friends tend to align). spill is the share. Used for first-degree
+     * spread only — spillover does NOT recurse to second-degree links.
+     * Spillover targets are NOT marked as met (you haven't actually
+     * encountered them); only their relationship counter pre-tilts.
+     */
+    const NPC_LINKS = [
+      { a: "dani_classmate", b: "maya_barista", spill: 0.5, why: { he: "חברי לימודים מבית הספר לקולנוע ת\"א", en: "Film-school classmates in TLV" } },
+      { a: "sofia_editor", b: "marc_crew", spill: 0.4, why: { he: "עבדו ביחד על הפקה אירופית ב-2005", en: "Worked together on a European production in 2005" } },
+      { a: "alexis_curator", b: "petra_programmer", spill: 0.4, why: { he: "שני תכניתני סינמטק, מכבדים זה את זו", en: "Two cinematheque programmers, mutual respect" } },
+      { a: "frank_set", b: "tony_loan", spill: 0.4, why: { he: "ידידי-עסקים מהשנים, ניו יורק", en: "Long-time NYC business friends" } },
+      { a: "rose_legend", b: "henry_festival", spill: 0.5, why: { he: "היא חנכה אותו לפני שני עשורים", en: "She mentored him two decades ago" } }
+    ];
+
+    function npcLinkPartners(npcId) {
+      const partners = [];
+      NPC_LINKS.forEach((link) => {
+        if (link.a === npcId) partners.push(link.b);
+        else if (link.b === npcId) partners.push(link.a);
+      });
+      return partners;
+    }
+
+    function applyNetworkSpillover(originId, deltaRel) {
+      if (Math.abs(deltaRel) < 2) return; // small interactions don't ripple
+      if (!gameState.npcs) gameState.npcs = {};
+      NPC_LINKS.forEach((link) => {
+        let target = null;
+        if (link.a === originId) target = link.b;
+        else if (link.b === originId) target = link.a;
+        if (!target || !NPCS[target]) return;
+        const spread = Math.round(deltaRel * link.spill);
+        if (spread === 0) return;
+        if (!gameState.npcs[target]) {
+          gameState.npcs[target] = { met: false, relationship: 0, firstMet: gameState.day };
+        }
+        gameState.npcs[target].relationship += spread;
+        // Do NOT set met=true. The player hasn't actually encountered them yet.
+      });
+    }
+
     function meetNpc(npcId, deltaRel) {
       if (!NPCS[npcId]) return;
       if (!gameState.npcs) gameState.npcs = {};
@@ -5009,6 +5054,7 @@
       gameState.npcs[npcId].met = true;
       gameState.npcs[npcId].relationship += (deltaRel || 0);
       gameState.npcs[npcId].lastSeen = gameState.day;
+      applyNetworkSpillover(npcId, deltaRel || 0);
     }
 
     /*
@@ -6682,6 +6728,12 @@
         const rel = state.relationship | 0;
         const sign = rel > 0 ? "+" : "";
         const cls = rel >= 1 ? "good" : rel <= -1 ? "bad" : "neutral";
+        const partners = npcLinkPartners(id)
+          .filter((pid) => NPCS[pid])
+          .map((pid) => localize(NPCS[pid].name));
+        const linkLine = partners.length
+          ? `<div class="npc-row-links">↔ ${partners.join(" • ")}</div>`
+          : "";
         return `
           <div class="npc-row ${cls}">
             <div class="npc-row-head">
@@ -6691,6 +6743,7 @@
             </div>
             <div class="npc-row-role">${localize(npc.role)}</div>
             <div class="npc-row-status">${localize(relationshipLabel(rel))}</div>
+            ${linkLine}
           </div>
         `;
       }).join("");
@@ -7970,6 +8023,8 @@
     root.SCENE_CARDS = SCENE_CARDS;
     root.NPCS = NPCS;
     root.meetNpc = meetNpc;
+    root.NPC_LINKS = NPC_LINKS;
+    root.applyNetworkSpillover = applyNetworkSpillover;
 
     if (canRender) {
       init();
