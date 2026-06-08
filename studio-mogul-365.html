@@ -4941,6 +4941,12 @@
         }), "good");
       }
       playSfx("success");
+      // Treatment task: a class while you have an active project unlocks
+      // the treatment phase (the doc/reading list that takes raw idea
+      // toward a structured pitch).
+      if (gameState.projects && gameState.projects.length > 0) {
+        markFilmTask("treatment");
+      }
       updateUnlocks();
       saveGame();
       return true;
@@ -5560,9 +5566,39 @@
       return FILM_TASKS.find((t) => !gameState.filmTasks[t.id]);
     }
 
-    function filmTasksComplete() {
+    function filmTasksDoneCount() {
       if (!gameState.filmTasks) gameState.filmTasks = {};
-      return FILM_TASKS.every((t) => !!gameState.filmTasks[t.id]);
+      return FILM_TASKS.filter((t) => !!gameState.filmTasks[t.id]).length;
+    }
+
+    /*
+     * filmTasksComplete — 9 of 12 is enough to claim the film is "done".
+     * The 3 missing tasks become visible flaws in the cut: no treatment
+     * lock means a meandering opening; no music rights means a watermarked
+     * temp track; no proper finishing means rough audio in act three.
+     * The film exists. It's just imperfect.
+     */
+    function filmTasksComplete() {
+      return filmTasksDoneCount() >= 9;
+    }
+
+    /*
+     * markFilmTask — idempotent hook. Called from existing actions
+     * (buyScript, hire, doShoot, doPost, doPremiere/Cinema/Tv).
+     * Flashes a soft confirmation only on the first mark.
+     */
+    function markFilmTask(id) {
+      if (!FILM_TASKS.find((t) => t.id === id)) return;
+      if (!gameState.filmTasks) gameState.filmTasks = {};
+      if (gameState.filmTasks[id]) return;
+      gameState.filmTasks[id] = true;
+      const task = FILM_TASKS.find((t) => t.id === id);
+      if (task) {
+        flashMessage(localize({
+          he: "✅ מטלת סרט הושלמה: " + localize(task.label),
+          en: "✅ Film task completed: " + localize(task.label)
+        }), "good");
+      }
     }
 
     function findStoryBeat(day) {
@@ -6498,6 +6534,7 @@
           en: "New project opened: " + project.title
         }), "good");
         playSfx("success");
+        markFilmTask("have_idea");
       } else {
         const project = getFocusedProject();
         if (!project) {
@@ -6526,6 +6563,7 @@
             return false;
           }
           project.cast.push({ name: offer.name, quality: offer.quality, price: agreedPrice });
+          if (project.cast.length === 1) markFilmTask("lead");
         } else {
           if (project.crew.length >= 3) {
             flashMessage(localize({
@@ -6535,6 +6573,7 @@
             return false;
           }
           project.crew.push({ name: offer.name, quality: offer.quality, price: agreedPrice });
+          if (project.crew.length === 3) markFilmTask("crew");
         }
         project.qualityBoost += offer.quality * 0.08;
         flashMessage(localize({
@@ -6639,6 +6678,8 @@
       }
       changeCash(-cost);
       project.shoots += 1;
+      if (project.shoots === 1) markFilmTask("first_shoot");
+      if (project.shoots >= 2) markFilmTask("raw_footage");
       project.budgetTier = tier;
       project.stage = project.shoots >= 2 ? "shot" : "shooting";
       project.qualityBoost += ({ lean: 0.04, bold: 0.08, decadent: 0.13 }[tier] || 0.04) + equipmentBenefits().qualityBoost;
@@ -6694,6 +6735,7 @@
       project.buzz = calcBuzz(project);
       project.stage = "post";
       adjustStat("creativity", 3);
+      markFilmTask("rough_cut");
       flashMessage(localize({
         he: "הבאזז הסמוי נקבע על " + project.buzz.toFixed(2),
         en: "Hidden buzz locked at " + project.buzz.toFixed(2)
@@ -6915,6 +6957,7 @@
       changeCash(-cost);
       project.premiered = true;
       project.qualityBoost += 0.08;
+      markFilmTask("distribution");
       if (project.buzz > 1.45 && rand() < 0.25) {
         adjustStat("reputation", 8);
         note(localize({
@@ -6950,6 +6993,8 @@
       if (!project.released) {
         project.released = true;
         gameState.genreReleases[project.genre] = (gameState.genreReleases[project.genre] || 0) + 1;
+        markFilmTask("distribution");
+        markFilmTask("premiere");
       }
       project.stage = mode === "cinema" ? "run" : "tv";
       const verdict = reviewForBuzz(project.buzz);
