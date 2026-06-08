@@ -1933,15 +1933,29 @@
     }
 
     .notice-dialog-body {
-      padding: 10px 8px 8px;
+      padding: 10px 10px 9px;
       font-size: 12px;
-      line-height: 1.4;
+      line-height: 1.55;
       background: #ffffff;
+      text-wrap: pretty;
+      text-align: justify;
+      text-align-last: start;
+      text-justify: inter-word;
+      hyphens: none;
+      overflow-wrap: break-word;
       box-shadow:
         inset -1px -1px var(--win-light),
         inset 1px 1px var(--win-dark),
         inset -2px -2px var(--win-mid),
         inset 2px 2px var(--win-black);
+    }
+
+    .notice-dialog-body p {
+      margin: 0;
+    }
+
+    .notice-dialog-body p + p {
+      margin-top: 6px;
     }
 
     .panel h2 + h2 {
