@@ -131,6 +131,34 @@ function run(htmlPath) {
     const gearCount = state().activeModifiers.filter((m) => m.category === "gear").length;
     assert.ok(gearCount <= 1, "no more than one gear modifier at any time (day " + state().day + ")");
   }
+
+  // --- Flight prices vary per destination after a few days ---
+  assert.ok(typeof state().flightIndex === "object", "flightIndex exists");
+  for (let i = 0; i < 5; i += 1) game.endDay();
+  const cities = ["athens", "berlin", "london", "nyc", "paris"];
+  const indices = cities.map((c) => state().flightIndex[c]);
+  assert.ok(indices.every((v) => typeof v === "number" && v >= 0.5 && v <= 1.8),
+    "flight indices stay in [0.55, 1.7] band: " + indices.join(","));
+  const spread = Math.max(...indices) - Math.min(...indices);
+  assert.ok(spread > 0.02, "flight indices vary across destinations (spread=" + spread.toFixed(3) + ")");
+
+  // --- Stock market: buy + sell roundtrip ---
+  assert.strictEqual(typeof game.buyStock, "function", "buyStock exported");
+  assert.strictEqual(typeof game.sellStock, "function", "sellStock exported");
+  state().cash = 10000;
+  const a24Before = state().stocks.A24.price;
+  assert.ok(a24Before > 0, "A24 has a positive price");
+  const cashBeforeBuy = state().cash;
+  assert.strictEqual(game.buyStock("A24", 1), true, "can buy 1 A24 share");
+  assert.strictEqual(state().holdings.A24, 1, "holdings reflect buy");
+  assert.ok(state().cash < cashBeforeBuy, "cash decreased after buy");
+  assert.strictEqual(game.sellStock("A24", 1), true, "can sell back");
+  assert.strictEqual(state().holdings.A24, 0, "holdings cleared after sell");
+
+  // BTC affordability: starts at ~60000, default startGame cash is 300 → buy must fail
+  state().cash = 100;
+  assert.strictEqual(game.buyStock("BTC", 1), false, "can't buy BTC without cash");
+  assert.strictEqual(state().holdings.BTC, 0, "BTC holdings unchanged");
 }
 
 if (require.main === module) {

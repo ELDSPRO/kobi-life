@@ -1454,6 +1454,44 @@
 
     .status-box.hud-summary {
       grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 4px;
+      padding: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .status-box.hud-summary .metric {
+      display: grid;
+      grid-template-rows: auto auto;
+      align-content: center;
+      row-gap: 2px;
+      padding: 6px 8px;
+      min-height: 38px;
+      background: #ffffff;
+      box-shadow:
+        inset -1px -1px var(--win-light),
+        inset 1px 1px var(--win-dark),
+        inset -2px -2px var(--win-mid),
+        inset 2px 2px var(--win-black);
+    }
+
+    .status-box.hud-summary .metric-label {
+      font-size: 10px;
+      letter-spacing: 0.3px;
+      color: #4a4a4a;
+      text-transform: none;
+      opacity: 1;
+      line-height: 1.1;
+    }
+
+    .status-box.hud-summary .metric-value {
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.15;
+      color: #111;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .layout {
@@ -1729,6 +1767,125 @@
       letter-spacing: 0.4px;
       padding: 4px 2px 0;
     }
+
+    .travel-btn.cheap span { color: #0a6b2a; font-weight: 700; }
+    .travel-btn.spicy span { color: #a01010; font-weight: 700; }
+
+    .newsletter {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 760px) {
+      .newsletter { grid-template-columns: 1fr; }
+    }
+
+    .news-pane,
+    .market-pane {
+      background: #ffffff;
+      padding: 8px 9px;
+      box-shadow:
+        inset -1px -1px var(--win-light),
+        inset 1px 1px var(--win-dark),
+        inset -2px -2px var(--win-mid),
+        inset 2px 2px var(--win-black);
+    }
+
+    .news-head,
+    .market-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 3px 6px;
+      margin: -8px -9px 6px;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #000080, #1084d0);
+    }
+
+    .news-list {
+      display: grid;
+      gap: 4px;
+      font-size: 11px;
+      line-height: 1.45;
+      text-wrap: pretty;
+    }
+
+    .news-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 6px;
+      align-items: start;
+      padding: 3px 0;
+      border-bottom: 1px dashed #d6d2c5;
+    }
+
+    .news-item:last-child { border-bottom: none; }
+
+    .news-item .news-icon { font-size: 13px; line-height: 1; }
+    .news-item .news-body strong { display: block; font-size: 11px; }
+    .news-item .news-body span { display: block; color: #555; font-size: 10px; line-height: 1.3; }
+
+    .news-up { color: #0a6b2a; font-weight: 700; }
+    .news-down { color: #a01010; font-weight: 700; }
+
+    .market-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    .market-table th {
+      text-align: start;
+      padding: 2px 4px 4px;
+      font-size: 10px;
+      letter-spacing: 0.3px;
+      color: #555;
+      border-bottom: 1px solid #d6d2c5;
+    }
+
+    .market-table td {
+      padding: 4px 4px;
+      border-bottom: 1px dashed #ebe6d6;
+      vertical-align: middle;
+    }
+
+    .market-table tr:last-child td { border-bottom: none; }
+
+    .market-table .ticker {
+      font-weight: 700;
+      letter-spacing: 0.4px;
+    }
+
+    .market-table .price { font-variant-numeric: tabular-nums; }
+
+    .market-table .delta-up { color: #0a6b2a; font-weight: 700; }
+    .market-table .delta-down { color: #a01010; font-weight: 700; }
+    .market-table .delta-flat { color: #888; }
+
+    .market-table .qty { font-variant-numeric: tabular-nums; }
+
+    .market-btn {
+      min-width: 26px;
+      padding: 2px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--win-face);
+      border: none;
+      box-shadow:
+        inset -1px -1px var(--win-black),
+        inset 1px 1px var(--win-light),
+        inset -2px -2px var(--win-dark),
+        inset 2px 2px var(--win-mid);
+    }
+
+    .market-btn:hover { background: #dbeaff; }
+    .market-btn[disabled] { color: #aaa; cursor: not-allowed; opacity: 0.6; }
 
     .win95-strip {
       display: flex;
@@ -3200,7 +3357,10 @@
         incidentBase: 0.4,
         pricesDrift: 1,
         travelFlash: false,
-        activeModifiers: []
+        activeModifiers: [],
+        flightIndex: {},
+        stocks: {},
+        holdings: {}
       }, overrides);
     }
 
@@ -3596,6 +3756,112 @@
       return moves.sort((a, b) => b.score - a.score).slice(0, 3);
     }
 
+    // --- Newsletter content: today's headlines drawn from briefing + modifiers + flights ---
+    function computeNewsItems() {
+      const items = [];
+      const brief = gameState.dailyBriefing;
+      if (brief && brief.day === gameState.day) {
+        items.push({
+          icon: brief.tone === "good" ? "🗞" : (brief.tone === "bad" ? "⚠️" : "📰"),
+          title: brief.headline,
+          subtitle: brief.body
+        });
+      }
+      const mods = Array.isArray(gameState.activeModifiers) ? gameState.activeModifiers : [];
+      mods.forEach((m) => {
+        const tagMap = {
+          gear: { he: "ציוד", en: "Gear" },
+          course: { he: "שכר לימוד", en: "Tuition" },
+          courseCredits: { he: "קרדיטים", en: "Credits" }
+        };
+        const tag = localize(tagMap[m.category] || { he: m.category, en: m.category });
+        const pct = Math.round((m.value - 1) * 100);
+        const isGood = m.category === "courseCredits" ? m.value > 1 : m.value < 1;
+        items.push({
+          icon: isGood ? "🟢" : "🔴",
+          title: tag + " " + (pct > 0 ? "+" : "") + pct + "%",
+          subtitle: localize({
+            he: "תקף עוד " + m.daysLeft + " ימים",
+            en: "Active for " + m.daysLeft + " more days"
+          }),
+          good: isGood
+        });
+      });
+      // Flight callouts: the single cheapest and the single priciest destination
+      ensureFlightIndex();
+      const flights = Object.keys(FLIGHT_BASE)
+        .filter((c) => c !== gameState.city)
+        .map((c) => ({ city: c, idx: gameState.flightIndex[c] || 1 }));
+      if (flights.length) {
+        const cheapest = flights.slice().sort((a, b) => a.idx - b.idx)[0];
+        const priciest = flights.slice().sort((a, b) => b.idx - a.idx)[0];
+        const cityName = (cid) => localize((CITIES.find((c) => c.id === cid) || {}).name || { he: cid, en: cid });
+        if (cheapest && cheapest.idx < 0.92) {
+          items.push({
+            icon: "✈️",
+            title: localize({ he: "טיסה זולה ל" + cityName(cheapest.city), en: "Cheap flight to " + cityName(cheapest.city) }),
+            subtitle: localize({
+              he: "פחות " + Math.round((1 - cheapest.idx) * 100) + "% מהממוצע",
+              en: Math.round((1 - cheapest.idx) * 100) + "% under average"
+            }),
+            good: true
+          });
+        }
+        if (priciest && priciest.idx > 1.12) {
+          items.push({
+            icon: "🛫",
+            title: localize({ he: "מחיר טיסה זינק ל" + cityName(priciest.city), en: "Flight spike to " + cityName(priciest.city) }),
+            subtitle: localize({
+              he: "+" + Math.round((priciest.idx - 1) * 100) + "% מהממוצע",
+              en: "+" + Math.round((priciest.idx - 1) * 100) + "% over average"
+            }),
+            good: false
+          });
+        }
+      }
+      return items.slice(0, 6);
+    }
+
+    function newsItemMarkup(item) {
+      const title = localize(item.title);
+      const subtitle = localize(item.subtitle);
+      return `
+        <div class="news-item">
+          <span class="news-icon">${item.icon}</span>
+          <div class="news-body">
+            <strong>${title}</strong>
+            <span>${subtitle}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function stockRowMarkup(def) {
+      ensureStocks();
+      const s = gameState.stocks[def.ticker];
+      const holding = (gameState.holdings && gameState.holdings[def.ticker]) || 0;
+      const price = s.price;
+      const last = s.lastPrice || price;
+      const deltaPct = last === 0 ? 0 : ((price - last) / last) * 100;
+      const deltaClass = deltaPct > 0.5 ? "delta-up" : (deltaPct < -0.5 ? "delta-down" : "delta-flat");
+      const deltaArrow = deltaPct > 0.5 ? "▲" : (deltaPct < -0.5 ? "▼" : "·");
+      const priceText = price >= 1000 ? Math.round(price).toLocaleString("en-US") : price.toFixed(price < 100 ? 2 : 1);
+      const canBuy = gameState.cash >= price;
+      const canSell = holding > 0;
+      return `
+        <tr>
+          <td class="ticker">${def.ticker}</td>
+          <td class="price">${priceText}</td>
+          <td class="${deltaClass}">${deltaArrow} ${Math.abs(deltaPct).toFixed(1)}%</td>
+          <td class="qty">${holding || "—"}</td>
+          <td>
+            <button class="market-btn" data-action="buyStock" data-value="${def.ticker}" ${canBuy ? "" : "disabled"}>${localize({ he: "קנה", en: "Buy" })}</button>
+            <button class="market-btn" data-action="sellStock" data-value="${def.ticker}" ${canSell ? "" : "disabled"}>${localize({ he: "מכר", en: "Sell" })}</button>
+          </td>
+        </tr>
+      `;
+    }
+
     function suggestedMoveMarkup(move) {
       const title = localize(move.title);
       const reason = localize(move.reason);
@@ -3623,6 +3889,120 @@
         en: " · " + m.daysLeft + "d"
       });
       return `<span class="inv-chip mod-chip-${isGood ? "good" : "bad"}">${tag} ${sign}${pct}%${daysSuffix}</span>`;
+    }
+
+    // --- Flight pricing (per-destination, mean-reverting daily walk) ---
+    // Inspired by the "FILM MASTER" prototype where each city has its own
+    // daily flight price. Here it's a soft mean-reverting walk per city so
+    // a player who watches the prices can time a cheap flight.
+    const FLIGHT_BASE = {
+      telaviv: 160,
+      athens:  140,
+      berlin:  200,
+      london:  260,
+      nyc:     380,
+      paris:   220
+    };
+
+    function ensureFlightIndex() {
+      if (!gameState.flightIndex || typeof gameState.flightIndex !== "object") {
+        gameState.flightIndex = {};
+      }
+      Object.keys(FLIGHT_BASE).forEach((c) => {
+        if (typeof gameState.flightIndex[c] !== "number") {
+          gameState.flightIndex[c] = 0.9 + rand() * 0.2;
+        }
+      });
+    }
+
+    function tickFlights() {
+      ensureFlightIndex();
+      Object.keys(gameState.flightIndex).forEach((c) => {
+        const cur = gameState.flightIndex[c];
+        const drift = (1 - cur) * 0.22;
+        const noise = (rand() - 0.5) * 0.22;
+        gameState.flightIndex[c] = clamp(cur + drift + noise, 0.55, 1.7);
+      });
+    }
+
+    function flightCost(destCityId) {
+      ensureFlightIndex();
+      const base = FLIGHT_BASE[destCityId] || 180;
+      const idx = gameState.flightIndex[destCityId] || 1;
+      return Math.round(base * idx * priceScale());
+    }
+
+    // --- Stock market (4 instruments, daily walk, buy/sell) ---
+    const STOCK_DEFS = [
+      { ticker: "A24",  initial: 380,   vol: 0.055, name: { he: "A24", en: "A24" } },
+      { ticker: "NFLX", initial: 480,   vol: 0.045, name: { he: "נטפליקס", en: "Netflix" } },
+      { ticker: "PARA", initial: 14,    vol: 0.07,  name: { he: "פאראמאונט", en: "Paramount" } },
+      { ticker: "BTC",  initial: 60000, vol: 0.11,  name: { he: "ביטקוין", en: "Bitcoin" } }
+    ];
+
+    function ensureStocks() {
+      if (!gameState.stocks || typeof gameState.stocks !== "object") {
+        gameState.stocks = {};
+      }
+      if (!gameState.holdings || typeof gameState.holdings !== "object") {
+        gameState.holdings = {};
+      }
+      STOCK_DEFS.forEach((def) => {
+        if (!gameState.stocks[def.ticker]) {
+          gameState.stocks[def.ticker] = { price: def.initial, lastPrice: def.initial };
+        }
+        if (typeof gameState.holdings[def.ticker] !== "number") {
+          gameState.holdings[def.ticker] = 0;
+        }
+      });
+    }
+
+    function tickStocks() {
+      ensureStocks();
+      STOCK_DEFS.forEach((def) => {
+        const s = gameState.stocks[def.ticker];
+        if (!s) return;
+        s.lastPrice = s.price;
+        const meanRevert = (def.initial - s.price) / def.initial * 0.06;
+        const noise = (rand() - 0.5) * 2 * def.vol;
+        const next = s.price * (1 + meanRevert + noise);
+        s.price = Math.max(def.initial * 0.1, Math.round(next * 100) / 100);
+      });
+    }
+
+    function buyStock(ticker, qty) {
+      ensureStocks();
+      const s = gameState.stocks[ticker];
+      if (!s) return false;
+      qty = Math.max(1, Math.floor(qty || 1));
+      const cost = Math.round(s.price * qty);
+      if (gameState.cash < cost) {
+        flashMessage(localize({ he: "אין מספיק מזומן", en: "Not enough cash" }), "bad");
+        return false;
+      }
+      changeCash(-cost);
+      gameState.holdings[ticker] = (gameState.holdings[ticker] || 0) + qty;
+      playSfx("cash");
+      saveGame();
+      return true;
+    }
+
+    function sellStock(ticker, qty) {
+      ensureStocks();
+      const s = gameState.stocks[ticker];
+      if (!s) return false;
+      qty = Math.max(1, Math.floor(qty || 1));
+      const have = gameState.holdings[ticker] || 0;
+      if (have < qty) {
+        flashMessage(localize({ he: "אין מספיק יחידות למכור", en: "Not enough units to sell" }), "bad");
+        return false;
+      }
+      const revenue = Math.round(s.price * qty);
+      changeCash(revenue);
+      gameState.holdings[ticker] = have - qty;
+      playSfx("cash");
+      saveGame();
+      return true;
     }
 
     function tickModifiers() {
@@ -3914,7 +4294,7 @@
       if (!target) {
         return false;
       }
-      const cost = Math.round(180 * priceScale());
+      const cost = flightCost(cityId);
       if (gameState.cash < cost) {
         flashMessage(localize({
           he: "אין מספיק כסף לכרטיס. השמיים שמורים לעשירים ולמלווים בריבית.",
@@ -5019,6 +5399,8 @@
         settleWeeklyRevenue();
         advanceEconomy();
         tickModifiers();
+        tickFlights();
+        tickStocks();
         maybeTriggerEvents();
         updateUnlocks();
         checkEndings();
@@ -5196,6 +5578,7 @@
       ].filter(Boolean);
       const activeModifiers = Array.isArray(gameState.activeModifiers) ? gameState.activeModifiers : [];
       const suggestedMoves = computeSuggestedMoves();
+      const newsItems = computeNewsItems();
       dom.boardStage.innerHTML = `
         <div class="win95-shell">
           <section class="win95-status">
@@ -5275,12 +5658,18 @@
               <div class="destination-block travel-block">
                 <div class="dest-header">${localize({ he: "מעבר בין ערים", en: "City travel" })}</div>
                 <div class="travel-grid">
-                  ${CITIES.filter((entry) => entry.id !== gameState.city).map((entry) => `
-                    <button class="dest-btn travel-btn" style="--tone-a:${entry.palette.a};--tone-b:${entry.palette.b};" data-action="flyTo" data-value="${entry.id}">
-                      <strong>${localize(entry.name)}</strong>
-                      <span>${t("flyCost", { hours: 3, cost: formatMoney(Math.round(180 * priceScale())) })}</span>
-                    </button>
-                  `).join("")}
+                  ${CITIES.filter((entry) => entry.id !== gameState.city).map((entry) => {
+                    const cost = flightCost(entry.id);
+                    const idx = (gameState.flightIndex && gameState.flightIndex[entry.id]) || 1;
+                    const trendClass = idx < 0.9 ? "cheap" : (idx > 1.15 ? "spicy" : "");
+                    const trendIcon = idx < 0.9 ? "▼" : (idx > 1.15 ? "▲" : "·");
+                    return `
+                      <button class="dest-btn travel-btn ${trendClass}" style="--tone-a:${entry.palette.a};--tone-b:${entry.palette.b};" data-action="flyTo" data-value="${entry.id}">
+                        <strong>${localize(entry.name)}</strong>
+                        <span>${t("flyCost", { hours: 3, cost: formatMoney(cost) })} ${trendIcon}</span>
+                      </button>
+                    `;
+                  }).join("")}
                 </div>
               </div>
             </div>
@@ -5294,14 +5683,35 @@
               <div class="scene-title">${localize(currentBuilding.label)}</div>
               <div class="scene-copy">${buildingSpeech(gameState.currentBuilding)}</div>
               <div class="scene-hint">${hint.copy || gameState.ticker || t("interiorPrompt")}</div>
-              <div class="scene-footer">
-                <div class="scene-chip">
-                  <strong>${t("city")}</strong>
-                  <span>${localize(city.mood)}</span>
+              <div class="newsletter">
+                <div class="news-pane">
+                  <div class="news-head">
+                    <span>📰 ${localize({ he: "ניוזלטר היום", en: "Today's newsletter" })}</span>
+                    <span>${localize(city.name)}</span>
+                  </div>
+                  <div class="news-list">
+                    ${newsItems.length ? newsItems.map(newsItemMarkup).join("") : `<div class="news-item"><span class="news-icon">·</span><div class="news-body"><strong>${localize({ he: "יום שקט", en: "Quiet day" })}</strong><span>${localize({ he: "אין כותרות חדשות. אולי תייצר אחת.", en: "No headlines. Make one." })}</span></div></div>`}
+                  </div>
                 </div>
-                <div class="scene-chip">
-                  <strong>${localize({ he: "פוקוס", en: "Focus" })}</strong>
-                  <span>${focusedProject ? focusedProject.title : t("noProjects")}</span>
+                <div class="market-pane">
+                  <div class="market-head">
+                    <span>📈 ${localize({ he: "שוק קולנוע + קריפטו", en: "Cinema + crypto market" })}</span>
+                    <span>${localize({ he: "מזומן: " + formatMoney(gameState.cash), en: "Cash: " + formatMoney(gameState.cash) })}</span>
+                  </div>
+                  <table class="market-table">
+                    <thead>
+                      <tr>
+                        <th>${localize({ he: "סימול", en: "Ticker" })}</th>
+                        <th>${localize({ he: "מחיר", en: "Price" })}</th>
+                        <th>${localize({ he: "שינוי", en: "Δ" })}</th>
+                        <th>${localize({ he: "שלי", en: "Mine" })}</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${STOCK_DEFS.map(stockRowMarkup).join("")}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
@@ -6092,6 +6502,10 @@
         } else if (action === "bankDo") {
           const parts = String(value).split(":");
           bankDo(parts[0], Number(parts[1] || 0));
+        } else if (action === "buyStock") {
+          if (buyStock(value, 1)) render();
+        } else if (action === "sellStock") {
+          if (sellStock(value, 1)) render();
         } else if (action === "endDay") {
           endDay();
         } else if (action === "setFocusedProject") {
@@ -6242,6 +6656,8 @@
     root.setFocusedProject = setFocusedProject;
     root.saveGame = saveGame;
     root.loadGame = loadGame;
+    root.buyStock = buyStock;
+    root.sellStock = sellStock;
 
     if (canRender) {
       init();
