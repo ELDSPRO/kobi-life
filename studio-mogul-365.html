@@ -1938,6 +1938,56 @@
     .npc-row-role { font-size: 10px; color: #444; }
     .npc-row-status { font-size: 10px; color: #2a4ba0; }
     .npc-row-links { font-size: 10px; color: #555; opacity: 0.85; font-style: italic; }
+    .story-beat-block {
+      display: grid;
+      gap: 6px;
+      padding: 8px 9px;
+      background: #fff7d6;
+      border: 2px solid #b59400;
+      box-shadow:
+        inset -1px -1px var(--win-light),
+        inset 1px 1px var(--win-dark);
+    }
+    .story-beat-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #5b4500;
+    }
+    .story-beat-copy {
+      font-size: 11px;
+      line-height: 1.4;
+      color: #333;
+    }
+    .story-choice-stack {
+      display: grid;
+      gap: 5px;
+    }
+    .story-choice {
+      display: grid;
+      gap: 2px;
+      padding: 6px 8px;
+      text-align: start;
+      background: #ffffff;
+      cursor: pointer;
+      box-shadow:
+        inset -1px -1px var(--win-light),
+        inset 1px 1px var(--win-dark),
+        inset -2px -2px var(--win-mid),
+        inset 2px 2px var(--win-black);
+    }
+    .story-choice.locked {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+    .story-choice-label {
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .story-choice-copy {
+      font-size: 10px;
+      color: #444;
+    }
+    .story-lock { font-size: 10px; }
     .roster-group li.muted {
       color: #888;
       font-style: italic;
@@ -3726,6 +3776,7 @@
       gameState.activeNotice = { id: "brief-" + gameState.day, title: headline, copy: body, tone };
       applyBriefingModifier(chosen);
       note(headline + " — " + body, tone);
+      maybeTriggerStoryBeat();
     }
 
     function loadPrefs() {
@@ -5000,6 +5051,114 @@
         emoji: "🔧"
       }
     };
+
+    /*
+     * STORY_BEATS — calendar-pinned events that interrupt the morning brief
+     * with a 2-4 choice menu. Choices may require relationship state, so
+     * the network you've built becomes the menu you get to choose from.
+     * Each choice can have a single outcome OR a weighted outcomes[] list
+     * (for risk choices). Effects apply through the same channels as
+     * scene-card outcomes.
+     */
+    const STORY_BEATS = [
+      {
+        id: "gossip_column_day30",
+        day: 30,
+        headline: { he: "השם שלך עלה בכתבת רכילות", en: "Your name showed up in a gossip column" },
+        copy: {
+          he: "כתבת ב-Variety כתבה עליך שורה אחת. נוטה לחיובי, לא ברור עד הסוף. השוק עכשיו מסתכל. צריך להחליט איך לטפל בזה — היום.",
+          en: "A Variety writer dropped one line on you. Leans positive, not fully clear. The market is watching. You need to decide today."
+        },
+        choices: [
+          {
+            id: "ignore",
+            label: { he: "להתעלם — לחזור לעבודה", en: "Ignore — back to work" },
+            copy: { he: "תני לכתבה לעבור. תמשיכי לכתוב.", en: "Let the piece pass. Keep writing." },
+            outcome: {
+              tone: "good",
+              flavor: { he: "השארת את הכתבה לבד. הזדמנות עברה, אבל לא הפסדת. כתבת מעט יותר טוב היום.", en: "Left the piece alone. Opportunity passed, but nothing lost. Wrote a little better today." },
+              effects: { creativity: 3, reputation: 1 }
+            }
+          },
+          {
+            id: "leverage",
+            label: { he: "לחזק — לפגוש NPC חבר ולמנף", en: "Leverage — meet a friendly NPC, capitalize" },
+            copy: { he: "פגישה זריזה עם ליאור, קארן או רוז — מי שהכי קרוב. הכתבה הזו צריכה אישור.", en: "Quick meeting with Lior, Karen, or Rose — whoever's closest. The piece needs to be endorsed." },
+            requires: function (s) {
+              const best = Math.max(
+                (s.npcs && s.npcs.lior_agent && s.npcs.lior_agent.relationship) || -99,
+                (s.npcs && s.npcs.karen_tv && s.npcs.karen_tv.relationship) || -99,
+                (s.npcs && s.npcs.rose_legend && s.npcs.rose_legend.relationship) || -99
+              );
+              return best >= 3;
+            },
+            outcome: {
+              tone: "good",
+              sfx: "cash",
+              flavor: { he: "הקשר שלך אישר את הכתבה ברכלות נוספת. שמועה הפכה למומנטום. +מוניטין גדול.", en: "Your contact endorsed the piece via another column. Whisper became momentum. +big reputation." },
+              effects: { reputation: 7, soul: 2, creativity: 1 }
+            }
+          },
+          {
+            id: "deny",
+            label: { he: "לכחד — לתבוע התנצלות פומבית", en: "Deny — demand a public apology" },
+            copy: { he: "אגרסיבי. אם המוניטין שלך מאחוריך, אנשים יכבדו. אם לא — נראית פתטי.", en: "Aggressive. If your reputation backs you, people respect it. If not, you look pathetic." },
+            outcomes: [
+              { weight: 60, tone: "good", flavor: { he: "הכתבת התנצלה בעדינות. בעיני התעשייה — אתה רציני. +מוניטין.", en: "The writer apologized softly. Industry now sees you as serious. +reputation." }, effects: { reputation: 4 } },
+              { weight: 40, tone: "bad", flavor: { he: "הכתבת ענתה בעמודה הבאה: 'הילד הזה צריך תרפיה.' צחקו.", en: "The writer replied in next week's column: 'this kid needs therapy.' People laughed." }, effects: { reputation: -5, soul: -3 } }
+            ]
+          }
+        ]
+      }
+    ];
+
+    function findStoryBeat(day) {
+      return STORY_BEATS.find((b) => b.day === day);
+    }
+
+    function applyStoryChoice(beatId, choiceId) {
+      const beat = STORY_BEATS.find((b) => b.id === beatId);
+      if (!beat) return false;
+      const choice = beat.choices.find((c) => c.id === choiceId);
+      if (!choice) return false;
+      if (choice.requires && !choice.requires(gameState)) {
+        flashMessage(localize({ he: "אין לך את הקשרים לזה.", en: "You don't have the network for this." }), "bad");
+        return false;
+      }
+      // Single outcome OR weighted outcomes[]
+      let picked = choice.outcome;
+      if (!picked && Array.isArray(choice.outcomes) && choice.outcomes.length) {
+        const total = choice.outcomes.reduce((s, o) => s + (o.weight || 1), 0);
+        let roll = Math.random() * total;
+        picked = choice.outcomes[0];
+        for (const o of choice.outcomes) {
+          roll -= (o.weight || 1);
+          if (roll <= 0) { picked = o; break; }
+        }
+      }
+      if (!picked) return false;
+      const fx = picked.effects || {};
+      if (typeof fx.cash === "number") changeCash(fx.cash);
+      ["soul", "happiness", "creativity", "reputation", "love"].forEach((k) => {
+        if (typeof fx[k] === "number") adjustStat(k, fx[k]);
+      });
+      flashMessage(localize(picked.flavor), picked.tone || "neutral");
+      if (picked.sfx) playSfx(picked.sfx);
+      if (!gameState.storyBeatsFired) gameState.storyBeatsFired = {};
+      gameState.storyBeatsFired[beatId] = { choiceId, day: gameState.day };
+      gameState.activeStoryBeat = null;
+      saveGame();
+      render();
+      return true;
+    }
+
+    function maybeTriggerStoryBeat() {
+      if (!gameState.storyBeatsFired) gameState.storyBeatsFired = {};
+      const beat = findStoryBeat(gameState.day);
+      if (!beat) return;
+      if (gameState.storyBeatsFired[beat.id]) return;
+      gameState.activeStoryBeat = beat.id;
+    }
 
     /*
      * NPC_LINKS — undirected social ties between recurring characters.
@@ -6755,6 +6914,30 @@
       `;
     }
 
+    function renderStoryBeatBlock() {
+      if (!gameState.activeStoryBeat) return "";
+      const beat = STORY_BEATS.find((b) => b.id === gameState.activeStoryBeat);
+      if (!beat) return "";
+      const choices = beat.choices.map((c) => {
+        const allowed = !c.requires || c.requires(gameState);
+        const lockBadge = allowed ? "" : ` <span class="story-lock">🔒</span>`;
+        const dataAction = allowed ? "runStoryChoice" : "noop";
+        return `
+          <button class="story-choice ${allowed ? "" : "locked"}" data-action="${dataAction}" data-value="${beat.id}:${c.id}">
+            <div class="story-choice-label">${localize(c.label)}${lockBadge}</div>
+            <div class="story-choice-copy">${localize(c.copy)}</div>
+          </button>
+        `;
+      }).join("");
+      return `
+        <div class="story-beat-block">
+          <div class="story-beat-title">⚡ ${localize(beat.headline)}</div>
+          <div class="story-beat-copy">${localize(beat.copy)}</div>
+          <div class="story-choice-stack">${choices}</div>
+        </div>
+      `;
+    }
+
     function renderProjectsBlock() {
       const focusedId = gameState.focusedProjectId;
       const rows = gameState.projects.map((project) => {
@@ -6865,6 +7048,7 @@
               </div>
             ` : ""}
             ${gameState.filmUnlocked ? "" : renderUnlockProgress()}
+            ${renderStoryBeatBlock()}
             ${gameState.projects && gameState.projects.length ? renderProjectsBlock() : ""}
             ${renderNpcsBlock()}
           </section>
@@ -7896,6 +8080,9 @@
           if (flirtAtCafe()) render();
         } else if (action === "runSceneCard") {
           if (runSceneCard(value)) render();
+        } else if (action === "runStoryChoice") {
+          const [bId, cId] = String(value || "").split(":");
+          if (bId && cId) applyStoryChoice(bId, cId);
         }
       });
     }
@@ -8025,6 +8212,9 @@
     root.meetNpc = meetNpc;
     root.NPC_LINKS = NPC_LINKS;
     root.applyNetworkSpillover = applyNetworkSpillover;
+    root.STORY_BEATS = STORY_BEATS;
+    root.applyStoryChoice = applyStoryChoice;
+    root.maybeTriggerStoryBeat = maybeTriggerStoryBeat;
 
     if (canRender) {
       init();
