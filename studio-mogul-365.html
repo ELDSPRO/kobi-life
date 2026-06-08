@@ -1665,6 +1665,16 @@
       color: #707070;
     }
 
+    .mod-chip-good {
+      color: #08311f;
+      background: #6cf0b0;
+    }
+
+    .mod-chip-bad {
+      color: #4a1010;
+      background: #ffb38a;
+    }
+
     .win95-strip {
       display: flex;
       justify-content: space-between;
@@ -3134,7 +3144,8 @@
         lastFundDevDay: -30,
         incidentBase: 0.4,
         pricesDrift: 1,
-        travelFlash: false
+        travelFlash: false,
+        activeModifiers: []
       }, overrides);
     }
 
@@ -3229,6 +3240,7 @@
       gameState.lastBriefId = chosen.id;
       gameState.dailyBriefing = { id: chosen.id, headline, body, tone, day: gameState.day };
       gameState.activeNotice = { id: "brief-" + gameState.day, title: headline, copy: body, tone };
+      applyBriefingModifier(chosen);
       note(headline + " — " + body, tone);
     }
 
@@ -3401,6 +3413,77 @@
       const profile = economyProfile();
       const releaseScale = Math.min(1.6, 1 + gameState.projects.filter((p) => p.released).length * 0.05);
       return profile.prices * gameState.pricesDrift * releaseScale;
+    }
+
+    // Narrow modifier channel: temporary effects from daily briefings. Only
+    // touches buyEquip price (category "gear") and attendClass cost/credits
+    // ("course" / "courseCredits"). Stays clear of the calibrated film economy.
+    function modifierMultiplier(category) {
+      const mods = gameState.activeModifiers || [];
+      let mult = 1;
+      for (let i = 0; i < mods.length; i += 1) {
+        if (mods[i].category === category) {
+          mult *= mods[i].value;
+        }
+      }
+      return mult;
+    }
+
+    function applyBriefingModifier(briefing) {
+      if (!briefing || !briefing.modifier) {
+        return;
+      }
+      const m = briefing.modifier;
+      if (!m.category || typeof m.value !== "number") {
+        return;
+      }
+      if (!Array.isArray(gameState.activeModifiers)) {
+        gameState.activeModifiers = [];
+      }
+      // Replace any active modifier in the same category — one effect per slot.
+      gameState.activeModifiers = gameState.activeModifiers.filter(
+        (existing) => existing.category !== m.category
+      );
+      gameState.activeModifiers.push({
+        id: briefing.id + ":" + gameState.day,
+        briefingId: briefing.id,
+        category: m.category,
+        value: m.value,
+        daysLeft: Math.max(1, m.days || 3),
+        label: briefing.headline || { he: briefing.id, en: briefing.id }
+      });
+    }
+
+    function modifierChipMarkup(m) {
+      const tags = {
+        gear: { he: "ציוד", en: "Gear" },
+        course: { he: "לימוד", en: "Tuition" },
+        courseCredits: { he: "קרדיט", en: "Credits" }
+      };
+      const tag = localize(tags[m.category] || { he: m.category, en: m.category });
+      const pct = Math.round((m.value - 1) * 100);
+      const sign = pct > 0 ? "+" : "";
+      const isGood = m.category === "courseCredits" ? m.value > 1 : m.value < 1;
+      const daysSuffix = localize({
+        he: " · " + m.daysLeft + " י׳",
+        en: " · " + m.daysLeft + "d"
+      });
+      return `<span class="inv-chip mod-chip-${isGood ? "good" : "bad"}">${tag} ${sign}${pct}%${daysSuffix}</span>`;
+    }
+
+    function tickModifiers() {
+      if (!Array.isArray(gameState.activeModifiers) || !gameState.activeModifiers.length) {
+        return;
+      }
+      const next = [];
+      for (let i = 0; i < gameState.activeModifiers.length; i += 1) {
+        const m = gameState.activeModifiers[i];
+        const daysLeft = m.daysLeft - 1;
+        if (daysLeft > 0) {
+          next.push(Object.assign({}, m, { daysLeft }));
+        }
+      }
+      gameState.activeModifiers = next;
     }
 
     function formatMoney(value) {
@@ -3859,7 +3942,7 @@
 
     function attendClass(courseId = "night") {
       const course = COURSES.find((entry) => entry.id === courseId) || COURSES[0];
-      const cost = Math.round(course.cost * priceScale());
+      const cost = Math.round(course.cost * priceScale() * modifierMultiplier("course"));
       if (gameState.cash < cost) {
         flashMessage(localize({
           he: "הקורס לא מקבל הבטחות עתידיות במקום כסף.",
@@ -3871,7 +3954,7 @@
         return false;
       }
       changeCash(-cost);
-      gameState.educationCredits += course.credits * paceScale();
+      gameState.educationCredits += course.credits * paceScale() * modifierMultiplier("courseCredits");
       adjustStat("creativity", course.creativity);
       adjustStat("soul", course.soul);
       while (gameState.educationCredits >= (gameState.education + 1) * 2) {
@@ -3927,7 +4010,7 @@
       if (!(name in prices)) {
         return false;
       }
-      const cost = Math.round(prices[name] * priceScale());
+      const cost = Math.round(prices[name] * priceScale() * modifierMultiplier("gear"));
       if (gameState.equipment[name]) {
         flashMessage(localize({
           he: "כבר קנית את זה. ציוד כפול זה פשוט חרדה בקופסה.",
@@ -4781,6 +4864,7 @@
         payRentAndHousing();
         settleWeeklyRevenue();
         advanceEconomy();
+        tickModifiers();
         maybeTriggerEvents();
         updateUnlocks();
         checkEndings();
@@ -4956,6 +5040,7 @@
         gameState.equipment.studio && localize({ he: "עמדת עריכה", en: "Edit station" }),
         gameState.equipment.insurance && localize({ he: "סאונד ותאורה", en: "Sound & light" })
       ].filter(Boolean);
+      const activeModifiers = Array.isArray(gameState.activeModifiers) ? gameState.activeModifiers : [];
       dom.boardStage.innerHTML = `
         <div class="win95-shell">
           <section class="win95-status">
@@ -4990,6 +5075,16 @@
                 </div>
               </div>
             </div>
+            ${activeModifiers.length ? `
+              <div class="inventory-block">
+                <div class="win95-panel-title">${localize({ he: "אפקטים פעילים היום", en: "Active effects today" })}</div>
+                <div class="inv-line">
+                  <div class="inv-chips">
+                    ${activeModifiers.map(modifierChipMarkup).join("")}
+                  </div>
+                </div>
+              </div>
+            ` : ""}
           </section>
           <section class="win95-main">
             <div class="win95-strip">

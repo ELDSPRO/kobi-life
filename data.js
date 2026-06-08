@@ -25,7 +25,15 @@
      *   tone    "good" | "bad" | "neutral"  (drives the dialog styling)
      *   headline {he,en}  short title
      *   body     {he,en}  one-line briefing — should hint at a decision/place
-     * (Slice 1 is information-only; mechanical effects are added later.)
+     *   modifier (optional) — temporary effect activated when this briefing fires.
+     *     { category, value, days }
+     *       category: "gear" | "course" | "courseCredits"
+     *       value:    multiplier (e.g., 0.75 = 25% off, 1.25 = 25% premium)
+     *       days:     how many days the effect stays active (decremented at endDay)
+     *     Modifier scope is deliberately narrow: it only touches buyEquip price
+     *     and attendClass cost/credits. The calibrated film economy (script →
+     *     shoot → post → release) is NOT affected — that comes in a later slice
+     *     after broader test coverage.
      */
     dailyEvents: [
       {
@@ -42,9 +50,10 @@
         weight: 3, tone: "good",
         headline: { he: "סדנת אורח בבית הספר לקולנוע", en: "Guest masterclass at the film school" },
         body: {
-          he: "במאי אורח מעביר היום סדנה. יום מצוין לקפוץ לבית הספר לקולנוע וללמוד.",
-          en: "A visiting director is teaching today. A great day to drop by the film school and study."
-        }
+          he: "במאי אורח מעביר היום סדנה. כל קורס שתעבור בשני הימים הקרובים מקנה 50% יותר קרדיטים.",
+          en: "A visiting director is teaching today. Any course in the next two days grants 50% more credits."
+        },
+        modifier: { category: "courseCredits", value: 1.5, days: 2 }
       },
       {
         id: "festival_ny",
@@ -78,18 +87,40 @@
         weight: 3, tone: "good",
         headline: { he: "ירידת מחירים בחנות הציוד", en: "Prices drop at the gear shop" },
         body: {
-          he: "המוכרים במצב חיסול מלאי. אם חסרה לך מצלמה או ציוד — אולי היום היום לקנות.",
-          en: "Sellers are clearing stock. If you still need a camera or gear, today might be the day to buy."
-        }
+          he: "המוכרים במצב חיסול מלאי — ציוד ב-25% הנחה לשלושה ימים. אם חסרה לך מצלמה, זה החלון.",
+          en: "Sellers are clearing stock — 25% off all gear for three days. If you need a camera, this is the window."
+        },
+        modifier: { category: "gear", value: 0.75, days: 3 }
       },
       {
         id: "gear_up",
-        weight: 1, tone: "neutral",
+        weight: 1, tone: "bad",
         headline: { he: "ביקוש גבוה לציוד צילום", en: "Camera gear is in demand" },
         body: {
-          he: "כולם מצלמים החודש והמחירים נדבקו למעלה. אולי כדאי לחכות לעסקה טובה יותר.",
-          en: "Everyone is shooting this month and prices crept up. Might be worth waiting for a better deal."
-        }
+          he: "כולם מצלמים החודש. המחירים בחנות עלו ב-25% לשלושה ימים — אולי שווה לחכות.",
+          en: "Everyone is shooting this month. Prices jumped 25% for three days — waiting might pay off."
+        },
+        modifier: { category: "gear", value: 1.25, days: 3 }
+      },
+      {
+        id: "tuition_grant",
+        weight: 2, tone: "good",
+        headline: { he: "בית הספר קיבל מענק", en: "The school landed a grant" },
+        body: {
+          he: "שכר הלימוד מסובסד ב-30% לארבעה ימים. אם חיכית להירשם — זה הזמן ללמוד זול.",
+          en: "Tuition is subsidized 30% for four days. If you've been waiting to enroll, this is the cheap window."
+        },
+        modifier: { category: "course", value: 0.7, days: 4 }
+      },
+      {
+        id: "tuition_spike",
+        weight: 1, minDay: 30, tone: "bad",
+        headline: { he: "המחזור הקודם הצליח — והעלו מחיר", en: "Last cohort blew up — tuition followed" },
+        body: {
+          he: "אחרי שתי בוגרות שעלו לפסטיבל, בית הספר העלה שכר לימוד ב-25% לשלושה ימים.",
+          en: "After two alumni hit a festival, the school bumped tuition 25% for three days."
+        },
+        modifier: { category: "course", value: 1.25, days: 3 }
       },
       {
         id: "casting_scout",
