@@ -1636,7 +1636,16 @@
     .win95-main {
       grid-column: 1;
       grid-row: 1;
-      grid-template-rows: auto auto minmax(260px, 1fr);
+      /* Use flex-column so children flow naturally; scene-block grows.
+         Was: grid-template-rows: auto auto minmax(260px, 1fr) — the 1fr row
+         caught the suggested-header (a one-line label) and inflated it. */
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .win95-main > .scene-block {
+      flex: 1 1 auto;
+      min-height: 260px;
     }
 
     .win95-status {
@@ -1804,10 +1813,14 @@
     }
 
     .suggested-strip {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      display: flex;
+      flex-wrap: wrap;
       gap: 6px;
       padding: 6px 0;
+    }
+    .suggested-strip .suggested-move {
+      flex: 0 1 200px;
+      min-width: 150px;
     }
 
     .suggested-move {
