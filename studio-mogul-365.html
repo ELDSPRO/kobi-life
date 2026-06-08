@@ -3469,6 +3469,14 @@
         color: ["#945863", "#4e2930"],
         category: "finance",
         clerk: { he: "האיש במשקפיים", en: "The Sunglasses Man" }
+      },
+      casino: {
+        id: "casino",
+        label: { he: "מועדון פוקר", en: "Poker Club" },
+        short: { he: "הימור", en: "Casino" },
+        color: ["#7a5577", "#3d2839"],
+        category: "finance",
+        clerk: { he: "קופאית", en: "Cashier" }
       }
     };
 
@@ -3526,7 +3534,7 @@
         },
         palette: { a: "#e3edf5", b: "#8ba6c5", c: "#4c5678" },
         skyline: [88, 62, 98, 50, 76, 92, 48, 84, 61, 103, 56],
-        buildings: ["home", "employment", "set", "tv", "loan", "cafe", "investor", "post"]
+        buildings: ["home", "employment", "set", "tv", "loan", "casino", "cafe", "investor", "post"]
       },
       {
         id: "paris",
@@ -5780,6 +5788,56 @@
       return true;
     }
 
+    /*
+     * gamble — casino actions. NOT NPC-driven; pure risk/reward with
+     * weighted probabilities calibrated to feel like Atlantic City.
+     * Poker: skill-ish, modest tail. Blackjack: closer to fair.
+     * Roulette: rare jackpot, mostly loss. Soul tracks tilt — losing
+     * costs soul, winning costs a tiny bit too (you start enjoying it).
+     */
+    function gamble(spec) {
+      const [game, betStr] = String(spec || "").split(":");
+      const bet = Number(betStr) || 0;
+      if (!game || bet <= 0) return false;
+      if (gameState.cash < bet) {
+        flashMessage(localize({ he: "אין מספיק מזומן.", en: "Not enough cash." }), "bad");
+        return false;
+      }
+      if (!spendHours(1, localize({ he: "הימור", en: "Gamble" }))) return false;
+      changeCash(-bet);
+      const r = Math.random();
+      let payout = 0, tone = "bad", flavor = null;
+      if (game === "poker") {
+        if (r < 0.05) { payout = bet * 5; tone = "good"; flavor = { he: "פול האוס. השולחן השתתק.", en: "Full house. The table went silent." }; }
+        else if (r < 0.30) { payout = bet * 2; tone = "good"; flavor = { he: "זכית. אנשים מסתכלים אחרת.", en: "You won. People look at you differently." }; }
+        else if (r < 0.50) { payout = bet; tone = "neutral"; flavor = { he: "החזרת את ההימור. שעה איבדת.", en: "Got your bet back. Lost an hour." }; }
+        else { payout = 0; tone = "bad"; flavor = { he: "פגוון. ההמתנה הייתה ארוכה מהיציאה.", en: "Bust. The wait was longer than the exit." }; }
+      } else if (game === "blackjack") {
+        if (r < 0.03) { payout = Math.round(bet * 2.5); tone = "good"; flavor = { he: "בלאק-ג'ק טבעי. השולחן ברך.", en: "Natural blackjack. The table tipped its hat." }; }
+        else if (r < 0.45) { payout = bet * 2; tone = "good"; flavor = { he: "ניצחת בלאק-ג'ק. הקופאית הסתכלה.", en: "Won blackjack. Cashier glanced over." }; }
+        else if (r < 0.50) { payout = bet; tone = "neutral"; flavor = { he: "תיקו עם הדילר. שעה הלכה.", en: "Push. Lost an hour." }; }
+        else { payout = 0; tone = "bad"; flavor = { he: "התעקשת על קלף שני. רע.", en: "Took a card you shouldn't have. Bad." }; }
+      } else if (game === "roulette") {
+        if (r < 0.005) { payout = bet * 35; tone = "good"; flavor = { he: "מספר אחד. המקום ראה אותך. אגדה זמנית.", en: "Single number. The room saw you. Temporary legend." }; }
+        else if (r < 0.40) { payout = bet * 2; tone = "good"; flavor = { he: "אדום או שחור. צבעת נכון.", en: "Red or black. You guessed right." }; }
+        else { payout = 0; tone = "bad"; flavor = { he: "הכדור נחת על הצבע האחר.", en: "Ball landed on the other color." }; }
+      } else { return false; }
+      if (payout > 0) {
+        changeCash(payout);
+        if (tone === "good") playSfx("cash");
+      } else if (tone === "bad") {
+        playSfx("fail");
+      }
+      // Soul tracking: losses bite, big wins also tilt slightly (the lure).
+      const net = payout - bet;
+      if (net < -bet * 0.5) adjustStat("soul", -2);
+      else if (net > bet * 3) adjustStat("soul", -1);
+      else if (net > 0) adjustStat("happiness", 1);
+      flashMessage(localize(flavor), tone);
+      saveGame();
+      return true;
+    }
+
     // Phone-indie path: free, time-only, low chance to go viral.
     // Available from day 1. RNG payout gives the underdog narrative
     // (Sean Baker on iPhone, Tangerine vibes) without breaking economy.
@@ -7800,6 +7858,17 @@
             ${tvScene ? `<div class="action-group"><h3>${localize({ he: "אנשי המקום", en: "The locals" })}</h3><div class="action-buttons">${tvScene}</div></div>` : ""}
           `;
         }
+        case "casino":
+          return `
+            <div class="action-group">
+              <h3>${localize({ he: "הימור", en: "Gambling" })}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("gamble", "poker:100", localize({ he: "פוקר", en: "Poker" }), localize({ he: "מיומנות מתוחה. 30% לזכות פי 2, 5% לפול האוס פי 5.", en: "Skill-tilted. 30% double, 5% full house ×5." }), "1h • " + formatMoney(100))}
+                ${buttonMarkup("gamble", "blackjack:200", localize({ he: "בלאק-ג'ק", en: "Blackjack" }), localize({ he: "קרוב להוגן. 46% לזכות פי 2, 4% לבלאק-ג'ק טבעי פי 2.5.", en: "Closer to fair. 46% double, 4% natural ×2.5." }), "1h • " + formatMoney(200))}
+                ${buttonMarkup("gamble", "roulette:50", localize({ he: "רולטה", en: "Roulette" }), localize({ he: "אגדה או אסון. 2.7% למספר בודד פי 35, 50% לצבע פי 2.", en: "Legend or disaster. 2.7% single number ×35, 50% color ×2." }), "1h • " + formatMoney(50))}
+              </div>
+            </div>
+          `;
         case "loan": {
           const loanScene = sceneCardButtons("loan");
           return `
@@ -8175,6 +8244,8 @@
         } else if (action === "runStoryChoice") {
           const [bId, cId] = String(value || "").split(":");
           if (bId && cId) applyStoryChoice(bId, cId);
+        } else if (action === "gamble") {
+          if (gamble(value)) render();
         }
       });
     }
@@ -8307,6 +8378,7 @@
     root.STORY_BEATS = STORY_BEATS;
     root.applyStoryChoice = applyStoryChoice;
     root.maybeTriggerStoryBeat = maybeTriggerStoryBeat;
+    root.gamble = gamble;
 
     if (canRender) {
       init();
