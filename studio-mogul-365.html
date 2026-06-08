@@ -4823,6 +4823,138 @@
       return true;
     }
 
+    /*
+     * SCENE_CARDS — declarative choice-cards per location.
+     * Each card resolves through runSceneCard(): cost gate → spendHours →
+     * weighted RNG → effects → LSL-tone flashMessage. Stats supported:
+     * cash, soul, happiness, creativity, reputation, love.
+     * `once` = once per game-day (ledgered like flirtAtCafe).
+     */
+    const SCENE_CARDS = {
+      cafe_overhear: {
+        location: "cafe",
+        label: { he: "להאזין לשולחן השכן", en: "Eavesdrop next table" },
+        copy: { he: "שני אנשים מציעים סרט בקול נמוך מדי. אולי משהו דולף.", en: "Two people pitching a film just slightly too loud. Maybe something leaks." },
+        hours: 1, cost: 0, once: true,
+        outcomes: [
+          { weight: 50, tone: "neutral", flavor: { he: "הם דיברו על סרט עם דובים. הסתיים בדרישות תזונה.", en: "They were pitching a bear movie. Ended in dietary demands." }, effects: {} },
+          { weight: 30, tone: "good", flavor: { he: "גנבת זווית מוצלחת לסצנה שלך. +יצירתיות.", en: "Stole a useful angle for your scene. +creativity." }, effects: { creativity: 2 } },
+          { weight: 15, tone: "good", flavor: { he: "אחת מהם תפסה אותך מקשיב — והזמינה אותך לפגישה.", en: "She caught you listening — and invited you to a meeting." }, effects: { reputation: 2, soul: 1 } },
+          { weight: 5, tone: "good", sfx: "cash", flavor: { he: "התסריט שלהם מתחרה בקרן. עכשיו אתה יודע מה לא להגיש.", en: "Their script is up at the fund. Now you know what NOT to pitch." }, effects: { creativity: 3, reputation: 1 } }
+        ]
+      },
+      cafe_pitch_barista: {
+        location: "cafe",
+        label: { he: "להציע פיץ' לברסיטה", en: "Pitch the barista" },
+        copy: { he: "המשורר עם הקפה אמר אתמול שהוא קרא קרואק. תנסה.", en: "The poet barista mentioned Kerouac yesterday. Try him." },
+        hours: 1, cost: 20, once: true,
+        outcomes: [
+          { weight: 60, tone: "neutral", flavor: { he: "הוא הנהן. הוא יודע להנהן.", en: "He nodded. He's good at nodding." }, effects: {} },
+          { weight: 30, tone: "good", flavor: { he: "הוא חידד לך את הסצנה השנייה. +יצירתיות גדולה.", en: "He sharpened your second scene. +big creativity." }, effects: { creativity: 4, soul: 1 } },
+          { weight: 10, tone: "bad", flavor: { he: "הוא חזר על הפיץ' שלך לחבר שלו. בקול. אנשים שמעו.", en: "He repeated your pitch to his friend. Loudly. People heard." }, effects: { reputation: -2, soul: -1 } }
+        ]
+      },
+      script_write_solo: {
+        location: "script",
+        label: { he: "לשבת לכתוב לבד", en: "Sit and write, alone" },
+        copy: { he: "שולחן בפינה, בלי WiFi, בלי תירוצים.", en: "Corner table, no WiFi, no excuses." },
+        hours: 2, cost: 0, once: false,
+        outcomes: [
+          { weight: 70, tone: "good", flavor: { he: "כתבת שתי סצנות. אחת שמורה.", en: "Wrote two scenes. One's a keeper." }, effects: { creativity: 3 } },
+          { weight: 25, tone: "neutral", flavor: { he: "כתבת. מחקת. אהבת. נמאס. +1 יצירתיות.", en: "Wrote. Deleted. Loved. Hated. +1 creativity." }, effects: { creativity: 1 } },
+          { weight: 5, tone: "good", sfx: "cash", flavor: { he: "פתאום זה זרם. סצנת סיום ירדה. +כבוד עצמי.", en: "It flowed. Final scene landed. +self-respect." }, effects: { creativity: 5, soul: 2, reputation: 1 } }
+        ]
+      },
+      script_borrow_idea: {
+        location: "script",
+        label: { he: "להעתיק רעיון של חבר", en: "Borrow a friend's idea" },
+        copy: { he: "הוא לא יכתוב את זה לעולם. אתה כן.", en: "He'll never write it. You will." },
+        hours: 1, cost: 0, once: true,
+        outcomes: [
+          { weight: 50, tone: "good", flavor: { he: "המתווה לבד הספיק. כתבת גרסה משלך. +רעיון.", en: "The outline alone was enough. Wrote your own version. +idea." }, effects: { creativity: 3, soul: -1 } },
+          { weight: 30, tone: "bad", flavor: { he: "הוא ראה. הוא לא אמר כלום. עכשיו אתה יודע.", en: "He saw. He said nothing. Now you know." }, effects: { soul: -3, reputation: -1 } },
+          { weight: 15, tone: "neutral", flavor: { he: "הרעיון לא היה טוב כמו שזכרת.", en: "The idea wasn't as good as you remembered." }, effects: {} },
+          { weight: 5, tone: "bad", flavor: { he: "החבר סיפר לסוכן. הסוכן סיפר לכולם.", en: "Your friend told an agent. The agent told everyone." }, effects: { reputation: -4, soul: -2 } }
+        ]
+      },
+      cast_court_agent: {
+        location: "casting",
+        label: { he: "לחזר אחרי סוכן בבר", en: "Court an agent at the bar" },
+        copy: { he: "משקה כפול במלון. הוא לא משלם, הוא מקשיב.", en: "Double drink at the hotel bar. He doesn't pay, he listens." },
+        hours: 2, cost: 80, once: true,
+        outcomes: [
+          { weight: 60, tone: "neutral", flavor: { he: "נתת כרטיס. הוא נתן כרטיס. אף אחד לא יתקשר.", en: "Gave a card. Took a card. Nobody is calling." }, effects: {} },
+          { weight: 25, tone: "good", flavor: { he: "הוא הקשיב יותר משצריך. +מוניטין.", en: "He listened longer than required. +reputation." }, effects: { reputation: 3 } },
+          { weight: 10, tone: "good", sfx: "cash", flavor: { he: "הזמין אותך לפגישה אמיתית. סימן את היומן.", en: "Booked a real meeting. Marked his calendar." }, effects: { reputation: 4, creativity: 1 } },
+          { weight: 5, tone: "bad", flavor: { he: "הוא ראה אותך מבקש. אנשים ראו אותו רואה.", en: "He saw you begging. People saw him seeing." }, effects: { reputation: -3, soul: -2 } }
+        ]
+      },
+      cast_offer_to_model: {
+        location: "casting",
+        label: { he: "להציע תפקיד לדוגמן/ית", en: "Offer a part to a model" },
+        copy: { he: "פנים יפות, אגנדה מינימלית. סטטיסטית — זהב או אסון.", en: "Beautiful face, minimal agenda. Statistically — gold or disaster." },
+        hours: 1, cost: 0, once: true,
+        outcomes: [
+          { weight: 50, tone: "neutral", flavor: { he: "אמר/ה לבדוק עם הסוכן. הסוכן לא קיים.", en: "Said they'd check with their agent. The agent doesn't exist." }, effects: {} },
+          { weight: 35, tone: "good", flavor: { he: "מסכימ/ה לתעריף אינדי. חסכת בליהוק.", en: "Agreed at indie rate. Saved on casting." }, effects: { creativity: 1, cash: 60 } },
+          { weight: 10, tone: "bad", flavor: { he: "צילמ/ה את הפנים שלך. עלית לאינסטה לשנייה.", en: "Filmed your face. You went on Instagram for a second." }, effects: { reputation: -2 } },
+          { weight: 5, tone: "good", sfx: "cash", flavor: { he: "מצא/ה את הזווית. הסצנה תיראה כמו פרסומת בושם. במובן הטוב.", en: "Found the angle. The scene will look like a perfume ad. The good kind." }, effects: { reputation: 3, creativity: 2 } }
+        ]
+      }
+    };
+
+    /*
+     * runSceneCard — single engine for choice-cards.
+     * Returns true on success (caller renders); false on gate failure.
+     * Reuses spendHours/changeCash/adjustStat/flashMessage/playSfx/saveGame.
+     */
+    function runSceneCard(cardId) {
+      const card = SCENE_CARDS[cardId];
+      if (!card) return false;
+      if (!gameState.dailyGigLedger) gameState.dailyGigLedger = {};
+      const ledgerKey = gameState.day + ":scene:" + cardId;
+      if (card.once && gameState.dailyGigLedger[ledgerKey]) {
+        flashMessage(localize({
+          he: "כבר עשית את זה היום. עדיין אתה ההוא.",
+          en: "Already did this today. Still you, still that guy."
+        }), "bad");
+        return false;
+      }
+      if (card.requires && !card.requires(gameState)) {
+        flashMessage(localize({
+          he: "לא הזמן. לא הסטטוס.",
+          en: "Wrong moment, wrong status."
+        }), "bad");
+        return false;
+      }
+      if (card.cost && gameState.cash < card.cost) {
+        flashMessage(localize({
+          he: "אין מספיק מזומן.",
+          en: "Not enough cash."
+        }), "bad");
+        return false;
+      }
+      if (!spendHours(card.hours || 1, localize(card.label))) return false;
+      if (card.cost) changeCash(-card.cost);
+      if (card.once) gameState.dailyGigLedger[ledgerKey] = true;
+      const totalWeight = card.outcomes.reduce((s, o) => s + (o.weight || 1), 0);
+      let roll = Math.random() * totalWeight;
+      let picked = card.outcomes[0];
+      for (const outcome of card.outcomes) {
+        roll -= (outcome.weight || 1);
+        if (roll <= 0) { picked = outcome; break; }
+      }
+      const fx = picked.effects || {};
+      if (typeof fx.cash === "number") changeCash(fx.cash);
+      ["soul", "happiness", "creativity", "reputation", "love"].forEach((key) => {
+        if (typeof fx[key] === "number") adjustStat(key, fx[key]);
+      });
+      flashMessage(localize(picked.flavor), picked.tone || "neutral");
+      if (picked.sfx) playSfx(picked.sfx);
+      saveGame();
+      return true;
+    }
+
     // Phone-indie path: free, time-only, low chance to go viral.
     // Available from day 1. RNG payout gives the underdog narrative
     // (Sean Baker on iPhone, Tangerine vibes) without breaking economy.
@@ -6518,6 +6650,8 @@
               <div class="action-buttons">
                 ${buttonMarkup("shootOnPhone", "cafe", localize({ he: "צלם בטלפון", en: "Shoot on phone" }), localize({ he: "סצנה אחת, יד רועדת, חלום אחד. 5% סיכוי לוויראלי.", en: "One scene, shaky hand, one dream. 5% viral shot." }), "4h • $0")}
                 ${buttonMarkup("flirtAtCafe", "", localize({ he: "לפלרטט", en: "Flirt" }), localize({ he: "השולחן ליד מסתכל. תנסה. כי אם לא, מי יחזור איתך?", en: "The next table is looking. Try. Because if you don't, who comes home?" }), "1h • $0")}
+                ${buttonMarkup("runSceneCard", "cafe_overhear", localize(SCENE_CARDS.cafe_overhear.label), localize(SCENE_CARDS.cafe_overhear.copy), "1h • $0")}
+                ${buttonMarkup("runSceneCard", "cafe_pitch_barista", localize(SCENE_CARDS.cafe_pitch_barista.label), localize(SCENE_CARDS.cafe_pitch_barista.copy), "1h • " + formatMoney(20))}
               </div>
             </div>
             <div class="action-group">
@@ -6556,6 +6690,13 @@
                 ${buttonMarkup("openOfferDeck", "script", localize({ he: "לעלעל בדוכן תסריטים", en: "Browse the script stall" }), localize({ he: "3 הצעות חדשות, כל אחת עם מחיר חבוי לאגו.", en: "3 fresh offers, each with a hidden floor for your ego." }), "2h")}
               </div>
             </div>
+            <div class="action-group">
+              <h3>${localize({ he: "עבודה על עצמך", en: "Work on yourself" })}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("runSceneCard", "script_write_solo", localize(SCENE_CARDS.script_write_solo.label), localize(SCENE_CARDS.script_write_solo.copy), "2h • $0")}
+                ${buttonMarkup("runSceneCard", "script_borrow_idea", localize(SCENE_CARDS.script_borrow_idea.label), localize(SCENE_CARDS.script_borrow_idea.copy), "1h • $0")}
+              </div>
+            </div>
             ${gameState.offers.length && gameState.offers[0].kind === "script" ? `<div class="action-group"><h3>${localize({ he: "הצעות פתוחות", en: "Open offers" })}</h3><div class="offer-list">${gameState.offers.map(renderOfferCard).join("")}</div></div>` : ""}
           `;
         case "casting":
@@ -6564,6 +6705,13 @@
               <h3>${localize({ he: "ליהוק לפרויקט בפוקוס", en: "Casting for focused project" })}</h3>
               <div class="action-buttons">
                 ${buttonMarkup("openOfferDeck", "cast", localize({ he: "לפתוח אודישנים", en: "Open auditions" }), localize({ he: "צריך 2 שחקנים. כל אחד עולה כסף וגם שעות של חיוך כפוי.", en: "You need 2 cast hires. Each costs money and hours of forced smiling." }), "2h")}
+              </div>
+            </div>
+            <div class="action-group">
+              <h3>${localize({ he: "כניסה מהדלת האחורית", en: "Through the back door" })}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("runSceneCard", "cast_court_agent", localize(SCENE_CARDS.cast_court_agent.label), localize(SCENE_CARDS.cast_court_agent.copy), "2h • " + formatMoney(80))}
+                ${buttonMarkup("runSceneCard", "cast_offer_to_model", localize(SCENE_CARDS.cast_offer_to_model.label), localize(SCENE_CARDS.cast_offer_to_model.copy), "1h • $0")}
               </div>
             </div>
             ${gameState.offers.length && gameState.offers[0].kind === "cast" ? `<div class="action-group"><h3>${localize({ he: "מועמדים", en: "Candidates" })}</h3><div class="offer-list">${gameState.offers.map(renderOfferCard).join("")}</div></div>` : ""}
@@ -7064,6 +7212,8 @@
           if (shootOnPhone(value)) render();
         } else if (action === "flirtAtCafe") {
           if (flirtAtCafe()) render();
+        } else if (action === "runSceneCard") {
+          if (runSceneCard(value)) render();
         }
       });
     }
@@ -7187,6 +7337,8 @@
     root.shootOnPhone = shootOnPhone;
     root.toggleFullscreen = toggleFullscreen;
     root.flirtAtCafe = flirtAtCafe;
+    root.runSceneCard = runSceneCard;
+    root.SCENE_CARDS = SCENE_CARDS;
 
     if (canRender) {
       init();
