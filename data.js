@@ -250,6 +250,70 @@
           he: "פתאום אתה במסגרת. עוד טיפה מוניטין, עוד טיפה לחץ.",
           en: "Suddenly you're in a frame. A drop more reputation, a drop more pressure."
         }
+      },
+      /* === NPC memory-callbacks ===
+       * requires(state) gates these to relationship thresholds. The brief
+       * picker filters them out otherwise. Tone matches the NPC's vibe.
+       * Body hints at where to go today so the brief connects to gameplay. */
+      {
+        id: "lior_friendly_call",
+        weight: 5, tone: "good",
+        requires: function (s) { return s.npcs && s.npcs.lior_agent && s.npcs.lior_agent.relationship >= 5; },
+        headline: { he: "ליאור התקשר. השאיר הודעה.", en: "Lior called. Left a message." },
+        body: {
+          he: "אם תקפוץ לבר המלון אחה\"צ — אמר שיש משהו ששווה בקבוק כפול.",
+          en: "If you swing by the hotel bar this afternoon — said there's something worth a double."
+        }
+      },
+      {
+        id: "lior_hostile_call",
+        weight: 4, tone: "bad",
+        requires: function (s) { return s.npcs && s.npcs.lior_agent && s.npcs.lior_agent.relationship <= -5; },
+        headline: { he: "השם שלך עלה בשיחה אצל ליהוקים", en: "Your name came up in casting talk" },
+        body: {
+          he: "ליאור צוחק עם חברים. השבוע. תיזהר על מי אתה נשען.",
+          en: "Lior is laughing with friends. This week. Watch who you lean on."
+        }
+      },
+      {
+        id: "maya_friendly_note",
+        weight: 5, tone: "good",
+        requires: function (s) { return s.npcs && s.npcs.maya_barista && s.npcs.maya_barista.relationship >= 5; },
+        headline: { he: "מאיה שלחה הודעה: 'אני מנסה לזכור שיר'", en: "Maya texted: 'trying to remember a poem'" },
+        body: {
+          he: "אם תיכנס לקפה היום, סביר שתצא עם שורה שלא חשבת עליה.",
+          en: "Swing by the cafe today and you'll likely leave with a line you didn't expect."
+        }
+      },
+      {
+        id: "maya_hostile_whisper",
+        weight: 3, tone: "bad",
+        requires: function (s) { return s.npcs && s.npcs.maya_barista && s.npcs.maya_barista.relationship <= -5; },
+        headline: { he: "מאיה אמרה לבריסטה השני: 'ההוא.'", en: "Maya said to the other barista: 'that guy.'" },
+        body: {
+          he: "תחשוב פעמיים לפני שתחזור לאותו קפה. אולי תחפש מקום אחר.",
+          en: "Think twice before walking back into that cafe. Try a different spot."
+        }
+      },
+      {
+        id: "sofia_friendly_slot",
+        weight: 5, tone: "good",
+        requires: function (s) { return s.npcs && s.npcs.sofia_editor && s.npcs.sofia_editor.relationship >= 5; },
+        headline: { he: "סופיה השאירה לך חצי שעה אחה\"צ", en: "Sofia carved out half an hour for you" },
+        body: {
+          he: "אם אתה באתונה — חדר העריכה היום. היא לא חוזרת על עצמה.",
+          en: "If you're in Athens — the post house today. She doesn't repeat herself."
+        }
+      },
+      {
+        id: "nikos_hostile_blacklist",
+        weight: 4, tone: "bad",
+        requires: function (s) { return s.npcs && s.npcs.nikos_lecturer && s.npcs.nikos_lecturer.relationship <= -5; },
+        headline: { he: "ניקוס הכניס את שמך לרשימה", en: "Nikos added you to a list" },
+        body: {
+          he: "'לא נכנסים יותר לכיתות שלי.' עבר במסדרון, יודעים שזה אתה.",
+          en: "'Not allowed in my classes anymore.' Word traveled the hallway. They know who."
+        }
       }
     ]
   };

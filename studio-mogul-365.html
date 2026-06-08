@@ -3688,15 +3688,21 @@
       // A calendar-pinned event (minDay === maxDay === today) always wins its day.
       let chosen = events.find((e) => e.minDay === gameState.day && e.maxDay === gameState.day);
       if (!chosen) {
+        // Events may declare requires(state) — used for NPC memory-callbacks
+        // that only surface when relationship thresholds have been crossed.
+        const meetsRequires = (e) => !e.requires || (function () {
+          try { return !!e.requires(gameState); } catch (_err) { return false; }
+        })();
         const eligible = events.filter((e) =>
           (e.weight || 0) > 0 &&
           gameState.day >= (e.minDay || 1) &&
           (!e.maxDay || gameState.day <= e.maxDay) &&
-          e.id !== gameState.lastBriefId
+          e.id !== gameState.lastBriefId &&
+          meetsRequires(e)
         );
         const pool = eligible.length
           ? eligible
-          : events.filter((e) => (e.weight || 0) > 0 && gameState.day >= (e.minDay || 1) && (!e.maxDay || gameState.day <= e.maxDay));
+          : events.filter((e) => (e.weight || 0) > 0 && gameState.day >= (e.minDay || 1) && (!e.maxDay || gameState.day <= e.maxDay) && meetsRequires(e));
         if (!pool.length) {
           return;
         }
