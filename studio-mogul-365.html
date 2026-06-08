@@ -4913,6 +4913,27 @@
         name: { he: "סופיה", en: "Sofia" },
         role: { he: "עורכת קרה, חדר עריכה", en: "Cold editor, post house" },
         emoji: "🎬"
+      },
+      klaus_gear: {
+        id: "klaus_gear",
+        city: "berlin",
+        name: { he: "קלאוס", en: "Klaus" },
+        role: { he: "בעל חנות ציוד, ברלין", en: "Gear shop owner, Berlin" },
+        emoji: "📷"
+      },
+      ulrich_investor: {
+        id: "ulrich_investor",
+        city: "berlin",
+        name: { he: "אולריך", en: "Ulrich" },
+        role: { he: "משקיע פרטי, כסף קר ותיאוריה", en: "Private investor, cold cash and theory" },
+        emoji: "💼"
+      },
+      petra_programmer: {
+        id: "petra_programmer",
+        city: "berlin",
+        name: { he: "פטרה", en: "Petra" },
+        role: { he: "תכניתנית סינמטק, יודעת הכל", en: "Cinematheque programmer, knows everyone" },
+        emoji: "📽️"
       }
     };
 
@@ -5059,6 +5080,66 @@
           { weight: 5, tone: "bad", flavor: { he: "ליאור ראה אותך מבקש. אנשים ראו אותו רואה.", en: "Lior saw you begging. People saw him seeing." }, effects: { reputation: -3, soul: -2 }, npc: { id: "lior_agent", rel: -4 } },
           { weight: 12, tone: "good", sfx: "cash", relGate: { id: "lior_agent", min: 5 }, flavor: { he: "ליאור: 'אני מסדר לך פגישה עם רגב נשר השבוע. תהיה מוכן.'", en: "Lior: 'I'm setting you up with Regev Nesher this week. Be ready.'" }, effects: { reputation: 6, creativity: 2 }, npc: { id: "lior_agent", rel: 2 } },
           { weight: 10, tone: "bad", relGate: { id: "lior_agent", max: -5 }, flavor: { he: "ליאור הסתובב לחברים: 'הילד הזה — אתה זוכר?'. כולם זוכרים.", en: "Lior turned to his crew: 'this kid — you remember?'. Everyone remembers." }, effects: { reputation: -6, soul: -4 }, npc: { id: "lior_agent", rel: -2 } }
+        ]
+      },
+      gear_klaus_negotiate: {
+        location: "gear",
+        cities: ["berlin"],
+        label: { he: "להתמקח עם קלאוס", en: "Negotiate with Klaus" },
+        copy: { he: "בעל החנות יושב על המחיר כמו על תהליך. אבל מקשיב.", en: "He sits on the price like it's a process. But listens." },
+        hours: 1, cost: 0, once: true,
+        npcInfluence: { id: "klaus_gear" },
+        outcomes: [
+          { weight: 60, tone: "neutral", flavor: { he: "קלאוס ציטט מפרטים ארבעים דקות. לא זז במחיר.", en: "Klaus quoted specs for forty minutes. No movement on price." }, effects: {}, npc: { id: "klaus_gear", rel: 1 } },
+          { weight: 25, tone: "good", flavor: { he: "קלאוס נתן לך הנחה קטנה. 'כי שאלת ברצינות.'", en: "Klaus gave you a small discount. 'Because you asked seriously.'" }, effects: { reputation: 2 }, npc: { id: "klaus_gear", rel: 2 } },
+          { weight: 10, tone: "good", flavor: { he: "פתח לך שיעור על workflow. +יצירתיות. +קרדיט.", en: "Walked you through a workflow. +creativity. +credit." }, effects: { creativity: 3 }, npc: { id: "klaus_gear", rel: 3 } },
+          { weight: 5, tone: "bad", flavor: { he: "אמר לקולגה: 'הילד הזה לא מבין רצינות.' אנשים שמעו.", en: "Said to a colleague: 'this kid doesn't understand seriousness.' People heard." }, effects: { reputation: -3, soul: -2 }, npc: { id: "klaus_gear", rel: -3 } },
+          { weight: 10, tone: "good", sfx: "cash", relGate: { id: "klaus_gear", min: 5 }, flavor: { he: "קלאוס: 'יש סדנת VFX סגורה ביום ראשון. תבוא, אני אגיד לך מה לקרוא קודם.'", en: "Klaus: 'closed VFX workshop on Sunday. Come — I'll tell you what to read first.'" }, effects: { reputation: 4, creativity: 4 }, npc: { id: "klaus_gear", rel: 1 } },
+          { weight: 8, tone: "bad", relGate: { id: "klaus_gear", max: -5 }, flavor: { he: "קלאוס: 'אני לא מוכר לך. תחפש חנות אחרת.' החנות שמעה.", en: "Klaus: 'I won't sell to you. Find another shop.' The shop heard." }, effects: { reputation: -4, soul: -3 }, npc: { id: "klaus_gear", rel: -1 } }
+        ]
+      },
+      gear_klaus_apprentice: {
+        location: "gear",
+        cities: ["berlin"],
+        label: { he: "להציע לקלאוס שעתיים של סידור מלאי", en: "Offer Klaus 2h of stock work" },
+        copy: { he: "בלי כסף, בלי תירוצים. רק קופסאות.", en: "No money, no excuses. Just boxes." },
+        hours: 2, cost: 0, once: true,
+        npcInfluence: { id: "klaus_gear" },
+        outcomes: [
+          { weight: 55, tone: "neutral", flavor: { he: "סידרת קופסאות, הוא לא הסתכל פעם אחת. שעתיים שקטות.", en: "You sorted boxes. He didn't look up once. Two quiet hours." }, effects: { soul: 1 }, npc: { id: "klaus_gear", rel: 2 } },
+          { weight: 30, tone: "good", flavor: { he: "נתן לך יחידת קול תקולה במחצית המחיר. +ציוד זול.", en: "Sold you a faulty sound unit at half price. +cheap gear." }, effects: { cash: 80, creativity: 1 }, npc: { id: "klaus_gear", rel: 3 } },
+          { weight: 15, tone: "good", flavor: { he: "התחיל לדבר. סיפר לך על מכירת ציוד מתוכננת בעוד שבועיים.", en: "Started talking. Told you about a gear sale planned for two weeks out." }, effects: { creativity: 2, reputation: 1 }, npc: { id: "klaus_gear", rel: 4 } }
+        ]
+      },
+      invest_ulrich_pitch: {
+        location: "investor",
+        cities: ["berlin"],
+        label: { he: "לפיץ' לאולריך מעל יין", en: "Pitch Ulrich over wine" },
+        copy: { he: "המשקיע הקר רוצה תיאוריה לפני מספרים. תביא את שתיהן.", en: "The cold investor wants theory before numbers. Bring both." },
+        hours: 2, cost: 40, once: true,
+        npcInfluence: { id: "ulrich_investor" },
+        outcomes: [
+          { weight: 50, tone: "neutral", flavor: { he: "אולריך אמר 'מעניין' וקם להתקשר. לא חזר.", en: "Ulrich said 'interesting' and got up to make a call. Didn't return." }, effects: {}, npc: { id: "ulrich_investor", rel: 1 } },
+          { weight: 25, tone: "good", sfx: "cash", flavor: { he: "נתן לך 500$ 'למחקר.' לא רוצה דוח.", en: "Gave you $500 'for research.' Doesn't want a report." }, effects: { cash: 500, reputation: 2 }, npc: { id: "ulrich_investor", rel: 3 } },
+          { weight: 15, tone: "good", flavor: { he: "חיבר אותך לקו-פרוד ברלינאי. שיחה אחרי הסופ\"ש.", en: "Connected you to a Berlin co-prod. Call after the weekend." }, effects: { reputation: 5, creativity: 1 }, npc: { id: "ulrich_investor", rel: 4 } },
+          { weight: 10, tone: "bad", flavor: { he: "אמר בקול: 'זה חסר אורגינליות. הצעד התיאורטי לא יושב.'", en: "Said loudly: 'this lacks rigor. The theoretical step doesn't hold.'" }, effects: { reputation: -4, soul: -3 }, npc: { id: "ulrich_investor", rel: -3 } },
+          { weight: 8, tone: "good", sfx: "cash", relGate: { id: "ulrich_investor", min: 5 }, flavor: { he: "אולריך: 'יש לי 1500$ לפיתוח. בלי החזר. אני סקרן מה תעשה איתם.'", en: "Ulrich: 'I have $1500 for development. No recoupment. Curious what you'll do.'" }, effects: { cash: 1500, reputation: 5 }, npc: { id: "ulrich_investor", rel: 2 } },
+          { weight: 8, tone: "bad", relGate: { id: "ulrich_investor", max: -5 }, flavor: { he: "אולריך התקשר לקרן השנייה והפיל לך גם שם. עבר מהר.", en: "Ulrich rang the second fund and torpedoed you there too. Word travels fast." }, effects: { reputation: -6, soul: -3 }, npc: { id: "ulrich_investor", rel: -1 } }
+        ]
+      },
+      cinema_petra_post: {
+        location: "cinematheque",
+        cities: ["berlin"],
+        label: { he: "שיחה עם פטרה אחרי הקרנה", en: "Chat with Petra after the screening" },
+        copy: { he: "התכניתנית עומדת בלובי עם בירה. דקה שלה שווה שלך.", en: "The programmer in the lobby with a beer. Her minute is worth your hour." },
+        hours: 1, cost: 25, once: true,
+        npcInfluence: { id: "petra_programmer" },
+        outcomes: [
+          { weight: 55, tone: "neutral", flavor: { he: "פטרה משכה כתפיים לטעם שלך. 'חשבתי שיש לך עין אחרת.'", en: "Petra shrugged at your taste. 'Thought you had a different eye.'" }, effects: {}, npc: { id: "petra_programmer", rel: 1 } },
+          { weight: 25, tone: "good", flavor: { he: "הזמינה אותך לקפה של אוצרים אורחים בשבוע הבא.", en: "Invited you to a guest-curators coffee next week." }, effects: { reputation: 3, creativity: 2 }, npc: { id: "petra_programmer", rel: 2 } },
+          { weight: 15, tone: "good", flavor: { he: "הוסיפה אותך לרשימת הזמנות לפאנל פסטיבל. בלי שאלות.", en: "Added you to a festival panel invite list. No questions." }, effects: { reputation: 4 }, npc: { id: "petra_programmer", rel: 3 } },
+          { weight: 5, tone: "bad", flavor: { he: "אמרה לחבורה: 'הוא לא הבין את הסרט.' הלכת מוקדם.", en: "Said to her group: 'he didn't get the film.' You left early." }, effects: { reputation: -3, soul: -2 }, npc: { id: "petra_programmer", rel: -2 } },
+          { weight: 10, tone: "good", sfx: "cash", relGate: { id: "petra_programmer", min: 5 }, flavor: { he: "פטרה: 'אני מתכננת רטרוספקטיבה. יש לי משבצת בעוד חצי שנה — בא לך?'", en: "Petra: 'planning a retrospective. I have a slot in six months — interested?'" }, effects: { reputation: 7, creativity: 3 }, npc: { id: "petra_programmer", rel: 2 } }
         ]
       },
       cinema_alexis_chat: {
@@ -7089,6 +7170,7 @@
               ? localize({ he: " ⚠️ (+" + Math.round((gearMod - 1) * 100) + "%)", en: " ⚠️ (+" + Math.round((gearMod - 1) * 100) + "%)" })
               : "";
           const gearPrice = (base) => formatMoney(Math.round(base * priceScale() * gearMod)) + modLabel;
+          const gearScene = sceneCardButtons("gear");
           return `
             <div class="action-group">
               <h3>${localize({ he: "צילום וציוד מקצועי", en: "Camera and pro gear" })}</h3>
@@ -7098,9 +7180,11 @@
                 ${buttonMarkup("buyEquip", "insurance", localize({ he: "קיט סאונד ותאורה", en: "Sound and light kit" }), localize({ he: "מוזיל צילום ופוסט • הופך את ההפקה לפחות חובבנית.", en: "Reduces shoot and post costs • makes the production feel less amateur." }), gearPrice(1450))}
               </div>
             </div>
+            ${gearScene ? `<div class="action-group"><h3>${localize({ he: "אנשי המקום", en: "The locals" })}</h3><div class="action-buttons">${gearScene}</div></div>` : ""}
           `;
         }
-        case "investor":
+        case "investor": {
+          const investorScene = sceneCardButtons("investor");
           return `
             <div class="action-group">
               <h3>${t("finance")}</h3>
@@ -7108,7 +7192,9 @@
                 ${buttonMarkup("doPinv", "", localize({ he: "לפגוש משקיע פרטי", en: "Meet a private investor" }), localize({ he: "2h • כסף מיידי תמורת אחוזי הכנסות", en: "2h • immediate cash for a revenue percentage" }), "2h")}
               </div>
             </div>
+            ${investorScene ? `<div class="action-group"><h3>${localize({ he: "אנשי המקום", en: "The locals" })}</h3><div class="action-buttons">${investorScene}</div></div>` : ""}
           `;
+        }
         case "festival":
           return `
             <div class="action-group">

@@ -314,6 +314,46 @@
           he: "'לא נכנסים יותר לכיתות שלי.' עבר במסדרון, יודעים שזה אתה.",
           en: "'Not allowed in my classes anymore.' Word traveled the hallway. They know who."
         }
+      },
+      {
+        id: "klaus_friendly_workshop",
+        weight: 4, tone: "good",
+        requires: function (s) { return s.npcs && s.npcs.klaus_gear && s.npcs.klaus_gear.relationship >= 5; },
+        headline: { he: "קלאוס: 'יש לי כיסא בסדנה בברלין'", en: "Klaus: 'I have a seat for you in a Berlin workshop'" },
+        body: {
+          he: "אם תקפוץ לחנות הציוד היום, הוא יסביר. ההזמנה לא תחזור.",
+          en: "Stop by the gear shop today and he'll explain. The invite won't repeat."
+        }
+      },
+      {
+        id: "ulrich_friendly_dev",
+        weight: 4, tone: "good",
+        requires: function (s) { return s.npcs && s.npcs.ulrich_investor && s.npcs.ulrich_investor.relationship >= 5; },
+        headline: { he: "אולריך הזכיר תקציב פיתוח", en: "Ulrich mentioned a development budget" },
+        body: {
+          he: "אמר לעוזרת לרשום אותך. אם אתה בברלין — היום אחה\"צ במשרד.",
+          en: "Told his assistant to put you on the list. If you're in Berlin — his office this afternoon."
+        }
+      },
+      {
+        id: "petra_friendly_slot",
+        weight: 4, tone: "good",
+        requires: function (s) { return s.npcs && s.npcs.petra_programmer && s.npcs.petra_programmer.relationship >= 5; },
+        headline: { he: "פטרה כתבה: 'יש משבצת. תרצה?'", en: "Petra wrote: 'there's a slot. Want it?'" },
+        body: {
+          he: "סינמטק ברלין, רטרוספקטיבה. אם תיכנס לדבר היום, היא תסגור.",
+          en: "Berlin Cinematheque, retrospective track. If you swing by today, she'll lock it in."
+        }
+      },
+      {
+        id: "ulrich_hostile_block",
+        weight: 3, tone: "bad",
+        requires: function (s) { return s.npcs && s.npcs.ulrich_investor && s.npcs.ulrich_investor.relationship <= -5; },
+        headline: { he: "אולריך מדבר עם הקרן השנייה", en: "Ulrich is speaking with the other fund" },
+        body: {
+          he: "השם שלך עולה בהקשר 'חסר רצינות'. השבוע. אל תגיש כלום.",
+          en: "Your name comes up framed 'not serious.' This week. Don't submit anything."
+        }
       }
     ]
   };
