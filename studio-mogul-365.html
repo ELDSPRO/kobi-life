@@ -4815,11 +4815,12 @@
     };
 
     function filmUnlockState() {
+      const eq = gameState.equipment || {};
       const have = {
         experience: gameState.experience | 0,
         education: gameState.education | 0,
         cash: gameState.cash | 0,
-        camera: !!gameState.equipment.camera
+        camera: !!eq.camera
       };
       return {
         have,
@@ -5902,6 +5903,7 @@
               ${statusRowMarkup(localize({ he: "חוב", en: "Debt" }), formatMoney(-gameState.debt), gameState.debt ? "debt" : "")}
               ${statusRowMarkup(t("reputation"), String(gameState.reputation), "plain")}
               ${statusRowMarkup(t("education"), String(gameState.education), "plain")}
+              ${statusRowMarkup(localize({ he: "ניסיון", en: "Experience" }), String(gameState.experience | 0), "plain")}
               ${statusRowMarkup(t("creativity"), String(gameState.creativity), "plain")}
             </div>
             <div class="win95-note">
