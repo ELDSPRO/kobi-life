@@ -34,6 +34,10 @@ function loadGame(htmlPath) {
   };
   context.globalThis = context;
   vm.createContext(context);
+  const dataPath = require("path").join(require("path").dirname(htmlPath), "data.js");
+  if (fs.existsSync(dataPath)) {
+    vm.runInContext(fs.readFileSync(dataPath, "utf8"), context);
+  }
   vm.runInContext(script, context);
   return context;
 }

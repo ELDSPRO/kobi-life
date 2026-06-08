@@ -2120,6 +2120,7 @@
   <div id="floatLayer" class="float-layer"></div>
   <div id="nightVeil" class="night-veil"></div>
 
+  <script src="data.js"></script>
   <script>
   (() => {
     "use strict";
@@ -3054,6 +3055,9 @@
         highscores: loadScores(),
         winState: null,
         seed: 1337,
+        briefSeed: 99991,
+        dailyBriefing: null,
+        lastBriefId: null,
         monthCounter: 1,
         lastFundDevDay: -30,
         incidentBase: 0.4,
@@ -3107,6 +3111,53 @@
         return null;
       }
       return array[Math.floor(rand() * array.length)];
+    }
+
+    // Dedicated RNG stream for cosmetic content (daily briefing) so picking a
+    // morning event never disturbs the tuned economy's rand() sequence.
+    function briefingRand() {
+      gameState.briefSeed = (gameState.briefSeed * 1664525 + 1013904223) >>> 0;
+      return gameState.briefSeed / 4294967296;
+    }
+
+    function triggerDailyBriefing() {
+      const events = (root.GAME_DATA && root.GAME_DATA.dailyEvents) || [];
+      if (!events.length) {
+        return;
+      }
+      // A calendar-pinned event (minDay === maxDay === today) always wins its day.
+      let chosen = events.find((e) => e.minDay === gameState.day && e.maxDay === gameState.day);
+      if (!chosen) {
+        const eligible = events.filter((e) =>
+          (e.weight || 0) > 0 &&
+          gameState.day >= (e.minDay || 1) &&
+          (!e.maxDay || gameState.day <= e.maxDay) &&
+          e.id !== gameState.lastBriefId
+        );
+        const pool = eligible.length
+          ? eligible
+          : events.filter((e) => (e.weight || 0) > 0 && gameState.day >= (e.minDay || 1) && (!e.maxDay || gameState.day <= e.maxDay));
+        if (!pool.length) {
+          return;
+        }
+        const total = pool.reduce((sum, e) => sum + (e.weight || 1), 0);
+        let roll = briefingRand() * total;
+        chosen = pool[pool.length - 1];
+        for (let i = 0; i < pool.length; i += 1) {
+          roll -= (pool[i].weight || 1);
+          if (roll <= 0) {
+            chosen = pool[i];
+            break;
+          }
+        }
+      }
+      const headline = localize(chosen.headline);
+      const body = localize(chosen.body);
+      const tone = chosen.tone || "neutral";
+      gameState.lastBriefId = chosen.id;
+      gameState.dailyBriefing = { id: chosen.id, headline, body, tone, day: gameState.day };
+      gameState.activeNotice = { id: "brief-" + gameState.day, title: headline, copy: body, tone };
+      note(headline + " — " + body, tone);
     }
 
     function loadPrefs() {
@@ -4662,6 +4713,7 @@
         updateUnlocks();
         checkEndings();
         saveGame();
+        triggerDailyBriefing();
         if (canRender && dom && dom.nightVeil) {
           dom.nightVeil.classList.remove("active");
         }
@@ -5785,6 +5837,7 @@
       }
       savePrefs();
       saveGame();
+      triggerDailyBriefing();
       render();
       return true;
     }
