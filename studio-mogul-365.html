@@ -1903,6 +1903,40 @@
       justify-content: space-between;
       gap: 6px;
     }
+    .npc-list {
+      display: grid;
+      gap: 5px;
+    }
+    .npc-row {
+      display: grid;
+      gap: 3px;
+      padding: 6px 7px;
+      background: #ffffff;
+      border-inline-start: 3px solid #999;
+      box-shadow:
+        inset -1px -1px var(--win-light),
+        inset 1px 1px var(--win-dark);
+    }
+    .npc-row.good { border-inline-start-color: #2e8b3d; }
+    .npc-row.bad  { border-inline-start-color: #b13c3c; }
+    .npc-row-head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .npc-emoji { font-size: 14px; }
+    .npc-rel {
+      margin-inline-start: auto;
+      font-style: normal;
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+    }
+    .npc-row.good .npc-rel { color: #2e8b3d; }
+    .npc-row.bad  .npc-rel { color: #b13c3c; }
+    .npc-row-role { font-size: 10px; color: #444; }
+    .npc-row-status { font-size: 10px; color: #2a4ba0; }
     .roster-group li.muted {
       color: #888;
       font-style: italic;
@@ -3587,7 +3621,8 @@
         activeModifiers: [],
         flightIndex: {},
         stocks: {},
-        holdings: {}
+        holdings: {},
+        npcs: {}
       }, overrides);
     }
 
@@ -4824,6 +4859,48 @@
     }
 
     /*
+     * NPCS — recurring named characters. Each card outcome that touches
+     * a relationship references one of these by id. State is tracked in
+     * gameState.npcs[id] = { met: true, relationship: number }.
+     * Sidebar renderNpcsBlock surfaces met NPCs so the player feels
+     * the relationship arc instead of forgetting last week's dice roll.
+     */
+    const NPCS = {
+      maya_barista: {
+        id: "maya_barista",
+        city: "telaviv",
+        name: { he: "מאיה", en: "Maya" },
+        role: { he: "ברסיטה משוררת, קפה שכונתי", en: "Poet barista, neighborhood cafe" },
+        emoji: "☕"
+      },
+      lior_agent: {
+        id: "lior_agent",
+        city: "telaviv",
+        name: { he: "ליאור כהן", en: "Lior Cohen" },
+        role: { he: "סוכן ליהוק, בר המלון", en: "Casting agent, hotel bar" },
+        emoji: "🥃"
+      },
+      dani_classmate: {
+        id: "dani_classmate",
+        city: "telaviv",
+        name: { he: "דני", en: "Dani" },
+        role: { he: "חבר מהלימודים, כותב שלא כותב", en: "Film-school friend who never writes" },
+        emoji: "📝"
+      }
+    };
+
+    function meetNpc(npcId, deltaRel) {
+      if (!NPCS[npcId]) return;
+      if (!gameState.npcs) gameState.npcs = {};
+      if (!gameState.npcs[npcId]) {
+        gameState.npcs[npcId] = { met: true, relationship: 0, firstMet: gameState.day };
+      }
+      gameState.npcs[npcId].met = true;
+      gameState.npcs[npcId].relationship += (deltaRel || 0);
+      gameState.npcs[npcId].lastSeen = gameState.day;
+    }
+
+    /*
      * SCENE_CARDS — declarative choice-cards per location.
      * Each card resolves through runSceneCard(): cost gate → spendHours →
      * weighted RNG → effects → LSL-tone flashMessage. Stats supported:
@@ -4845,13 +4922,13 @@
       },
       cafe_pitch_barista: {
         location: "cafe",
-        label: { he: "להציע פיץ' לברסיטה", en: "Pitch the barista" },
-        copy: { he: "המשורר עם הקפה אמר אתמול שהוא קרא קרואק. תנסה.", en: "The poet barista mentioned Kerouac yesterday. Try him." },
+        label: { he: "להציע פיץ' למאיה", en: "Pitch Maya" },
+        copy: { he: "מאיה הברסיטה אמרה אתמול שהיא קראה קרואק. תנסה.", en: "Maya the barista mentioned Kerouac yesterday. Try her." },
         hours: 1, cost: 20, once: true,
         outcomes: [
-          { weight: 60, tone: "neutral", flavor: { he: "הוא הנהן. הוא יודע להנהן.", en: "He nodded. He's good at nodding." }, effects: {} },
-          { weight: 30, tone: "good", flavor: { he: "הוא חידד לך את הסצנה השנייה. +יצירתיות גדולה.", en: "He sharpened your second scene. +big creativity." }, effects: { creativity: 4, soul: 1 } },
-          { weight: 10, tone: "bad", flavor: { he: "הוא חזר על הפיץ' שלך לחבר שלו. בקול. אנשים שמעו.", en: "He repeated your pitch to his friend. Loudly. People heard." }, effects: { reputation: -2, soul: -1 } }
+          { weight: 60, tone: "neutral", flavor: { he: "מאיה הנהנה. היא יודעת להנהן.", en: "Maya nodded. She's good at nodding." }, effects: {}, npc: { id: "maya_barista", rel: 0 } },
+          { weight: 30, tone: "good", flavor: { he: "מאיה חידדה לך את הסצנה השנייה. +יצירתיות גדולה.", en: "Maya sharpened your second scene. +big creativity." }, effects: { creativity: 4, soul: 1 }, npc: { id: "maya_barista", rel: 2 } },
+          { weight: 10, tone: "bad", flavor: { he: "היא חזרה על הפיץ' שלך לחבר שלה. בקול. אנשים שמעו.", en: "She repeated your pitch to her friend. Loudly. People heard." }, effects: { reputation: -2, soul: -1 }, npc: { id: "maya_barista", rel: -2 } }
         ]
       },
       script_write_solo: {
@@ -4867,26 +4944,26 @@
       },
       script_borrow_idea: {
         location: "script",
-        label: { he: "להעתיק רעיון של חבר", en: "Borrow a friend's idea" },
-        copy: { he: "הוא לא יכתוב את זה לעולם. אתה כן.", en: "He'll never write it. You will." },
+        label: { he: "להעתיק רעיון מדני", en: "Borrow Dani's idea" },
+        copy: { he: "דני לא יכתוב את זה לעולם. אתה כן.", en: "Dani will never write it. You will." },
         hours: 1, cost: 0, once: true,
         outcomes: [
-          { weight: 50, tone: "good", flavor: { he: "המתווה לבד הספיק. כתבת גרסה משלך. +רעיון.", en: "The outline alone was enough. Wrote your own version. +idea." }, effects: { creativity: 3, soul: -1 } },
-          { weight: 30, tone: "bad", flavor: { he: "הוא ראה. הוא לא אמר כלום. עכשיו אתה יודע.", en: "He saw. He said nothing. Now you know." }, effects: { soul: -3, reputation: -1 } },
-          { weight: 15, tone: "neutral", flavor: { he: "הרעיון לא היה טוב כמו שזכרת.", en: "The idea wasn't as good as you remembered." }, effects: {} },
-          { weight: 5, tone: "bad", flavor: { he: "החבר סיפר לסוכן. הסוכן סיפר לכולם.", en: "Your friend told an agent. The agent told everyone." }, effects: { reputation: -4, soul: -2 } }
+          { weight: 50, tone: "good", flavor: { he: "המתווה של דני לבד הספיק. כתבת גרסה משלך. +רעיון.", en: "Dani's outline alone was enough. Wrote your own version. +idea." }, effects: { creativity: 3, soul: -1 }, npc: { id: "dani_classmate", rel: 0 } },
+          { weight: 30, tone: "bad", flavor: { he: "דני ראה. הוא לא אמר כלום. עכשיו אתה יודע.", en: "Dani saw. He said nothing. Now you know." }, effects: { soul: -3, reputation: -1 }, npc: { id: "dani_classmate", rel: -3 } },
+          { weight: 15, tone: "neutral", flavor: { he: "הרעיון לא היה טוב כמו שזכרת.", en: "The idea wasn't as good as you remembered." }, effects: {}, npc: { id: "dani_classmate", rel: 0 } },
+          { weight: 5, tone: "bad", flavor: { he: "דני סיפר לסוכן. הסוכן סיפר לכולם.", en: "Dani told an agent. The agent told everyone." }, effects: { reputation: -4, soul: -2 }, npc: { id: "dani_classmate", rel: -5 } }
         ]
       },
       cast_court_agent: {
         location: "casting",
-        label: { he: "לחזר אחרי סוכן בבר", en: "Court an agent at the bar" },
-        copy: { he: "משקה כפול במלון. הוא לא משלם, הוא מקשיב.", en: "Double drink at the hotel bar. He doesn't pay, he listens." },
+        label: { he: "לחזר אחרי ליאור בבר", en: "Court Lior at the bar" },
+        copy: { he: "משקה כפול במלון. ליאור לא משלם, הוא מקשיב.", en: "Double drink at the hotel bar. Lior doesn't pay, he listens." },
         hours: 2, cost: 80, once: true,
         outcomes: [
-          { weight: 60, tone: "neutral", flavor: { he: "נתת כרטיס. הוא נתן כרטיס. אף אחד לא יתקשר.", en: "Gave a card. Took a card. Nobody is calling." }, effects: {} },
-          { weight: 25, tone: "good", flavor: { he: "הוא הקשיב יותר משצריך. +מוניטין.", en: "He listened longer than required. +reputation." }, effects: { reputation: 3 } },
-          { weight: 10, tone: "good", sfx: "cash", flavor: { he: "הזמין אותך לפגישה אמיתית. סימן את היומן.", en: "Booked a real meeting. Marked his calendar." }, effects: { reputation: 4, creativity: 1 } },
-          { weight: 5, tone: "bad", flavor: { he: "הוא ראה אותך מבקש. אנשים ראו אותו רואה.", en: "He saw you begging. People saw him seeing." }, effects: { reputation: -3, soul: -2 } }
+          { weight: 60, tone: "neutral", flavor: { he: "נתת כרטיס. ליאור נתן כרטיס. אף אחד לא יתקשר.", en: "Gave a card. Lior gave a card. Nobody is calling." }, effects: {}, npc: { id: "lior_agent", rel: 1 } },
+          { weight: 25, tone: "good", flavor: { he: "ליאור הקשיב יותר משצריך. +מוניטין.", en: "Lior listened longer than required. +reputation." }, effects: { reputation: 3 }, npc: { id: "lior_agent", rel: 3 } },
+          { weight: 10, tone: "good", sfx: "cash", flavor: { he: "ליאור הזמין אותך לפגישה אמיתית. סימן את היומן.", en: "Lior booked a real meeting. Marked his calendar." }, effects: { reputation: 4, creativity: 1 }, npc: { id: "lior_agent", rel: 5 } },
+          { weight: 5, tone: "bad", flavor: { he: "ליאור ראה אותך מבקש. אנשים ראו אותו רואה.", en: "Lior saw you begging. People saw him seeing." }, effects: { reputation: -3, soul: -2 }, npc: { id: "lior_agent", rel: -4 } }
         ]
       },
       cast_offer_to_model: {
@@ -4949,6 +5026,7 @@
       ["soul", "happiness", "creativity", "reputation", "love"].forEach((key) => {
         if (typeof fx[key] === "number") adjustStat(key, fx[key]);
       });
+      if (picked.npc && picked.npc.id) meetNpc(picked.npc.id, picked.npc.rel || 0);
       flashMessage(localize(picked.flavor), picked.tone || "neutral");
       if (picked.sfx) playSfx(picked.sfx);
       saveGame();
@@ -6134,6 +6212,46 @@
     // Sidebar projects block. The legacy renderProjectsPanel exists but was
     // never wired into the DOM, so users with active projects had no way to
     // see cast/crew, budget, or stage. This block lives in win95-status.
+    function relationshipLabel(rel) {
+      if (rel >= 8)  return { he: "סומך עליך", en: "Trusts you" };
+      if (rel >= 4)  return { he: "מחבב אותך", en: "Likes you" };
+      if (rel >= 1)  return { he: "מזהה אותך", en: "Knows you" };
+      if (rel === 0) return { he: "ניטרלי", en: "Neutral" };
+      if (rel >= -3) return { he: "צונן", en: "Cool to you" };
+      if (rel >= -7) return { he: "נעלב ממך", en: "Holds a grudge" };
+      return { he: "אויב/ת", en: "Enemy" };
+    }
+
+    function renderNpcsBlock() {
+      if (!gameState.npcs) return "";
+      const met = Object.keys(gameState.npcs).filter((id) => gameState.npcs[id] && gameState.npcs[id].met && NPCS[id]);
+      if (!met.length) return "";
+      const rows = met.map((id) => {
+        const npc = NPCS[id];
+        const state = gameState.npcs[id];
+        const rel = state.relationship | 0;
+        const sign = rel > 0 ? "+" : "";
+        const cls = rel >= 1 ? "good" : rel <= -1 ? "bad" : "neutral";
+        return `
+          <div class="npc-row ${cls}">
+            <div class="npc-row-head">
+              <span class="npc-emoji">${npc.emoji || "👤"}</span>
+              <strong>${localize(npc.name)}</strong>
+              <em class="npc-rel">${sign}${rel}</em>
+            </div>
+            <div class="npc-row-role">${localize(npc.role)}</div>
+            <div class="npc-row-status">${localize(relationshipLabel(rel))}</div>
+          </div>
+        `;
+      }).join("");
+      return `
+        <div class="inventory-block">
+          <div class="win95-panel-title">${localize({ he: "🤝 אנשים שאני מכיר", en: "🤝 People I know" })}</div>
+          <div class="npc-list">${rows}</div>
+        </div>
+      `;
+    }
+
     function renderProjectsBlock() {
       const focusedId = gameState.focusedProjectId;
       const rows = gameState.projects.map((project) => {
@@ -6245,6 +6363,7 @@
             ` : ""}
             ${gameState.filmUnlocked ? "" : renderUnlockProgress()}
             ${gameState.projects && gameState.projects.length ? renderProjectsBlock() : ""}
+            ${renderNpcsBlock()}
           </section>
           <section class="win95-main">
             <div class="win95-strip">
@@ -7339,6 +7458,8 @@
     root.flirtAtCafe = flirtAtCafe;
     root.runSceneCard = runSceneCard;
     root.SCENE_CARDS = SCENE_CARDS;
+    root.NPCS = NPCS;
+    root.meetNpc = meetNpc;
 
     if (canRender) {
       init();
