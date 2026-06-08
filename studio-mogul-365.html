@@ -1988,6 +1988,29 @@
       color: #444;
     }
     .story-lock { font-size: 10px; }
+    .npc-empty-block .npc-empty-copy {
+      font-size: 10px;
+      line-height: 1.5;
+      color: #555;
+      padding: 4px 0 2px;
+    }
+    .dest-btn { position: relative; }
+    .dest-btn .fresh-badge {
+      position: absolute;
+      top: 2px;
+      inset-inline-end: 4px;
+      font-size: 11px;
+      animation: freshPulse 2.2s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .dest-btn.fresh-locals {
+      outline: 2px solid #f0c93a;
+      outline-offset: -2px;
+    }
+    @keyframes freshPulse {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
     .roster-group li.muted {
       color: #888;
       font-style: italic;
@@ -3681,7 +3704,8 @@
         flightIndex: {},
         stocks: {},
         holdings: {},
-        npcs: {}
+        npcs: {},
+        buildingVisits: {}
       }, overrides);
     }
 
@@ -4612,6 +4636,8 @@
       }
       gameState.currentBuilding = id;
       gameState.travelFlash = true;
+      if (!gameState.buildingVisits) gameState.buildingVisits = {};
+      gameState.buildingVisits[city.id + ":" + id] = true;
       playSfx(distance > 0 ? "travel" : "cash");
       render();
       root.setTimeout(() => {
@@ -7028,9 +7054,19 @@
     }
 
     function renderNpcsBlock() {
-      if (!gameState.npcs) return "";
+      if (!gameState.npcs) gameState.npcs = {};
       const met = Object.keys(gameState.npcs).filter((id) => gameState.npcs[id] && gameState.npcs[id].met && NPCS[id]);
-      if (!met.length) return "";
+      if (!met.length) {
+        return `
+          <div class="inventory-block npc-empty-block">
+            <div class="win95-panel-title">${localize({ he: "🤝 אנשים שאני מכיר", en: "🤝 People I know" })}</div>
+            <div class="npc-empty-copy">${localize({
+              he: "עוד לא פגשת אף אחד. כנס לקפה, שוק תסריטים או משרד ליהוק בעיר — תראה ✨ על כפתורים עם דמויות חדשות.",
+              en: "You haven't met anyone yet. Visit the cafe, script market, or casting agency in town — buttons with new characters are marked ✨."
+            })}</div>
+          </div>
+        `;
+      }
       const rows = met.map((id) => {
         const npc = NPCS[id];
         const state = gameState.npcs[id];
@@ -7224,8 +7260,13 @@
                     const building = getBuilding(buildingId);
                     const selected = buildingId === gameState.currentBuilding;
                     const target = buildingId === inCityHint;
+                    const visitKey = city.id + ":" + buildingId;
+                    const visited = gameState.buildingVisits && gameState.buildingVisits[visitKey];
+                    const hasScene = sceneCardButtons(buildingId).length > 0;
+                    const fresh = hasScene && !visited;
                     return `
-                      <button class="dest-btn ${selected ? "selected" : ""} ${target ? "target" : ""}" style="--tone-a:${building.color[0]};--tone-b:${building.color[1]};" data-action="goToBuilding" data-value="${buildingId}">
+                      <button class="dest-btn ${selected ? "selected" : ""} ${target ? "target" : ""} ${fresh ? "fresh-locals" : ""}" style="--tone-a:${building.color[0]};--tone-b:${building.color[1]};" data-action="goToBuilding" data-value="${buildingId}">
+                        ${fresh ? `<span class="fresh-badge" title="${localize({ he: "אנשי מקום חדשים", en: "New locals here" })}">✨</span>` : ""}
                         <strong>${localize(building.short)}</strong>
                         <span>${localize(building.sub || building.label)}</span>
                       </button>
