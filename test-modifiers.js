@@ -146,19 +146,19 @@ function run(htmlPath) {
   assert.strictEqual(typeof game.buyStock, "function", "buyStock exported");
   assert.strictEqual(typeof game.sellStock, "function", "sellStock exported");
   state().cash = 10000;
-  const a24Before = state().stocks.A24.price;
-  assert.ok(a24Before > 0, "A24 has a positive price");
+  const a26Before = state().stocks.A26.price;
+  assert.ok(a26Before > 0, "A26 has a positive price");
   const cashBeforeBuy = state().cash;
-  assert.strictEqual(game.buyStock("A24", 1), true, "can buy 1 A24 share");
-  assert.strictEqual(state().holdings.A24, 1, "holdings reflect buy");
+  assert.strictEqual(game.buyStock("A26", 1), true, "can buy 1 A26 share");
+  assert.strictEqual(state().holdings.A26, 1, "holdings reflect buy");
   assert.ok(state().cash < cashBeforeBuy, "cash decreased after buy");
-  assert.strictEqual(game.sellStock("A24", 1), true, "can sell back");
-  assert.strictEqual(state().holdings.A24, 0, "holdings cleared after sell");
+  assert.strictEqual(game.sellStock("A26", 1), true, "can sell back");
+  assert.strictEqual(state().holdings.A26, 0, "holdings cleared after sell");
 
-  // BTC affordability: starts at ~60000, default startGame cash is 300 → buy must fail
+  // KOIN affordability: starts at ~60000, default startGame cash is 300 → buy must fail
   state().cash = 100;
-  assert.strictEqual(game.buyStock("BTC", 1), false, "can't buy BTC without cash");
-  assert.strictEqual(state().holdings.BTC, 0, "BTC holdings unchanged");
+  assert.strictEqual(game.buyStock("KOIN", 1), false, "can't buy KOIN without cash");
+  assert.strictEqual(state().holdings.KOIN, 0, "KOIN holdings unchanged");
 }
 
 if (require.main === module) {

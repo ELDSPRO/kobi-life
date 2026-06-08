@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>kobi life.</title>
   <style>
     :root {
@@ -1073,21 +1076,87 @@
     }
 
     html, body {
-      background: var(--win-bg);
+      background: var(--win-face);
       color: var(--win-black);
       font-size: 14px;
     }
 
     #app {
-      max-width: 1320px;
-      margin: 10px auto;
-      height: calc(100vh - 20px);
+      max-width: none;
+      margin: 0;
+      height: 100vh;
+      background: var(--win-face);
+      box-shadow: none;
+    }
+
+    body:fullscreen #app,
+    body:-webkit-full-screen #app {
+      height: 100vh;
+    }
+
+    /* Win95 dialog/alert overlays — deepen the theme on modal windows */
+    .start-screen,
+    .win-loss,
+    .status-window,
+    .incident-window {
+      background: var(--win-face);
+      color: var(--win-black);
+      font-family: var(--font-body);
+    }
+    .start-screen .panel,
+    .win-loss .panel,
+    .status-window .panel,
+    .incident-window .panel,
+    .start-screen .card,
+    .win-loss .card,
+    .status-window .card,
+    .incident-window .card {
+      background: var(--win-face);
+      border: 0;
+      box-shadow:
+        inset -1px -1px var(--win-black),
+        inset 1px 1px var(--win-light),
+        inset -2px -2px var(--win-dark),
+        inset 2px 2px var(--win-mid);
+      border-radius: 0;
+    }
+    /* Win95 scrollbar */
+    *::-webkit-scrollbar { width: 16px; height: 16px; }
+    *::-webkit-scrollbar-track {
+      background: var(--win-face);
+      box-shadow:
+        inset 1px 1px var(--win-dark),
+        inset -1px -1px var(--win-light);
+    }
+    *::-webkit-scrollbar-thumb {
       background: var(--win-face);
       box-shadow:
         inset -1px -1px var(--win-black),
         inset 1px 1px var(--win-light),
         inset -2px -2px var(--win-dark),
         inset 2px 2px var(--win-mid);
+    }
+    /* Fullscreen toggle button — sits in the HUD */
+    .fs-btn {
+      background: var(--win-face);
+      color: var(--win-black);
+      padding: 4px 10px;
+      font-family: var(--font-body);
+      font-size: 12px;
+      box-shadow:
+        inset -1px -1px var(--win-black),
+        inset 1px 1px var(--win-light),
+        inset -2px -2px var(--win-dark),
+        inset 2px 2px var(--win-mid);
+      border: 0;
+      border-radius: 0;
+    }
+    .fs-btn:active {
+      box-shadow:
+        inset 1px 1px var(--win-black),
+        inset -1px -1px var(--win-light),
+        inset 2px 2px var(--win-dark),
+        inset -2px -2px var(--win-mid);
     }
 
     .hud {
@@ -1811,8 +1880,12 @@
       display: grid;
       gap: 4px;
       font-size: 11px;
-      line-height: 1.45;
-      text-wrap: pretty;
+      line-height: 1.55;
+      text-wrap: balance;
+      hyphens: none;
+      word-break: normal;
+      overflow-wrap: anywhere;
+      unicode-bidi: plaintext;
     }
 
     .news-item {
@@ -2157,14 +2230,14 @@
     .notice-dialog-body {
       padding: 10px 10px 9px;
       font-size: 12px;
-      line-height: 1.55;
+      line-height: 1.65;
       background: #ffffff;
       text-wrap: pretty;
-      text-align: justify;
-      text-align-last: start;
-      text-justify: inter-word;
+      text-align: start;
       hyphens: none;
-      overflow-wrap: break-word;
+      word-break: normal;
+      overflow-wrap: anywhere;
+      unicode-bidi: plaintext;
       box-shadow:
         inset -1px -1px var(--win-light),
         inset 1px 1px var(--win-dark),
@@ -2414,7 +2487,7 @@
   <div id="floatLayer" class="float-layer"></div>
   <div id="nightVeil" class="night-veil"></div>
 
-  <script src="data.js"></script>
+  <script src="data.js?v=20260608"></script>
   <script>
   (() => {
     "use strict";
@@ -3933,11 +4006,12 @@
     }
 
     // --- Stock market (4 instruments, daily walk, buy/sell) ---
+    // Fictional brands — stylized clones, no real trademarks
     const STOCK_DEFS = [
-      { ticker: "A24",  initial: 380,   vol: 0.055, name: { he: "A24", en: "A24" } },
-      { ticker: "NFLX", initial: 480,   vol: 0.045, name: { he: "נטפליקס", en: "Netflix" } },
-      { ticker: "PARA", initial: 14,    vol: 0.07,  name: { he: "פאראמאונט", en: "Paramount" } },
-      { ticker: "BTC",  initial: 60000, vol: 0.11,  name: { he: "ביטקוין", en: "Bitcoin" } }
+      { ticker: "A26",  initial: 380,   vol: 0.055, name: { he: "א.26",       en: "A26" } },
+      { ticker: "NTFK", initial: 480,   vol: 0.045, name: { he: "נטפליק",     en: "Netfleek" } },
+      { ticker: "PRMX", initial: 14,    vol: 0.07,  name: { he: "פראמקס",    en: "Paramax" } },
+      { ticker: "KOIN", initial: 60000, vol: 0.11,  name: { he: "קוין-קוין",   en: "KoinKoin" } }
     ];
 
     function ensureStocks() {
@@ -4531,6 +4605,50 @@
         en: "Gig closed: +" + formatMoney(gig.pay)
       }), "good");
       playSfx("cash");
+      saveGame();
+      return true;
+    }
+
+    // Phone-indie path: free, time-only, low chance to go viral.
+    // Available from day 1. RNG payout gives the underdog narrative
+    // (Sean Baker on iPhone, Tangerine vibes) without breaking economy.
+    function shootOnPhone(originId) {
+      const hours = originId === "cinematheque" ? 3 : 4;
+      const viralChance = originId === "cinematheque" ? 0.07 : 0.05;
+      const ledgerKey = gameState.day + ":phone:" + originId;
+      if (!gameState.dailyGigLedger) gameState.dailyGigLedger = {};
+      if (gameState.dailyGigLedger[ledgerKey]) {
+        flashMessage(localize({
+          he: "כבר צילמת בטלפון היום. תן לקליפ לנשום.",
+          en: "Already shot a phone clip today. Let it breathe."
+        }), "bad");
+        return false;
+      }
+      if (!spendHours(hours, localize({ he: "צילום בטלפון", en: "Phone shoot" }))) {
+        return false;
+      }
+      gameState.dailyGigLedger[ledgerKey] = true;
+      const rng = (typeof Math.random === "function") ? Math.random() : 0;
+      const wentViral = rng < viralChance;
+      if (wentViral) {
+        const cashGain = 240 + Math.round(rng * 9999) % 360;
+        changeCash(cashGain);
+        adjustStat("reputation", 2);
+        adjustStat("happiness", 2);
+        adjustStat("creativity", 1);
+        flashMessage(localize({
+          he: "ויראלי! הקליפ עף. +" + formatMoney(cashGain) + " וטיק שמים את השם שלך בפה.",
+          en: "Viral! Clip is flying. +" + formatMoney(cashGain) + " and the algorithm whispers your name."
+        }), "good");
+        playSfx("cash");
+      } else {
+        adjustStat("creativity", 1);
+        adjustStat("soul", 1);
+        flashMessage(localize({
+          he: "לא ויראלי, אבל היה כיף. +1 יצירתיות.",
+          en: "Not viral, but it was fun. +1 creativity."
+        }), "neutral");
+      }
       saveGame();
       return true;
     }
@@ -5505,8 +5623,21 @@
           <button class="icon-btn" data-action="saveGame" title="${localize({ he: "שמור", en: "Save" })}">${localize({ he: "שמור", en: "Save" })}</button>
           <button class="icon-btn" data-action="toggleMute" title="${t("mute")}">${gameState.muted ? localize({ he: "שקט", en: "Muted" }) : localize({ he: "צליל", en: "Sound" })}</button>
           <button class="icon-btn" data-action="showStart" title="${t("newYear")}">${localize({ he: "חדש", en: "New" })}</button>
+          <button class="icon-btn fs-btn" data-action="toggleFullscreen" title="${localize({ he: "מסך מלא", en: "Fullscreen" })}">⛶</button>
         </div>
       `;
+    }
+
+    function toggleFullscreen() {
+      const el = document.documentElement;
+      const isFs = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!isFs) {
+        const req = el.requestFullscreen || el.webkitRequestFullscreen;
+        if (req) req.call(el);
+      } else {
+        const exit = document.exitFullscreen || document.webkitExitFullscreen;
+        if (exit) exit.call(document);
+      }
     }
 
     function buildingPos(index, total) {
@@ -6014,6 +6145,12 @@
               </div>
             </div>
             <div class="action-group">
+              <h3>${localize({ he: "מסלול אינדי", en: "Indie path" })}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("shootOnPhone", "cafe", localize({ he: "צלם בטלפון", en: "Shoot on phone" }), localize({ he: "סצנה אחת, יד רועדת, חלום אחד. 5% סיכוי לוויראלי.", en: "One scene, shaky hand, one dream. 5% viral shot." }), "4h • $0")}
+              </div>
+            </div>
+            <div class="action-group">
               <h3>${t("lifestyle")}</h3>
               <div class="action-buttons">
                 ${buttonMarkup("softAction", "coffee", localize(SOFT_ACTIONS.coffee.name), localize(SOFT_ACTIONS.coffee.menu), formatDuration(SOFT_ACTIONS.coffee.hours) + " • " + formatMoney(SOFT_ACTIONS.coffee.cost))}
@@ -6028,6 +6165,7 @@
               <h3>${t("training")}</h3>
               <div class="action-buttons">
                 ${buttonMarkup("softAction", "watchFilm", localize(SOFT_ACTIONS.watchFilm.name), localize(SOFT_ACTIONS.watchFilm.menu), formatDuration(SOFT_ACTIONS.watchFilm.hours) + " • " + formatMoney(SOFT_ACTIONS.watchFilm.cost))}
+                ${buttonMarkup("shootOnPhone", "cinematheque", localize({ he: "צלם בטלפון", en: "Shoot on phone" }), localize({ he: "מצולם אחרי הקרנה, אווירה עזה. 7% ויראלי.", en: "Shot after a screening, vibe loaded. 7% viral." }), "3h • $0")}
               </div>
             </div>
           `;
@@ -6538,6 +6676,10 @@
           startFromScreen();
         } else if (action === "resetGame") {
           resetGame();
+        } else if (action === "toggleFullscreen") {
+          toggleFullscreen();
+        } else if (action === "shootOnPhone") {
+          if (shootOnPhone(value)) render();
         }
       });
     }
@@ -6658,6 +6800,8 @@
     root.loadGame = loadGame;
     root.buyStock = buyStock;
     root.sellStock = sellStock;
+    root.shootOnPhone = shootOnPhone;
+    root.toggleFullscreen = toggleFullscreen;
 
     if (canRender) {
       init();

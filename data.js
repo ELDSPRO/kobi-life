@@ -193,6 +193,63 @@
           he: "כולם מדברים על הסרט הבא. בוקר טוב לשבת, לחשוב על תסריט ולטעון יצירתיות.",
           en: "Everyone's pitching the next film. A good morning to sit, think script, and refill creativity."
         }
+      },
+      /* === Money incidents === */
+      {
+        id: "shark_loan_calls",
+        weight: 1, minDay: 12, tone: "bad",
+        headline: { he: "הכריש התקשר פעמיים", en: "The loan shark called twice" },
+        body: {
+          he: "אם יש לך חוב פתוח — היום הוא יום שווה לסגור משהו. אחרת זה ימצא אותך בלילה.",
+          en: "If you carry open debt, today is a good day to chip away. Otherwise it finds you at night."
+        }
+      },
+      {
+        id: "lottery_dust",
+        weight: 1, tone: "good",
+        headline: { he: "מטבע שנפל מהכיס בכביסה", en: "A coin you forgot in the laundry" },
+        body: {
+          he: "מצאת 80 ש\"ח בכיס של מעיל ישן. לא יציל את הסרט, אבל יציל את הקפה.",
+          en: "Eighty bucks turned up in an old coat. Won't save the film — will save the coffee."
+        }
+      },
+      /* === Creative incidents === */
+      {
+        id: "writers_block",
+        weight: 2, minDay: 8, tone: "bad",
+        headline: { he: "התסריט נתקע", en: "The script is stuck" },
+        body: {
+          he: "שלוש שעות מול הדף, אפס מילים. אולי סינמטק היום במקום מחשב.",
+          en: "Three hours, blank page. Maybe cinematheque today instead of the keyboard."
+        }
+      },
+      {
+        id: "muse_visit",
+        weight: 2, tone: "good",
+        headline: { he: "רעיון חטף אותך בדרך הביתה", en: "An idea ambushed you on the walk home" },
+        body: {
+          he: "סצנה שלמה התרוצצה לך בראש. רוץ הביתה ותכתוב לפני שזה נעלם.",
+          en: "A whole scene just landed in your head. Run home and write before it dissolves."
+        }
+      },
+      /* === Ego incidents === */
+      {
+        id: "rival_in_paper",
+        weight: 2, minDay: 14, tone: "bad",
+        headline: { he: "חבר ללימודים בכותרת", en: "A film-school friend made the front page" },
+        body: {
+          he: "מישהו שהיה איתך בכיתה חתם עם סטודיו. תקנא ביעילות — או תעבוד.",
+          en: "Someone from your class signed with a studio. Envy efficiently — or work."
+        }
+      },
+      {
+        id: "paparazzi_glance",
+        weight: 1, minDay: 20, tone: "good",
+        headline: { he: "צלם רחוב לחץ פעמיים בכיוונך", en: "A street photographer clicked twice your way" },
+        body: {
+          he: "פתאום אתה במסגרת. עוד טיפה מוניטין, עוד טיפה לחץ.",
+          en: "Suddenly you're in a frame. A drop more reputation, a drop more pressure."
+        }
       }
     ]
   };
