@@ -4901,6 +4901,45 @@
     }
 
     /*
+     * Relationship bucket: rel >= 5 friendly, <= -5 hostile, else neutral.
+     * Used to bend outcome weights and surface UI badges. Card declares
+     * npcInfluence: { id } at the top level; outcomes inherit the bend
+     * based on their tone (good outcomes amplify with friends, bad with
+     * enemies). Neutral-toned outcomes are not affected.
+     */
+    function npcRelBucket(npcId) {
+      if (!gameState.npcs || !gameState.npcs[npcId]) return "neutral";
+      const rel = gameState.npcs[npcId].relationship | 0;
+      if (rel >= 5) return "friendly";
+      if (rel <= -5) return "hostile";
+      return "neutral";
+    }
+
+    function resolveOutcomeWeight(outcome, card) {
+      let w = outcome.weight || 1;
+      if (card.npcInfluence && card.npcInfluence.id) {
+        const bucket = npcRelBucket(card.npcInfluence.id);
+        if (bucket === "friendly") {
+          if (outcome.tone === "good") w *= 2;
+          else if (outcome.tone === "bad") w *= 0.5;
+        } else if (bucket === "hostile") {
+          if (outcome.tone === "good") w *= 0.5;
+          else if (outcome.tone === "bad") w *= 2;
+        }
+      }
+      return w;
+    }
+
+    function npcInfluenceBadge(cardId) {
+      const card = SCENE_CARDS[cardId];
+      if (!card || !card.npcInfluence || !card.npcInfluence.id) return "";
+      const bucket = npcRelBucket(card.npcInfluence.id);
+      if (bucket === "friendly") return " • 🤝";
+      if (bucket === "hostile") return " • ❄️";
+      return "";
+    }
+
+    /*
      * SCENE_CARDS — declarative choice-cards per location.
      * Each card resolves through runSceneCard(): cost gate → spendHours →
      * weighted RNG → effects → LSL-tone flashMessage. Stats supported:
@@ -4925,6 +4964,7 @@
         label: { he: "להציע פיץ' למאיה", en: "Pitch Maya" },
         copy: { he: "מאיה הברסיטה אמרה אתמול שהיא קראה קרואק. תנסה.", en: "Maya the barista mentioned Kerouac yesterday. Try her." },
         hours: 1, cost: 20, once: true,
+        npcInfluence: { id: "maya_barista" },
         outcomes: [
           { weight: 60, tone: "neutral", flavor: { he: "מאיה הנהנה. היא יודעת להנהן.", en: "Maya nodded. She's good at nodding." }, effects: {}, npc: { id: "maya_barista", rel: 0 } },
           { weight: 30, tone: "good", flavor: { he: "מאיה חידדה לך את הסצנה השנייה. +יצירתיות גדולה.", en: "Maya sharpened your second scene. +big creativity." }, effects: { creativity: 4, soul: 1 }, npc: { id: "maya_barista", rel: 2 } },
@@ -4947,6 +4987,7 @@
         label: { he: "להעתיק רעיון מדני", en: "Borrow Dani's idea" },
         copy: { he: "דני לא יכתוב את זה לעולם. אתה כן.", en: "Dani will never write it. You will." },
         hours: 1, cost: 0, once: true,
+        npcInfluence: { id: "dani_classmate" },
         outcomes: [
           { weight: 50, tone: "good", flavor: { he: "המתווה של דני לבד הספיק. כתבת גרסה משלך. +רעיון.", en: "Dani's outline alone was enough. Wrote your own version. +idea." }, effects: { creativity: 3, soul: -1 }, npc: { id: "dani_classmate", rel: 0 } },
           { weight: 30, tone: "bad", flavor: { he: "דני ראה. הוא לא אמר כלום. עכשיו אתה יודע.", en: "Dani saw. He said nothing. Now you know." }, effects: { soul: -3, reputation: -1 }, npc: { id: "dani_classmate", rel: -3 } },
@@ -4959,6 +5000,7 @@
         label: { he: "לחזר אחרי ליאור בבר", en: "Court Lior at the bar" },
         copy: { he: "משקה כפול במלון. ליאור לא משלם, הוא מקשיב.", en: "Double drink at the hotel bar. Lior doesn't pay, he listens." },
         hours: 2, cost: 80, once: true,
+        npcInfluence: { id: "lior_agent" },
         outcomes: [
           { weight: 60, tone: "neutral", flavor: { he: "נתת כרטיס. ליאור נתן כרטיס. אף אחד לא יתקשר.", en: "Gave a card. Lior gave a card. Nobody is calling." }, effects: {}, npc: { id: "lior_agent", rel: 1 } },
           { weight: 25, tone: "good", flavor: { he: "ליאור הקשיב יותר משצריך. +מוניטין.", en: "Lior listened longer than required. +reputation." }, effects: { reputation: 3 }, npc: { id: "lior_agent", rel: 3 } },
@@ -5014,12 +5056,13 @@
       if (!spendHours(card.hours || 1, localize(card.label))) return false;
       if (card.cost) changeCash(-card.cost);
       if (card.once) gameState.dailyGigLedger[ledgerKey] = true;
-      const totalWeight = card.outcomes.reduce((s, o) => s + (o.weight || 1), 0);
+      const resolvedWeights = card.outcomes.map((o) => resolveOutcomeWeight(o, card));
+      const totalWeight = resolvedWeights.reduce((s, w) => s + w, 0);
       let roll = Math.random() * totalWeight;
       let picked = card.outcomes[0];
-      for (const outcome of card.outcomes) {
-        roll -= (outcome.weight || 1);
-        if (roll <= 0) { picked = outcome; break; }
+      for (let i = 0; i < card.outcomes.length; i++) {
+        roll -= resolvedWeights[i];
+        if (roll <= 0) { picked = card.outcomes[i]; break; }
       }
       const fx = picked.effects || {};
       if (typeof fx.cash === "number") changeCash(fx.cash);
@@ -6770,7 +6813,7 @@
                 ${buttonMarkup("shootOnPhone", "cafe", localize({ he: "צלם בטלפון", en: "Shoot on phone" }), localize({ he: "סצנה אחת, יד רועדת, חלום אחד. 5% סיכוי לוויראלי.", en: "One scene, shaky hand, one dream. 5% viral shot." }), "4h • $0")}
                 ${buttonMarkup("flirtAtCafe", "", localize({ he: "לפלרטט", en: "Flirt" }), localize({ he: "השולחן ליד מסתכל. תנסה. כי אם לא, מי יחזור איתך?", en: "The next table is looking. Try. Because if you don't, who comes home?" }), "1h • $0")}
                 ${buttonMarkup("runSceneCard", "cafe_overhear", localize(SCENE_CARDS.cafe_overhear.label), localize(SCENE_CARDS.cafe_overhear.copy), "1h • $0")}
-                ${buttonMarkup("runSceneCard", "cafe_pitch_barista", localize(SCENE_CARDS.cafe_pitch_barista.label), localize(SCENE_CARDS.cafe_pitch_barista.copy), "1h • " + formatMoney(20))}
+                ${buttonMarkup("runSceneCard", "cafe_pitch_barista", localize(SCENE_CARDS.cafe_pitch_barista.label), localize(SCENE_CARDS.cafe_pitch_barista.copy), "1h • " + formatMoney(20) + npcInfluenceBadge("cafe_pitch_barista"))}
               </div>
             </div>
             <div class="action-group">
@@ -6813,7 +6856,7 @@
               <h3>${localize({ he: "עבודה על עצמך", en: "Work on yourself" })}</h3>
               <div class="action-buttons">
                 ${buttonMarkup("runSceneCard", "script_write_solo", localize(SCENE_CARDS.script_write_solo.label), localize(SCENE_CARDS.script_write_solo.copy), "2h • $0")}
-                ${buttonMarkup("runSceneCard", "script_borrow_idea", localize(SCENE_CARDS.script_borrow_idea.label), localize(SCENE_CARDS.script_borrow_idea.copy), "1h • $0")}
+                ${buttonMarkup("runSceneCard", "script_borrow_idea", localize(SCENE_CARDS.script_borrow_idea.label), localize(SCENE_CARDS.script_borrow_idea.copy), "1h • $0" + npcInfluenceBadge("script_borrow_idea"))}
               </div>
             </div>
             ${gameState.offers.length && gameState.offers[0].kind === "script" ? `<div class="action-group"><h3>${localize({ he: "הצעות פתוחות", en: "Open offers" })}</h3><div class="offer-list">${gameState.offers.map(renderOfferCard).join("")}</div></div>` : ""}
@@ -6829,7 +6872,7 @@
             <div class="action-group">
               <h3>${localize({ he: "כניסה מהדלת האחורית", en: "Through the back door" })}</h3>
               <div class="action-buttons">
-                ${buttonMarkup("runSceneCard", "cast_court_agent", localize(SCENE_CARDS.cast_court_agent.label), localize(SCENE_CARDS.cast_court_agent.copy), "2h • " + formatMoney(80))}
+                ${buttonMarkup("runSceneCard", "cast_court_agent", localize(SCENE_CARDS.cast_court_agent.label), localize(SCENE_CARDS.cast_court_agent.copy), "2h • " + formatMoney(80) + npcInfluenceBadge("cast_court_agent"))}
                 ${buttonMarkup("runSceneCard", "cast_offer_to_model", localize(SCENE_CARDS.cast_offer_to_model.label), localize(SCENE_CARDS.cast_offer_to_model.copy), "1h • $0")}
               </div>
             </div>
