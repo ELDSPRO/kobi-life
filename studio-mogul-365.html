@@ -1217,6 +1217,7 @@
       border-radius: 0;
       border: 0;
       background: var(--win-face);
+      color: var(--win-black);
       box-shadow:
         inset -1px -1px var(--win-black),
         inset 1px 1px var(--win-light),
@@ -1952,6 +1953,15 @@
     .market-table .ticker {
       font-weight: 700;
       letter-spacing: 0.4px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .market-table .ticker .ticker-code {
+      font-weight: 500;
+      font-size: 9px;
+      color: #666;
+      letter-spacing: 0.6px;
     }
 
     .market-table .price { font-variant-numeric: tabular-nums; }
@@ -3602,13 +3612,18 @@
       }
     }
 
-    function saveGame() {
+    // saveGame is called after most actions to persist progress.
+    // We only show the toast when the user explicitly clicks "Save" in the
+    // HUD — auto-saves stay silent so they don't pollute the screen.
+    function saveGame(options) {
       try {
         if (!root.localStorage) {
           return false;
         }
         root.localStorage.setItem(STORAGE_KEYS.save, JSON.stringify(gameState));
-        flashMessage(t("saved"), "good");
+        if (options && options.notify) {
+          flashMessage(t("saved"), "good");
+        }
         return true;
       } catch (_err) {
         return false;
@@ -3941,9 +3956,10 @@
       const priceText = price >= 1000 ? Math.round(price).toLocaleString("en-US") : price.toFixed(price < 100 ? 2 : 1);
       const canBuy = gameState.cash >= price;
       const canSell = holding > 0;
+      const displayName = localize(def.name);
       return `
         <tr>
-          <td class="ticker">${def.ticker}</td>
+          <td class="ticker"><strong>${displayName}</strong><span class="ticker-code">${def.ticker}</span></td>
           <td class="price">${priceText}</td>
           <td class="${deltaClass}">${deltaArrow} ${Math.abs(deltaPct).toFixed(1)}%</td>
           <td class="qty">${holding || "—"}</td>
@@ -6560,9 +6576,6 @@
               <button class="start-card button" data-action="loadGame">${t("resumeButton")}</button>
               <button class="lead-btn" data-action="startFromScreen">${t("startButton")}</button>
             </div>
-            <div class="start-actions-secondary">
-              <button class="icon-btn" data-action="setLanguage" data-value="${gameState.language === "he" ? "en" : "he"}">${gameState.language === "he" ? "EN" : "עב"}</button>
-            </div>
           </div>
         </div>
       `;
@@ -6683,7 +6696,7 @@
         } else if (action === "cycleTheme") {
           cycleTheme();
         } else if (action === "saveGame") {
-          saveGame();
+          saveGame({ notify: true });
         } else if (action === "setLanguage") {
           setLanguage(value);
         } else if (action === "showStart") {
