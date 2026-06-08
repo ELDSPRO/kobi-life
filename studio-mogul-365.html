@@ -5062,6 +5062,95 @@
      */
     const STORY_BEATS = [
       {
+        id: "cannes_festival_day60",
+        day: 60,
+        headline: { he: "פסטיבל קאן פתח. ההזמנה הגיעה.", en: "Cannes opened. The invitation arrived." },
+        copy: {
+          he: "ארבעה ימים. ברים מלאים. הנרי מלונדון שם. ליאה מפריז שם. רוז גם. אלכסיס ופטרה מהסינמטקים. הכל קורה בקוקטיילים, לא בהקרנות. בחר מסלול.",
+          en: "Four days. Crowded bars. Henry from London is there. Léa from Paris is there. Rose too. Alexis and Petra from the cinematheques. Everything happens at cocktails, not screenings. Pick a lane."
+        },
+        choices: [
+          {
+            id: "watch",
+            label: { he: "להישאר ברחוב — לראות סרטים, להפנים", en: "Stay on the street — watch films, absorb" },
+            copy: { he: "להירשם הסחורה. לא הוכחת רשת, אבל לא הפסדת אף אחת.", en: "Soak up the goods. Didn't prove a network — didn't lose any either." },
+            outcome: { tone: "good", flavor: { he: "ארבעה ימים, ארבעה סרטים. חזרת עם מחברת מלאה.", en: "Four days, four films. Came back with a full notebook." }, effects: { creativity: 5, reputation: 1 } }
+          },
+          {
+            id: "lea_grant",
+            label: { he: "פגישה עם ליאה — להגיש דרך הקרן הפריזאית", en: "Meet Léa — submit through the Paris fund" },
+            copy: { he: "התקציב האמיתי לא נגמר כאן. ליאה רוצה להאזין.", en: "The real budget isn't here. Léa wants to listen." },
+            requires: function (s) { return s.npcs && s.npcs.lea_lector && s.npcs.lea_lector.relationship >= 3; },
+            outcome: { tone: "good", sfx: "cash", flavor: { he: "ליאה דחפה את התיק שלך עוד באותו לילה. מענק 800. ועוד 6 מוניטין.", en: "Léa pushed your file the same night. $800 grant. +6 rep." }, effects: { cash: 800, reputation: 6, creativity: 1 } }
+          },
+          {
+            id: "henry_competition",
+            label: { he: "לחזר אחרי הנרי — סלוט בתחרות הראשית", en: "Pursue Henry — main competition slot" },
+            copy: { he: "הקוקטייל בלובי, ארבע אחה\"צ. הנרי לא יחכה.", en: "Lobby cocktail, 4pm. Henry won't wait." },
+            requires: function (s) { return s.npcs && s.npcs.henry_festival && s.npcs.henry_festival.relationship >= 3; },
+            outcome: { tone: "good", sfx: "cash", flavor: { he: "הנרי הכניס אותך לתחרות. +10 מוניטין. רוז שמעה ואישרה.", en: "Henry placed you in competition. +10 rep. Rose heard and confirmed." }, effects: { reputation: 10, creativity: 2, soul: 1 } }
+          },
+          {
+            id: "rose_column",
+            label: { he: "בר הלילי עם רוז — תזכורת אלגנטית בעמודה", en: "Late bar with Rose — elegant column mention" },
+            copy: { he: "הדרך הבריטית. שקטה, אבל כשאגדה מציינת אותך, כותרות צצות.", en: "The British way. Quiet — but when a legend names you, headlines follow." },
+            requires: function (s) { return s.npcs && s.npcs.rose_legend && s.npcs.rose_legend.relationship >= 4; },
+            outcome: { tone: "good", sfx: "cash", flavor: { he: "רוז כתבה משפט. הטור התפרסם השבוע. +12 מוניטין. הנרי קרא.", en: "Rose wrote a sentence. Column ran this week. +12 rep. Henry read it." }, effects: { reputation: 12, creativity: 2 } }
+          }
+        ]
+      },
+      {
+        id: "coprod_offer_day90",
+        day: 90,
+        headline: { he: "הצעת קו-פרודקשן נחתה על השולחן", en: "A co-production offer landed on the table" },
+        copy: {
+          he: "אחרי הכל, הצעה ממשית. שלוש דרכים להשלים. כל אחת אומרת על איזה אדם בנית. תבחר — וזה ייקבע את המסע הבא.",
+          en: "After everything, a real offer. Three ways to close it. Each says who you've become. Choose — it'll define the next stretch."
+        },
+        choices: [
+          {
+            id: "decline",
+            label: { he: "להחזיר את ההצעה — לא היו מספיק קשרים", en: "Decline — you didn't build enough network" },
+            copy: { he: "כנות. כואב. אבל כן.", en: "Honest. Painful. But yes." },
+            outcome: { tone: "bad", flavor: { he: "החזרת. הנשמה עלתה קצת, המוניטין ירד.", en: "Returned the offer. Soul up a little, reputation down." }, effects: { soul: 2, reputation: -2 } }
+          },
+          {
+            id: "europe",
+            label: { he: "ההצעה האירופית — ליאה ואמילי בונות צוות פריז", en: "Europe deal — Léa and Émilie assemble a Paris crew" },
+            copy: { he: "מסלול האמנות. תקציב בינוני, אמינות גבוהה.", en: "The art path. Mid budget, high credibility." },
+            requires: function (s) {
+              const lea = (s.npcs && s.npcs.lea_lector && s.npcs.lea_lector.relationship) || 0;
+              const emilie = (s.npcs && s.npcs.emilie_wardrobe && s.npcs.emilie_wardrobe.relationship) || 0;
+              return lea >= 3 && emilie >= 3;
+            },
+            outcome: { tone: "good", sfx: "cash", flavor: { he: "הסכם פריז. ליאה הסדירה מימון, אמילי לוקחת את הקאסט. +2500 ומסע אירופאי.", en: "Paris deal. Léa secured funding, Émilie owns the cast. +$2500 and a European arc." }, effects: { cash: 2500, reputation: 8, creativity: 3 } }
+          },
+          {
+            id: "america",
+            label: { he: "ההצעה האמריקאית — קארן וטוני סוגרים TV ומימון אפור", en: "America deal — Karen and Tony lock TV plus grey financing" },
+            copy: { he: "מסלול הכסף. תקציב גדול, מוסר אפור.", en: "The money path. Big budget, grey ethics." },
+            requires: function (s) {
+              const karen = (s.npcs && s.npcs.karen_tv && s.npcs.karen_tv.relationship) || 0;
+              const tony = (s.npcs && s.npcs.tony_loan && s.npcs.tony_loan.relationship) || 0;
+              return karen >= 3 && tony >= 3;
+            },
+            outcome: { tone: "good", sfx: "cash", flavor: { he: "הסכם NYC. קארן קונה את הזכויות, טוני סוגר את ההון החסר. +3500. נשמה -2.", en: "NYC deal. Karen bought rights, Tony filled the financing gap. +$3500. Soul -2." }, effects: { cash: 3500, reputation: 5, soul: -2 } }
+          },
+          {
+            id: "tlv_collective",
+            label: { he: "נאמן לתל אביב — דני, מאיה, ליאור מקימים קולקטיב", en: "Stay TLV — Dani, Maya, Lior form a collective" },
+            copy: { he: "מסלול הבית. תקציב קטן, אבל הסיפור הכי שלך.", en: "The home path. Smaller budget — but the most you it gets." },
+            requires: function (s) {
+              const d = (s.npcs && s.npcs.dani_classmate && s.npcs.dani_classmate.relationship) || 0;
+              const m = (s.npcs && s.npcs.maya_barista && s.npcs.maya_barista.relationship) || 0;
+              const l = (s.npcs && s.npcs.lior_agent && s.npcs.lior_agent.relationship) || 0;
+              return d >= 2 && m >= 2 && l >= 2;
+            },
+            outcome: { tone: "good", sfx: "cash", flavor: { he: "הקולקטיב התל-אביבי קם. הכסף קטן, האהבה גדולה. +1200, נשמה +5, אהבה +4.", en: "TLV collective forms. Smaller money, bigger heart. +$1200, soul +5, love +4." }, effects: { cash: 1200, reputation: 6, soul: 5, love: 4 } }
+          }
+        ]
+      },
+      {
         id: "gossip_column_day30",
         day: 30,
         headline: { he: "השם שלך עלה בכתבת רכילות", en: "Your name showed up in a gossip column" },
