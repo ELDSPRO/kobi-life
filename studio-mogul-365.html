@@ -1675,6 +1675,61 @@
       background: #ffb38a;
     }
 
+    .suggested-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 6px;
+      padding: 6px 0;
+    }
+
+    .suggested-move {
+      display: grid;
+      gap: 3px;
+      padding: 7px 8px;
+      font-size: 11px;
+      text-align: start;
+      cursor: pointer;
+      color: inherit;
+      background: linear-gradient(180deg, #ffffff, #efece2);
+      border: none;
+      box-shadow:
+        inset -1px -1px var(--win-black),
+        inset 1px 1px var(--win-light),
+        inset -2px -2px var(--win-dark),
+        inset 2px 2px var(--win-mid);
+    }
+
+    .suggested-move:hover {
+      background: linear-gradient(180deg, #ffffff, #dbeaff);
+    }
+
+    .suggested-move .move-icon {
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .suggested-move strong {
+      font-size: 11px;
+      letter-spacing: 0.2px;
+    }
+
+    .suggested-move .move-reason {
+      font-size: 10px;
+      line-height: 1.35;
+      color: #4a4a4a;
+      text-wrap: pretty;
+    }
+
+    .suggested-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      padding: 4px 2px 0;
+    }
+
     .win95-strip {
       display: flex;
       justify-content: space-between;
@@ -3454,6 +3509,105 @@
       });
     }
 
+    // Suggested moves panel — three soft hints the player can ignore. Each
+    // move scores higher when an active modifier makes its action timely.
+    function computeSuggestedMoves() {
+      const moves = [];
+      const studyBuilding = cityHasBuilding("filmSchool")
+        ? "filmSchool"
+        : (cityHasBuilding("cinematheque") ? "cinematheque" : null);
+      const courseMod = modifierMultiplier("course");
+      const creditMod = modifierMultiplier("courseCredits");
+      const courseBase = (typeof COURSES !== "undefined" && COURSES[0] && COURSES[0].cost) || 80;
+      const studyCost = Math.round(courseBase * priceScale() * courseMod);
+      const studyHot = courseMod < 1 || creditMod > 1;
+
+      if (gameState.education < 3 && studyBuilding && gameState.cash >= studyCost) {
+        moves.push({
+          key: "study",
+          score: studyHot ? 95 : (gameState.education < 1 ? 80 : 55),
+          icon: "🎓",
+          title: { he: "ללמוד", en: "Study" },
+          reason: studyHot
+            ? { he: "שיעור זול היום (" + studyCost + " ₪)", en: "Class is cheap today (" + studyCost + ")" }
+            : { he: "השכלה פותחת עבודות", en: "Education unlocks jobs" },
+          action: "goToBuilding",
+          value: studyBuilding
+        });
+      } else if (!studyBuilding && studyHot && gameState.education < 3 && gameState.cash >= 600) {
+        moves.push({
+          key: "fly_study",
+          score: 70,
+          icon: "✈️",
+          title: { he: "טוס ללמוד", en: "Fly to study" },
+          reason: { he: "שכר לימוד ירד — אתונה פתוחה", en: "Tuition is down in Athens" },
+          action: "flyTo",
+          value: "athens"
+        });
+      }
+
+      if (cityHasBuilding("fund") && gameState.cash >= 500 && gameState.fund < 2500) {
+        moves.push({
+          key: "arkady",
+          score: 60,
+          icon: "💼",
+          title: { he: "ארקדי וקרן הקולנוע", en: "Arkady and the fund" },
+          reason: gameState.fund > 0
+            ? { he: "יש לך כסף בקרן — לבדוק", en: "You have cash in the fund" }
+            : { he: "הפקדה קטנה יכולה לצמוח", en: "A small deposit could grow" },
+          action: "goToBuilding",
+          value: "fund"
+        });
+      } else if (!cityHasBuilding("fund") && gameState.fund > 0 && gameState.cash >= 800) {
+        moves.push({
+          key: "fly_fund",
+          score: 45,
+          icon: "✈️",
+          title: { he: "טוס לתל אביב", en: "Fly to Tel Aviv" },
+          reason: { he: "הקרן שלך שם — כדאי לבדוק", en: "Your fund is there — worth a check" },
+          action: "flyTo",
+          value: "telaviv"
+        });
+      }
+
+      if (gameState.filmUnlocked && cityHasBuilding("festival")) {
+        moves.push({
+          key: "festival_here",
+          score: 75,
+          icon: "🎬",
+          title: { he: "פסטיבל בעיר", en: "Festival in town" },
+          reason: { he: "סרט מוכן רוצה אולם", en: "A finished film wants a screen" },
+          action: "goToBuilding",
+          value: "festival"
+        });
+      } else if (gameState.filmUnlocked && !cityHasBuilding("festival") && gameState.cash >= 600) {
+        const target = gameState.city === "telaviv" ? "berlin" : (gameState.city === "berlin" ? "london" : "berlin");
+        moves.push({
+          key: "fly_festival",
+          score: 50,
+          icon: "✈️",
+          title: { he: "טוס לפסטיבל", en: "Fly to a festival" },
+          reason: { he: "ברלין או לונדון פתוחים", en: "Berlin or London is open" },
+          action: "flyTo",
+          value: target
+        });
+      }
+
+      return moves.sort((a, b) => b.score - a.score).slice(0, 3);
+    }
+
+    function suggestedMoveMarkup(move) {
+      const title = localize(move.title);
+      const reason = localize(move.reason);
+      return `
+        <button class="suggested-move" data-action="${move.action}" data-value="${move.value}">
+          <div class="move-icon">${move.icon}</div>
+          <strong>${title}</strong>
+          <span class="move-reason">${reason}</span>
+        </button>
+      `;
+    }
+
     function modifierChipMarkup(m) {
       const tags = {
         gear: { he: "ציוד", en: "Gear" },
@@ -5041,6 +5195,7 @@
         gameState.equipment.insurance && localize({ he: "סאונד ותאורה", en: "Sound & light" })
       ].filter(Boolean);
       const activeModifiers = Array.isArray(gameState.activeModifiers) ? gameState.activeModifiers : [];
+      const suggestedMoves = computeSuggestedMoves();
       dom.boardStage.innerHTML = `
         <div class="win95-shell">
           <section class="win95-status">
@@ -5129,6 +5284,12 @@
                 </div>
               </div>
             </div>
+            ${suggestedMoves.length ? `
+              <div class="suggested-header">${localize({ he: "💡 לאן ללכת עכשיו", en: "💡 Where to go now" })}</div>
+              <div class="suggested-strip">
+                ${suggestedMoves.map(suggestedMoveMarkup).join("")}
+              </div>
+            ` : ""}
             <div class="scene-block" style="--scene-a:${currentBuilding.color[0]};--scene-b:${currentBuilding.color[1]};">
               <div class="scene-title">${localize(currentBuilding.label)}</div>
               <div class="scene-copy">${buildingSpeech(gameState.currentBuilding)}</div>
