@@ -105,12 +105,17 @@ function run(htmlPath) {
   assert.ok(state().cash > 9000, "weekly payouts bring cash back");
   assert.ok(state().reputation > 26, "release grows reputation");
 
-  state().cash = 22000;
-  // career goal (modest 70) = reputation + released*15 + jobTier*12; with one film
-  // and no job, reputation must reach 55 to clear it. 60 represents a strong career.
-  state().reputation = 60;
+  // The new ending model: at day > 90, win requires film tasks complete AND debt cleared.
+  // We don't drive 90 real days here; we set the world state directly and tick endDay once.
+  const s2 = state();
+  s2.cash = 22000;
+  s2.debt = 0;
+  s2.reputation = 60;
+  s2.day = 90;
+  s2.filmTasks = {};
+  game.FILM_TASKS.forEach((task) => { s2.filmTasks[task.id] = true; });
   game.endDay();
-  assert.ok(state().winState && state().winState.win === true, "strong deterministic run can trigger the win state");
+  assert.ok(state().winState && state().winState.win === true, "film complete + debt cleared at day 90 triggers a win");
 }
 
 if (require.main === module) {

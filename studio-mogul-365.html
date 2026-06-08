@@ -1988,6 +1988,42 @@
       color: #444;
     }
     .story-lock { font-size: 10px; }
+    .film-clock-block {
+      display: grid;
+      gap: 4px;
+      padding: 8px 9px 9px;
+      background: #1a1a1d;
+      color: #f0f0e8;
+      margin-bottom: 8px;
+      box-shadow:
+        inset -1px -1px var(--win-light),
+        inset 1px 1px #000,
+        inset -2px -2px var(--win-mid),
+        inset 2px 2px #000;
+      border-inline-start: 4px solid #d04444;
+    }
+    .film-clock-block.urgent { border-inline-start-color: #f0c93a; }
+    .film-clock-block.overdue { border-inline-start-color: #ff3333; background: #2a1414; }
+    .film-clock-block.done { border-inline-start-color: #4caf50; background: #14241a; }
+    .film-clock-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .film-clock-day { color: #cce6ff; font-variant-numeric: tabular-nums; }
+    .film-clock-debt.owes { color: #ff9a9a; font-variant-numeric: tabular-nums; }
+    .film-clock-debt.clear { color: #9aff9a; }
+    .film-task-title { font-size: 12px; font-weight: 700; margin-top: 2px; }
+    .film-task-deadline {
+      font-size: 11px;
+      color: #f0c93a;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .film-clock-block.overdue .film-task-deadline { color: #ff6666; }
+    .film-task-copy { font-size: 10px; color: #cccccc; line-height: 1.35; }
     .npc-empty-block .npc-empty-copy {
       font-size: 10px;
       line-height: 1.5;
@@ -3661,7 +3697,7 @@
         cash: 300,
         bank: 0,
         fund: 0,
-        debt: 0,
+        debt: 8000,
         education: 0,
         educationCredits: 0,
         reputation: 0,
@@ -3705,7 +3741,9 @@
         stocks: {},
         holdings: {},
         npcs: {},
-        buildingVisits: {}
+        buildingVisits: {},
+        filmTasks: {},
+        endingShown: false
       }, overrides);
     }
 
@@ -5235,6 +5273,54 @@
       }
     ];
 
+    /*
+     * FILM_TASKS — the 12-step production checklist. This is the spine
+     * of the 90-day arc. Each task has a deadline day; missing it doesn't
+     * stop the game but the consequence carries into the final ending
+     * (worse cut, no actor, Arkady takes over a slot, etc.).
+     * Tasks completion is tracked in gameState.filmTasks[id] = true.
+     * Most tasks will get "completion hooks" wired into existing actions
+     * in Commit B (buyScript → "have_idea", doShoot → "first_shoot_day"...).
+     * For now the data establishes the spine and the UI shows the next
+     * deadline so the player feels the clock.
+     */
+    const FILM_TASKS = [
+      { id: "have_idea",     day: 8,  label: { he: "לבחור רעיון לסרט",        en: "Pick a film idea" },
+        copy: { he: "ספרים אצל מאיה, רחוב, פיץ' לאולריך, או רעיון של דני שמתחנן להיגנב.", en: "Maya's books, the street, a pitch to Ulrich, or Dani's begging-to-be-stolen idea." } },
+      { id: "treatment",     day: 14, label: { he: "להשיג treatment",          en: "Get a treatment" },
+        copy: { he: "ספרים עם פטרה, ניקוס או רוז עוזרים. אולי גם מאיה תחתום.", en: "Books with Petra, Nikos, or Rose help. Maybe Maya signs on." } },
+      { id: "producer",      day: 20, label: { he: "למצוא מפיק בפועל",          en: "Find a line producer" },
+        copy: { he: "אם אתה מתעקש לבד — ארקדי שולח את 'העוזר' שלו, וזה גרוע יותר.", en: "Insist on solo and Arkady sends his 'assistant.' Worse." } },
+      { id: "lead",          day: 27, label: { he: "לסגור שחקן/מרואיין ראשי",   en: "Lock the lead" },
+        copy: { he: "ליאור הסוכן יסגור. או הוא יסגור עם המתחרה שלך.", en: "Lior the agent will sign — or sign with your competitor." } },
+      { id: "crew",          day: 35, label: { he: "מצלמה, לוקיישן וצוות מינימלי", en: "Camera, location, minimal crew" },
+        copy: { he: "קלאוס בברלין, פרנק בניו יורק, מארק בפריז. אחד מהם חייב להגיד כן.", en: "Klaus in Berlin, Frank in NYC, Marc in Paris. One of them must say yes." } },
+      { id: "first_shoot",   day: 45, label: { he: "יום צילום ראשון",           en: "First day of filming" },
+        copy: { he: "אם לא יצאת לסט עד אז — לוח הזמנים מתחיל לדמם.", en: "If you haven't shot by now, the schedule starts to bleed." } },
+      { id: "raw_footage",   day: 58, label: { he: "להשלים חומרי גלם עיקריים",   en: "Complete primary footage" },
+        copy: { he: "מכרת חומר כדי לכסות חוב? המכס החרים משלוח? תנפיק תירוצים.", en: "Sold footage to cover debt? Customs seized a shipment? Stack the excuses." } },
+      { id: "music",         day: 63, label: { he: "לסגור זכויות מוזיקה",         en: "Secure music rights" },
+        copy: { he: "השיר הזמני שהתאהבת בו עולה עכשיו פי שלושה.", en: "That temp track you fell in love with just tripled in price." } },
+      { id: "rough_cut",     day: 70, label: { he: "למסור rough cut לסופיה",     en: "Deliver rough cut to Sofia" },
+        copy: { he: "סופיה לא משאירה הודעות שניות. תהיה באתונה ביום שתסכים.", en: "Sofia doesn't leave second voicemails. Be in Athens the day she agrees." } },
+      { id: "distribution",  day: 78, label: { he: "לבחור מסלול הפצה",          en: "Pick a distribution lane" },
+        copy: { he: "הנרי לפסטיבל, קארן לטלוויזיה, או עצמאי. חיזרת אחרי כולם — אף אחד.", en: "Henry for festivals, Karen for TV, or DIY. Courted all three? You'll get none." } },
+      { id: "finishing",     day: 84, label: { he: "סאונד, צבע, כתוביות, עותק",  en: "Sound, color, captions, master" },
+        copy: { he: "כל יום שמתעכבים — מעבדה חינמית, סימן מים על המסך.", en: "Every day you wait — free lab, watermark across the screen." } },
+      { id: "premiere",      day: 90, label: { he: "בכורה / מסירה / או החרמה",   en: "Premiere / handover / or seizure" },
+        copy: { he: "ביום 90 ארקדי מקבל את הסרט אם החוב לא נסגר.", en: "On day 90 Arkady takes the film unless the debt is settled." } }
+    ];
+
+    function nextFilmTask() {
+      if (!gameState.filmTasks) gameState.filmTasks = {};
+      return FILM_TASKS.find((t) => !gameState.filmTasks[t.id]);
+    }
+
+    function filmTasksComplete() {
+      if (!gameState.filmTasks) gameState.filmTasks = {};
+      return FILM_TASKS.every((t) => !!gameState.filmTasks[t.id]);
+    }
+
     function findStoryBeat(day) {
       return STORY_BEATS.find((b) => b.day === day);
     }
@@ -6761,7 +6847,7 @@
 
     function advanceEconomy() {
       gameState.bank = Math.round(gameState.bank * 1.003);
-      gameState.debt = Math.round(gameState.debt * 1.005);
+      gameState.debt = Math.round(gameState.debt * 1.015);
       if (gameState.fund > 0) {
         if (rand() < 0.005) {
           gameState.fund = 0;
@@ -6837,17 +6923,51 @@
     }
 
     function checkEndings() {
+      // Hard liquidation: debt runs away mid-arc
       if (gameState.debt >= 60000) {
-        gameState.winState = { win: false, title: t("youLost"), copy: localize({
-          he: "החוב עבר 60,000$. הכריש שלח לך מבט סופי.",
-          en: "Debt passed $60,000. The shark sent you a final look."
+        gameState.winState = { win: false, title: localize({ he: "ארקדי לא צוחק יותר", en: "Arkady stopped smiling" }), copy: localize({
+          he: "החוב חצה 60,000$. ארקדי שלח את 'העוזרים' לאסוף את חומרי הגלם. המשחק הסתיים מוקדם.",
+          en: "Debt passed $60,000. Arkady sent the 'helpers' to collect the footage. The game ended early."
         }) };
-      } else if (allGoalsMet()) {
-        gameState.winState = { win: true, title: t("youWon"), copy: t("winCopy") };
-        recordScore(true);
-      } else if (gameState.day > seasonLength()) {
-        gameState.winState = { win: false, title: t("youLost"), copy: t("loseCopy") };
-        recordScore(false);
+        if (!gameState.endingShown) { gameState.endingShown = true; recordScore(false); }
+        return;
+      }
+      // Day 90 — the arc resolves based on film + debt state
+      if (gameState.day > seasonLength()) {
+        const filmDone = filmTasksComplete();
+        const debtClear = gameState.debt <= 0;
+        let title, copy, won;
+        if (filmDone && debtClear) {
+          won = true;
+          title = localize({ he: "הסרט יצא. ארקדי נחנק בקפה.", en: "The film is out. Arkady choked on his coffee." });
+          copy = localize({
+            he: "בכורה, חוב סגור, הקרדיט שלך. אגדה מקומית קטנה. אנשים מעתיקים את החיוך שלך.",
+            en: "Premiere, debt closed, your credit. Small local legend. People copy your smile."
+          });
+        } else if (filmDone && !debtClear) {
+          won = true;
+          title = localize({ he: "סיימת את הסרט. החוב סיים אותך חצי.", en: "You finished the film. The debt finished half of you." });
+          copy = localize({
+            he: "ארקדי לוקח 50% מההכנסות לכל החיים. אבל הקרדיט שלך, והסרט שלך. זה הסיום הצנוע.",
+            en: "Arkady takes 50% of revenue for life. But the credit is yours, the film is yours. The quiet ending."
+          });
+        } else if (!filmDone && debtClear) {
+          won = false;
+          title = localize({ he: "החוב נסגר. הסרט לא.", en: "The debt closed. The film didn't." });
+          copy = localize({
+            he: "סיימת חופשי מארקדי, אבל בלי סרט. הקרנת לעצמך, לחבר אחד שהביא יין. הבמאי שלא עשה סרט.",
+            en: "You finished free of Arkady, but with no film. Screened to yourself, one friend who brought wine. The director who didn't direct."
+          });
+        } else {
+          won = false;
+          title = localize({ he: "'הישראלי שחיפש את עצמו באירופה'", en: "'The Israeli Who Searched for Himself in Europe'" });
+          copy = localize({
+            he: "ארקדי לקח את חומרי הגלם, מכר לערוץ גרסה מקוצרת בשם הזה. אתה מקבל קרדיט: 'תחקיר נוסף'. הוא חייך בקבלת הכסף.",
+            en: "Arkady took the footage, sold the channel a short cut by that name. You got the credit: 'additional research'. He smiled cashing the check."
+          });
+        }
+        gameState.winState = { win: won, title, copy };
+        if (!gameState.endingShown) { gameState.endingShown = true; recordScore(won); }
       }
     }
 
@@ -7100,6 +7220,42 @@
       `;
     }
 
+    function renderFilmTaskBlock() {
+      const next = nextFilmTask();
+      const debt = gameState.debt | 0;
+      const left = daysLeft();
+      const urgent = next && (next.day - gameState.day) <= 3;
+      const overdue = next && (gameState.day > next.day);
+      if (!next) {
+        return `
+          <div class="film-clock-block done">
+            <div class="film-clock-row">
+              <span class="film-clock-day">יום ${gameState.day}/90</span>
+              <span class="film-clock-debt ${debt > 0 ? "owes" : "clear"}">${debt > 0 ? "חוב: " + formatMoney(debt) : "חוב סגור"}</span>
+            </div>
+            <div class="film-task-title">${localize({ he: "✅ כל המטלות סגורות. תלך לבכורה ביום 90.", en: "✅ All tasks done. Premiere on day 90." })}</div>
+          </div>
+        `;
+      }
+      const daysToDeadline = next.day - gameState.day;
+      const deadlineLabel = overdue
+        ? localize({ he: "⚠ עברת את המועד ב-" + (gameState.day - next.day) + " ימים", en: "⚠ Overdue by " + (gameState.day - next.day) + " days" })
+        : daysToDeadline === 0
+          ? localize({ he: "היום!", en: "Today!" })
+          : localize({ he: "עוד " + daysToDeadline + " ימים", en: daysToDeadline + " days left" });
+      return `
+        <div class="film-clock-block ${overdue ? "overdue" : urgent ? "urgent" : ""}">
+          <div class="film-clock-row">
+            <span class="film-clock-day">יום ${gameState.day}/90 • ${left} נותרו</span>
+            <span class="film-clock-debt ${debt > 0 ? "owes" : "clear"}">חוב לארקדי: ${formatMoney(debt)}</span>
+          </div>
+          <div class="film-task-title">📋 ${localize(next.label)}</div>
+          <div class="film-task-deadline">${deadlineLabel}</div>
+          <div class="film-task-copy">${localize(next.copy)}</div>
+        </div>
+      `;
+    }
+
     function renderStoryBeatBlock() {
       if (!gameState.activeStoryBeat) return "";
       const beat = STORY_BEATS.find((b) => b.id === gameState.activeStoryBeat);
@@ -7191,6 +7347,7 @@
       dom.boardStage.innerHTML = `
         <div class="win95-shell">
           <section class="win95-status">
+            ${renderFilmTaskBlock()}
             <div class="win95-panel-title">${localize({ he: "חשבונות", en: "Ledger" })}</div>
             <div class="ledger-stack">
               ${statusRowMarkup(t("cash"), formatMoney(gameState.cash), "cash")}
@@ -8336,7 +8493,7 @@
         playerName: options.playerName || prefs.playerName || gameState.playerName,
         economyDifficulty: options.economyDifficulty || prefs.economyDifficulty || "modest",
         goalLevels: options.goalLevels || prefs.goalLevels || { wealth: "modest", career: "modest", education: "modest", happiness: "modest" },
-        seasonLength: [30, 90, 365].includes(options.seasonLength) ? options.seasonLength : (gameState.seasonLength || 365),
+        seasonLength: 90,
         language: gameState.language,
         themeIndex: gameState.themeIndex,
         muted: gameState.muted,
@@ -8420,6 +8577,9 @@
     root.applyStoryChoice = applyStoryChoice;
     root.maybeTriggerStoryBeat = maybeTriggerStoryBeat;
     root.gamble = gamble;
+    root.FILM_TASKS = FILM_TASKS;
+    root.nextFilmTask = nextFilmTask;
+    root.filmTasksComplete = filmTasksComplete;
 
     if (canRender) {
       init();
