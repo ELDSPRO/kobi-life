@@ -4955,6 +4955,48 @@
         name: { he: "טוני", en: "Tony" },
         role: { he: "כריש הלוואות עם נימוסים", en: "Loan shark with manners" },
         emoji: "🕶️"
+      },
+      henry_festival: {
+        id: "henry_festival",
+        city: "london",
+        name: { he: "הנרי", en: "Henry" },
+        role: { he: "מנהל פסטיבל, פסיב-אגרסיב", en: "Festival director, passive-aggressive" },
+        emoji: "🎭"
+      },
+      rose_legend: {
+        id: "rose_legend",
+        city: "london",
+        name: { he: "דיים רוז", en: "Dame Rose" },
+        role: { he: "אגדה זקנה בקולנוע הבריטי", en: "Old legend of British cinema" },
+        emoji: "🎖️"
+      },
+      whitwell_banker: {
+        id: "whitwell_banker",
+        city: "london",
+        name: { he: "מר ויטוול", en: "Mr. Whitwell" },
+        role: { he: "בנקאי לונדוני קר", en: "Cold London banker" },
+        emoji: "🏦"
+      },
+      emilie_wardrobe: {
+        id: "emilie_wardrobe",
+        city: "paris",
+        name: { he: "אמילי", en: "Émilie" },
+        role: { he: "מעצבת בגדים אומנותית, פריז", en: "Art-house costume designer, Paris" },
+        emoji: "🧵"
+      },
+      lea_lector: {
+        id: "lea_lector",
+        city: "paris",
+        name: { he: "ליאה", en: "Léa" },
+        role: { he: "לקטורית בקרן, הסבר זה הכל", en: "Fund reader — explanation is everything" },
+        emoji: "📖"
+      },
+      marc_crew: {
+        id: "marc_crew",
+        city: "paris",
+        name: { he: "מארק", en: "Marc" },
+        role: { he: "ראש איגוד צוות, פילוסוף-טכנאי", en: "Crew union head, philosopher-technician" },
+        emoji: "🔧"
       }
     };
 
@@ -5101,6 +5143,96 @@
           { weight: 5, tone: "bad", flavor: { he: "ליאור ראה אותך מבקש. אנשים ראו אותו רואה.", en: "Lior saw you begging. People saw him seeing." }, effects: { reputation: -3, soul: -2 }, npc: { id: "lior_agent", rel: -4 } },
           { weight: 12, tone: "good", sfx: "cash", relGate: { id: "lior_agent", min: 5 }, flavor: { he: "ליאור: 'אני מסדר לך פגישה עם רגב נשר השבוע. תהיה מוכן.'", en: "Lior: 'I'm setting you up with Regev Nesher this week. Be ready.'" }, effects: { reputation: 6, creativity: 2 }, npc: { id: "lior_agent", rel: 2 } },
           { weight: 10, tone: "bad", relGate: { id: "lior_agent", max: -5 }, flavor: { he: "ליאור הסתובב לחברים: 'הילד הזה — אתה זוכר?'. כולם זוכרים.", en: "Lior turned to his crew: 'this kid — you remember?'. Everyone remembers." }, effects: { reputation: -6, soul: -4 }, npc: { id: "lior_agent", rel: -2 } }
+        ]
+      },
+      festival_henry_chat: {
+        location: "festival",
+        cities: ["london"],
+        label: { he: "להתחנן להנרי בלובי", en: "Corner Henry in the lobby" },
+        copy: { he: "מנהל הפסטיבל מחייך כל הזמן. אל תיקח את זה לחיוב.", en: "The festival director smiles always. Don't read it as positive." },
+        hours: 2, cost: 25, once: true,
+        npcInfluence: { id: "henry_festival" },
+        outcomes: [
+          { weight: 55, tone: "neutral", flavor: { he: "הנרי הזכיר 'תהליך' שש פעמים. תרגום: לא השנה.", en: "Henry said 'process' six times. Translation: not this year." }, effects: {}, npc: { id: "henry_festival", rel: 1 } },
+          { weight: 25, tone: "good", flavor: { he: "אמר 'תגיש למחזור הבא, אישית.' פסיב, אבל חיובי.", en: "Said 'submit to the next cycle — personally.' Passive, but positive." }, effects: { reputation: 3 }, npc: { id: "henry_festival", rel: 2 } },
+          { weight: 15, tone: "good", flavor: { he: "הציג אותך לחבר השופטים בקוקטייל. שלום, שלום.", en: "Introduced you to a juror at the cocktail. Hello, hello." }, effects: { reputation: 4, creativity: 1 }, npc: { id: "henry_festival", rel: 3 } },
+          { weight: 5, tone: "bad", flavor: { he: "אמר לאסיסטנט שלו: 'תזכיר לי לא לקבל פגישות שניות.' שמעת.", en: "Told his assistant: 'remind me not to take seconds.' You heard." }, effects: { reputation: -3, soul: -3 }, npc: { id: "henry_festival", rel: -3 } },
+          { weight: 10, tone: "good", sfx: "cash", relGate: { id: "henry_festival", min: 5 }, flavor: { he: "הנרי: 'אני שם אותך בתחרות הראשית. תכיר את התקציב.'", en: "Henry: 'I'm placing you in the main competition. Meet the budget.'" }, effects: { reputation: 8, creativity: 3 }, npc: { id: "henry_festival", rel: 2 } },
+          { weight: 8, tone: "bad", relGate: { id: "henry_festival", max: -5 }, flavor: { he: "הנרי אמר ביבשות: 'אנחנו לא מציגים עבודות באיכות הזו.' מול אגף שופטים.", en: "Henry said drily: 'we don't show work at this level.' In front of jurors." }, effects: { reputation: -6, soul: -4 }, npc: { id: "henry_festival", rel: -1 } }
+        ]
+      },
+      cinema_rose_invite: {
+        location: "cinema",
+        cities: ["london"],
+        label: { he: "לבקש פגישה עם דיים רוז", en: "Request an audience with Dame Rose" },
+        copy: { he: "האגדה שותה תה לבד. אם תפנה — או הזכרה לדורות, או דחייה מנומסת.", en: "The legend takes tea alone. Approach: either generational mention or polite refusal." },
+        hours: 2, cost: 50, once: true,
+        npcInfluence: { id: "rose_legend" },
+        outcomes: [
+          { weight: 50, tone: "neutral", flavor: { he: "דיים רוז שאלה שאלה אחת. ענית. היא נדה ראש.", en: "Dame Rose asked one question. You answered. She nodded." }, effects: { creativity: 1 }, npc: { id: "rose_legend", rel: 2 } },
+          { weight: 25, tone: "good", flavor: { he: "סיפרה אנקדוטה על דייוויד לין. +יצירתיות גדולה.", en: "Told you a David Lean anecdote. +big creativity." }, effects: { creativity: 4, reputation: 1 }, npc: { id: "rose_legend", rel: 3 } },
+          { weight: 15, tone: "good", flavor: { he: "כתבה משפט המלצה ביד שלה. נדיר.", en: "Wrote a sentence of endorsement in her hand. Rare." }, effects: { reputation: 5 }, npc: { id: "rose_legend", rel: 4 } },
+          { weight: 10, tone: "bad", flavor: { he: "אמרה: 'אני לא מאזינה לפיץ'.' קמה. ההמלצה לא תיכתב.", en: "Said: 'I don't take pitches.' Stood. The endorsement won't be written." }, effects: { reputation: -2, soul: -2 }, npc: { id: "rose_legend", rel: -2 } },
+          { weight: 10, tone: "good", sfx: "cash", relGate: { id: "rose_legend", min: 5 }, flavor: { he: "דיים רוז: 'אני אזכיר אותך במאמר שלי השבוע. בעדינות, אבל אזכרה.'", en: "Dame Rose: 'I'll mention you in this week's column. Subtly — but mention.'" }, effects: { reputation: 9, creativity: 2 }, npc: { id: "rose_legend", rel: 1 } }
+        ]
+      },
+      bank_whitwell_credit: {
+        location: "bank",
+        cities: ["london"],
+        label: { he: "לבקש שדרוג קו אשראי ממר ויטוול", en: "Ask Mr. Whitwell for a credit upgrade" },
+        copy: { he: "הבנקאי לא ישנא אותך. הוא פשוט יחשב.", en: "The banker won't hate you. He'll just calculate." },
+        hours: 2, cost: 0, once: true,
+        npcInfluence: { id: "whitwell_banker" },
+        outcomes: [
+          { weight: 55, tone: "neutral", flavor: { he: "מר ויטוול קרא את הטפסים פעמיים. 'אני אבדוק.' לא יחזור.", en: "Mr. Whitwell read the forms twice. 'I'll review.' He won't return." }, effects: {}, npc: { id: "whitwell_banker", rel: 1 } },
+          { weight: 25, tone: "good", flavor: { he: "אישר לך תוספת קטנה של 300 לקו האשראי.", en: "Approved a small $300 bump to your credit line." }, effects: { cash: 300, reputation: 1 }, npc: { id: "whitwell_banker", rel: 2 } },
+          { weight: 10, tone: "good", flavor: { he: "התרשם מהמסמכים. נתן לך מספר אישי. נדיר.", en: "Impressed by the docs. Gave you his direct line. Rare." }, effects: { reputation: 3 }, npc: { id: "whitwell_banker", rel: 3 } },
+          { weight: 10, tone: "bad", flavor: { he: "סימן אותך כ'לקוח בסיכון'. תרגיש את זה בעוד שבועיים.", en: "Flagged you 'at risk.' You'll feel it in two weeks." }, effects: { reputation: -2 }, npc: { id: "whitwell_banker", rel: -2 } },
+          { weight: 10, tone: "good", sfx: "cash", relGate: { id: "whitwell_banker", min: 5 }, flavor: { he: "מר ויטוול: 'אתה רציני. הנה 2000 בריבית ידידותית. בלי טפסים.'", en: "Mr. Whitwell: 'you're serious. Here's $2000 at friendly rate. No forms.'" }, effects: { cash: 2000, reputation: 3 }, npc: { id: "whitwell_banker", rel: 1 } }
+        ]
+      },
+      wardrobe_emilie_consult: {
+        location: "wardrobe",
+        cities: ["paris"],
+        label: { he: "ייעוץ סטיילינג עם אמילי", en: "Style consultation with Émilie" },
+        copy: { he: "המעצבת שואלת על המנגינה של הסצנה, לא על הסט.", en: "The designer asks about the scene's melody, not its set." },
+        hours: 1, cost: 40, once: true,
+        npcInfluence: { id: "emilie_wardrobe" },
+        outcomes: [
+          { weight: 55, tone: "neutral", flavor: { he: "אמילי הציעה אריג אחד. אמרת תודה. לא היה מספיק זמן.", en: "Émilie suggested one fabric. You thanked her. Not enough time." }, effects: {}, npc: { id: "emilie_wardrobe", rel: 1 } },
+          { weight: 25, tone: "good", flavor: { he: "עיצבה לך מראה לדמות אחת חינם. הסצנה תיראה אחרת.", en: "Sketched a character look for free. The scene will look different." }, effects: { creativity: 3, reputation: 1 }, npc: { id: "emilie_wardrobe", rel: 2 } },
+          { weight: 15, tone: "good", flavor: { he: "הביאה אותך לאחת השעות שלה במגזין. צילום קצר.", en: "Brought you to her magazine hour. A short shoot." }, effects: { reputation: 4 }, npc: { id: "emilie_wardrobe", rel: 3 } },
+          { weight: 5, tone: "bad", flavor: { he: "אמרה: 'אתה רואה דמויות כמו תפאורה.' עזבה. שמעו.", en: "Said: 'you see characters as set dressing.' Left. People heard." }, effects: { reputation: -3, soul: -2 }, npc: { id: "emilie_wardrobe", rel: -2 } },
+          { weight: 10, tone: "good", sfx: "cash", relGate: { id: "emilie_wardrobe", min: 5 }, flavor: { he: "אמילי: 'אני עוזרת לך עם המראה של הסרט הבא. בלי לחשב שעות.'", en: "Émilie: 'I'll style your next film. No hour-counting.'" }, effects: { reputation: 5, creativity: 4 }, npc: { id: "emilie_wardrobe", rel: 2 } }
+        ]
+      },
+      fund_lea_meeting: {
+        location: "fund",
+        cities: ["paris"],
+        label: { he: "פגישה עם ליאה הלקטורית", en: "Meeting with Léa the reader" },
+        copy: { he: "ליאה מבקשת את הסיבה. לא את הסיפור. תכיר הבדל.", en: "Léa asks for the reason — not the story. Know the difference." },
+        hours: 2, cost: 0, once: true,
+        npcInfluence: { id: "lea_lector" },
+        outcomes: [
+          { weight: 55, tone: "neutral", flavor: { he: "ליאה רשמה משהו. לא הראתה. תקבל בעוד שבועיים.", en: "Léa wrote something. Didn't show it. You'll receive it in two weeks." }, effects: {}, npc: { id: "lea_lector", rel: 1 } },
+          { weight: 25, tone: "good", flavor: { he: "אישרה לך לעבור לשלב הבא בקרן. שקט אבל אמיתי.", en: "Cleared you to the next fund stage. Quiet but real." }, effects: { reputation: 3, creativity: 2 }, npc: { id: "lea_lector", rel: 2 } },
+          { weight: 15, tone: "good", flavor: { he: "סימנה אותך כ'דחוף.' מקבץ הקריאה הבא יסתכל מהר.", en: "Marked you 'urgent.' Next reading panel will see you fast." }, effects: { reputation: 4 }, npc: { id: "lea_lector", rel: 3 } },
+          { weight: 5, tone: "bad", flavor: { he: "אמרה: 'הסיבה לא יושבת. תחזור עם הסבר.' פומבי.", en: "Said: 'the reason doesn't hold. Come back with a why.' Public." }, effects: { reputation: -2, soul: -2 }, npc: { id: "lea_lector", rel: -2 } },
+          { weight: 10, tone: "good", sfx: "cash", relGate: { id: "lea_lector", min: 5 }, flavor: { he: "ליאה: 'אני ממליצה אישית. הוועדה לא תידחה.' זה מענק.", en: "Léa: 'I'm recommending you personally. The committee won't refuse.' That's a grant." }, effects: { cash: 1200, reputation: 6 }, npc: { id: "lea_lector", rel: 2 } }
+        ]
+      },
+      crew_marc_drink: {
+        location: "crew",
+        cities: ["paris"],
+        label: { he: "לשתות בירה עם מארק", en: "Have a beer with Marc" },
+        copy: { he: "ראש הצוות מסביר טכניקה דרך פילוסופיה. תשתה לאט.", en: "The crew head explains technique through philosophy. Drink slow." },
+        hours: 2, cost: 35, once: true,
+        npcInfluence: { id: "marc_crew" },
+        outcomes: [
+          { weight: 60, tone: "neutral", flavor: { he: "מארק דיבר שעה על דה-לוז'. למדת. לא ברור איך זה עוזר.", en: "Marc spoke for an hour on Deleuze. You learned. Unclear how it helps." }, effects: { creativity: 1 }, npc: { id: "marc_crew", rel: 1 } },
+          { weight: 25, tone: "good", flavor: { he: "הציע לך צוות לסרט הבא במחיר עלות. רשת.", en: "Offered you crew at cost for the next film. Network." }, effects: { reputation: 3, creativity: 1 }, npc: { id: "marc_crew", rel: 2 } },
+          { weight: 10, tone: "good", flavor: { he: "סיפר לך על אגדה בעריכה שמחפשת פרויקט קטן. +קשר.", en: "Told you about an editing legend hunting a small project. +contact." }, effects: { reputation: 4 }, npc: { id: "marc_crew", rel: 3 } },
+          { weight: 5, tone: "bad", flavor: { he: "מארק שאל: 'אתה מתעניין בטכניקה או בקרדיט?' שתקת.", en: "Marc asked: 'are you interested in technique or credit?' You were silent." }, effects: { reputation: -2, soul: -2 }, npc: { id: "marc_crew", rel: -3 } }
         ]
       },
       set_frank_favor: {
@@ -7085,7 +7217,8 @@
               `;
             })() : ""}
           `;
-        case "wardrobe":
+        case "wardrobe": {
+          const wardrobeScene = sceneCardButtons("wardrobe");
           return `
             <div class="action-group">
               <h3>${t("wardrobe")}</h3>
@@ -7093,7 +7226,9 @@
                 ${WARDROBES.map((item) => buttonMarkup("buyWardrobe", String(item.tier), localize(item.name), localize(item.desc), formatMoney(Math.round(item.price * priceScale())))).join("")}
               </div>
             </div>
+            ${wardrobeScene ? `<div class="action-group"><h3>${localize({ he: "אנשי המקום", en: "The locals" })}</h3><div class="action-buttons">${wardrobeScene}</div></div>` : ""}
           `;
+        }
         case "cafe":
           return `
             <div class="action-group">
@@ -7176,7 +7311,8 @@
             </div>
             ${gameState.offers.length && gameState.offers[0].kind === "cast" ? `<div class="action-group"><h3>${localize({ he: "מועמדים", en: "Candidates" })}</h3><div class="offer-list">${gameState.offers.map(renderOfferCard).join("")}</div></div>` : ""}
           `;
-        case "fund":
+        case "fund": {
+          const fundScene = sceneCardButtons("fund");
           return `
             <div class="action-group">
               <h3>${t("finance")}</h3>
@@ -7186,8 +7322,11 @@
                 ${buttonMarkup("doFund", "finishing", localize({ he: "בקשת השלמה", en: "Finishing grant" }), localize({ he: "לסרט שצולם • 3ש • כסף לפוסט והשלמה", en: "For a shot film • 3h • cash for post and finishing" }), formatDuration(3))}
               </div>
             </div>
+            ${fundScene ? `<div class="action-group"><h3>${localize({ he: "אנשי המקום", en: "The locals" })}</h3><div class="action-buttons">${fundScene}</div></div>` : ""}
           `;
-        case "crew":
+        }
+        case "crew": {
+          const crewScene = sceneCardButtons("crew");
           return `
             <div class="action-group">
               <h3>${localize({ he: "אנשי צוות", en: "Crew hires" })}</h3>
@@ -7196,7 +7335,9 @@
               </div>
             </div>
             ${gameState.offers.length && gameState.offers[0].kind === "crew" ? `<div class="action-group"><h3>${localize({ he: "חבילות צוות", en: "Crew packages" })}</h3><div class="offer-list">${gameState.offers.map(renderOfferCard).join("")}</div></div>` : ""}
+            ${crewScene ? `<div class="action-group"><h3>${localize({ he: "אנשי המקום", en: "The locals" })}</h3><div class="action-buttons">${crewScene}</div></div>` : ""}
           `;
+        }
         case "filmSchool": {
           const courseMod = modifierMultiplier("course");
           const courseLabel = courseMod < 1
@@ -7218,7 +7359,8 @@
             ${filmSchoolScene ? `<div class="action-group"><h3>${localize({ he: "אנשי המקום", en: "The locals" })}</h3><div class="action-buttons">${filmSchoolScene}</div></div>` : ""}
           `;
         }
-        case "bank":
+        case "bank": {
+          const bankScene = sceneCardButtons("bank");
           return `
             <div class="action-group">
               <h3>${t("finance")}</h3>
@@ -7231,7 +7373,9 @@
                 ${buttonMarkup("bankDo", "cashOut:500", t("cashOut"), localize({ he: "לחלץ כסף לפני שארקדי ייעלם", en: "Pull cash before Arkady disappears" }), formatMoney(500))}
               </div>
             </div>
+            ${bankScene ? `<div class="action-group"><h3>${localize({ he: "אנשי המקום", en: "The locals" })}</h3><div class="action-buttons">${bankScene}</div></div>` : ""}
           `;
+        }
         case "post": {
           const postScene = sceneCardButtons("post");
           return `
@@ -7277,7 +7421,8 @@
             ${investorScene ? `<div class="action-group"><h3>${localize({ he: "אנשי המקום", en: "The locals" })}</h3><div class="action-buttons">${investorScene}</div></div>` : ""}
           `;
         }
-        case "festival":
+        case "festival": {
+          const festScene = sceneCardButtons("festival");
           return `
             <div class="action-group">
               <h3>${t("release")}</h3>
@@ -7285,8 +7430,11 @@
                 ${buttonMarkup("doPremiere", "", localize({ he: "להרים פרמיירה", en: "Stage a premiere" }), localize({ he: "4h • +25% הילה מסחרית, אולי פרס צדדי", en: "4h • +25% commercial halo, maybe a side prize" }), "4h • " + formatMoney(Math.round(480 * priceScale())))}
               </div>
             </div>
+            ${festScene ? `<div class="action-group"><h3>${localize({ he: "אנשי המקום", en: "The locals" })}</h3><div class="action-buttons">${festScene}</div></div>` : ""}
           `;
-        case "cinema":
+        }
+        case "cinema": {
+          const cinemaScene = sceneCardButtons("cinema");
           return `
             <div class="action-group">
               <h3>${t("release")}</h3>
@@ -7294,7 +7442,9 @@
                 ${buttonMarkup("doCinema", "", localize({ he: "להוציא לריצה קולנועית", en: "Launch a theatrical run" }), localize({ he: "3h • 5 תשלומים שבועיים יורדים", en: "3h • 5 decaying weekly payouts" }), "3h")}
               </div>
             </div>
+            ${cinemaScene ? `<div class="action-group"><h3>${localize({ he: "אנשי המקום", en: "The locals" })}</h3><div class="action-buttons">${cinemaScene}</div></div>` : ""}
           `;
+        }
         case "set": {
           const setScene = sceneCardButtons("set");
           return `

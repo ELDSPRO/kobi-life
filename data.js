@@ -394,6 +394,76 @@
           he: "לא נראה שזה אישי. נראה שזה כן. עדיף לא לחזור לאותו אזור.",
           en: "Doesn't look personal. It is. Better not to revisit that block."
         }
+      },
+      {
+        id: "henry_friendly_invite",
+        weight: 4, tone: "good",
+        requires: function (s) { return s.npcs && s.npcs.henry_festival && s.npcs.henry_festival.relationship >= 5; },
+        headline: { he: "הנרי דוחף אותך לתחרות הראשית", en: "Henry is pushing you into the main competition" },
+        body: {
+          he: "לונדון. הלובי, ארבע אחר הצהריים. אל תאחר.",
+          en: "London. The lobby, 4pm. Don't be late."
+        }
+      },
+      {
+        id: "henry_hostile_blacklist",
+        weight: 3, tone: "bad",
+        requires: function (s) { return s.npcs && s.npcs.henry_festival && s.npcs.henry_festival.relationship <= -5; },
+        headline: { he: "השם שלך הוצא משתי רשימות פסטיבל", en: "Your name was pulled from two festival lists" },
+        body: {
+          he: "הנרי מצא דרך מנומסת לעשות את זה. השבוע. אל תגיש.",
+          en: "Henry found a polite way to do it. This week. Don't submit."
+        }
+      },
+      {
+        id: "rose_friendly_column",
+        weight: 4, tone: "good",
+        requires: function (s) { return s.npcs && s.npcs.rose_legend && s.npcs.rose_legend.relationship >= 5; },
+        headline: { he: "דיים רוז הזכירה אותך במאמר", en: "Dame Rose mentioned you in her column" },
+        body: {
+          he: "שורה אחת בעדינות. אבל בריטים יודעים לקרוא.",
+          en: "One subtle line. But the British know how to read."
+        }
+      },
+      {
+        id: "whitwell_friendly_offer",
+        weight: 3, tone: "good",
+        requires: function (s) { return s.npcs && s.npcs.whitwell_banker && s.npcs.whitwell_banker.relationship >= 5; },
+        headline: { he: "מר ויטוול שולח הצעת אשראי אישית", en: "Mr. Whitwell sent a personal credit offer" },
+        body: {
+          he: "אם אתה בלונדון — היום הבנק, בלי תור. הוא יחכה.",
+          en: "If you're in London — the bank today, no queue. He'll wait."
+        }
+      },
+      {
+        id: "emilie_friendly_event",
+        weight: 4, tone: "good",
+        requires: function (s) { return s.npcs && s.npcs.emilie_wardrobe && s.npcs.emilie_wardrobe.relationship >= 5; },
+        headline: { he: "אמילי הזמינה אותך לאירוע אופנה", en: "Émilie invited you to a fashion event" },
+        body: {
+          he: "פריז, הערב. הקאסט שלה שם. תיכרו פנים שלא מצולמות.",
+          en: "Paris, tonight. Her cast is there. Meet faces that aren't on camera yet."
+        }
+      },
+      {
+        id: "lea_friendly_grant",
+        weight: 4, tone: "good",
+        requires: function (s) { return s.npcs && s.npcs.lea_lector && s.npcs.lea_lector.relationship >= 5; },
+        headline: { he: "ליאה דחפה את התיק שלך", en: "Léa pushed your file forward" },
+        body: {
+          he: "הוועדה תקרא השבוע. אם אתה בפריז — קפה איתה בבוקר.",
+          en: "The committee reads this week. If you're in Paris — coffee with her in the morning."
+        }
+      },
+      {
+        id: "marc_friendly_crew",
+        weight: 3, tone: "good",
+        requires: function (s) { return s.npcs && s.npcs.marc_crew && s.npcs.marc_crew.relationship >= 5; },
+        headline: { he: "מארק שלח לך צוות במחיר עלות", en: "Marc lined up a crew at cost" },
+        body: {
+          he: "פריז, היום. אם תבוא לאיגוד, הוא יחתום על המסמכים.",
+          en: "Paris, today. Show up at the union and he'll sign the paperwork."
+        }
       }
     ]
   };
