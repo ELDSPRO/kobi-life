@@ -929,12 +929,32 @@
     }
 
     .start-actions {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 22px;
+      padding-top: 16px;
+      border-top: 1px dashed rgba(39, 24, 15, 0.16);
+    }
+
+    .start-actions-primary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 12px;
-      align-items: center;
-      margin-top: 20px;
-      flex-wrap: wrap;
+      align-items: stretch;
+    }
+
+    .start-actions-primary button {
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .start-actions-secondary {
+      display: flex;
+      justify-content: center;
     }
 
     .lead-btn {
@@ -2540,9 +2560,9 @@
         modest: "צנוע",
         ambitious: "שאפתני",
         legendary: "אגדי",
-        startButton: "להתחיל את השנה",
-        resumeButton: "להמשיך שמירה",
-        newYear: "שנה חדשה",
+        startButton: "להתחיל",
+        resumeButton: "להמשיך מהמשמר",
+        newYear: "התחלה חדשה",
         reset: "איפוס",
         close: "סגור",
         target: "יעד",
@@ -2677,9 +2697,9 @@
         modest: "Modest",
         ambitious: "Ambitious",
         legendary: "Legendary",
-        startButton: "Start the year",
-        resumeButton: "Resume save",
-        newYear: "New year",
+        startButton: "Begin",
+        resumeButton: "Continue",
+        newYear: "Fresh start",
         reset: "Reset",
         close: "Close",
         target: "Target",
@@ -6536,12 +6556,12 @@
             `).join("")}
           </div>
           <div class="start-actions">
-            <div>
-              <button class="icon-btn" data-action="setLanguage" data-value="${gameState.language === "he" ? "en" : "he"}">${gameState.language === "he" ? "EN" : "עב"}</button>
-            </div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <div class="start-actions-primary">
               <button class="start-card button" data-action="loadGame">${t("resumeButton")}</button>
               <button class="lead-btn" data-action="startFromScreen">${t("startButton")}</button>
+            </div>
+            <div class="start-actions-secondary">
+              <button class="icon-btn" data-action="setLanguage" data-value="${gameState.language === "he" ? "en" : "he"}">${gameState.language === "he" ? "EN" : "עב"}</button>
             </div>
           </div>
         </div>
