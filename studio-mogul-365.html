@@ -4886,6 +4886,27 @@
         name: { he: "דני", en: "Dani" },
         role: { he: "חבר מהלימודים, כותב שלא כותב", en: "Film-school friend who never writes" },
         emoji: "📝"
+      },
+      alexis_curator: {
+        id: "alexis_curator",
+        city: "athens",
+        name: { he: "אלכסיס", en: "Alexis" },
+        role: { he: "אוצר עייף, סינמטק אתונה", en: "Sleepy curator, Athens Cinematheque" },
+        emoji: "🎞️"
+      },
+      nikos_lecturer: {
+        id: "nikos_lecturer",
+        city: "athens",
+        name: { he: "ניקוס", en: "Nikos" },
+        role: { he: "מרצה זעוף, בית הספר לקולנוע", en: "Grim lecturer, Athens film school" },
+        emoji: "🎓"
+      },
+      sofia_editor: {
+        id: "sofia_editor",
+        city: "athens",
+        name: { he: "סופיה", en: "Sofia" },
+        role: { he: "עורכת קרה, חדר עריכה", en: "Cold editor, post house" },
+        emoji: "🎬"
       }
     };
 
@@ -4951,6 +4972,7 @@
         location: "cafe",
         label: { he: "להאזין לשולחן השכן", en: "Eavesdrop next table" },
         copy: { he: "שני אנשים מציעים סרט בקול נמוך מדי. אולי משהו דולף.", en: "Two people pitching a film just slightly too loud. Maybe something leaks." },
+        cities: ["telaviv"],
         hours: 1, cost: 0, once: true,
         outcomes: [
           { weight: 50, tone: "neutral", flavor: { he: "הם דיברו על סרט עם דובים. הסתיים בדרישות תזונה.", en: "They were pitching a bear movie. Ended in dietary demands." }, effects: {} },
@@ -4963,6 +4985,7 @@
         location: "cafe",
         label: { he: "להציע פיץ' למאיה", en: "Pitch Maya" },
         copy: { he: "מאיה הברסיטה אמרה אתמול שהיא קראה קרואק. תנסה.", en: "Maya the barista mentioned Kerouac yesterday. Try her." },
+        cities: ["telaviv"],
         hours: 1, cost: 20, once: true,
         npcInfluence: { id: "maya_barista" },
         outcomes: [
@@ -4975,6 +4998,7 @@
         location: "script",
         label: { he: "לשבת לכתוב לבד", en: "Sit and write, alone" },
         copy: { he: "שולחן בפינה, בלי WiFi, בלי תירוצים.", en: "Corner table, no WiFi, no excuses." },
+        cities: ["telaviv"],
         hours: 2, cost: 0, once: false,
         outcomes: [
           { weight: 70, tone: "good", flavor: { he: "כתבת שתי סצנות. אחת שמורה.", en: "Wrote two scenes. One's a keeper." }, effects: { creativity: 3 } },
@@ -4986,6 +5010,7 @@
         location: "script",
         label: { he: "להעתיק רעיון מדני", en: "Borrow Dani's idea" },
         copy: { he: "דני לא יכתוב את זה לעולם. אתה כן.", en: "Dani will never write it. You will." },
+        cities: ["telaviv"],
         hours: 1, cost: 0, once: true,
         npcInfluence: { id: "dani_classmate" },
         outcomes: [
@@ -4999,6 +5024,7 @@
         location: "casting",
         label: { he: "לחזר אחרי ליאור בבר", en: "Court Lior at the bar" },
         copy: { he: "משקה כפול במלון. ליאור לא משלם, הוא מקשיב.", en: "Double drink at the hotel bar. Lior doesn't pay, he listens." },
+        cities: ["telaviv"],
         hours: 2, cost: 80, once: true,
         npcInfluence: { id: "lior_agent" },
         outcomes: [
@@ -5008,10 +5034,66 @@
           { weight: 5, tone: "bad", flavor: { he: "ליאור ראה אותך מבקש. אנשים ראו אותו רואה.", en: "Lior saw you begging. People saw him seeing." }, effects: { reputation: -3, soul: -2 }, npc: { id: "lior_agent", rel: -4 } }
         ]
       },
+      cinema_alexis_chat: {
+        location: "cinematheque",
+        cities: ["athens"],
+        label: { he: "שיחה עם אלכסיס בין הקרנות", en: "Chat with Alexis between screenings" },
+        copy: { he: "האוצר עם עיני הפנדה רוצה לדבר על טרקובסקי. תקשיב.", en: "The curator with the panda eyes wants to talk Tarkovsky. Listen." },
+        hours: 1, cost: 30, once: true,
+        npcInfluence: { id: "alexis_curator" },
+        outcomes: [
+          { weight: 55, tone: "neutral", flavor: { he: "אלכסיס דיבר ארבעים דקות. שכחת חצי. למדת רבע.", en: "Alexis talked for forty minutes. You forgot half. Learned a quarter." }, effects: { creativity: 1 }, npc: { id: "alexis_curator", rel: 1 } },
+          { weight: 25, tone: "good", flavor: { he: "הזמין אותך להקרנה פרטית של אוצרים. +מוניטין שקט.", en: "Invited you to a private curator screening. +quiet reputation." }, effects: { reputation: 2, creativity: 2 }, npc: { id: "alexis_curator", rel: 3 } },
+          { weight: 15, tone: "good", sfx: "cash", flavor: { he: "חיבר אותך למפיק יווני שמחפש כותב.", en: "Connected you to a Greek producer hunting for a writer." }, effects: { reputation: 4, creativity: 1 }, npc: { id: "alexis_curator", rel: 4 } },
+          { weight: 5, tone: "bad", flavor: { he: "שכח אותך באמצע משפט וקם להחליף סליל. אנשים ראו.", en: "Forgot you mid-sentence and got up to swap a reel. People saw." }, effects: { soul: -2 }, npc: { id: "alexis_curator", rel: -2 } }
+        ]
+      },
+      school_nikos_office: {
+        location: "filmSchool",
+        cities: ["athens"],
+        label: { he: "שעות קבלה אצל ניקוס", en: "Nikos's office hours" },
+        copy: { he: "המרצה הזעוף מקבל אחד ביום. תביא ספר, אל תביא תירוצים.", en: "The grim lecturer takes one per day. Bring a book, not excuses." },
+        hours: 2, cost: 40, once: true,
+        npcInfluence: { id: "nikos_lecturer" },
+        outcomes: [
+          { weight: 50, tone: "neutral", flavor: { he: "חקר אותך על תחביר קולנועי ארבעים דקות. לא קיבלת תשובה.", en: "Grilled you on film syntax for forty minutes. No answer given." }, effects: { creativity: 1 }, npc: { id: "nikos_lecturer", rel: 1 } },
+          { weight: 30, tone: "good", flavor: { he: "נתן לך רשימת קריאה אישית. +קרדיט לימודי.", en: "Handed you a personal reading list. +education credit." }, effects: { creativity: 2 }, npc: { id: "nikos_lecturer", rel: 2 } },
+          { weight: 15, tone: "good", flavor: { he: "הזמין אותך להקרנת בוגרים שלו. +מוניטין אקדמי.", en: "Invited you to his alumni screening. +academic reputation." }, effects: { reputation: 3, creativity: 1 }, npc: { id: "nikos_lecturer", rel: 3 } },
+          { weight: 5, tone: "bad", flavor: { he: "פיטר אותך פומבית מול סטודנטים אחרים: 'תחזור כשתבין סרט'.", en: "Dismissed you in front of other students: 'come back when you understand cinema.'" }, effects: { reputation: -3, soul: -2 }, npc: { id: "nikos_lecturer", rel: -4 } }
+        ]
+      },
+      school_audit_class: {
+        location: "filmSchool",
+        cities: ["athens"],
+        label: { he: "להיכנס לכיתה בלי לשלם", en: "Sit in without paying" },
+        copy: { he: "ניקוס לא תמיד סופר ראשים. לפעמים כן.", en: "Nikos doesn't always count heads. Sometimes he does." },
+        hours: 2, cost: 0, once: true,
+        npcInfluence: { id: "nikos_lecturer" },
+        outcomes: [
+          { weight: 50, tone: "good", flavor: { he: "תפסת שיעור שלם בחינם. +קרדיט.", en: "Caught a full lecture for free. +credit." }, effects: { creativity: 3 }, npc: { id: "nikos_lecturer", rel: 0 } },
+          { weight: 30, tone: "neutral", flavor: { he: "ניקוס ראה. לא אמר. תזכור שהוא ראה.", en: "Nikos saw. Said nothing. Remember that he saw." }, effects: { creativity: 1 }, npc: { id: "nikos_lecturer", rel: -1 } },
+          { weight: 20, tone: "bad", flavor: { he: "הוציא אותך פומבית באמצע השיעור.", en: "Threw you out publicly mid-lecture." }, effects: { reputation: -2, soul: -2 }, npc: { id: "nikos_lecturer", rel: -3 } }
+        ]
+      },
+      post_sofia_critique: {
+        location: "post",
+        cities: ["athens"],
+        label: { he: "להראות לסופיה את הראף קאט", en: "Show Sofia your rough cut" },
+        copy: { he: "העורכת הקרה תגיד 'מעניין'. ובאמת תכוון בזה משהו, או לא.", en: "The cold editor will say 'interesting.' She may even mean it." },
+        hours: 1, cost: 0, once: true,
+        npcInfluence: { id: "sofia_editor" },
+        outcomes: [
+          { weight: 50, tone: "neutral", flavor: { he: "סופיה אמרה 'מעניין'. לא הצלחת לפענח.", en: "Sofia said 'interesting.' Couldn't decode it." }, effects: {}, npc: { id: "sofia_editor", rel: 1 } },
+          { weight: 30, tone: "good", flavor: { he: "חתכה סצנה שלמה באכזריות. הסרט שלך נראה יותר טוב.", en: "Cut a whole sequence brutally. Your film is now better." }, effects: { creativity: 3, reputation: 1 }, npc: { id: "sofia_editor", rel: 2 } },
+          { weight: 15, tone: "good", sfx: "cash", flavor: { he: "הציעה לך עסקת פוסט להפקה הבאה.", en: "Offered you a post deal for the next project." }, effects: { reputation: 3, creativity: 1 }, npc: { id: "sofia_editor", rel: 3 } },
+          { weight: 5, tone: "bad", flavor: { he: "הקרינה את הקאט לצוות שלה. הם צחקו. היא לא עצרה אותם.", en: "Screened the cut to her crew. They laughed. She didn't stop them." }, effects: { reputation: -3, soul: -3 }, npc: { id: "sofia_editor", rel: -3 } }
+        ]
+      },
       cast_offer_to_model: {
         location: "casting",
         label: { he: "להציע תפקיד לדוגמן/ית", en: "Offer a part to a model" },
         copy: { he: "פנים יפות, אגנדה מינימלית. סטטיסטית — זהב או אסון.", en: "Beautiful face, minimal agenda. Statistically — gold or disaster." },
+        cities: ["telaviv"],
         hours: 1, cost: 0, once: true,
         outcomes: [
           { weight: 50, tone: "neutral", flavor: { he: "אמר/ה לבדוק עם הסוכן. הסוכן לא קיים.", en: "Said they'd check with their agent. The agent doesn't exist." }, effects: {} },
@@ -6702,6 +6784,29 @@
       `;
     }
 
+    /*
+     * sceneCardButtons — renders all SCENE_CARDS matching the building,
+     * filtered by current city. Each card's button gets the npcInfluence
+     * badge appended to its meta line so the player sees the bend.
+     */
+    function sceneCardButtons(buildingId) {
+      const city = gameState.city;
+      return Object.keys(SCENE_CARDS)
+        .filter((id) => {
+          const c = SCENE_CARDS[id];
+          if (c.location !== buildingId) return false;
+          if (Array.isArray(c.cities) && c.cities.length && !c.cities.includes(city)) return false;
+          return true;
+        })
+        .map((id) => {
+          const c = SCENE_CARDS[id];
+          const hours = c.hours || 1;
+          const money = c.cost ? formatMoney(c.cost) : "$0";
+          return buttonMarkup("runSceneCard", id, localize(c.label), localize(c.copy), hours + "h • " + money + npcInfluenceBadge(id));
+        })
+        .join("");
+    }
+
     function buttonMarkup(action, value, title, copy, meta) {
       return `
         <button class="action-btn" data-action="${action}" data-value="${value}">
@@ -6812,8 +6917,7 @@
               <div class="action-buttons">
                 ${buttonMarkup("shootOnPhone", "cafe", localize({ he: "צלם בטלפון", en: "Shoot on phone" }), localize({ he: "סצנה אחת, יד רועדת, חלום אחד. 5% סיכוי לוויראלי.", en: "One scene, shaky hand, one dream. 5% viral shot." }), "4h • $0")}
                 ${buttonMarkup("flirtAtCafe", "", localize({ he: "לפלרטט", en: "Flirt" }), localize({ he: "השולחן ליד מסתכל. תנסה. כי אם לא, מי יחזור איתך?", en: "The next table is looking. Try. Because if you don't, who comes home?" }), "1h • $0")}
-                ${buttonMarkup("runSceneCard", "cafe_overhear", localize(SCENE_CARDS.cafe_overhear.label), localize(SCENE_CARDS.cafe_overhear.copy), "1h • $0")}
-                ${buttonMarkup("runSceneCard", "cafe_pitch_barista", localize(SCENE_CARDS.cafe_pitch_barista.label), localize(SCENE_CARDS.cafe_pitch_barista.copy), "1h • " + formatMoney(20) + npcInfluenceBadge("cafe_pitch_barista"))}
+                ${sceneCardButtons("cafe")}
               </div>
             </div>
             <div class="action-group">
@@ -6825,7 +6929,8 @@
               </div>
             </div>
           `;
-        case "cinematheque":
+        case "cinematheque": {
+          const sceneHtml = sceneCardButtons("cinematheque");
           return `
             <div class="action-group">
               <h3>${t("training")}</h3>
@@ -6834,7 +6939,9 @@
                 ${buttonMarkup("shootOnPhone", "cinematheque", localize({ he: "צלם בטלפון", en: "Shoot on phone" }), localize({ he: "מצולם אחרי הקרנה, אווירה עזה. 7% ויראלי.", en: "Shot after a screening, vibe loaded. 7% viral." }), "3h • $0")}
               </div>
             </div>
+            ${sceneHtml ? `<div class="action-group"><h3>${localize({ he: "אנשי המקום", en: "The locals" })}</h3><div class="action-buttons">${sceneHtml}</div></div>` : ""}
           `;
+        }
         case "airport":
           return `
             <div class="action-group">
@@ -6855,8 +6962,7 @@
             <div class="action-group">
               <h3>${localize({ he: "עבודה על עצמך", en: "Work on yourself" })}</h3>
               <div class="action-buttons">
-                ${buttonMarkup("runSceneCard", "script_write_solo", localize(SCENE_CARDS.script_write_solo.label), localize(SCENE_CARDS.script_write_solo.copy), "2h • $0")}
-                ${buttonMarkup("runSceneCard", "script_borrow_idea", localize(SCENE_CARDS.script_borrow_idea.label), localize(SCENE_CARDS.script_borrow_idea.copy), "1h • $0" + npcInfluenceBadge("script_borrow_idea"))}
+                ${sceneCardButtons("script")}
               </div>
             </div>
             ${gameState.offers.length && gameState.offers[0].kind === "script" ? `<div class="action-group"><h3>${localize({ he: "הצעות פתוחות", en: "Open offers" })}</h3><div class="offer-list">${gameState.offers.map(renderOfferCard).join("")}</div></div>` : ""}
@@ -6872,8 +6978,7 @@
             <div class="action-group">
               <h3>${localize({ he: "כניסה מהדלת האחורית", en: "Through the back door" })}</h3>
               <div class="action-buttons">
-                ${buttonMarkup("runSceneCard", "cast_court_agent", localize(SCENE_CARDS.cast_court_agent.label), localize(SCENE_CARDS.cast_court_agent.copy), "2h • " + formatMoney(80) + npcInfluenceBadge("cast_court_agent"))}
-                ${buttonMarkup("runSceneCard", "cast_offer_to_model", localize(SCENE_CARDS.cast_offer_to_model.label), localize(SCENE_CARDS.cast_offer_to_model.copy), "1h • $0")}
+                ${sceneCardButtons("casting")}
               </div>
             </div>
             ${gameState.offers.length && gameState.offers[0].kind === "cast" ? `<div class="action-group"><h3>${localize({ he: "מועמדים", en: "Candidates" })}</h3><div class="offer-list">${gameState.offers.map(renderOfferCard).join("")}</div></div>` : ""}
@@ -6906,6 +7011,7 @@
             : courseMod > 1
               ? localize({ he: " ⚠️ (+" + Math.round((courseMod - 1) * 100) + "%)", en: " ⚠️ (+" + Math.round((courseMod - 1) * 100) + "%)" })
               : "";
+          const filmSchoolScene = sceneCardButtons("filmSchool");
           return `
             <div class="action-group">
               <h3>${t("training")}</h3>
@@ -6916,6 +7022,7 @@
                 }), course.hours + "h • " + formatMoney(Math.round(course.cost * priceScale() * courseMod)) + courseLabel)).join("")}
               </div>
             </div>
+            ${filmSchoolScene ? `<div class="action-group"><h3>${localize({ he: "אנשי המקום", en: "The locals" })}</h3><div class="action-buttons">${filmSchoolScene}</div></div>` : ""}
           `;
         }
         case "bank":
@@ -6932,7 +7039,8 @@
               </div>
             </div>
           `;
-        case "post":
+        case "post": {
+          const postScene = sceneCardButtons("post");
           return `
             <div class="action-group">
               <h3>${t("production")}</h3>
@@ -6940,7 +7048,9 @@
                 ${buttonMarkup("doPost", "", localize({ he: "לבצע פוסט לפרויקט בפוקוס", en: "Run post on focused project" }), localize({ he: "6h • עריכה, סאונד, וקצת שקר ערכי", en: "6h • edit, sound, and a little narrative fraud" }), "6h • " + formatMoney(postCost(920)))}
               </div>
             </div>
+            ${postScene ? `<div class="action-group"><h3>${localize({ he: "אנשי המקום", en: "The locals" })}</h3><div class="action-buttons">${postScene}</div></div>` : ""}
           `;
+        }
         case "gear": {
           const gearMod = modifierMultiplier("gear");
           const modLabel = gearMod < 1
