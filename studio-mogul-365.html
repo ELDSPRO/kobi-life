@@ -5222,6 +5222,208 @@
           }
         ]
       },
+      /* === ATTACK EVENTS — fire when condition meets, modal-style choice === */
+      {
+        id: "hackers_drive_lock",
+        triggers: function (s) { return s.day === 11; },
+        headline: { he: "הכונן שלך מוצפן. יש להם לוגו.", en: "Your drive is encrypted. They have a logo." },
+        copy: {
+          he: "האקרים שלחו צ'אט נחמד. תמיכה בארבע שפות, FAQ, קבלה. דרישה: $900 או שהם מוחקים את כל מה שצילמת. הצ'אטבוט אומר 'תודה שבחרת בנו.'",
+          en: "Hackers opened a friendly chat. Support in four languages, FAQ, receipt. Demand: $900 or they delete everything you shot. Their chatbot says 'thanks for choosing us.'"
+        },
+        choices: [
+          {
+            id: "pay_ransom",
+            label: { he: "לשלם $900", en: "Pay $900" },
+            copy: { he: "נדבק. אנחנו מקצוענים מול מקצוענים.", en: "Pay it. Pros against pros." },
+            outcome: { tone: "neutral", flavor: { he: "שילמת. הם שלחו לך קבלה ממוספרת ופרסומת לאנטי-וירוס. הכל פעיל.", en: "Paid. They sent a numbered receipt and an antivirus ad. Everything restored." }, effects: { cash: -900 } }
+          },
+          {
+            id: "refuse_ransom",
+            label: { he: "שיימחקו. אני אתחיל מחדש.", en: "Let them delete. I'll restart." },
+            copy: { he: "הגאווה זולה היום.", en: "Pride is cheap today." },
+            outcome: { tone: "bad", flavor: { he: "מחקו. שני ימים של עבודה. -3 יצירתיות, -2 נשמה. הם כתבו 'תודה על השיתוף.'", en: "They deleted. Two days of work gone. -3 creativity, -2 soul. They wrote 'thanks for the share.'" }, effects: { creativity: -3, soul: -2 } }
+          }
+        ]
+      },
+      {
+        id: "dani_idea_claim",
+        triggers: function (s) { return s.day === 23 && s.npcs && s.npcs.dani_classmate && s.npcs.dani_classmate.relationship < 0; },
+        headline: { he: "דני טוען שחצי מהרעיון שלו", en: "Dani claims half the idea is his" },
+        copy: {
+          he: "הוא שלח עו\"ד. עו\"ד שמדבר ב-'אי-ספק' ו'ראיות מקדמיות'. הוא לא רוצה לעצור אותך. הוא רוצה שתבחר איך זה ייגמר.",
+          en: "He sent a lawyer. A lawyer who speaks in 'prima facie' and 'preliminary evidence'. He doesn't want to stop you. He wants you to choose how this ends."
+        },
+        choices: [
+          {
+            id: "pay_dani",
+            label: { he: "לשלם $1500 ולסגור", en: "Pay $1500 and close" },
+            copy: { he: "כסף קונה שקט. בערך.", en: "Money buys silence. Roughly." },
+            outcome: { tone: "neutral", flavor: { he: "סגרת. דני חתם על NDA וקנה מרגריטה.", en: "Closed. Dani signed an NDA and bought a margarita." }, effects: { cash: -1500 } }
+          },
+          {
+            id: "give_credit",
+            label: { he: "לתת לו קרדיט 'רעיון משותף'", en: "Give him a 'co-idea' credit" },
+            copy: { he: "חינם, אבל הקרדיט שלך כעת חולק.", en: "Free, but your credit is now split." },
+            outcome: { tone: "neutral", flavor: { he: "דני שמח. אתה רושם 'בהשראת' באותיות קטנות. הוא רושם 'יוצר משותף' באותיות גדולות.", en: "Dani is thrilled. You write 'inspired by' in small letters. He writes 'co-creator' in large." }, effects: { reputation: -2 } }
+          },
+          {
+            id: "fight_dani",
+            label: { he: "להילחם. אני יוצר.", en: "Fight. I'm the creator." },
+            copy: { he: "סיכון: עיכוב משפטי שלא תגדיר.", en: "Risk: a legal delay you can't define." },
+            outcomes: [
+              { weight: 50, tone: "good", flavor: { he: "התיק נפל. דני בלע. +מוניטין שקט.", en: "Case dropped. Dani choked. +quiet reputation." }, effects: { reputation: 3, soul: 1 } },
+              { weight: 50, tone: "bad", flavor: { he: "צו עיכוב. שני שבועות. -2 מטלות שלך מתעכבות.", en: "Restraining order. Two weeks. -2 of your tasks delayed." }, effects: { reputation: -4, soul: -3, cash: -800 } }
+            ]
+          }
+        ]
+      },
+      {
+        id: "lead_toothpaste",
+        triggers: function (s) { return s.day === 38 && s.filmTasks && s.filmTasks.lead; },
+        headline: { he: "השחקן הראשי קיבל פרסומת למשחת שיניים", en: "Your lead booked a toothpaste commercial" },
+        copy: {
+          he: "הוא מצטער. הסוכן שלו (לא ליאור — סוכן אחר, גרוע יותר) לחץ. שמלם 8,000 ויש לו צילום חודש. אתה חייב לבחור.",
+          en: "He's sorry. His agent (not Lior — a worse one) pressured him. Pays 8,000 and shoots for a month. You have to choose."
+        },
+        choices: [
+          {
+            id: "reschedule",
+            label: { he: "להזיז צילומים — לחכות", en: "Push the shoot — wait" },
+            copy: { he: "השעון שלך לא יחכה.", en: "Your clock won't wait." },
+            outcome: { tone: "bad", flavor: { he: "החודש הולך. ארקדי מתעצבן. -1 לכל המטלות הבאות בזמן.", en: "A month gone. Arkady is annoyed. -1 on every upcoming task on time." }, effects: { creativity: -1, soul: -2 } }
+          },
+          {
+            id: "replace_lead",
+            label: { he: "להחליף שחקן עכשיו", en: "Replace the lead now" },
+            copy: { he: "מהיר, מסוכן, יקר.", en: "Fast, risky, costly." },
+            outcome: { tone: "neutral", flavor: { he: "מצאת מישהי. היא לא הוא. הסרט שונה עכשיו. -$1200, +1 יצירתיות.", en: "Found someone else. She's not him. The film is different now. -$1200, +1 creativity." }, effects: { cash: -1200, creativity: 1, reputation: -1 } }
+          },
+          {
+            id: "shoot_at_night",
+            label: { he: "לצלם בלילה אחרי הפרסומת", en: "Shoot at night after the ad" },
+            copy: { he: "הוא יבוא עייף. החיוך שלו לא טבעי.", en: "He'll come tired. His smile won't be natural." },
+            outcome: { tone: "bad", flavor: { he: "צילמתם 3 לילות. החיוך שלו זוהר כמו במשחת השיניים. ככה זה ישאר.", en: "Three nights. His smile glows like in the ad. That's the film now." }, effects: { creativity: -2, soul: -1, reputation: -1 } }
+          }
+        ]
+      },
+      {
+        id: "tax_audit_day52",
+        triggers: function (s) { return s.day === 52 && (s.cash + s.bank > 8000 || s.fund > 3000); },
+        headline: { he: "ביקורת מס פתאומית", en: "Surprise tax audit" },
+        copy: {
+          he: "פקיד עם משקפיים נכנס למשרד הוירטואלי שלך. רואה החשבון שלך 'בחו\"ל'. יש לך שלוש דרכים לטפל בזה.",
+          en: "A clerk with glasses walks into your virtual office. Your accountant is 'abroad'. Three ways to handle this."
+        },
+        choices: [
+          {
+            id: "pay_audit",
+            label: { he: "לשלם 12% מהמזומן", en: "Pay 12% of cash" },
+            copy: { he: "ישר, יקר, גמור.", en: "Straight, costly, done." },
+            outcome: { tone: "neutral", flavor: { he: "שילמת. הפקיד אמר 'ראיתי גרוע יותר'.", en: "Paid. The clerk said 'I've seen worse.'" }, effects: { cash: -Infinity } /* hacky marker — see handler */, taxBite: 0.12 }
+          },
+          {
+            id: "whitwell_favor",
+            label: { he: "לבקש טובה ממר ויטוול בלונדון", en: "Ask Mr. Whitwell in London for a favor" },
+            copy: { he: "אם הוא מחבב אותך — בלי תשלום. אם לא — קולנוע אחר.", en: "If he likes you — no payment. If not — another problem." },
+            requires: function (s) { return s.npcs && s.npcs.whitwell_banker && s.npcs.whitwell_banker.relationship >= 3; },
+            outcome: { tone: "good", flavor: { he: "ויטוול שלח מסמך פיקטיבי בעיניים פתוחות. הפקיד סגר תיק. +2 נשמה (מישהו דאג לך).", en: "Whitwell sent a polite fiction. Clerk closed the file. +2 soul (someone covered for you)." }, effects: { soul: 2, reputation: -1 } }
+          },
+          {
+            id: "fake_docs",
+            label: { he: "לזייף — מסמך מפוקפק", en: "Forge a sketchy doc" },
+            copy: { he: "30% הם יגלו ויחזרו ב-15.", en: "30% they catch it and come back at 15%." },
+            outcomes: [
+              { weight: 70, tone: "good", flavor: { he: "עבר. הפקיד הלך. -1 נשמה (ידעת).", en: "Passed. Clerk left. -1 soul (you knew)." }, effects: { soul: -1 } },
+              { weight: 30, tone: "bad", flavor: { he: "תפסו. 15% במזומן, ומכתב 'נמשיך לעקוב'.", en: "Caught. 15% cash, and a 'we'll keep watching' letter." }, effects: { reputation: -3, soul: -2 }, taxBite: 0.15 }
+            ]
+          }
+        ]
+      },
+      {
+        id: "arkady_assistant",
+        triggers: function (s) { return s.debt > 12000 && !s.storyBeatsFired.arkady_assistant; },
+        headline: { he: "ארקדי שלח 'מפיק בפועל לעזרה'", en: "Arkady sent a 'line producer to help'" },
+        copy: {
+          he: "ארקדי התקשר ואמר 'אני שולח לך את שמואל. הוא מעולה. הוא יסדר לך הכל.' שמואל הגיע עם תיק עור ועם החלטות.",
+          en: "Arkady called: 'I'm sending Shmuel. He's great. He'll handle everything.' Shmuel arrived with a leather case and decisions."
+        },
+        choices: [
+          {
+            id: "accept_shmuel",
+            label: { he: "לקבל אותו — חיתוך חוב $3000", en: "Accept him — debt cut $3000" },
+            copy: { he: "פחות שליטה, פחות חוב.", en: "Less control, less debt." },
+            outcome: { tone: "neutral", flavor: { he: "שמואל נכנס. ארקדי הוריד $3000 מהחוב. השליטה שלך על הסרט עכשיו 70%.", en: "Shmuel is in. Arkady knocked $3000 off the debt. Your film control is now 70%." }, effects: { cash: 0 }, debtCut: 3000 }
+          },
+          {
+            id: "refuse_shmuel",
+            label: { he: "לא תודה. אני לבד.", en: "No thanks. Solo." },
+            copy: { he: "ארקדי יזכור.", en: "Arkady will remember." },
+            outcome: { tone: "bad", flavor: { he: "ארקדי חייך בטלפון. החוב גדל ב-$500 'דמי טיפול'. הוא מבין שאתה מתקשה.", en: "Arkady smiled on the phone. Debt grew $500 'handling fee'. He understands you're struggling." }, effects: { cash: 0 }, debtAdd: 500 }
+          }
+        ]
+      },
+      {
+        id: "arkady_unauthorized_teaser",
+        triggers: function (s) { return s.day === 61; },
+        headline: { he: "ארקדי שחרר קדימון שלא ראית", en: "Arkady released a teaser you've never seen" },
+        copy: {
+          he: "30 שניות באינטרנט. הקול שלך, חומרים שלך, מוזיקה ש-לא קנית. הוא חתם 'בקרוב — סרט ישראלי חדש.' המגיבים שואלים מי הבמאי.",
+          en: "30 seconds online. Your voice, your footage, music you didn't license. He signed it 'coming soon — a new Israeli film.' Commenters ask who the director is."
+        },
+        choices: [
+          {
+            id: "swallow",
+            label: { he: "לבלוע. להמשיך.", en: "Swallow. Move on." },
+            copy: { he: "להישאר נחמד עם ארקדי.", en: "Stay polite with Arkady." },
+            outcome: { tone: "bad", flavor: { he: "בלעת. הסרט עכשיו בעיניים של הקהל פחות שלך. -3 מוניטין, -2 נשמה.", en: "Swallowed. The film now belongs to the audience less. -3 reputation, -2 soul." }, effects: { reputation: -3, soul: -2 } }
+          },
+          {
+            id: "confront_arkady",
+            label: { he: "להתעמת — דרישת שליטה", en: "Confront — demand control" },
+            copy: { he: "מצחיק לבטל מפיק עם 8% ריבית.", en: "Funny to challenge a producer at 8% interest." },
+            outcome: { tone: "bad", flavor: { he: "ארקדי הסכים בנימוס ולקח $1500 'דמי דיון'. הקדימון לא הוסר.", en: "Arkady politely agreed and took $1500 'discussion fee'. The teaser stayed up." }, effects: { cash: -1500, reputation: 1 } }
+          },
+          {
+            id: "leak_own",
+            label: { he: "להדליף גרסה משלך לרשת", en: "Leak your own version online" },
+            copy: { he: "הסיכון: ארקדי יידע מי הדליף.", en: "Risk: Arkady will know who leaked." },
+            outcomes: [
+              { weight: 60, tone: "good", flavor: { he: "הגרסה שלך התפוצצה. רוז קוראת. +5 מוניטין.", en: "Your version blew up. Rose is reading. +5 reputation." }, effects: { reputation: 5, creativity: 1 } },
+              { weight: 40, tone: "bad", flavor: { he: "ארקדי גילה ב-12 שעות. החוב גדל ב-$2000 'נזק תדמיתי'.", en: "Arkady found out in 12 hours. Debt grew $2000 'reputational damage'." }, effects: { reputation: 2 }, debtAdd: 2000 }
+            ]
+          }
+        ]
+      },
+      {
+        id: "master_copy_crisis",
+        triggers: function (s) { return s.day === 82; },
+        headline: { he: "עותק ההקרנה לא נפתח", en: "Master copy won't open" },
+        copy: {
+          he: "המעבדה אומרת 'יש לנו בעיה'. הקובץ דרס את עצמו. ארבע אפשרויות, אף אחת לא נוחה.",
+          en: "The lab says 'we have a problem'. The file ate itself. Four options, none comfortable."
+        },
+        choices: [
+          {
+            id: "pay_lab",
+            label: { he: "$2200 לשחזור מקצועי", en: "$2200 for pro recovery" },
+            copy: { he: "מקצועי. יקר.", en: "Professional. Expensive." },
+            outcome: { tone: "neutral", flavor: { he: "שחזרו. המעבדה הזכירה אותך לעוד שלוש שנים.", en: "Recovered. The lab will remember you for three years." }, effects: { cash: -2200 } }
+          },
+          {
+            id: "skip_captions",
+            label: { he: "לוותר על כתוביות", en: "Drop the captions" },
+            copy: { he: "חצי קהל לא יבין.", en: "Half the audience won't follow." },
+            outcome: { tone: "bad", flavor: { he: "ויתרת. הסרט נחתך לחצי שפה. -2 מוניטין, -1 יצירתיות.", en: "Dropped. The film is half-language. -2 reputation, -1 creativity." }, effects: { reputation: -2, creativity: -1 } }
+          },
+          {
+            id: "free_service",
+            label: { he: "שירות חינמי עם סימן מים", en: "Free service with watermark" },
+            copy: { he: "סימן מים עצום באמצע המסך.", en: "Massive watermark across the screen." },
+            outcome: { tone: "bad", flavor: { he: "סימן המים נשאר לכל ההקרנות הראשונות. הקהל צוחק. -4 מוניטין.", en: "The watermark stays for every early screening. Audience laughs. -4 reputation." }, effects: { reputation: -4, soul: -2 } }
+          }
+        ]
+      },
       {
         id: "gossip_column_day30",
         day: 30,
@@ -5325,6 +5527,18 @@
       return STORY_BEATS.find((b) => b.day === day);
     }
 
+    function findFiringBeat() {
+      if (!gameState.storyBeatsFired) gameState.storyBeatsFired = {};
+      return STORY_BEATS.find((b) => {
+        if (gameState.storyBeatsFired[b.id]) return false;
+        if (typeof b.day === "number" && b.day === gameState.day) return true;
+        if (typeof b.triggers === "function") {
+          try { return !!b.triggers(gameState); } catch (_err) { return false; }
+        }
+        return false;
+      });
+    }
+
     function applyStoryChoice(beatId, choiceId) {
       const beat = STORY_BEATS.find((b) => b.id === beatId);
       if (!beat) return false;
@@ -5347,10 +5561,21 @@
       }
       if (!picked) return false;
       const fx = picked.effects || {};
-      if (typeof fx.cash === "number") changeCash(fx.cash);
+      if (typeof fx.cash === "number" && fx.cash !== -Infinity) changeCash(fx.cash);
       ["soul", "happiness", "creativity", "reputation", "love"].forEach((k) => {
         if (typeof fx[k] === "number") adjustStat(k, fx[k]);
       });
+      // Attack-specific levers: tax bite as % of cash, debt cut/add for Arkady moves
+      if (typeof picked.taxBite === "number") {
+        const bite = Math.round(gameState.cash * picked.taxBite);
+        if (bite > 0) changeCash(-bite);
+      }
+      if (typeof picked.debtCut === "number") {
+        gameState.debt = Math.max(0, gameState.debt - picked.debtCut);
+      }
+      if (typeof picked.debtAdd === "number") {
+        gameState.debt += picked.debtAdd;
+      }
       flashMessage(localize(picked.flavor), picked.tone || "neutral");
       if (picked.sfx) playSfx(picked.sfx);
       if (!gameState.storyBeatsFired) gameState.storyBeatsFired = {};
@@ -5363,9 +5588,8 @@
 
     function maybeTriggerStoryBeat() {
       if (!gameState.storyBeatsFired) gameState.storyBeatsFired = {};
-      const beat = findStoryBeat(gameState.day);
+      const beat = findFiringBeat();
       if (!beat) return;
-      if (gameState.storyBeatsFired[beat.id]) return;
       gameState.activeStoryBeat = beat.id;
     }
 
