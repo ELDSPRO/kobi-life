@@ -1802,6 +1802,47 @@
       color: #707070;
     }
 
+    .unlock-list {
+      display: grid;
+      gap: 5px;
+      padding: 7px;
+      background: #ffffff;
+      box-shadow:
+        inset -1px -1px var(--win-light),
+        inset 1px 1px var(--win-dark),
+        inset -2px -2px var(--win-mid),
+        inset 2px 2px var(--win-black);
+    }
+
+    .unlock-row {
+      display: grid;
+      gap: 3px;
+      font-size: 11px;
+      line-height: 1.3;
+    }
+
+    .unlock-row.done .unlock-row-head { color: #0b7d3a; }
+    .unlock-row.done .unlock-fill { background: linear-gradient(90deg, #0b7d3a, #6cf0b0); }
+
+    .unlock-row-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-weight: 600;
+    }
+
+    .unlock-bar {
+      height: 7px;
+      background: #c0c0c0;
+      box-shadow: inset 1px 1px var(--win-black), inset -1px -1px var(--win-light);
+    }
+
+    .unlock-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2a4ba0, #5f95c8);
+      transition: width 0.25s ease;
+    }
+
     .mod-chip-good {
       color: #08311f;
       background: #6cf0b0;
@@ -4764,11 +4805,53 @@
       return true;
     }
 
+    // Single source of truth for the film-industry unlock requirements.
+    // Anything that checks lock status or renders progress reads from here.
+    const FILM_UNLOCK_REQS = {
+      experience: 62,
+      education: 1,
+      cash: 300,
+      camera: true
+    };
+
+    function filmUnlockState() {
+      const have = {
+        experience: gameState.experience | 0,
+        education: gameState.education | 0,
+        cash: gameState.cash | 0,
+        camera: !!gameState.equipment.camera
+      };
+      return {
+        have,
+        need: FILM_UNLOCK_REQS,
+        missing: {
+          experience: Math.max(0, FILM_UNLOCK_REQS.experience - have.experience),
+          education: Math.max(0, FILM_UNLOCK_REQS.education - have.education),
+          cash: Math.max(0, FILM_UNLOCK_REQS.cash - have.cash),
+          camera: have.camera ? 0 : 1
+        }
+      };
+    }
+
+    function filmLockedCopy() {
+      const s = filmUnlockState();
+      const parts = [];
+      if (s.missing.experience > 0) parts.push(localize({ he: s.missing.experience + " ניסיון", en: s.missing.experience + " xp" }));
+      if (s.missing.education > 0) parts.push(localize({ he: s.missing.education + " השכלה", en: s.missing.education + " edu" }));
+      if (s.missing.cash > 0) parts.push(localize({ he: formatMoney(s.missing.cash) + " מזומן", en: formatMoney(s.missing.cash) + " cash" }));
+      if (s.missing.camera > 0) parts.push(localize({ he: "מצלמה", en: "camera" }));
+      if (!parts.length) return localize({ he: "הכל מוכן — נסה שוב.", en: "All set — try again." });
+      return localize({
+        he: "חסר לפתיחת התעשייה: " + parts.join(" • "),
+        en: "To unlock the industry: " + parts.join(" • ")
+      });
+    }
+
     function updateUnlocks() {
       if (!gameState.filmUnlocked &&
-        gameState.experience >= 62 &&
-        gameState.education >= 1 &&
-        gameState.cash >= 300 &&
+        gameState.experience >= FILM_UNLOCK_REQS.experience &&
+        gameState.education >= FILM_UNLOCK_REQS.education &&
+        gameState.cash >= FILM_UNLOCK_REQS.cash &&
         gameState.equipment.camera) {
         gameState.filmUnlocked = true;
         flashMessage(t("filmUnlocked"), "good");
@@ -4797,7 +4880,7 @@
         return false;
       }
       if (kind === "script" && !gameState.filmUnlocked) {
-        flashMessage(t("filmLocked"), "bad");
+        flashMessage(filmLockedCopy(), "bad");
         return false;
       }
       const offers = [];
@@ -5741,6 +5824,56 @@
       `;
     }
 
+    function renderUnlockProgress() {
+      const s = filmUnlockState();
+      const rows = [
+        {
+          key: "experience",
+          label: localize({ he: "ניסיון", en: "Experience" }),
+          have: s.have.experience, need: s.need.experience,
+          fmt: (n) => n
+        },
+        {
+          key: "education",
+          label: localize({ he: "השכלה", en: "Education" }),
+          have: s.have.education, need: s.need.education,
+          fmt: (n) => n
+        },
+        {
+          key: "cash",
+          label: localize({ he: "מזומן", en: "Cash" }),
+          have: s.have.cash, need: s.need.cash,
+          fmt: (n) => formatMoney(n)
+        }
+      ];
+      return `
+        <div class="inventory-block unlock-card">
+          <div class="win95-panel-title">${localize({ he: "🎬 פתיחת תעשיית הקולנוע", en: "🎬 Unlock film industry" })}</div>
+          <div class="unlock-list">
+            ${rows.map((r) => {
+              const pct = r.need > 0 ? Math.min(100, Math.round((r.have / r.need) * 100)) : 100;
+              const done = r.have >= r.need;
+              return `
+                <div class="unlock-row ${done ? "done" : ""}">
+                  <div class="unlock-row-head">
+                    <span>${r.label}</span>
+                    <span>${r.fmt(r.have)} / ${r.fmt(r.need)} ${done ? "✓" : ""}</span>
+                  </div>
+                  <div class="unlock-bar"><div class="unlock-fill" style="width:${pct}%"></div></div>
+                </div>
+              `;
+            }).join("")}
+            <div class="unlock-row ${s.have.camera ? "done" : ""}">
+              <div class="unlock-row-head">
+                <span>${localize({ he: "מצלמה", en: "Camera" })}</span>
+                <span>${s.have.camera ? "✓" : localize({ he: "לקנות בחנות ציוד", en: "Buy at gear shop" })}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     function renderBoard() {
       const city = getCity();
       const hint = currentHint();
@@ -5803,6 +5936,7 @@
                 </div>
               </div>
             ` : ""}
+            ${gameState.filmUnlocked ? "" : renderUnlockProgress()}
           </section>
           <section class="win95-main">
             <div class="win95-strip">
@@ -6162,16 +6296,26 @@
                 }), "$" + Math.round(job.wage * economyProfile().wages) + "/h")).join("")}
               </div>
             </div>
-            ${activeJob ? `
+            ${activeJob ? (() => {
+              const shiftCopy = (hours) => {
+                const pay = Math.round(activeJob.wage * hours * economyProfile().wages);
+                const xp = Math.round(activeJob.exp * (hours / 4));
+                return localize({
+                  he: formatMoney(pay) + " • +" + xp + " ניסיון",
+                  en: formatMoney(pay) + " • +" + xp + " xp"
+                });
+              };
+              return `
               <div class="action-group">
                 <h3>${t("shift")}</h3>
                 <div class="action-buttons">
-                  ${buttonMarkup("workShift", "4", t("work4"), localize({ he: "שכר: " + formatMoney(Math.round(activeJob.wage * 4 * economyProfile().wages)), en: "Pay: " + formatMoney(Math.round(activeJob.wage * 4 * economyProfile().wages)) }), "4h")}
-                  ${buttonMarkup("workShift", "6", t("work6"), localize({ he: "שכר: " + formatMoney(Math.round(activeJob.wage * 6 * economyProfile().wages)), en: "Pay: " + formatMoney(Math.round(activeJob.wage * 6 * economyProfile().wages)) }), "6h")}
-                  ${buttonMarkup("workShift", "8", t("work8"), localize({ he: "שכר: " + formatMoney(Math.round(activeJob.wage * 8 * economyProfile().wages)), en: "Pay: " + formatMoney(Math.round(activeJob.wage * 8 * economyProfile().wages)) }), "8h")}
+                  ${buttonMarkup("workShift", "4", t("work4"), shiftCopy(4), "4h")}
+                  ${buttonMarkup("workShift", "6", t("work6"), shiftCopy(6), "6h")}
+                  ${buttonMarkup("workShift", "8", t("work8"), shiftCopy(8), "8h")}
                 </div>
               </div>
-            ` : ""}
+              `;
+            })() : ""}
           `;
         case "wardrobe":
           return `
