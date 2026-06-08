@@ -1,0 +1,5851 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>kobi life.</title>
+  <style>
+    :root {
+      --paper: #f5e8ce;
+      --paper-2: #ebd5ac;
+      --ink: #27180f;
+      --accent: #b44f2a;
+      --accent-2: #19475d;
+      --glow: #ffd171;
+      --sky-a: #eae2d3;
+      --sky-b: #d8ccb8;
+      --sky-c: #cfc3b1;
+      --panel: rgba(255, 255, 255, 0.74);
+      --panel-strong: rgba(255, 255, 255, 0.84);
+      --shadow: rgba(25, 16, 12, 0.12);
+      --good: #23775f;
+      --bad: #a53131;
+      --soft: rgba(39, 24, 15, 0.08);
+      --street: #9e8c72;
+      --street-edge: #786850;
+      --marquee: #fff7cf;
+      --night: rgba(8, 14, 28, 0.74);
+      --font-title: "Trebuchet MS", "Arial", sans-serif;
+      --font-body: "Verdana", "Arial", sans-serif;
+      --hud-height: 94px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: linear-gradient(180deg, #f6eedf, #ece4d6);
+      color: var(--ink);
+      font-family: var(--font-body);
+      overflow: hidden;
+    }
+
+    body {
+      position: relative;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      color: inherit;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #app {
+      height: 100vh;
+      display: grid;
+      grid-template-rows: var(--hud-height) minmax(0, 1fr);
+      overflow: hidden;
+    }
+
+    .hud {
+      position: relative;
+      z-index: 40;
+      display: grid;
+      grid-template-columns: 210px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      background: rgba(251, 246, 237, 0.96);
+      border-bottom: 1px solid rgba(39, 24, 15, 0.08);
+    }
+
+    .clock-box,
+    .status-box,
+    .controls-box {
+      background: var(--panel);
+      border: 1px solid rgba(39, 24, 15, 0.08);
+      border-radius: 18px;
+      box-shadow: none;
+      padding: 8px 10px;
+    }
+
+    .clock-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .clock-face {
+      width: 58px;
+      height: 58px;
+      flex: 0 0 auto;
+    }
+
+    .clock-face .bg {
+      stroke: rgba(39, 24, 15, 0.14);
+      stroke-width: 9;
+      fill: none;
+    }
+
+    .clock-face .fg {
+      stroke: var(--accent);
+      stroke-width: 10;
+      stroke-linecap: round;
+      fill: none;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+      transition: stroke-dashoffset 0.4s ease;
+    }
+
+    .clock-time {
+      font-family: var(--font-title);
+      font-size: clamp(1.04rem, 1.55vw, 1.34rem);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .clock-sub {
+      font-size: 0.77rem;
+      opacity: 0.72;
+      margin-top: 2px;
+    }
+
+    .status-box {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .metric {
+      min-width: 0;
+      padding: 6px 8px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.56);
+      border: 1px solid rgba(39, 24, 15, 0.08);
+    }
+
+    .metric-label {
+      font-size: 0.67rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      opacity: 0.62;
+    }
+
+    .metric-value {
+      font-family: var(--font-title);
+      font-size: clamp(0.86rem, 1.2vw, 1.02rem);
+      font-weight: 700;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .controls-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: flex-end;
+      flex-wrap: nowrap;
+    }
+
+    .icon-btn {
+      min-width: 38px;
+      min-height: 38px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(39, 24, 15, 0.1);
+      box-shadow: none;
+      transition: transform 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      grid-template-areas: "side board";
+      direction: ltr;
+      gap: 12px;
+      padding: 12px;
+      min-height: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .board-stage {
+      grid-area: board;
+      direction: rtl;
+      position: relative;
+      min-height: 0;
+      height: 100%;
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid rgba(39, 24, 15, 0.1);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0)),
+        linear-gradient(180deg, var(--city-sky-a), var(--city-sky-b) 60%, var(--city-sky-c));
+    }
+
+    .city-skyline,
+    .board-ground {
+      display: none;
+    }
+
+    .skyline-bar {
+      display: none;
+    }
+
+    .board-caption {
+      position: absolute;
+      inset: 12px 12px auto 12px;
+      z-index: 3;
+      display: grid;
+      gap: 0;
+      pointer-events: none;
+    }
+
+    .city-title {
+      background: rgba(255, 255, 255, 0.76);
+      border-radius: 16px;
+      padding: 10px 12px;
+      border: 1px solid rgba(39, 24, 15, 0.08);
+      max-width: none;
+    }
+
+    .city-title .board-meta {
+      margin: 4px 0 0;
+      font-size: 0.74rem;
+      opacity: 0.62;
+    }
+
+    .city-title .board-hint {
+      margin: 6px 0 0;
+      font-size: 0.82rem;
+      opacity: 0.9;
+      white-space: normal;
+      line-height: 1.32;
+    }
+
+    .city-title h1 {
+      margin: 0;
+      font-family: var(--font-title);
+      font-size: clamp(1.08rem, 1.7vw, 1.48rem);
+      line-height: 1.02;
+    }
+
+    .city-title p {
+      margin: 4px 0 0;
+      opacity: 0.78;
+      font-size: 0.8rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ticker {
+      display: none;
+    }
+
+    .board-ring {
+      position: absolute;
+      inset: 86px 18px 18px 18px;
+      z-index: 2;
+    }
+
+    .street-loop {
+      position: absolute;
+      inset: 10% 8%;
+      border-radius: 50%;
+      background: transparent;
+      border: 10px solid rgba(114, 91, 62, 0.34);
+    }
+
+    .street-loop::after {
+      content: "";
+      position: absolute;
+      inset: 6px;
+      border-radius: 50%;
+      border: 1px dashed rgba(114, 91, 62, 0.28);
+    }
+
+    .center-plaza {
+      display: none;
+    }
+
+    .center-plaza strong {
+      display: block;
+      font-family: var(--font-title);
+      font-size: clamp(0.92rem, 1.3vw, 1.08rem);
+    }
+
+    .center-plaza span {
+      display: block;
+      font-size: 0.76rem;
+      opacity: 0.8;
+      margin-top: 2px;
+    }
+
+    .building {
+      position: absolute;
+      width: clamp(62px, 7vw, 86px);
+      aspect-ratio: 1;
+      transform: translate(-50%, -50%);
+      z-index: 4;
+      cursor: pointer;
+      transition: transform 0.18s ease, filter 0.18s ease;
+    }
+
+    .building:hover {
+      transform: translate(-50%, -52%);
+      filter: brightness(1.02);
+    }
+
+    .building.selected {
+      z-index: 5;
+    }
+
+    .building-card {
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.18), transparent 38%),
+        linear-gradient(180deg, var(--b1, #c97f5c), var(--b2, #7e4a35));
+      border: 1px solid rgba(39, 24, 15, 0.12);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .roof,
+    .facade,
+    .building-tag,
+    .windows,
+    .door,
+    .window {
+      display: none;
+    }
+
+    .sign {
+      position: relative;
+      z-index: 2;
+      width: calc(100% - 14px);
+      height: calc(100% - 14px);
+      background: rgba(255, 255, 255, 0.86);
+      border-radius: 12px;
+      padding: 8px 6px;
+      text-align: center;
+      font-family: var(--font-title);
+      font-size: clamp(0.64rem, 0.82vw, 0.78rem);
+      line-height: 1.18;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(39, 24, 15, 0.12);
+    }
+
+    .building.target .sign {
+      animation: blinkSign 1s infinite alternate;
+    }
+
+    .avatar {
+      position: absolute;
+      width: 40px;
+      height: 54px;
+      transform: translate(-50%, -50%);
+      z-index: 7;
+      transition: left 0.95s cubic-bezier(.23,.91,.23,.99), top 0.95s cubic-bezier(.23,.91,.23,.99);
+      pointer-events: none;
+    }
+
+    .avatar .shadow {
+      position: absolute;
+      inset: auto 8px 2px 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.22);
+      filter: blur(4px);
+    }
+
+    .avatar .body {
+      position: absolute;
+      inset: 6px 8px 8px 8px;
+      animation: bob 1s ease-in-out infinite;
+    }
+
+    .avatar .head {
+      width: 16px;
+      height: 16px;
+      margin: 0 auto;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #f8d8a2, #ecbd73);
+      border: 1px solid rgba(39,24,15,0.18);
+      position: relative;
+      z-index: 2;
+    }
+
+    .avatar .head::before {
+      content: "";
+      position: absolute;
+      inset: -2px 2px auto 2px;
+      height: 7px;
+      border-radius: 8px 8px 3px 3px;
+      background: linear-gradient(180deg, #312018, #5e382b);
+    }
+
+    .avatar .torso {
+      width: 20px;
+      height: 20px;
+      margin: -1px auto 0;
+      border-radius: 8px 8px 6px 6px;
+      background: linear-gradient(180deg, var(--accent-2), #122330);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .avatar .legs {
+      width: 18px;
+      height: 12px;
+      margin: 2px auto 0;
+      position: relative;
+      animation: walk 0.7s linear infinite;
+      transform-origin: top center;
+    }
+
+    .avatar .legs::before,
+    .avatar .legs::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 5px;
+      height: 12px;
+      border-radius: 4px;
+      background: #2b1c17;
+    }
+
+    .avatar .legs::before {
+      left: 3px;
+    }
+
+    .avatar .legs::after {
+      right: 3px;
+    }
+
+    .side-panel {
+      grid-area: side;
+      direction: rtl;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr);
+      gap: 10px;
+      min-height: 0;
+      height: 100%;
+      overflow: auto;
+    }
+
+    .panel {
+      background: var(--panel-strong);
+      border-radius: 18px;
+      border: 1px solid rgba(39, 24, 15, 0.08);
+      box-shadow: none;
+      padding: 12px;
+    }
+
+    .panel h2,
+    .panel h3 {
+      margin: 0 0 8px;
+      font-family: var(--font-title);
+      line-height: 1.02;
+    }
+
+    .goal-list,
+    .stats-list,
+    .project-list,
+    .score-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .goal-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .goal-card,
+    .project-card,
+    .score-card {
+      background: rgba(255,255,255,0.42);
+      border: 1px solid rgba(39, 24, 15, 0.08);
+      border-radius: 14px;
+      padding: 8px 10px;
+    }
+
+    .goal-top,
+    .project-top,
+    .score-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.82rem;
+    }
+
+    .goal-bar {
+      margin-top: 6px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(39,24,15,0.1);
+      overflow: hidden;
+    }
+
+    .goal-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), #ebad53);
+      transition: width 0.4s ease;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .stat-chip {
+      padding: 8px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.42);
+      text-align: center;
+      border: 1px solid rgba(39,24,15,0.08);
+      font-size: 0.76rem;
+    }
+
+    .stat-chip strong {
+      display: block;
+      font-family: var(--font-title);
+      font-size: 0.98rem;
+      margin-top: 3px;
+    }
+
+    .project-card {
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    .project-card:hover {
+      transform: translateY(-1px);
+    }
+
+    .project-card.focused {
+      border-color: rgba(180, 79, 42, 0.46);
+      box-shadow: inset 0 0 0 2px rgba(180, 79, 42, 0.14);
+    }
+
+    .project-list {
+      max-height: 150px;
+      overflow: auto;
+      padding-inline-end: 2px;
+    }
+
+    .project-meta {
+      margin-top: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .pill {
+      background: rgba(35, 23, 21, 0.82);
+      color: #fef1cb;
+      padding: 3px 7px;
+      border-radius: 999px;
+      font-size: 0.68rem;
+    }
+
+    .highscores {
+      display: none;
+    }
+
+    .marquee {
+      background:
+        radial-gradient(circle at center, rgba(255, 230, 153, 0.58), rgba(255, 230, 153, 0) 68%),
+        linear-gradient(180deg, #a73426, #642017);
+      color: var(--marquee);
+      border-radius: 16px;
+      padding: 12px;
+      border: 1px solid rgba(255,245,212,0.14);
+      min-height: 84px;
+      position: relative;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .marquee::before {
+      display: none;
+    }
+
+    .marquee h3 {
+      margin: 0;
+      position: relative;
+      z-index: 1;
+      font-size: clamp(0.95rem, 1.3vw, 1.08rem);
+    }
+
+    .marquee p {
+      margin: 6px 0 0;
+      position: relative;
+      z-index: 1;
+      font-size: 0.82rem;
+      line-height: 1.35;
+    }
+
+    .marquee.fireworks::after,
+    .marquee.flop::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.42;
+    }
+
+    .marquee.fireworks::after {
+      background:
+        radial-gradient(circle at 25% 28%, rgba(255,255,255,0.9), transparent 10%),
+        radial-gradient(circle at 72% 18%, rgba(255,218,126,0.9), transparent 11%),
+        radial-gradient(circle at 61% 55%, rgba(255,99,71,0.76), transparent 12%);
+      animation: sparkle 1.2s linear infinite;
+    }
+
+    .marquee.flop::after {
+      background:
+        linear-gradient(180deg, transparent 0, rgba(15,10,9,0.12) 20%, rgba(15,10,9,0.4)),
+        radial-gradient(circle at 50% 76%, rgba(23,15,12,0.4), transparent 30%);
+    }
+
+    .action-groups {
+      display: grid;
+      gap: 12px;
+    }
+
+    .action-group {
+      background: rgba(255,255,255,0.3);
+      border: 1px solid rgba(39,24,15,0.08);
+      border-radius: 16px;
+      padding: 10px;
+    }
+
+    .action-group h3 {
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+
+    .action-buttons,
+    .offer-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .action-btn,
+    .offer-card,
+    .start-card button {
+      width: 100%;
+      text-align: start;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.56), rgba(255,255,255,0.18)),
+        linear-gradient(180deg, #dfe7d8, #c8d4bf);
+      border-radius: 14px;
+      padding: 10px 12px;
+      border: 1px solid rgba(39,24,15,0.1);
+      box-shadow: none;
+      transition: transform 0.15s ease;
+    }
+
+    .action-btn:hover,
+    .offer-card:hover,
+    .start-card button:hover {
+      transform: translateY(-1px);
+    }
+
+    .action-btn .topline,
+    .offer-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      font-family: var(--font-title);
+      font-size: 0.84rem;
+    }
+
+    .action-btn .subline,
+    .offer-copy {
+      margin-top: 4px;
+      opacity: 0.78;
+      font-size: 0.76rem;
+      line-height: 1.34;
+    }
+
+    .offer-card {
+      background: rgba(255,255,255,0.88);
+      cursor: default;
+    }
+
+    .offer-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .mini-btn {
+      background: rgba(34, 25, 22, 0.88);
+      color: #f9efcf;
+      padding: 7px 9px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .mini-btn.secondary {
+      background: rgba(255,255,255,0.64);
+      color: var(--ink);
+      border: 1px solid rgba(39,24,15,0.08);
+    }
+
+    .place-copy {
+      margin: 0;
+      font-size: 0.84rem;
+      line-height: 1.4;
+      opacity: 0.86;
+    }
+
+    .hint-box {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(180, 79, 42, 0.08);
+      border: 1px solid rgba(180, 79, 42, 0.14);
+      font-size: 0.8rem;
+      line-height: 1.34;
+    }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .quick-item {
+      background: rgba(255,255,255,0.42);
+      border: 1px solid rgba(39,24,15,0.08);
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-size: 0.74rem;
+    }
+
+    .quick-item strong {
+      display: block;
+      margin-top: 3px;
+      font-family: var(--font-title);
+      font-size: 0.94rem;
+    }
+
+    .goal-rows {
+      display: grid;
+      gap: 8px;
+    }
+
+    .goal-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.42);
+      border: 1px solid rgba(39,24,15,0.08);
+      font-size: 0.8rem;
+    }
+
+    .goal-row strong {
+      font-family: var(--font-title);
+      font-size: 0.92rem;
+    }
+
+    .goal-row div {
+      display: grid;
+      gap: 2px;
+      text-align: end;
+    }
+
+    .goal-row span:last-child {
+      opacity: 0.62;
+      font-size: 0.72rem;
+    }
+
+    .section-label {
+      margin: 0 0 8px;
+      font-size: 0.76rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      opacity: 0.6;
+    }
+
+    .focus-empty {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.42);
+      border: 1px solid rgba(39,24,15,0.08);
+      font-size: 0.8rem;
+      line-height: 1.35;
+    }
+
+    .clerk-wrap {
+      width: min(240px, 100%);
+      aspect-ratio: 0.8;
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+
+    .clerk-nameplate {
+      position: absolute;
+      inset: auto 12px 12px 12px;
+      background: rgba(23, 18, 16, 0.82);
+      color: #fff2cc;
+      border-radius: 12px;
+      padding: 8px 10px;
+      text-align: center;
+      font-size: 0.76rem;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .start-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(25, 20, 18, 0.54);
+      display: grid;
+      place-items: center;
+      padding: 12px;
+      backdrop-filter: blur(6px);
+    }
+
+    .start-card {
+      width: min(680px, 94vw);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.18), transparent 36%),
+        linear-gradient(180deg, #f6e8cf, #d8bea1);
+      color: #1d120f;
+      border-radius: 24px;
+      padding: 20px;
+      border: 1px solid rgba(39,24,15,0.08);
+      box-shadow: 0 22px 40px -32px rgba(0,0,0,0.7);
+    }
+
+    .start-card h1 {
+      margin: 0;
+      font-family: var(--font-title);
+      font-size: clamp(1.72rem, 3.2vw, 2.28rem);
+      line-height: 0.98;
+    }
+
+    .start-card p {
+      opacity: 0.82;
+      max-width: 58ch;
+      line-height: 1.4;
+      font-size: 0.88rem;
+    }
+
+    .start-card .subtitle {
+      margin: 8px 0 0;
+      font-weight: 700;
+      opacity: 0.92;
+    }
+
+    .start-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field label {
+      font-size: 0.84rem;
+      opacity: 0.78;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      border: 1px solid rgba(39,24,15,0.14);
+      background: rgba(255,255,255,0.9);
+      padding: 11px 12px;
+      border-radius: 12px;
+    }
+
+    .goal-picks {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .goal-picks .field {
+      background: rgba(255,255,255,0.2);
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(39,24,15,0.08);
+    }
+
+    .start-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .lead-btn {
+      min-width: 0;
+      background: linear-gradient(180deg, #2f5f52, #173c34);
+      color: #fef0ca;
+      border-radius: 14px;
+      padding: 12px 16px;
+      box-shadow: none;
+    }
+
+    .float-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 120;
+    }
+
+    .floaty {
+      position: absolute;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(24, 19, 17, 0.86);
+      color: #fff4cf;
+      font-family: var(--font-title);
+      font-size: 0.92rem;
+      animation: floatUp 1.8s ease forwards;
+      white-space: nowrap;
+    }
+
+    .floaty.good {
+      background: rgba(18, 90, 65, 0.9);
+    }
+
+    .floaty.bad {
+      background: rgba(133, 34, 34, 0.92);
+    }
+
+    .night-veil {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(13, 20, 38, 0.08), var(--night));
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+
+    .night-veil.active {
+      opacity: 1;
+    }
+
+    .win-loss {
+      position: fixed;
+      inset: 0;
+      z-index: 95;
+      background: rgba(10, 8, 10, 0.72);
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      backdrop-filter: blur(7px);
+    }
+
+    .win-card {
+      width: min(680px, 94vw);
+      background: linear-gradient(180deg, #f8ddb1, #bb6f46);
+      color: #1f1410;
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 22px 40px -32px rgba(0,0,0,0.8);
+      border: 1px solid rgba(255,255,255,0.1);
+      text-align: center;
+    }
+
+    .win-card h2 {
+      margin: 0;
+      font-size: clamp(1.64rem, 2.6vw, 2.1rem);
+    }
+
+    .win-card p {
+      line-height: 1.45;
+      opacity: 0.86;
+      font-size: 0.88rem;
+    }
+
+    @keyframes blinkSign {
+      from { box-shadow: 0 0 0 rgba(255, 209, 113, 0); }
+      to { box-shadow: 0 0 0 5px rgba(255, 209, 113, 0.16); }
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-2px); }
+    }
+
+    @keyframes walk {
+      0%, 100% { transform: rotate(4deg); }
+      50% { transform: rotate(-4deg); }
+    }
+
+    @keyframes floatUp {
+      0% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0; }
+      14% { opacity: 1; transform: translate3d(0, -10px, 0) scale(1); }
+      100% { transform: translate3d(0, -68px, 0) scale(1.04); opacity: 0; }
+    }
+
+    @keyframes sparkle {
+      0% { transform: scale(0.95); opacity: 0.35; }
+      50% { transform: scale(1.04); opacity: 0.72; }
+      100% { transform: scale(0.95); opacity: 0.35; }
+    }
+
+    :root {
+      --paper: #c0c0c0;
+      --paper-2: #c0c0c0;
+      --ink: #000000;
+      --accent: #000080;
+      --accent-2: #000080;
+      --sky-a: #c0c0c0;
+      --sky-b: #c0c0c0;
+      --sky-c: #c0c0c0;
+      --panel: #c0c0c0;
+      --panel-strong: #c0c0c0;
+      --shadow: rgba(0, 0, 0, 0);
+      --soft: #808080;
+      --street: #9a9a9a;
+      --street-edge: #6f6f6f;
+      --marquee: #000000;
+      --font-title: "Tahoma", "MS Sans Serif", "Verdana", sans-serif;
+      --font-body: "Tahoma", "MS Sans Serif", "Verdana", sans-serif;
+      --hud-height: 92px;
+      --win-bg: #008080;
+      --win-face: #c0c0c0;
+      --win-light: #ffffff;
+      --win-mid: #dfdfdf;
+      --win-dark: #808080;
+      --win-black: #000000;
+      --win-blue: #000080;
+    }
+
+    html, body {
+      background: var(--win-bg);
+      color: var(--win-black);
+      font-size: 14px;
+    }
+
+    #app {
+      max-width: 1320px;
+      margin: 10px auto;
+      height: calc(100vh - 20px);
+      background: var(--win-face);
+      box-shadow:
+        inset -1px -1px var(--win-black),
+        inset 1px 1px var(--win-light),
+        inset -2px -2px var(--win-dark),
+        inset 2px 2px var(--win-mid);
+    }
+
+    .hud {
+      background: var(--win-face);
+      border-bottom: 0;
+      padding: 28px 6px 6px;
+      gap: 6px;
+    }
+
+    .hud::before {
+      content: var(--window-title, "kobi life.");
+      position: absolute;
+      inset: 4px 4px auto 4px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 12px;
+      background: linear-gradient(90deg, #000080, #1084d0);
+    }
+
+    .clock-box,
+    .status-box,
+    .controls-box,
+    .panel,
+    .action-group,
+    .action-btn,
+    .offer-card,
+    .project-card,
+    .score-card,
+    .goal-card,
+    .mini-btn,
+    .lead-btn,
+    .icon-btn,
+    .start-card button {
+      border-radius: 0;
+      border: 0;
+      background: var(--win-face);
+      box-shadow:
+        inset -1px -1px var(--win-black),
+        inset 1px 1px var(--win-light),
+        inset -2px -2px var(--win-dark),
+        inset 2px 2px var(--win-mid);
+    }
+
+    .action-btn,
+    .start-card button {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.56), rgba(255,255,255,0.18)),
+        linear-gradient(180deg, #dfe7d8, #c8d4bf);
+    }
+
+    .metric,
+    .quick-item,
+    .stat-chip,
+    .goal-row,
+    .place-copy,
+    .hint-box,
+    .city-title,
+    .marquee,
+    .field input,
+    .field select,
+    .board-stage {
+      border-radius: 0;
+      border: 0;
+      background: #ffffff;
+      box-shadow:
+        inset -1px -1px var(--win-light),
+        inset 1px 1px var(--win-dark),
+        inset -2px -2px var(--win-mid),
+        inset 2px 2px var(--win-black);
+    }
+
+    .board-stage {
+      background: #bdbdbd;
+    }
+
+    .board-caption {
+      inset: 8px 8px auto 8px;
+    }
+
+    .city-title {
+      padding: 8px 10px;
+    }
+
+    .city-title h1 {
+      font-size: 18px;
+    }
+
+    .city-title .board-meta,
+    .city-title .board-hint,
+    .clock-sub,
+    .metric-label,
+    .section-label {
+      opacity: 1;
+      color: #222;
+    }
+
+    .clock-time,
+    .metric-value,
+    .goal-row strong,
+    .stat-chip strong,
+    .quick-item strong {
+      font-family: var(--font-body);
+      font-weight: 700;
+    }
+
+    .controls-box {
+      background: transparent;
+      box-shadow: none;
+      padding: 0;
+    }
+
+    .sleep-btn {
+      min-width: 76px;
+      padding-inline: 10px;
+      font-weight: 700;
+    }
+
+    .layout {
+      gap: 6px;
+      padding: 6px;
+    }
+
+    .side-panel {
+      gap: 6px;
+    }
+
+    .panel {
+      padding: 8px;
+    }
+
+    .panel h2,
+    .panel h3 {
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    .lead-btn {
+      color: #008c2a;
+      font-weight: 700;
+    }
+
+    .goal-row,
+    .metric,
+    .quick-item,
+    .stat-chip,
+    .project-card,
+    .score-card,
+    .goal-card,
+    .action-btn,
+    .offer-card {
+      padding: 8px;
+    }
+
+    .place-copy,
+    .hint-box {
+      padding: 8px 10px;
+    }
+
+    .hint-box {
+      background: #ffffe1;
+    }
+
+    .board-ring {
+      inset: 78px 12px 12px 12px;
+    }
+
+    .street-loop {
+      border-width: 4px;
+      border-color: #7f7f7f;
+      background:
+        linear-gradient(180deg, #d4d4d4, #bdbdbd);
+      box-shadow:
+        inset -1px -1px var(--win-light),
+        inset 1px 1px var(--win-dark);
+    }
+
+    .street-loop::after {
+      border-color: #9a9a9a;
+      inset: 3px;
+    }
+
+    .building {
+      width: clamp(74px, 8vw, 96px);
+    }
+
+    .building-card {
+      border-radius: 0;
+      border: 0;
+      background:
+        linear-gradient(180deg, var(--b1) 0 9px, var(--win-face) 9px 100%);
+      box-shadow:
+        inset -1px -1px var(--win-black),
+        inset 1px 1px var(--win-light),
+        inset -2px -2px var(--win-dark),
+        inset 2px 2px var(--win-mid);
+    }
+
+    .sign {
+      width: calc(100% - 8px);
+      height: calc(100% - 8px);
+      padding: 12px 6px 6px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 700;
+      box-shadow: none;
+    }
+
+    .building.selected .building-card {
+      background:
+        linear-gradient(180deg, #000080 0 9px, var(--win-face) 9px 100%);
+    }
+
+    .building.selected .sign {
+      color: #000080;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 46px;
+    }
+
+    .avatar .torso {
+      background: #000080;
+    }
+
+    .project-card.focused {
+      box-shadow:
+        inset -1px -1px var(--win-light),
+        inset 1px 1px var(--win-dark),
+        inset -2px -2px var(--win-mid),
+        inset 2px 2px var(--win-black);
+      background: #dfefff;
+    }
+
+    .pill {
+      border-radius: 0;
+      background: #000080;
+      color: #ffffff;
+      padding: 2px 6px;
+    }
+
+    .marquee {
+      background: #ffffff;
+      color: #000000;
+      min-height: 68px;
+    }
+
+    .marquee.fireworks::after,
+    .marquee.flop::after {
+      display: none;
+    }
+
+    .mini-btn.secondary {
+      background: var(--win-face);
+    }
+
+    .start-screen,
+    .win-loss {
+      background: rgba(0, 0, 0, 0.28);
+      backdrop-filter: none;
+    }
+
+    .start-card,
+    .win-card {
+      border-radius: 0;
+      border: 0;
+      background: var(--win-face);
+      color: #000000;
+      box-shadow:
+        inset -1px -1px var(--win-black),
+        inset 1px 1px var(--win-light),
+        inset -2px -2px var(--win-dark),
+        inset 2px 2px var(--win-mid);
+    }
+
+    .start-card h1,
+    .win-card h2 {
+      font-size: 22px;
+    }
+
+    @media (max-width: 1060px) {
+      :root {
+        --hud-height: auto;
+      }
+
+      html, body {
+        overflow: auto;
+      }
+
+      #app {
+        height: auto;
+        min-height: 100vh;
+        grid-template-rows: auto auto;
+      }
+
+      .hud {
+        grid-template-columns: 1fr;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+        grid-template-areas: "side" "board";
+        height: auto;
+        overflow: visible;
+      }
+
+      .board-stage {
+        min-height: 66vh;
+      }
+
+      .side-panel {
+        height: auto;
+        overflow: visible;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .status-box {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .goal-list,
+      .goal-picks,
+      .action-buttons,
+      .offer-list,
+      .start-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .layout,
+      .hud {
+        padding: 10px;
+      }
+
+      .board-ring {
+        inset: 96px 10px 10px 10px;
+      }
+
+      .building {
+        width: clamp(60px, 16vw, 82px);
+      }
+
+      .center-plaza {
+        inset: 41% 32%;
+      }
+    }
+
+    :root {
+      --hud-height: 74px;
+    }
+
+    .hud {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 4px;
+      padding: 24px 6px 6px;
+    }
+
+    .status-box.hud-summary {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .layout {
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 4px;
+      padding: 4px;
+    }
+
+    .board-stage {
+      padding: 0;
+      overflow: auto;
+    }
+
+    .win95-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 248px;
+      grid-template-rows: minmax(0, 1fr);
+      gap: 4px;
+      min-height: 100%;
+      height: 100%;
+      padding: 4px;
+      background: var(--win-face);
+      align-items: stretch;
+      align-content: stretch;
+    }
+
+    .win95-status,
+    .win95-main {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      gap: 4px;
+      padding: 5px;
+      background: var(--win-face);
+      box-shadow:
+        inset -1px -1px var(--win-black),
+        inset 1px 1px var(--win-light),
+        inset -2px -2px var(--win-dark),
+        inset 2px 2px var(--win-mid);
+    }
+
+    .win95-status,
+    .win95-main {
+      overflow: visible;
+      align-content: start;
+    }
+
+    .side-panel {
+      overflow: auto;
+    }
+
+    .win95-main {
+      grid-column: 1;
+      grid-row: 1;
+      grid-template-rows: auto auto minmax(260px, 1fr);
+    }
+
+    .win95-status {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .board-route-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 190px;
+      gap: 4px;
+      align-items: start;
+    }
+
+    .win95-panel-title,
+    .dest-header,
+    .scene-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #ffffff;
+      padding: 4px 6px;
+      box-shadow:
+        inset -1px -1px rgba(0, 0, 0, 0.25),
+        inset 1px 1px rgba(255, 255, 255, 0.25);
+    }
+
+    .win95-panel-title {
+      background: linear-gradient(90deg, #0b7d7d, #23b9a6);
+    }
+
+    .ledger-stack {
+      display: grid;
+      gap: 4px;
+    }
+
+    .ledger-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      padding: 6px 7px;
+      background: #101010;
+      color: #24f224;
+      border: 2px solid #2a2a2a;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    .ledger-row strong {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .ledger-row.debt {
+      color: #ff5c48;
+    }
+
+    .ledger-row.plain {
+      color: #ffe55b;
+    }
+
+    .ledger-row.bank {
+      color: #7bffed;
+    }
+
+    .win95-note,
+    .win95-strip,
+    .destination-block,
+    .scene-copy,
+    .scene-hint,
+    .scene-chip {
+      background: #ffffff;
+      box-shadow:
+        inset -1px -1px var(--win-light),
+        inset 1px 1px var(--win-dark),
+        inset -2px -2px var(--win-mid),
+        inset 2px 2px var(--win-black);
+    }
+
+    .win95-note,
+    .scene-copy,
+    .scene-hint,
+    .scene-chip {
+      padding: 7px;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .win95-note {
+      display: grid;
+      gap: 3px;
+    }
+
+    .win95-note strong,
+    .scene-chip strong {
+      font-size: 11px;
+    }
+
+    .win95-strip {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 8px;
+      align-items: center;
+      padding: 6px 7px;
+      font-size: 11px;
+    }
+
+    .win95-strip strong {
+      font-size: 16px;
+    }
+
+    .strip-place,
+    .strip-clock {
+      display: grid;
+      gap: 2px;
+    }
+
+    .strip-clock {
+      min-width: 110px;
+      text-align: center;
+    }
+
+    .strip-clock strong {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .strip-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .strip-btn {
+      min-width: 126px;
+      min-height: 38px;
+      padding: 0 10px;
+      white-space: nowrap;
+    }
+
+    .destination-block {
+      display: grid;
+      gap: 4px;
+      padding: 5px;
+      background: var(--win-face);
+    }
+
+    .city-block .dest-header {
+      background: linear-gradient(90deg, #375b9b, #72a7f5);
+    }
+
+    .travel-block .dest-header {
+      background: linear-gradient(90deg, #8640a8, #d06ce0);
+    }
+
+    .dest-grid,
+    .travel-grid {
+      display: grid;
+      gap: 4px;
+    }
+
+    .dest-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .travel-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+
+    .dest-btn {
+      min-width: 0;
+      min-height: 48px;
+      padding: 6px 5px;
+      text-align: center;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.58), rgba(255,255,255,0.2)),
+        linear-gradient(180deg, var(--tone-a, #d8ddd8), var(--tone-b, #b5c0b0));
+      box-shadow:
+        inset -1px -1px var(--win-black),
+        inset 1px 1px var(--win-light),
+        inset -2px -2px var(--win-dark),
+        inset 2px 2px var(--win-mid);
+    }
+
+    .dest-btn strong,
+    .dest-btn span {
+      display: block;
+    }
+
+    .dest-btn strong {
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .dest-btn span {
+      margin-top: 3px;
+      font-size: 10px;
+      line-height: 1.25;
+      color: #303030;
+    }
+
+    .dest-btn.selected {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0.12)),
+        linear-gradient(180deg, #dfe9f7, #c7d5ea);
+      color: #000080;
+    }
+
+    .dest-btn.target span {
+      color: #8f2a00;
+      font-weight: 700;
+    }
+
+    .travel-btn {
+      max-width: none;
+      min-height: 32px;
+      padding: 4px;
+    }
+
+    .scene-block {
+      display: grid;
+      grid-template-rows: auto auto auto minmax(0, 1fr);
+      gap: 4px;
+      min-height: 260px;
+    }
+
+    .scene-title {
+      background: linear-gradient(90deg, var(--scene-b, #566d92), var(--scene-a, #a4bedf));
+    }
+
+    .scene-hint {
+      background: #fffbd0;
+    }
+
+    .scene-footer {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .scene-chip {
+      display: grid;
+      gap: 4px;
+    }
+
+    .controls-box {
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .icon-btn {
+      min-width: 54px;
+      min-height: 28px;
+      padding: 0 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .sleep-btn {
+      min-width: 82px;
+    }
+
+    .side-panel {
+      grid-template-rows: minmax(0, 1fr);
+    }
+
+    .side-panel .panel:first-child {
+      min-height: 0;
+      overflow: auto;
+    }
+
+    .status-open-btn {
+      min-width: 90px;
+    }
+
+    .status-window {
+      position: fixed;
+      inset: 0;
+      z-index: 93;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(17, 15, 12, 0.12);
+    }
+
+    .status-dialog {
+      width: min(520px, calc(100vw - 36px));
+      background: var(--win-face);
+      box-shadow:
+        inset -1px -1px var(--win-black),
+        inset 1px 1px var(--win-light),
+        inset -2px -2px var(--win-dark),
+        inset 2px 2px var(--win-mid);
+      padding: 4px;
+    }
+
+    .status-dialog-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 6px;
+      background: linear-gradient(90deg, #000080, #1084d0);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status-dialog-body {
+      display: grid;
+      gap: 8px;
+      padding: 8px;
+      background: var(--win-face);
+    }
+
+    .incident-window {
+      position: fixed;
+      inset: 0;
+      z-index: 96;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(17, 15, 12, 0.18);
+    }
+
+    .notice-dialog {
+      width: min(420px, calc(100vw - 36px));
+      background: var(--win-face);
+      box-shadow:
+        inset -1px -1px var(--win-black),
+        inset 1px 1px var(--win-light),
+        inset -2px -2px var(--win-dark),
+        inset 2px 2px var(--win-mid);
+      padding: 4px;
+    }
+
+    .notice-dialog-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 6px;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .notice-dialog.good .notice-dialog-head {
+      background: linear-gradient(90deg, #1c6a2d, #40aa56);
+    }
+
+    .notice-dialog.bad .notice-dialog-head {
+      background: linear-gradient(90deg, #8a4f00, #d38b19);
+    }
+
+    .notice-dialog.neutral .notice-dialog-head {
+      background: linear-gradient(90deg, #2b5f86, #5f95c8);
+    }
+
+    .notice-dialog-body {
+      padding: 10px 8px 8px;
+      font-size: 12px;
+      line-height: 1.4;
+      background: #ffffff;
+      box-shadow:
+        inset -1px -1px var(--win-light),
+        inset 1px 1px var(--win-dark),
+        inset -2px -2px var(--win-mid),
+        inset 2px 2px var(--win-black);
+    }
+
+    .panel h2 + h2 {
+      margin-top: 12px;
+    }
+
+    @media (max-width: 1060px) {
+      .layout {
+        grid-template-columns: 1fr;
+        grid-template-areas: "side" "board";
+      }
+
+      .win95-shell {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        height: auto;
+      }
+
+      .win95-main,
+      .win95-status {
+        grid-column: auto;
+        grid-row: auto;
+      }
+
+      .board-route-row {
+        grid-template-columns: 1fr;
+      }
+
+      .hud {
+        grid-template-columns: 1fr;
+      }
+
+      .win95-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .travel-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .status-window {
+        padding: 12px;
+      }
+
+      .incident-window {
+        padding: 12px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      :root {
+        --hud-height: auto;
+      }
+
+      html, body {
+        overflow: auto;
+      }
+
+      #app {
+        height: auto;
+        min-height: 100dvh;
+        grid-template-rows: auto auto;
+      }
+
+      .hud {
+        position: sticky;
+        top: 0;
+        grid-template-columns: 1fr;
+        gap: 6px;
+        padding: 10px 8px 8px;
+      }
+
+      .status-box.hud-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .controls-box {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        justify-content: stretch;
+      }
+
+      .icon-btn,
+      .status-open-btn {
+        width: 100%;
+        min-width: 0;
+        min-height: 36px;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+        gap: 6px;
+        padding: 6px;
+        height: auto;
+        overflow: visible;
+      }
+
+      .board-stage {
+        height: auto;
+        min-height: 0;
+      }
+
+      .win95-shell {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        height: auto;
+      }
+
+      .win95-main {
+        order: 1;
+        grid-column: auto;
+        grid-row: auto;
+        overflow: visible;
+      }
+
+      .win95-status {
+        order: 2;
+        grid-column: auto;
+        grid-row: auto;
+        overflow: visible;
+      }
+
+      .win95-main,
+      .win95-status,
+      .side-panel {
+        padding: 4px;
+        gap: 4px;
+      }
+
+      .win95-strip {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+
+      .strip-actions {
+        grid-column: 1 / -1;
+        justify-content: stretch;
+      }
+
+      .strip-btn {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .strip-clock {
+        min-width: 0;
+      }
+
+      .ledger-stack {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .dest-grid,
+      .travel-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .travel-btn {
+        max-width: none;
+      }
+
+      .scene-footer {
+        grid-template-columns: 1fr;
+      }
+
+      .action-groups {
+        gap: 8px;
+      }
+
+      .action-group {
+        padding: 8px;
+      }
+
+      .action-btn,
+      .offer-card {
+        padding: 8px 9px;
+      }
+
+      .action-btn .topline,
+      .offer-head {
+        display: grid;
+        grid-template-columns: 1fr;
+        align-items: start;
+        gap: 2px;
+      }
+
+      .action-btn .subline,
+      .offer-copy {
+        font-size: 0.74rem;
+      }
+
+      .project-list {
+        max-height: none;
+      }
+
+      .status-dialog,
+      .notice-dialog {
+        width: min(100vw - 24px, 520px);
+      }
+    }
+
+    @media (max-width: 460px) {
+      .controls-box {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .dest-grid,
+      .travel-grid,
+      .quick-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .win95-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .ledger-stack {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header id="hud" class="hud"></header>
+    <div class="layout">
+      <section id="boardStage" class="board-stage"></section>
+      <aside id="sidePanel" class="side-panel"></aside>
+    </div>
+  </div>
+  <section id="startScreen" class="start-screen hidden"></section>
+  <section id="winLoss" class="win-loss hidden"></section>
+  <section id="statusWindow" class="status-window hidden"></section>
+  <section id="incidentWindow" class="incident-window hidden"></section>
+  <div id="floatLayer" class="float-layer"></div>
+  <div id="nightVeil" class="night-veil"></div>
+
+  <script>
+  (() => {
+    "use strict";
+
+    const root = typeof globalThis !== "undefined" ? globalThis : window;
+    const canRender = typeof document !== "undefined" &&
+      typeof document.getElementById === "function" &&
+      typeof document.createElement === "function";
+
+    const STORAGE_KEYS = {
+      save: "sm365-save",
+      prefs: "sm365-prefs",
+      scores: "sm365-scores"
+    };
+
+    const TEXT = {
+      he: {
+        title: "החיים של קובי",
+        subtitle: "בתעשיית הקולנוע.",
+        timeStrip: "יום {day} • חודש {month}",
+        cash: "מזומן",
+        career: "קריירה",
+        home: "בית",
+        city: "עיר",
+        money: "כסף",
+        education: "השכלה",
+        happiness: "אושר",
+        wealth: "עושר",
+        reputation: "מוניטין",
+        soul: "נשמה",
+        creativity: "יצירתיות",
+        love: "אהבה",
+        projects: "הפקות",
+        noProjects: "עדיין אין לך הפקה. קודם מייצבים את החיים, ואז עושים סרט.",
+        focused: "בפוקוס",
+        daysLeft: "ימים נותרו",
+        nextMove: "מה עכשיו",
+        startIntro: "מתחילים עם 300$, ספה של חבר, בלי עבודה, בלי דירה ובלי קריירה. תתלבש כמו בן אדם, תשיג משמרות, תשלם שכירות, תקנה מצלמה ורק אז תנסה להיות אגדה.",
+        playerName: "שם הדמות",
+        economyDiff: "קושי כלכלי",
+        language: "שפה",
+        goalWealth: "יעד עושר",
+        goalCareer: "יעד קריירה",
+        goalEducation: "יעד השכלה",
+        goalHappiness: "יעד אושר",
+        seasonLength: "אורך משחק",
+        season30: "ספרינט · 30 יום",
+        season90: "עונה · 90 יום",
+        season365: "שנה מלאה · 365 יום",
+        modest: "צנוע",
+        ambitious: "שאפתני",
+        legendary: "אגדי",
+        startButton: "להתחיל את השנה",
+        resumeButton: "להמשיך שמירה",
+        newYear: "שנה חדשה",
+        reset: "איפוס",
+        close: "סגור",
+        target: "יעד",
+        current: "נוכחי",
+        rank: "דרגה",
+        wardrobe: "מלתחה",
+        job: "עבודה",
+        noJob: "מובטל/ת עם חלום מסוכן",
+        housing: "דיור",
+        onCouch: "ספה של חבר",
+        boardHintJob: "המשרד לתעסוקה מהבהב. ספה לא נחשבת אסטרטגיה עסקית.",
+        boardHintWardrobe: "בלי בגדים אי אפשר לטפס. אפילו מזנון פופקורן רוצה צווארון.",
+        boardHintHousing: "שכירות כואבת פחות מחיים על ספה לנצח.",
+        boardHintSchool: "עוד קורס אחד, ותתחיל/י לדבר כמו מישהו מהתעשייה.",
+        boardHintCamera: "הגיע הזמן לקנות מצלמה. חלומות לא מצלמים את עצמם.",
+        boardHintScript: "יש לך ציוד וקצת אוויר. עכשיו גנוב תסריט, סליחה, קנה תסריט.",
+        boardHintCast: "ההפקה בפוקוס צריכה פנים שאפשר לשים על הפוסטר.",
+        boardHintCrew: "צוות בלי קפה ובלי משכורת עושה רק סרט ניסיוני על רעב.",
+        boardHintSet: "הסט מחכה. כל דקה בלי צילום היא עוד דקה של ריבית.",
+        boardHintPost: "בחדר העריכה אפשר להפוך כאוס ל'אמירה'. לפעמים.",
+        boardHintRelease: "הסרט מוכן. עכשיו צריך קהל או לפחות טכנאי שיספור כרטיסים.",
+        goThere: "לסוע לשם",
+        travelCost: "{hours}ש הליכה",
+        flyCost: "{hours}ש • {cost}",
+        shift: "משמרת",
+        work4: "משמרת 4 שעות",
+        work6: "משמרת 6 שעות",
+        work8: "משמרת 8 שעות",
+        workShift: "לעבוד {hours} שעות",
+        apply: "להגיש מועמדות",
+        wardrobeWorn: "הבגדים שלך נשברו קודם ממך.",
+        filmLocked: "תעשיית הקולנוע עדיין נעולה. תשיג ניסיון, כסף ומצלמה.",
+        filmUnlocked: "מצלמה על הכתף, אגו בכיס: שערי הקולנוע נפתחו.",
+        needProject: "אין פרויקט בפוקוס.",
+        success: "הצליח",
+        fail: "נכשל",
+        sleep: "לישון ולסגור יום",
+        sleepCopy: "היום נגמר. מחר ממשיכים.",
+        bank: "בנק",
+        rentDue: "שכר דירה",
+        unlocked: "נפתח",
+        accept: "לקחת",
+        haggle10: "להתמקח 10%-",
+        haggle25: "להתמקח 25%-",
+        haggle40: "להעליב 40%-",
+        release: "הפצה",
+        testBuzz: "באזז",
+        premiere: "פרמיירה",
+        cinema: "קולנוע",
+        tvSale: "מכירה לטלוויזיה",
+        fund: "קרן",
+        investor: "משקיע",
+        buy: "לקנות",
+        deposit: "להפקיד",
+        withdraw: "למשוך",
+        invest: "להמר עם ארקדי",
+        cashOut: "לחלץ מארקדי",
+        borrow: "הלוואת כריש",
+        repay: "להחזיר חוב",
+        shiftPay: "שכר",
+        unlockedFilms: "תעשיית הסרטים פתוחה",
+        highScores: "שיאי שנה",
+        noScores: "עדיין אין סיפורי הצלחה. זה דווקא עקבי.",
+        youWon: "ניצחת את השנה",
+        youLost: "השנה נגמרה",
+        winCopy: "מזוג עבודה, הישרדות וסרטים בלי להתפרק. קלאסה חשודה.",
+        loseCopy: "365 ימים עברו. אפשר להתחיל שוב, הפעם עם פחות אשליות ויותר משמרות.",
+        playAgain: "לשנה נוספת",
+        mute: "צליל",
+        openInterior: "להיכנס",
+        salaryPath: "מסלול שכיר",
+        freelancePath: "פרילאנס",
+        training: "לימודים",
+        production: "הפקה",
+        finance: "מימון",
+        lifestyle: "חיים",
+        directBuy: "לסגור במחיר מלא",
+        soldOut: "הלך לעד",
+        prestige: "יוקרה",
+        reviewFlop: "המרקיזה נבולה. המבקר כתב 'אמיץ, אם מתעלמים מהתוצאה'.",
+        reviewMeh: "הקהל אמר 'יש בזה משהו' ואז הלך לאכול.",
+        reviewHit: "הפוסטר עובד שעות נוספות. פתאום כולם הכירו אותך 'מההתחלה'.",
+        reviewSleeper: "להיט ישן-חדש. הסרט צמח מפה לאוזן כמו חשבון לא משולם.",
+        interiorPrompt: "כל פעולה מציגה מראש זמן וכסף. פשוט בוחרים מהלך.",
+        chooseProject: "בחר/י פרויקט",
+        saveLoaded: "שמירה נטענה.",
+        noSave: "אין שמירה זמינה.",
+        saved: "המשחק נשמר מקומית.",
+        airportCopy: "השמיים מלאים מפיקים שברחו מהשכירות של עצמם.",
+        points: "נק'",
+        monthlyTrouble: "צרה חודשית",
+        weeklyRevenue: "תשלום שבועי",
+        langName: "עברית",
+        continue: "להמשיך",
+        stats: "סטטוס יומי",
+        notice: "הודעה",
+        marqueeWaiting: "אין כרגע בכורה נוצצת. גם זה סוג של מתח."
+      },
+      en: {
+        title: "kobi life",
+        subtitle: "Kobi's life in the film industry.",
+        timeStrip: "Day {day} • Month {month}",
+        cash: "Cash",
+        career: "Career",
+        home: "Home",
+        city: "City",
+        money: "Money",
+        education: "Education",
+        happiness: "Happiness",
+        wealth: "Wealth",
+        reputation: "Reputation",
+        soul: "Soul",
+        creativity: "Creativity",
+        love: "Love",
+        projects: "Productions",
+        noProjects: "No production yet. First survive, then make art.",
+        focused: "Focused",
+        daysLeft: "Days left",
+        nextMove: "What now",
+        startIntro: "You begin with $300, a borrowed couch, no job, no apartment, and no film career. Dress like a professional, land shifts, pay rent, buy a camera, then try to become a legend.",
+        playerName: "Character name",
+        economyDiff: "Economy difficulty",
+        language: "Language",
+        goalWealth: "Wealth goal",
+        goalCareer: "Career goal",
+        goalEducation: "Education goal",
+        goalHappiness: "Happiness goal",
+        seasonLength: "Game length",
+        season30: "Sprint · 30 days",
+        season90: "Season · 90 days",
+        season365: "Full year · 365 days",
+        modest: "Modest",
+        ambitious: "Ambitious",
+        legendary: "Legendary",
+        startButton: "Start the year",
+        resumeButton: "Resume save",
+        newYear: "New year",
+        reset: "Reset",
+        close: "Close",
+        target: "Target",
+        current: "Current",
+        rank: "Rank",
+        wardrobe: "Wardrobe",
+        job: "Job",
+        noJob: "Unemployed with dangerous taste",
+        housing: "Housing",
+        onCouch: "Friend's couch",
+        boardHintJob: "The employment office is blinking. A couch is not a business strategy.",
+        boardHintWardrobe: "You need clothes to climb. Even the popcorn counter wants a collar.",
+        boardHintHousing: "Rent hurts less than living on a couch forever.",
+        boardHintSchool: "One more class and you may sound like you know what continuity means.",
+        boardHintCamera: "Time to buy the camera. Dreams do not self-photograph.",
+        boardHintScript: "You have gear and a pulse. Now go buy a script and call it destiny.",
+        boardHintCast: "Your focused project needs faces the poster can exploit.",
+        boardHintCrew: "A crew with no coffee and no pay only makes hunger documentaries.",
+        boardHintSet: "The set is waiting. Every hour without shooting is another hour of interest.",
+        boardHintPost: "The edit suite can turn chaos into 'intent'. Sometimes.",
+        boardHintRelease: "The film is ready. Now you need an audience, or at least a projectionist.",
+        goThere: "Go there",
+        travelCost: "{hours}h walk",
+        flyCost: "{hours}h • {cost}",
+        shift: "Shift",
+        work4: "4-hour shift",
+        work6: "6-hour shift",
+        work8: "8-hour shift",
+        workShift: "Work {hours} hours",
+        apply: "Apply",
+        wardrobeWorn: "Your clothes broke before you did.",
+        filmLocked: "The film industry is still locked. Get experience, cash, and a camera.",
+        filmUnlocked: "Camera on your shoulder, ego in your pocket: the film gate opens.",
+        needProject: "No focused project.",
+        success: "Success",
+        fail: "Failed",
+        sleep: "Sleep and end day",
+        sleepCopy: "The day is over. The tears are self-managed.",
+        bank: "Bank",
+        rentDue: "Rent due",
+        unlocked: "Unlocked",
+        accept: "Take it",
+        haggle10: "Haggle -10%",
+        haggle25: "Haggle -25%",
+        haggle40: "Insult -40%",
+        release: "Release",
+        testBuzz: "Buzz",
+        premiere: "Premiere",
+        cinema: "Cinema",
+        tvSale: "TV sale",
+        fund: "Fund",
+        investor: "Investor",
+        buy: "Buy",
+        deposit: "Deposit",
+        withdraw: "Withdraw",
+        invest: "Gamble with Arkady",
+        cashOut: "Pull from Arkady",
+        borrow: "Shark loan",
+        repay: "Repay debt",
+        shiftPay: "Wage",
+        unlockedFilms: "Film industry unlocked",
+        highScores: "High Scores",
+        noScores: "No success stories yet. Consistent, at least.",
+        youWon: "You beat the year",
+        youLost: "The year ran out",
+        winCopy: "You balanced work, survival, and filmmaking without exploding. Suspiciously classy.",
+        loseCopy: "365 days passed. Start over with fewer illusions and more shifts.",
+        playAgain: "Run it again",
+        mute: "Sound",
+        openInterior: "Enter",
+        salaryPath: "Salary path",
+        freelancePath: "Freelance",
+        training: "Study",
+        production: "Production",
+        finance: "Finance",
+        lifestyle: "Life",
+        directBuy: "Take full price",
+        soldOut: "Gone forever",
+        prestige: "Prestige",
+        reviewFlop: "The marquee wilted. The critic wrote 'bold, if you ignore the result.'",
+        reviewMeh: "The audience said 'there's something there' and went to eat.",
+        reviewHit: "The poster is working overtime. Suddenly everyone knew you from the beginning.",
+        reviewSleeper: "Sleeper hit. The film crawled from whisper to whisper like unpaid debt.",
+        interiorPrompt: "Every option shows time and money up front. This is a decisions game, not a dice game.",
+        chooseProject: "Choose project",
+        saveLoaded: "Save loaded.",
+        noSave: "No save available.",
+        saved: "Game saved locally.",
+        airportCopy: "The skies are full of producers fleeing their own rent.",
+        points: "pts",
+        monthlyTrouble: "Monthly trouble",
+        weeklyRevenue: "Weekly payout",
+        langName: "English",
+        continue: "Continue",
+        stats: "Daily status",
+        notice: "Notice",
+        marqueeWaiting: "No blazing premiere right now. That is also a kind of tension."
+      }
+    };
+
+    const THEME_PRESETS = [
+      {
+        name: { he: "שקיעה", en: "Sunset" },
+        vars: { "--accent": "#b44f2a", "--accent-2": "#19475d", "--paper": "#f5e8ce", "--paper-2": "#eacb97", "--sky-a": "#fee6bf", "--sky-b": "#f6a15b", "--sky-c": "#7f4d68", "--street": "#bd8e4f", "--street-edge": "#8f6534" }
+      },
+      {
+        name: { he: "ניאון חיוור", en: "Pale Neon" },
+        vars: { "--accent": "#1f7a6f", "--accent-2": "#5f2437", "--paper": "#efe5da", "--paper-2": "#d9c8c2", "--sky-a": "#dff0f6", "--sky-b": "#84c5d8", "--sky-c": "#345273", "--street": "#8b744f", "--street-edge": "#5f4c33" }
+      },
+      {
+        name: { he: "לילה רך", en: "Soft Night" },
+        vars: { "--accent": "#d9703e", "--accent-2": "#234050", "--paper": "#eee2d0", "--paper-2": "#c7b39a", "--sky-a": "#eed0c9", "--sky-b": "#a06f88", "--sky-c": "#364863", "--street": "#806142", "--street-edge": "#553e2a" }
+      },
+      {
+        name: { he: "חול ואבן", en: "Sand & Stone" },
+        vars: { "--accent": "#8c5537", "--accent-2": "#3e5c51", "--paper": "#f0e6d5", "--paper-2": "#d9c5a7", "--sky-a": "#fbf3d0", "--sky-b": "#d6b26a", "--sky-c": "#7f6a50", "--street": "#a07a48", "--street-edge": "#6d4f2e" }
+      },
+      {
+        name: { he: "כרזה אירופית", en: "European Poster" },
+        vars: { "--accent": "#9b2f2f", "--accent-2": "#1e315c", "--paper": "#f3e7d8", "--paper-2": "#d6c1a4", "--sky-a": "#f6d7be", "--sky-b": "#df8364", "--sky-c": "#504b74", "--street": "#9a7446", "--street-edge": "#61472d" }
+      }
+    ];
+
+    const GOAL_TARGETS = {
+      wealth: { modest: 18000, ambitious: 36000, legendary: 65000 },
+      career: { modest: 70, ambitious: 135, legendary: 220 },
+      education: { modest: 2, ambitious: 4, legendary: 6 },
+      happiness: { modest: 62, ambitious: 72, legendary: 80 }
+    };
+
+    const ECONOMY = {
+      modest: { wages: 1, prices: 1, rent: 1, incident: 1 },
+      ambitious: { wages: 0.93, prices: 1.08, rent: 1.1, incident: 1.12 },
+      legendary: { wages: 0.88, prices: 1.18, rent: 1.18, incident: 1.24 }
+    };
+
+    const JOBS = [
+      {
+        id: "popcorn",
+        tier: 1,
+        title: { he: "מוכר/ת פופקורן בקולנוע", en: "Cinema Popcorn Vendor" },
+        wage: 18,
+        exp: 4,
+        rep: 0,
+        req: { education: 0, wardrobe: 1, experience: 0, reputation: 0 },
+        reject: {
+          he: "המנהל אומר שהכתמים על הטי-שירט נראים 'אנטי-חמאה'.",
+          en: "The manager says the stains on your shirt look 'anti-butter'."
+        }
+      },
+      {
+        id: "usher",
+        tier: 2,
+        title: { he: "סדרן/ית בסינמטק", en: "Cinematheque Usher" },
+        wage: 27,
+        exp: 6,
+        rep: 1,
+        req: { education: 0, wardrobe: 1, experience: 14, reputation: 0 },
+        reject: {
+          he: "הם מחפשים מישהו שיודע להגיד 'שקט באולם' בלי לבכות.",
+          en: "They need someone who can say 'silence in the hall' without crying."
+        }
+      },
+      {
+        id: "runner",
+        tier: 3,
+        title: { he: "ראנר/ית על סט", en: "Set Runner" },
+        wage: 38,
+        exp: 9,
+        rep: 2,
+        req: { education: 1, wardrobe: 2, experience: 34, reputation: 4 },
+        reject: {
+          he: "המפיק רוצה ראנר שנראה כאילו יש לו גם נעליים וגם עתיד.",
+          en: "The producer wants a runner who looks like they own shoes and a future."
+        }
+      },
+      {
+        id: "pa",
+        tier: 4,
+        title: { he: "עוזר/ת הפקה", en: "Production Assistant" },
+        wage: 56,
+        exp: 12,
+        rep: 3,
+        req: { education: 1, wardrobe: 2, experience: 62, reputation: 10 },
+        reject: {
+          he: "הטופס חזר עם הערה: 'מבין/ה לחץ? הוכחות בבקשה'.",
+          en: "The form came back with a note: 'Understands pressure? Cite sources.'"
+        }
+      },
+      {
+        id: "assistantEditor",
+        tier: 5,
+        title: { he: "עוזר/ת עורך", en: "Assistant Editor" },
+        wage: 84,
+        exp: 15,
+        rep: 5,
+        req: { education: 2, wardrobe: 2, experience: 96, reputation: 18 },
+        reject: {
+          he: "אמרו שחסרה לך הבעה של מישהו שראה 400 טייקים ולא איבד אמונה.",
+          en: "They said you lack the look of someone who has watched 400 takes and kept faith."
+        }
+      },
+      {
+        id: "secondUnit",
+        tier: 6,
+        title: { he: "במאי/ת יחידה שנייה", en: "2nd Unit Director" },
+        wage: 138,
+        exp: 20,
+        rep: 8,
+        req: { education: 3, wardrobe: 3, experience: 150, reputation: 34 },
+        reject: {
+          he: "אמרו שכרגע אתה יותר 'פוטנציאל' מ'פאניקה עם ווקי'.",
+          en: "They said you are currently more 'potential' than 'panic with a walkie.'"
+        }
+      }
+    ];
+
+    const HOUSING = {
+      couch: {
+        id: "couch",
+        name: { he: "הספה של חבר", en: "Friend's Couch" },
+        rent: 0,
+        soul: -3,
+        secure: false,
+        desc: {
+          he: "חינם, דוקר בגב, ואין מקום לחליפה רצינית.",
+          en: "Free, cruel to the spine, and no space for a serious suit."
+        }
+      },
+      cheap: {
+        id: "cheap",
+        name: { he: "דירת חדר מתנדנדת", en: "Cheap Flat" },
+        rent: 520,
+        soul: 0,
+        secure: false,
+        desc: {
+          he: "קירות דקים, סיכוי לשוד, אבל לפחות זו דלת שלך.",
+          en: "Thin walls, robbery risk, but at least the door is yours."
+        }
+      },
+      secure: {
+        id: "secure",
+        name: { he: "דירה מאובטחת", en: "Secure Flat" },
+        rent: 1180,
+        soul: 2,
+        secure: true,
+        desc: {
+          he: "יקרה, בטוחה, ואפילו אפשר להעמיד מלתחה בלי לחשוש.",
+          en: "Expensive, safe, and you can keep a wardrobe without praying."
+        }
+      }
+    };
+
+    const WARDROBES = [
+      {
+        tier: 1,
+        id: "tier1",
+        name: { he: "חליפה מיד שנייה של מנחה טלוויזיה", en: "Second-hand TV host suit" },
+        price: 150,
+        desc: {
+          he: "נראה כאילו עבדת פעם. אף אחד לא ישאל איפה.",
+          en: "Looks like you once had a job. Nobody will ask where."
+        }
+      },
+      {
+        tier: 2,
+        id: "tier2",
+        name: { he: "מעיל נואר לחצי-מקצוענים", en: "Noir coat for half-pros" },
+        price: 420,
+        desc: {
+          he: "מספיק טוב כדי שמפיק יתעלם מהפאניקה בעיניים.",
+          en: "Good enough for a producer to ignore the panic in your eyes."
+        }
+      },
+      {
+        tier: 3,
+        id: "tier3",
+        name: { he: "כריש-משי של ערב פרסים", en: "Award-night sharkskin fit" },
+        price: 980,
+        desc: {
+          he: "כשצריך להיראות כאילו כבר עשית אקזיט על פסטיבל.",
+          en: "For when you need to look like you already sold a festival exit."
+        }
+      }
+    ];
+
+    const COURSES = [
+      {
+        id: "night",
+        name: { he: "קורס ערב: יסודות מיזנסצנה", en: "Night class: Mise-en-scene basics" },
+        hours: 4,
+        cost: 140,
+        credits: 1,
+        soul: 1,
+        creativity: 2
+      },
+      {
+        id: "weekend",
+        name: { he: "סדנת סוף שבוע: עריכה מתוך כאב", en: "Weekend lab: Editing through pain" },
+        hours: 6,
+        cost: 320,
+        credits: 2,
+        soul: 0,
+        creativity: 3
+      }
+    ];
+
+    const GIGS = [
+      { id: "subtitles", name: { he: "סנכרון כתוביות", en: "Subtitle sync gig" }, pay: 95, hours: 4, creativity: 1, soul: -1, rep: 0 },
+      { id: "wedding", name: { he: "צילום חתונה עצובה", en: "Sad wedding shoot" }, pay: 180, hours: 6, creativity: 1, soul: -1, rep: 1 },
+      { id: "podcast", name: { he: "עריכת פודקאסט של יזם", en: "Edit a founder podcast" }, pay: 110, hours: 4, creativity: -1, soul: -1, rep: 0 },
+      { id: "promo", name: { he: "פרומו למועדון שלא נסגר", en: "Promo for a club that never closes" }, pay: 220, hours: 6, creativity: 2, soul: -1, rep: 1 },
+      { id: "assistant", name: { he: "עוזר/ת יום צילום מקרי", en: "Random shoot assistant day" }, pay: 240, hours: 8, creativity: 1, soul: -2, rep: 2 },
+      { id: "festivalLeaflets", name: { he: "חלוקת פלאיירים לפסטיבל", en: "Festival flyer hustle" }, pay: 70, hours: 3, creativity: 0, soul: -1, rep: 1 }
+    ];
+
+    const SOFT_ACTIONS = {
+      coffee: {
+        name: { he: "אספרסו קצר", en: "Quick espresso" },
+        hours: 1,
+        cost: 4,
+        effects: { soul: 2, creativity: 1 },
+        menu: {
+          he: "4₪ • 1ש • +2 נשמה • +1 יצירתיות",
+          en: "$4 • 1h • +2 soul • +1 creativity"
+        },
+        result: {
+          he: "הקפה עשה סדר בראש. לפחות לשעה.",
+          en: "The coffee put your head back in order. For an hour, at least."
+        }
+      },
+      beer: {
+        name: { he: "בירה על הבר", en: "Beer at the bar" },
+        hours: 1,
+        cost: 18,
+        effects: { soul: 3, love: 1 },
+        menu: {
+          he: "18₪ • 1ש • +3 נשמה • +1 אהבה",
+          en: "$18 • 1h • +3 soul • +1 love"
+        },
+        result: {
+          he: "בירה אחת הורידה את הרעש הפנימי.",
+          en: "One beer turned the inner noise down."
+        }
+      },
+      cocktail: {
+        name: { he: "קוקטייל ונטוורקינג", en: "Cocktail networking" },
+        hours: 2,
+        cost: 36,
+        effects: { soul: 2, love: 2, reputation: 1, creativity: 1 },
+        menu: {
+          he: "36₪ • 2ש • +2 נשמה • +2 אהבה • +1 מוניטין",
+          en: "$36 • 2h • +2 soul • +2 love • +1 reputation"
+        },
+        result: {
+          he: "הקוקטייל היה יקר, אבל יצאת עם מספר טלפון ושמועה טובה.",
+          en: "The cocktail was expensive, but you left with a number and a useful rumor."
+        }
+      },
+      watchFilm: {
+        name: { he: "לצפות בהקרנת רטרו", en: "Watch a retro screening" },
+        hours: 2,
+        cost: 18,
+        effects: { creativity: 3, soul: 1 },
+        menu: {
+          he: "18₪ • 2ש • +3 יצירתיות • +1 נשמה",
+          en: "$18 • 2h • +3 creativity • +1 soul"
+        },
+        result: {
+          he: "יצאת עם רעיון אחד טוב ושניים מסוכנים.",
+          en: "You left with one good idea and two dangerous ones."
+        }
+      }
+    };
+
+    const GENRES = [
+      { id: "drama", name: { he: "דרמה", en: "Drama" }, baseGross: 6200 },
+      { id: "thriller", name: { he: "מתח", en: "Thriller" }, baseGross: 7000 },
+      { id: "romance", name: { he: "רומנטי", en: "Romance" }, baseGross: 5800 },
+      { id: "documentary", name: { he: "דוקו", en: "Documentary" }, baseGross: 5200 },
+      { id: "comedy", name: { he: "קומדיה", en: "Comedy" }, baseGross: 7600 }
+    ];
+
+    const SHOOT_TIERS = {
+      lean: { name: { he: "רזה", en: "Lean" }, cost: 1200, box: 0.92 },
+      bold: { name: { he: "נועז", en: "Bold" }, cost: 2100, box: 1.22 },
+      decadent: { name: { he: "ראוותני", en: "Decadent" }, cost: 3400, box: 1.6 }
+    };
+
+    const BUILDINGS = {
+      home: {
+        id: "home",
+        label: { he: "בית", en: "Home" },
+        short: { he: "שינה", en: "Sleep" },
+        color: ["#d88362", "#7f4a39"],
+        category: "lifestyle",
+        clerk: { he: "דוד מהספה", en: "Couch Cousin" }
+      },
+      employment: {
+        id: "employment",
+        label: { he: "לשכת תעסוקה", en: "Employment Office" },
+        short: { he: "עבודה", en: "Jobs" },
+        color: ["#8ea3c9", "#495a82"],
+        category: "salary",
+        clerk: { he: "גברת תקן", en: "Ms. Compliance" }
+      },
+      wardrobe: {
+        id: "wardrobe",
+        label: { he: "חנות בגדים", en: "Wardrobe Shop" },
+        short: { he: "סטייל", en: "Style" },
+        color: ["#d08a8b", "#7e3b56"],
+        category: "lifestyle",
+        clerk: { he: "מר פפיון", en: "Mr. Bow Tie" }
+      },
+      cafe: {
+        id: "cafe",
+        label: { he: "קפה שכונתי", en: "Neighborhood Cafe" },
+        short: { he: "קפה שכונתי", en: "Cafe" },
+        sub: { he: "חיים עצמם", en: "Life itself" },
+        color: ["#c59d53", "#7a5630"],
+        category: "lifestyle",
+        clerk: { he: "הבריסטה המשורר", en: "Poet Barista" }
+      },
+      cinematheque: {
+        id: "cinematheque",
+        label: { he: "סינמטק", en: "Cinematheque" },
+        short: { he: "סינמה", en: "Cinema" },
+        color: ["#7ea39c", "#3d5d5a"],
+        category: "training",
+        clerk: { he: "אוצר עייף", en: "Sleepy Curator" }
+      },
+      airport: {
+        id: "airport",
+        label: { he: "שדה תעופה", en: "Airport" },
+        short: { he: "טיסות", en: "Flights" },
+        color: ["#95b6d0", "#4d6d8f"],
+        category: "travel",
+        clerk: { he: "פקיד שער", en: "Gate Agent" }
+      },
+      script: {
+        id: "script",
+        label: { he: "שוק תסריטים", en: "Script Market" },
+        short: { he: "תסריט", en: "Scripts" },
+        color: ["#d0a85a", "#7f5a2e"],
+        category: "production",
+        clerk: { he: "סוחר תסריטים", en: "Script Dealer" }
+      },
+      casting: {
+        id: "casting",
+        label: { he: "משרד ליהוק", en: "Casting Agency" },
+        short: { he: "ליהוק", en: "Casting" },
+        color: ["#d07c64", "#7f4736"],
+        category: "production",
+        clerk: { he: "סוכנת פנים", en: "Face Broker" }
+      },
+      fund: {
+        id: "fund",
+        label: { he: "קרן קולנוע", en: "Film Fund" },
+        short: { he: "קרן", en: "Fund" },
+        color: ["#9cab6b", "#61723d"],
+        category: "finance",
+        clerk: { he: "הלקטור", en: "The Reader" }
+      },
+      crew: {
+        id: "crew",
+        label: { he: "איגוד הצוות", en: "Crew Union" },
+        short: { he: "צוות", en: "Crew" },
+        color: ["#8d9884", "#485044"],
+        category: "production",
+        clerk: { he: "ראש הצוות", en: "Union Rep" }
+      },
+      filmSchool: {
+        id: "filmSchool",
+        label: { he: "בית ספר לקולנוע", en: "Film School" },
+        short: { he: "לימודים", en: "School" },
+        color: ["#b58fc7", "#644477"],
+        category: "training",
+        clerk: { he: "מרצה זעוף", en: "Grim Lecturer" }
+      },
+      bank: {
+        id: "bank",
+        label: { he: "בנק וארקדי", en: "Bank & Arkady" },
+        short: { he: "בנק", en: "Bank" },
+        color: ["#88aa72", "#466140"],
+        category: "finance",
+        clerk: { he: "ארקדי", en: "Arkady" }
+      },
+      post: {
+        id: "post",
+        label: { he: "חדר עריכה", en: "Post House" },
+        short: { he: "פוסט", en: "Post" },
+        color: ["#7a89b6", "#3e4f76"],
+        category: "production",
+        clerk: { he: "עורכת קרה", en: "Cold Editor" }
+      },
+      gear: {
+        id: "gear",
+        label: { he: "חנות צילום וציוד מקצועי", en: "Camera and Pro Gear" },
+        short: { he: "צילום", en: "Gear" },
+        color: ["#c68755", "#6c472d"],
+        category: "production",
+        clerk: { he: "סוחר חיישנים", en: "Sensor Merchant" }
+      },
+      investor: {
+        id: "investor",
+        label: { he: "משקיע פרטי", en: "Private Investor" },
+        short: { he: "כסף", en: "Investor" },
+        color: ["#9c8d66", "#56492e"],
+        category: "finance",
+        clerk: { he: "מר אחוזים", en: "Mr. Percent" }
+      },
+      festival: {
+        id: "festival",
+        label: { he: "פסטיבל", en: "Festival" },
+        short: { he: "פרסים", en: "Festival" },
+        color: ["#c46f6b", "#7a3735"],
+        category: "release",
+        clerk: { he: "מנהלת אומנותית", en: "Artistic Director" }
+      },
+      cinema: {
+        id: "cinema",
+        label: { he: "קולנוע מסחרי", en: "Commercial Cinema" },
+        short: { he: "אולם", en: "Cinema" },
+        color: ["#c8a752", "#735c21"],
+        category: "release",
+        clerk: { he: "מנהל אולם", en: "Cinema Manager" }
+      },
+      set: {
+        id: "set",
+        label: { he: "לוקיישן / סט", en: "Set & Location" },
+        short: { he: "סט", en: "Set" },
+        color: ["#b58a61", "#6a4b33"],
+        category: "production",
+        clerk: { he: "מנהל סט", en: "Set Boss" }
+      },
+      tv: {
+        id: "tv",
+        label: { he: "תחנת טלוויזיה", en: "TV Station" },
+        short: { he: "TV", en: "TV" },
+        color: ["#7aa7c2", "#40647f"],
+        category: "release",
+        clerk: { he: "רוכשת תוכן", en: "Content Buyer" }
+      },
+      loan: {
+        id: "loan",
+        label: { he: "כריש הלוואות", en: "Loan Shark" },
+        short: { he: "חוב", en: "Debt" },
+        color: ["#945863", "#4e2930"],
+        category: "finance",
+        clerk: { he: "האיש במשקפיים", en: "The Sunglasses Man" }
+      }
+    };
+
+    const CITIES = [
+      {
+        id: "telaviv",
+        name: { he: "תל אביב", en: "Tel Aviv" },
+        mood: {
+          he: "אור מלוח, תקרות גבוהות ושכירות שמדברת כמו משקיע.",
+          en: "Salty light, high ceilings, and rent that speaks like an investor."
+        },
+        palette: { a: "#fee8c9", b: "#f0a563", c: "#8c5570" },
+        skyline: [40, 58, 32, 72, 46, 64, 38, 78, 52, 68, 48],
+        buildings: ["home", "employment", "wardrobe", "cafe", "script", "casting", "fund", "gear", "bank", "investor"]
+      },
+      {
+        id: "athens",
+        name: { he: "אתונה", en: "Athens" },
+        mood: {
+          he: "אבן חמה, רוח סקפטית ופקידים שיודעים להגיד 'לא' בחיוך.",
+          en: "Warm stone, skeptical wind, and clerks who say no with a smile."
+        },
+        palette: { a: "#f7e4c8", b: "#d7aa7a", c: "#78677a" },
+        skyline: [36, 48, 35, 57, 43, 64, 34, 52, 40, 60, 38],
+        buildings: ["home", "employment", "cinematheque", "cafe", "crew", "filmSchool", "bank", "post"]
+      },
+      {
+        id: "berlin",
+        name: { he: "ברלין", en: "Berlin" },
+        mood: {
+          he: "אפור חכם, מסדרונות נקיים ואנשים שקוראים לזה 'תהליך'.",
+          en: "Smart grey, tidy corridors, and people who call this 'process.'"
+        },
+        palette: { a: "#d8e3ea", b: "#9fb7c5", c: "#5a5f74" },
+        skyline: [62, 78, 48, 68, 58, 84, 46, 58, 76, 40, 66],
+        buildings: ["home", "employment", "post", "gear", "cafe", "cinematheque", "investor", "script"]
+      },
+      {
+        id: "london",
+        name: { he: "לונדון", en: "London" },
+        mood: {
+          he: "גשם תרבותי, פסיב-אגרסיב ונצנוץ של מרקיזות.",
+          en: "Cultured rain, passive aggression, and glowing marquees."
+        },
+        palette: { a: "#e3dddb", b: "#b09f90", c: "#5f5465" },
+        skyline: [68, 52, 74, 42, 66, 88, 48, 60, 55, 71, 44],
+        buildings: ["home", "employment", "festival", "cinema", "cafe", "bank", "casting", "gear"]
+      },
+      {
+        id: "nyc",
+        name: { he: "ניו יורק", en: "NYC" },
+        mood: {
+          he: "קצב מהיר, כעס פרודוקטיבי ומנהלים בלי זמן למצמץ.",
+          en: "Fast pace, productive anger, and executives with no time to blink."
+        },
+        palette: { a: "#e3edf5", b: "#8ba6c5", c: "#4c5678" },
+        skyline: [88, 62, 98, 50, 76, 92, 48, 84, 61, 103, 56],
+        buildings: ["home", "employment", "set", "tv", "loan", "cafe", "investor", "post"]
+      },
+      {
+        id: "paris",
+        name: { he: "פריז", en: "Paris" },
+        mood: {
+          he: "אור יפה, תקציבים קטנים ומבטים שמניחים שכבר קראת תיאוריה.",
+          en: "Beautiful light, small budgets, and glances that assume you read theory."
+        },
+        palette: { a: "#f3dbc4", b: "#d68863", c: "#70546f" },
+        skyline: [34, 44, 37, 54, 42, 64, 36, 58, 40, 70, 44],
+        buildings: ["home", "employment", "cinematheque", "script", "post", "crew", "wardrobe", "fund"]
+      }
+    ];
+
+    const MONTHLY_TROUBLES = [
+      {
+        he: "בעל הבית הזכיר ש'יצירתיות' אינה מטבע מקומי. שכירות עלתה.",
+        en: "The landlord reminded you that 'creativity' is not legal tender. Rent climbed.",
+        apply() {
+          gameState.rentMultiplier += 0.08;
+        }
+      },
+      {
+        he: "ידיד ביקש להחזיר את הספה ל'מישהו עם עתיד'. הנשמה חטפה.",
+        en: "Your friend wants the couch back for 'someone with prospects.' Your soul took a hit.",
+        apply() {
+          adjustStat("soul", -6);
+        }
+      },
+      {
+        he: "בכיר בתעשייה אמר 'בוא נשמור על קשר'. המוניטין לא הסכים שזה מחמאה.",
+        en: "An industry executive said 'let's stay in touch.' Your reputation refused to call that praise.",
+        apply() {
+          adjustStat("reputation", -4);
+        }
+      },
+      {
+        he: "כרטיס אשראי התעורר עם אגו. שילמת עמלה סתמית.",
+        en: "Your credit card woke up with an ego. You paid a nonsense fee.",
+        apply() {
+          changeCash(-Math.round(120 * priceScale()));
+        }
+      }
+    ];
+
+    const MINI_EVENTS = [
+      {
+        he: "הקפה היה טוב מדי. היצירתיות עלתה.",
+        en: "The coffee was suspiciously good. Creativity rose.",
+        apply() {
+          adjustStat("creativity", 4);
+        }
+      },
+      {
+        he: "מישהו אמר שהסטייל שלך נראה 'כמעט מועסק'. הנשמה עלתה.",
+        en: "Someone said your style looks 'almost employed.' Soul up.",
+        apply() {
+          adjustStat("soul", 3);
+        }
+      },
+      {
+        he: "האקס/ית הגיב/ה לסטורי בדיוק כשעבדת. האהבה ירדה, הפרודוקטיביות עלתה.",
+        en: "Your ex replied to a story while you were working. Love down, productivity up.",
+        apply() {
+          adjustStat("love", -4);
+          adjustStat("reputation", 1);
+        }
+      }
+    ];
+
+    const TITLE_BITS = {
+      he: {
+        first: ["הצל", "הסדק", "בוקר", "רחוב", "ארכיון", "חסד", "צלופן", "הלילה", "הקלטת", "שקר"],
+        second: ["האחרון", "של שישי", "במדרגות", "לא שואל", "על הגג", "ללא כתוביות", "ומשכורת", "בלי עדים", "דחוי", "מול העיר"]
+      },
+      en: {
+        first: ["The Shadow", "Morning", "Street", "Archive", "Mercy", "Neon", "The Tape", "Afterglow", "Silence", "The Debt"],
+        second: ["of Friday", "in the Stairwell", "Without Credits", "Against the City", "on the Roof", "No Witnesses", "That Stayed Late", "of Last Call", "Under Neon", "and Salary"]
+      }
+    };
+
+    let dom = null;
+    let audioContext = null;
+    let gameState = createState();
+
+    function createState(overrides = {}) {
+      const prefs = loadPrefs();
+      return Object.assign({
+        day: 1,
+        hour: 7,
+        city: "telaviv",
+        currentBuilding: "home",
+        language: prefs.language || "he",
+        playerName: prefs.playerName || "קובי",
+        economyDifficulty: prefs.economyDifficulty || "modest",
+        goalLevels: prefs.goalLevels || { wealth: "modest", career: "modest", education: "modest", happiness: "modest" },
+        seasonLength: [30, 90, 365].includes(prefs.seasonLength) ? prefs.seasonLength : 365,
+        themeIndex: Number.isInteger(prefs.themeIndex) ? prefs.themeIndex : 0,
+        muted: !!prefs.muted,
+        started: false,
+        cash: 300,
+        bank: 0,
+        fund: 0,
+        debt: 0,
+        education: 0,
+        educationCredits: 0,
+        reputation: 0,
+        soul: 54,
+        creativity: 58,
+        love: 42,
+        experience: 0,
+        housing: "couch",
+        rentMultiplier: 1,
+        wardrobeTier: 0,
+        wardrobeWear: 0,
+        jobId: null,
+        jobTier: 0,
+        filmUnlocked: false,
+        equipment: { camera: false, studio: false, insurance: false },
+        activeNotice: null,
+        projects: [],
+        focusedProjectId: null,
+        genreReleases: {},
+        weeklyRevenue: [],
+        offers: [],
+        walkaways: {},
+        ticker: "",
+        lastOutcome: null,
+        lastRelease: null,
+        log: [],
+        dailyGigLedger: {},
+        highscores: loadScores(),
+        winState: null,
+        seed: 1337,
+        monthCounter: 1,
+        lastFundDevDay: -30,
+        incidentBase: 0.4,
+        pricesDrift: 1,
+        travelFlash: false
+      }, overrides);
+    }
+
+    function adaptUiText(str) {
+      if (typeof str !== "string" || gameState.language !== "he") {
+        return str;
+      }
+      return str
+        .replace(/-\$(\d[\d,]*(?:\.\d+)?)/g, "-$1 ₪")
+        .replace(/\$(\d[\d,]*(?:\.\d+)?)/g, "$1 ₪")
+        .replace(/(\d[\d,]*(?:\.\d+)?)\$/g, "$1 ₪")
+        .replace(/\/h\b/g, "/ש")
+        .replace(/(\d+)h\b/g, "$1ש");
+    }
+
+    function t(key, vars = {}) {
+      const lang = gameState.language in TEXT ? gameState.language : "he";
+      let str = TEXT[lang][key] || TEXT.he[key] || key;
+      Object.keys(vars).forEach((name) => {
+        str = str.replace(new RegExp("\\{" + name + "\\}", "g"), String(vars[name]));
+      });
+      return adaptUiText(str);
+    }
+
+    function localize(value) {
+      if (value == null) {
+        return "";
+      }
+      if (typeof value === "string") {
+        return adaptUiText(value);
+      }
+      return adaptUiText(value[gameState.language] || value.he || value.en || "");
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function rand() {
+      gameState.seed = (gameState.seed * 1664525 + 1013904223) >>> 0;
+      return gameState.seed / 4294967296;
+    }
+
+    function pick(array) {
+      if (!array.length) {
+        return null;
+      }
+      return array[Math.floor(rand() * array.length)];
+    }
+
+    function loadPrefs() {
+      try {
+        if (!root.localStorage) {
+          return {};
+        }
+        return JSON.parse(root.localStorage.getItem(STORAGE_KEYS.prefs) || "{}");
+      } catch (_err) {
+        return {};
+      }
+    }
+
+    function savePrefs() {
+      try {
+        if (!root.localStorage) {
+          return;
+        }
+        root.localStorage.setItem(STORAGE_KEYS.prefs, JSON.stringify({
+          language: gameState.language,
+          playerName: gameState.playerName,
+          economyDifficulty: gameState.economyDifficulty,
+          goalLevels: gameState.goalLevels,
+          seasonLength: gameState.seasonLength,
+          themeIndex: gameState.themeIndex,
+          muted: gameState.muted
+        }));
+      } catch (_err) {
+      }
+    }
+
+    function loadScores() {
+      try {
+        if (!root.localStorage) {
+          return [];
+        }
+        return JSON.parse(root.localStorage.getItem(STORAGE_KEYS.scores) || "[]");
+      } catch (_err) {
+        return [];
+      }
+    }
+
+    function saveScores() {
+      try {
+        if (!root.localStorage) {
+          return;
+        }
+        root.localStorage.setItem(STORAGE_KEYS.scores, JSON.stringify(gameState.highscores.slice(0, 10)));
+      } catch (_err) {
+      }
+    }
+
+    function saveGame() {
+      try {
+        if (!root.localStorage) {
+          return false;
+        }
+        root.localStorage.setItem(STORAGE_KEYS.save, JSON.stringify(gameState));
+        flashMessage(t("saved"), "good");
+        return true;
+      } catch (_err) {
+        return false;
+      }
+    }
+
+    function loadGame() {
+      try {
+        if (!root.localStorage) {
+          return false;
+        }
+        const raw = root.localStorage.getItem(STORAGE_KEYS.save);
+        if (!raw) {
+          flashMessage(t("noSave"), "bad");
+          return false;
+        }
+        const parsed = JSON.parse(raw);
+        gameState = Object.assign(createState(), parsed);
+        gameState.activeNotice = null;
+        if (!Array.isArray(gameState.highscores)) {
+          gameState.highscores = loadScores();
+        }
+        gameState.started = true;
+        if (dom) {
+          dom.statusWindowOpen = false;
+        }
+        note(t("saveLoaded"));
+        savePrefs();
+        applyTheme();
+        syncDocument();
+        render();
+        return true;
+      } catch (_err) {
+        flashMessage(t("noSave"), "bad");
+        return false;
+      }
+    }
+
+    function setLanguage(lang) {
+      gameState.language = lang === "en" ? "en" : "he";
+      savePrefs();
+      syncDocument();
+      render();
+    }
+
+    function syncDocument() {
+      if (!canRender) {
+        return;
+      }
+      document.documentElement.lang = gameState.language;
+      document.documentElement.dir = gameState.language === "he" ? "rtl" : "ltr";
+      document.title = t("title");
+      document.documentElement.style.setProperty("--window-title", JSON.stringify(t("title")));
+    }
+
+    function applyTheme() {
+      if (!canRender) {
+        return;
+      }
+      const preset = THEME_PRESETS[gameState.themeIndex % THEME_PRESETS.length];
+      Object.keys(preset.vars).forEach((key) => {
+        document.documentElement.style.setProperty(key, preset.vars[key]);
+      });
+    }
+
+    function cycleTheme() {
+      gameState.themeIndex = (gameState.themeIndex + 1) % THEME_PRESETS.length;
+      applyTheme();
+      savePrefs();
+      render();
+    }
+
+    function toggleMute() {
+      gameState.muted = !gameState.muted;
+      savePrefs();
+      render();
+    }
+
+    function getCity(cityId = gameState.city) {
+      return CITIES.find((city) => city.id === cityId) || CITIES[0];
+    }
+
+    function getBuilding(id) {
+      return BUILDINGS[id] || BUILDINGS.home;
+    }
+
+    function currentMonth() {
+      return Math.floor((gameState.day - 1) / 30) + 1;
+    }
+
+    function seasonLength() {
+      return [30, 90, 365].includes(gameState.seasonLength) ? gameState.seasonLength : 365;
+    }
+
+    function paceScale() {
+      // Shorter seasons accelerate "soft" gains (wages, study, grants, release rep)
+      // by a moderate sqrt factor so a strong status is reachable in time. 365 => 1.
+      return Math.sqrt(365 / seasonLength());
+    }
+
+    function daysLeft() {
+      return Math.max(0, seasonLength() - gameState.day);
+    }
+
+    function economyProfile() {
+      return ECONOMY[gameState.economyDifficulty] || ECONOMY.modest;
+    }
+
+    function priceScale() {
+      const profile = economyProfile();
+      const releaseScale = Math.min(1.6, 1 + gameState.projects.filter((p) => p.released).length * 0.05);
+      return profile.prices * gameState.pricesDrift * releaseScale;
+    }
+
+    function formatMoney(value) {
+      const rounded = Math.round(value);
+      if (gameState.language === "he") {
+        return (rounded < 0 ? "-" : "") + Math.abs(rounded) + " ₪";
+      }
+      return (rounded < 0 ? "-$" + Math.abs(rounded) : "$" + rounded);
+    }
+
+    function formatHour(hour) {
+      return String(hour).padStart(2, "0") + ":00";
+    }
+
+    function formatDuration(hours) {
+      return gameState.language === "he" ? hours + "ש" : hours + "h";
+    }
+
+    function visibleBuildings(city = getCity()) {
+      return (city.buildings || []).filter((buildingId) => buildingId !== "airport");
+    }
+
+    function normalizeCurrentBuilding() {
+      const currentCity = getCity();
+      const available = visibleBuildings(currentCity);
+      if (!available.includes(gameState.currentBuilding)) {
+        gameState.currentBuilding = available[0] || "home";
+      }
+    }
+
+    function equipmentBenefits() {
+      const benefits = {
+        shootDiscount: 0,
+        postDiscount: 0,
+        buzzBoost: 0,
+        qualityBoost: 0,
+        releaseBoost: 0
+      };
+      if (gameState.equipment.camera) {
+        benefits.shootDiscount += 0.08;
+        benefits.buzzBoost += 0.04;
+        benefits.qualityBoost += 0.03;
+      }
+      if (gameState.equipment.studio) {
+        benefits.postDiscount += 0.3;
+        benefits.buzzBoost += 0.09;
+        benefits.releaseBoost += 0.04;
+      }
+      if (gameState.equipment.insurance) {
+        benefits.shootDiscount += 0.12;
+        benefits.postDiscount += 0.08;
+        benefits.buzzBoost += 0.06;
+        benefits.qualityBoost += 0.04;
+      }
+      return benefits;
+    }
+
+    function shootCost(baseCost) {
+      return Math.round(baseCost * priceScale() * (1 - equipmentBenefits().shootDiscount));
+    }
+
+    function postCost(baseCost = 920) {
+      return Math.round(baseCost * priceScale() * (1 - equipmentBenefits().postDiscount));
+    }
+
+    function statusRowMarkup(label, value, tone) {
+      return `
+        <div class="ledger-row ${tone || ""}">
+          <span>${label}</span>
+          <strong>${value}</strong>
+        </div>
+      `;
+    }
+
+    function scoreWealth() {
+      return Math.round(gameState.cash + gameState.bank + gameState.fund - gameState.debt);
+    }
+
+    function scoreCareer() {
+      return Math.round(gameState.reputation + gameState.projects.filter((p) => p.released).length * 15 + gameState.jobTier * 12);
+    }
+
+    function scoreEducation() {
+      return gameState.education;
+    }
+
+    function scoreHappiness() {
+      return Math.round((gameState.soul + gameState.creativity + gameState.love) / 3);
+    }
+
+    function goalValue(category) {
+      if (category === "wealth") return scoreWealth();
+      if (category === "career") return scoreCareer();
+      if (category === "education") return scoreEducation();
+      return scoreHappiness();
+    }
+
+    function goalTarget(category) {
+      const base = GOAL_TARGETS[category][gameState.goalLevels[category]];
+      // Happiness is a bounded quality-of-life stat, not time-accumulated — keep it fixed.
+      // Accumulative goals scale closer in shorter seasons (the other half of the pacing).
+      if (category === "happiness") {
+        return base;
+      }
+      const eased = base / paceScale();
+      return category === "education" ? Math.max(1, Math.round(eased)) : Math.round(eased);
+    }
+
+    function goalProgress(category) {
+      return clamp(Math.round((goalValue(category) / goalTarget(category)) * 100), 0, 100);
+    }
+
+    function allGoalsMet() {
+      return ["wealth", "career", "education", "happiness"].every((category) => goalProgress(category) >= 100);
+    }
+
+    function projectSlotLimit() {
+      if (!gameState.filmUnlocked) {
+        return 0;
+      }
+      return 2 + (gameState.reputation >= 80 ? 1 : 0);
+    }
+
+    function activeProjects() {
+      return gameState.projects.filter((project) => !project.archived).length;
+    }
+
+    function getFocusedProject() {
+      return gameState.projects.find((project) => project.id === gameState.focusedProjectId) || null;
+    }
+
+    function setFocusedProject(projectId) {
+      gameState.focusedProjectId = projectId;
+      render();
+      return true;
+    }
+
+    function adjustStat(key, delta) {
+      const bounds = key === "reputation" || key === "education" ? [0, 999] : [0, 100];
+      gameState[key] = clamp(gameState[key] + delta, bounds[0], bounds[1]);
+      return gameState[key];
+    }
+
+    function changeCash(delta) {
+      gameState.cash = Math.round(gameState.cash + delta);
+      return gameState.cash;
+    }
+
+    function note(copy, tone = "neutral") {
+      gameState.ticker = copy;
+      gameState.log.unshift({ copy, tone, day: gameState.day, hour: gameState.hour });
+      gameState.log = gameState.log.slice(0, 18);
+      return copy;
+    }
+
+    function openNotice(copy, tone = "neutral", title) {
+      gameState.activeNotice = {
+        id: "n" + gameState.day + "-" + gameState.hour + "-" + Math.floor(rand() * 100000),
+        title: title || (tone === "good" ? t("success") : tone === "bad" ? t("fail") : t("notice")),
+        copy,
+        tone
+      };
+      if (canRender && dom) {
+        if (dom.noticeTimer) {
+          root.clearTimeout(dom.noticeTimer);
+          dom.noticeTimer = null;
+        }
+      }
+    }
+
+    function flashMessage(copy, tone = "neutral") {
+      note(copy, tone);
+      openNotice(copy, tone);
+      render();
+    }
+
+    function playSfx(kind) {
+      if (!canRender || gameState.muted) {
+        return;
+      }
+      try {
+        audioContext = audioContext || new (root.AudioContext || root.webkitAudioContext)();
+      } catch (_err) {
+        return;
+      }
+      const ctx = audioContext;
+      const now = ctx.currentTime;
+      const bank = {
+        cash: [[420, 0.08], [620, 0.06]],
+        success: [[520, 0.08], [760, 0.08], [920, 0.1]],
+        fail: [[180, 0.08], [130, 0.12]],
+        release: [[480, 0.09], [680, 0.08], [910, 0.15], [1180, 0.11]],
+        danger: [[160, 0.16], [120, 0.18]],
+        travel: [[360, 0.06], [420, 0.06]],
+        sleep: [[260, 0.16]]
+      };
+      const notes = bank[kind] || bank.cash;
+      notes.forEach((pair, index) => {
+        const [freq, len] = pair;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = kind === "danger" ? "square" : kind === "release" ? "triangle" : "sine";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, now + index * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.11, now + index * 0.08 + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.08 + len);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + index * 0.08);
+        osc.stop(now + index * 0.08 + len + 0.02);
+      });
+    }
+
+    function ensureTime(hours) {
+      return gameState.hour + hours <= 23;
+    }
+
+    function spendHours(hours, reason) {
+      if (!ensureTime(hours)) {
+        flashMessage(localize({
+          he: "היום קצר מדי לזה. תישן/י קודם.",
+          en: "The day is too short for that. Sleep first."
+        }), "bad");
+        return false;
+      }
+      gameState.hour += hours;
+      if (reason) {
+        note(reason);
+      }
+      return true;
+    }
+
+    function distanceBetween(city, fromId, toId) {
+      const ring = visibleBuildings(city);
+      const fromIndex = ring.indexOf(fromId);
+      const toIndex = ring.indexOf(toId);
+      if (fromIndex < 0 || toIndex < 0) {
+        return 0;
+      }
+      const raw = Math.abs(fromIndex - toIndex);
+      return Math.min(raw, ring.length - raw);
+    }
+
+    function goToBuilding(id) {
+      const city = getCity();
+      const ring = visibleBuildings(city);
+      if (!ring.includes(id)) {
+        flashMessage(localize({
+          he: "הבניין לא בעיר הזו כרגע.",
+          en: "That building is not in this city right now."
+        }), "bad");
+        return false;
+      }
+      const distance = distanceBetween(city, gameState.currentBuilding, id);
+      if (distance > 0 && !spendHours(distance, t("travelCost", { hours: distance }))) {
+        return false;
+      }
+      gameState.currentBuilding = id;
+      gameState.travelFlash = true;
+      playSfx(distance > 0 ? "travel" : "cash");
+      render();
+      root.setTimeout(() => {
+        gameState.travelFlash = false;
+        render();
+      }, 900);
+      return true;
+    }
+
+    function flyTo(cityId) {
+      if (cityId === gameState.city) {
+        return true;
+      }
+      const target = getCity(cityId);
+      if (!target) {
+        return false;
+      }
+      const cost = Math.round(180 * priceScale());
+      if (gameState.cash < cost) {
+        flashMessage(localize({
+          he: "אין מספיק כסף לכרטיס. השמיים שמורים לעשירים ולמלווים בריבית.",
+          en: "Not enough cash for a ticket. The skies belong to the rich and the predatory."
+        }), "bad");
+        return false;
+      }
+      if (!spendHours(3, t("flyCost", { hours: 3, cost }))) {
+        return false;
+      }
+      changeCash(-cost);
+      gameState.city = cityId;
+      gameState.currentBuilding = visibleBuildings(target)[0] || "home";
+      flashMessage(localize({
+        he: "נחתת ב" + localize(target.name) + ".",
+        en: "You landed in " + localize(target.name) + "."
+      }), "good");
+      playSfx("travel");
+      updateDailySystems();
+      render();
+      return true;
+    }
+
+    function getJob(jobId) {
+      return JOBS.find((job) => job.id === jobId) || null;
+    }
+
+    function applyJob(jobId) {
+      const job = getJob(jobId);
+      if (!job) {
+        return false;
+      }
+      const missing =
+        gameState.education < job.req.education ||
+        gameState.wardrobeTier < job.req.wardrobe ||
+        gameState.experience < job.req.experience ||
+        gameState.reputation < job.req.reputation;
+      if (missing) {
+        flashMessage(localize(job.reject), "bad");
+        playSfx("fail");
+        spendHours(1, localize({
+          he: "בזבזת שעה על טופס ודחייה מנומסת.",
+          en: "You burned an hour on paperwork and polite rejection."
+        }));
+        render();
+        return false;
+      }
+      if (!spendHours(1, localize({
+        he: "ראיון קצר, מבט חודר, לחיצת יד מזיעה.",
+        en: "Short interview, cold stare, sweaty handshake."
+      }))) {
+        return false;
+      }
+      gameState.jobId = job.id;
+      gameState.jobTier = job.tier;
+      adjustStat("reputation", 1);
+      flashMessage(localize({
+        he: "התקבלת: " + localize(job.title),
+        en: "Hired: " + localize(job.title)
+      }), "good");
+      playSfx("success");
+      updateUnlocks();
+      saveGame();
+      return true;
+    }
+
+    function degradeWardrobe(amount) {
+      if (!gameState.wardrobeTier) {
+        return;
+      }
+      gameState.wardrobeWear -= amount;
+      if (gameState.wardrobeWear <= 0) {
+        gameState.wardrobeTier = Math.max(0, gameState.wardrobeTier - 1);
+        gameState.wardrobeWear = gameState.wardrobeTier ? 100 : 0;
+        flashMessage(t("wardrobeWorn"), "bad");
+      }
+    }
+
+    function workShift(hours = 4) {
+      const job = getJob(gameState.jobId);
+      if (!job) {
+        flashMessage(localize({
+          he: "צריך קודם עבודה. הקונספט של משכורת בנוי על זה.",
+          en: "You need a job first. Salary depends on that concept."
+        }), "bad");
+        return false;
+      }
+      if (![4, 6, 8].includes(hours)) {
+        hours = 4;
+      }
+      if (!spendHours(hours, t("workShift", { hours }))) {
+        return false;
+      }
+      const pay = Math.round(job.wage * hours * economyProfile().wages * paceScale());
+      changeCash(pay);
+      gameState.experience += Math.round(job.exp * (hours / 4));
+      adjustStat("reputation", job.rep);
+      adjustStat("soul", hours >= 8 ? -3 : -1);
+      adjustStat("creativity", -1);
+      degradeWardrobe(hours * 6 + job.tier * 2);
+      flashMessage(localize({
+        he: "משמרת הסתיימה: +" + formatMoney(pay),
+        en: "Shift complete: +" + formatMoney(pay)
+      }), "good");
+      playSfx("cash");
+      updateUnlocks();
+      saveGame();
+      return true;
+    }
+
+    function switchHousing(housingId) {
+      const item = HOUSING[housingId];
+      if (!item) {
+        return false;
+      }
+      if (housingId === gameState.housing) {
+        return true;
+      }
+      if (housingId === "couch") {
+        gameState.housing = "couch";
+        flashMessage(localize({
+          he: "חזרת לספה. היא לא התגעגעה.",
+          en: "Back to the couch. It did not miss you."
+        }), "bad");
+        render();
+        return true;
+      }
+      const entry = Math.round(item.rent * gameState.rentMultiplier);
+      if (gameState.cash < entry) {
+        flashMessage(localize({
+          he: "אין לך מספיק בשביל שכר הדירה הראשון.",
+          en: "You cannot cover the first rent."
+        }), "bad");
+        return false;
+      }
+      changeCash(-entry);
+      gameState.housing = housingId;
+      flashMessage(localize({
+        he: "עברת ל" + localize(item.name) + ".",
+        en: "Moved into " + localize(item.name) + "."
+      }), "good");
+      playSfx("success");
+      saveGame();
+      return true;
+    }
+
+    function buyWardrobe(tier) {
+      const item = WARDROBES.find((entry) => entry.tier === Number(tier));
+      if (!item) {
+        return false;
+      }
+      if (gameState.housing === "couch" && item.tier > 1) {
+        flashMessage(localize({
+          he: "אין לך ארון. אי אפשר לנהל מלתחה מפוארת על יד כרית של מישהו אחר.",
+          en: "You do not own a closet. Luxury wardrobe management from someone else's pillow is not viable."
+        }), "bad");
+        return false;
+      }
+      const cost = Math.round(item.price * priceScale());
+      if (gameState.cash < cost) {
+        flashMessage(localize({
+          he: "אין מספיק כסף לבד שנראה אמין.",
+          en: "Not enough cash for believable fabric."
+        }), "bad");
+        return false;
+      }
+      changeCash(-cost);
+      gameState.wardrobeTier = item.tier;
+      gameState.wardrobeWear = 100;
+      flashMessage(localize({
+        he: "המלתחה עלתה לדרגה " + item.tier + ".",
+        en: "Wardrobe upgraded to tier " + item.tier + "."
+      }), "good");
+      playSfx("cash");
+      saveGame();
+      render();
+      return true;
+    }
+
+    function attendClass(courseId = "night") {
+      const course = COURSES.find((entry) => entry.id === courseId) || COURSES[0];
+      const cost = Math.round(course.cost * priceScale());
+      if (gameState.cash < cost) {
+        flashMessage(localize({
+          he: "הקורס לא מקבל הבטחות עתידיות במקום כסף.",
+          en: "The school does not accept future promises instead of money."
+        }), "bad");
+        return false;
+      }
+      if (!spendHours(course.hours, localize(course.name))) {
+        return false;
+      }
+      changeCash(-cost);
+      gameState.educationCredits += course.credits * paceScale();
+      adjustStat("creativity", course.creativity);
+      adjustStat("soul", course.soul);
+      while (gameState.educationCredits >= (gameState.education + 1) * 2) {
+        gameState.education += 1;
+        adjustStat("reputation", 2);
+        flashMessage(localize({
+          he: "עלית ברמת ההשכלה. עכשיו אתה נשמע יקר יותר.",
+          en: "Education level up. You now sound more expensive."
+        }), "good");
+      }
+      playSfx("success");
+      updateUnlocks();
+      saveGame();
+      return true;
+    }
+
+    function takeGig(gigId) {
+      const gig = GIGS.find((entry) => entry.id === gigId);
+      if (!gig) {
+        return false;
+      }
+      const ledgerKey = gameState.day + ":" + gigId;
+      if (gameState.dailyGigLedger[ledgerKey]) {
+        flashMessage(localize({
+          he: "את הגיג הזה כבר סחטת היום.",
+          en: "You already squeezed that gig today."
+        }), "bad");
+        return false;
+      }
+      if (!spendHours(gig.hours, localize(gig.name))) {
+        return false;
+      }
+      gameState.dailyGigLedger[ledgerKey] = true;
+      changeCash(gig.pay);
+      adjustStat("creativity", gig.creativity);
+      adjustStat("soul", gig.soul);
+      adjustStat("reputation", gig.rep);
+      flashMessage(localize({
+        he: "גיג נסגר: +" + formatMoney(gig.pay),
+        en: "Gig closed: +" + formatMoney(gig.pay)
+      }), "good");
+      playSfx("cash");
+      saveGame();
+      return true;
+    }
+
+    function buyEquip(name) {
+      const prices = {
+        camera: 1700,
+        studio: 3600,
+        insurance: 1450
+      };
+      if (!(name in prices)) {
+        return false;
+      }
+      const cost = Math.round(prices[name] * priceScale());
+      if (gameState.equipment[name]) {
+        flashMessage(localize({
+          he: "כבר קנית את זה. ציוד כפול זה פשוט חרדה בקופסה.",
+          en: "You already bought that. Duplicate gear is just boxed anxiety."
+        }), "bad");
+        return false;
+      }
+      if (gameState.cash < cost) {
+        flashMessage(localize({
+          he: "אין מספיק מזומן לציוד הזה.",
+          en: "Not enough cash for that gear."
+        }), "bad");
+        return false;
+      }
+      changeCash(-cost);
+      gameState.equipment[name] = true;
+      adjustStat("reputation", name === "camera" ? 1 : 2);
+      flashMessage(localize({
+        he: "רכשת " + (name === "camera" ? "מצלמת כתף" : name === "studio" ? "עמדת עריכה" : "קיט סאונד ותאורה"),
+        en: "Purchased " + (name === "camera" ? "camera" : name === "studio" ? "editing workstation" : "sound and light kit")
+      }), "good");
+      playSfx("cash");
+      updateUnlocks();
+      saveGame();
+      return true;
+    }
+
+    function doSoftAction(actionId) {
+      const action = SOFT_ACTIONS[actionId];
+      if (!action) {
+        return false;
+      }
+      if (gameState.cash < action.cost) {
+        flashMessage(localize({
+          he: "אין מספיק מזומן לפינוק הזה כרגע.",
+          en: "Not enough cash for that indulgence right now."
+        }), "bad");
+        return false;
+      }
+      if (!spendHours(action.hours, localize(action.name))) {
+        return false;
+      }
+      changeCash(-action.cost);
+      Object.keys(action.effects).forEach((stat) => {
+        adjustStat(stat, action.effects[stat]);
+      });
+      flashMessage(localize(action.result), "good");
+      playSfx("success");
+      saveGame();
+      return true;
+    }
+
+    function updateUnlocks() {
+      if (!gameState.filmUnlocked &&
+        gameState.experience >= 62 &&
+        gameState.education >= 1 &&
+        gameState.cash >= 300 &&
+        gameState.equipment.camera) {
+        gameState.filmUnlocked = true;
+        flashMessage(t("filmUnlocked"), "good");
+        playSfx("release");
+      }
+      return gameState.filmUnlocked;
+    }
+
+    function generateProjectTitle() {
+      const first = pick(TITLE_BITS[gameState.language].first) || TITLE_BITS.he.first[0];
+      const second = pick(TITLE_BITS[gameState.language].second) || TITLE_BITS.he.second[0];
+      return first + " " + second;
+    }
+
+    function projectByIndex(index) {
+      if (typeof index === "number") {
+        return gameState.projects[index] || null;
+      }
+      return getFocusedProject();
+    }
+
+    function openOfferDeck(kind) {
+      const focusedProject = getFocusedProject();
+      if (kind !== "script" && !focusedProject) {
+        flashMessage(t("needProject"), "bad");
+        return false;
+      }
+      if (kind === "script" && !gameState.filmUnlocked) {
+        flashMessage(t("filmLocked"), "bad");
+        return false;
+      }
+      const offers = [];
+      if (kind === "script") {
+        for (let i = 0; i < 3; i += 1) {
+          const genre = GENRES[Math.floor(rand() * GENRES.length)];
+          const price = Math.round((620 + rand() * 980) * priceScale());
+          offers.push({
+            uid: "script-" + gameState.day + "-" + i,
+            kind,
+            name: generateProjectTitle(),
+            genre: genre.id,
+            label: localize(genre.name),
+            price,
+            floor: Math.round(price * (0.62 + rand() * 0.3)),
+            copy: localize({
+              he: "תסריט " + localize(genre.name) + " עם ריח של סיכון מבוקר.",
+              en: localize(genre.name) + " script with the smell of curated risk."
+            })
+          });
+        }
+      } else {
+        const names = kind === "cast"
+          ? [{ he: "נועה עיניים-קשות", en: "Noa Hard-Eyes" }, { he: "בן כריזמה-בהשכרה", en: "Ben Rental-Charisma" }, { he: "מאיה בלי-בושה", en: "Maya No-Shame" }]
+          : [{ he: "צוות לילה עם תיקים", en: "Night Crew with Cases" }, { he: "יחידת קפה אגרסיבית", en: "Aggressive Coffee Unit" }, { he: "חבילת מקצוענים שקטים", en: "Package of Quiet Pros" }];
+        for (let i = 0; i < 3; i += 1) {
+          const base = kind === "cast" ? 420 : 360;
+          const spread = kind === "cast" ? 820 : 720;
+          const price = Math.round((base + rand() * spread) * priceScale());
+          offers.push({
+            uid: kind + "-" + gameState.day + "-" + i,
+            kind,
+            name: localize(names[i % names.length]),
+            price,
+            floor: Math.round(price * (0.68 + rand() * 0.22)),
+            quality: 0.8 + rand() * 0.55,
+            copy: localize({
+              he: kind === "cast" ? "הפנים ישדרו כאב, גם אם הטקסט חלש." : "הם שקטים, יקרים ויודעים להעמיד כבל בלי דרמה.",
+              en: kind === "cast" ? "The face will carry pain even if the text cannot." : "They are quiet, expensive, and know how to place a cable without drama."
+            })
+          });
+        }
+      }
+      gameState.offers = offers;
+      render();
+      return true;
+    }
+
+    function commitOffer(offer, agreedPrice) {
+      if (offer.kind === "script") {
+        if (activeProjects() >= projectSlotLimit()) {
+          flashMessage(localize({
+            he: "כל סלוטי ההפקה מלאים. תסיים משהו לפני עוד פאניקה.",
+            en: "All production slots are full. Finish something before buying more panic."
+          }), "bad");
+          return false;
+        }
+        if (gameState.cash < agreedPrice) {
+          flashMessage(localize({
+            he: "אין מספיק מזומן לתסריט הזה.",
+            en: "Not enough cash for that script."
+          }), "bad");
+          return false;
+        }
+        if (!spendHours(2, localize({
+          he: "סגרת תסריט, חיבקת מסמך והעמדת פנים שאתה רגוע.",
+          en: "You closed a script, hugged a document, and pretended to be calm."
+        }))) {
+          return false;
+        }
+        changeCash(-agreedPrice);
+        const project = {
+          id: "p" + (Date.now ? Date.now() : Math.floor(rand() * 100000)),
+          title: offer.name,
+          genre: offer.genre,
+          stage: "script",
+          cast: [],
+          crew: [],
+          shoots: 0,
+          budgetTier: null,
+          buzz: 0,
+          reviewed: null,
+          premiered: false,
+          released: false,
+          createdDay: gameState.day,
+          fundGrant: 0,
+          fundRecoup: 0,
+          finishGrant: 0,
+          investorCut: 0,
+          scriptCost: agreedPrice,
+          qualityBoost: 0
+        };
+        gameState.projects.push(project);
+        gameState.focusedProjectId = project.id;
+        flashMessage(localize({
+          he: "נפתח פרויקט חדש: " + project.title,
+          en: "New project opened: " + project.title
+        }), "good");
+        playSfx("success");
+      } else {
+        const project = getFocusedProject();
+        if (!project) {
+          return false;
+        }
+        if (gameState.cash < agreedPrice) {
+          flashMessage(localize({
+            he: "אין מספיק מזומן לסגור את זה.",
+            en: "Not enough cash to close that deal."
+          }), "bad");
+          return false;
+        }
+        if (!spendHours(2, localize({
+          he: "סגרת חוזה עם חיוך שנשמע יקר.",
+          en: "You closed a deal with an expensive sounding smile."
+        }))) {
+          return false;
+        }
+        changeCash(-agreedPrice);
+        if (offer.kind === "cast") {
+          if (project.cast.length >= 2) {
+            flashMessage(localize({
+              he: "לפרויקט כבר יש שני שחקנים. זאת כבר קבוצה.",
+              en: "The project already has two cast members. That is a team now."
+            }), "bad");
+            return false;
+          }
+          project.cast.push({ name: offer.name, quality: offer.quality, price: agreedPrice });
+        } else {
+          if (project.crew.length >= 3) {
+            flashMessage(localize({
+              he: "לפרויקט כבר יש שלושה אנשי צוות. זה מספיק כאב ניהולי.",
+              en: "The project already has three crew hires. That is enough managerial pain."
+            }), "bad");
+            return false;
+          }
+          project.crew.push({ name: offer.name, quality: offer.quality, price: agreedPrice });
+        }
+        project.qualityBoost += offer.quality * 0.08;
+        flashMessage(localize({
+          he: "הצטרף/ה לפרויקט: " + offer.name,
+          en: "Joined the project: " + offer.name
+        }), "good");
+        playSfx("cash");
+      }
+      gameState.offers = gameState.offers.filter((entry) => entry.uid !== offer.uid);
+      saveGame();
+      updateUnlocks();
+      return true;
+    }
+
+    function buyScript(index = 0) {
+      if (!gameState.offers.length || gameState.offers[0].kind !== "script") {
+        openOfferDeck("script");
+      }
+      const offer = gameState.offers[index];
+      if (!offer) {
+        return false;
+      }
+      return commitOffer(offer, offer.price);
+    }
+
+    function hire(kind = "cast", index = 0) {
+      if (!gameState.offers.length || gameState.offers[0].kind !== kind) {
+        openOfferDeck(kind);
+      }
+      const offer = gameState.offers[index];
+      if (!offer) {
+        return false;
+      }
+      return commitOffer(offer, offer.price);
+    }
+
+    function haggle(index, optionIndex) {
+      const offer = gameState.offers[index];
+      if (!offer) {
+        return false;
+      }
+      const discounts = [0.1, 0.25, 0.4];
+      const discount = discounts[optionIndex] || 0.1;
+      const ask = Math.round(offer.price * (1 - discount));
+      if (!spendHours(1, localize({
+        he: "התמקחת עם פרצוף של תקציב מתפורר.",
+        en: "You haggled with the face of a collapsing budget."
+      }))) {
+        return false;
+      }
+      if (ask >= offer.floor) {
+        flashMessage(localize({
+          he: "הספק נאנח והסכים ל" + formatMoney(ask),
+          en: "The vendor sighed and accepted " + formatMoney(ask)
+        }), "good");
+        playSfx("success");
+        return commitOffer(offer, ask);
+      }
+      gameState.walkaways[offer.uid] = true;
+      gameState.offers.splice(index, 1);
+      flashMessage(localize({
+        he: "הספק נעלב, אסף את כבודו ויצא.",
+        en: "The vendor took offense, gathered their dignity, and left."
+      }), "bad");
+      playSfx("fail");
+      saveGame();
+      render();
+      return false;
+    }
+
+    function canShoot(project) {
+      return project && project.cast.length >= 2 && project.crew.length >= 3;
+    }
+
+    function doShoot(index, tier = "lean") {
+      const project = projectByIndex(index);
+      const shootTier = SHOOT_TIERS[tier] || SHOOT_TIERS.lean;
+      if (!project) {
+        flashMessage(t("needProject"), "bad");
+        return false;
+      }
+      if (!canShoot(project)) {
+        flashMessage(localize({
+          he: "צריך 2 שחקנים ו-3 אנשי צוות לפני הצילומים.",
+          en: "You need 2 cast hires and 3 crew hires before shooting."
+        }), "bad");
+        return false;
+      }
+      const cost = shootCost(shootTier.cost);
+      if (gameState.cash < cost) {
+        flashMessage(localize({
+          he: "אין מספיק כסף ליום צילום כזה.",
+          en: "Not enough cash for that shoot day."
+        }), "bad");
+        return false;
+      }
+      if (!spendHours(6, localize({
+        he: "יום צילום " + localize(shootTier.name),
+        en: localize(shootTier.name) + " shoot day"
+      }))) {
+        return false;
+      }
+      changeCash(-cost);
+      project.shoots += 1;
+      project.budgetTier = tier;
+      project.stage = project.shoots >= 2 ? "shot" : "shooting";
+      project.qualityBoost += ({ lean: 0.04, bold: 0.08, decadent: 0.13 }[tier] || 0.04) + equipmentBenefits().qualityBoost;
+      adjustStat("creativity", tier === "decadent" ? 3 : 2);
+      adjustStat("soul", -2);
+      flashMessage(localize({
+        he: "הצילום התקדם. טייקים, עשן ולחץ.",
+        en: "Shooting moved forward. Takes, fumes, and pressure."
+      }), "good");
+      playSfx("cash");
+      saveGame();
+      render();
+      return true;
+    }
+
+    function calcBuzz(project) {
+      const castQuality = project.cast.reduce((sum, entry) => sum + entry.quality, 0) * 0.16;
+      const crewQuality = project.crew.reduce((sum, entry) => sum + entry.quality, 0) * 0.12;
+      const educationBoost = gameState.education * 0.05;
+      const repBoost = gameState.reputation * 0.006;
+      const luck = (rand() - 0.4) * 1.5;
+      return clamp(0.55 + luck + castQuality + crewQuality + educationBoost + repBoost + project.qualityBoost + equipmentBenefits().buzzBoost, 0.4, 2.3);
+    }
+
+    function doPost(index) {
+      const project = projectByIndex(index);
+      if (!project) {
+        flashMessage(t("needProject"), "bad");
+        return false;
+      }
+      if (project.shoots < 2) {
+        flashMessage(localize({
+          he: "צריך שני ימי צילום גמורים לפני פוסט.",
+          en: "You need two completed shoot days before post."
+        }), "bad");
+        return false;
+      }
+      const cost = postCost(920);
+      if (gameState.cash < cost) {
+        flashMessage(localize({
+          he: "אין מספיק כסף לעריכה וסאונד.",
+          en: "Not enough cash for editing and sound."
+        }), "bad");
+        return false;
+      }
+      if (!spendHours(6, localize({
+        he: "פוסט: מחברים כאוס למסך אחד",
+        en: "Post: stitching chaos into one screen"
+      }))) {
+        return false;
+      }
+      changeCash(-cost);
+      project.buzz = calcBuzz(project);
+      project.stage = "post";
+      adjustStat("creativity", 3);
+      flashMessage(localize({
+        he: "הבאזז הסמוי נקבע על " + project.buzz.toFixed(2),
+        en: "Hidden buzz locked at " + project.buzz.toFixed(2)
+      }), "good");
+      playSfx("success");
+      saveGame();
+      render();
+      return true;
+    }
+
+    function doFund(kind = "production") {
+      const project = getFocusedProject();
+      if (kind === "development") {
+        if (gameState.day - (gameState.lastFundDevDay || -30) < 30) {
+          flashMessage(localize({
+            he: "מסלול הפיתוח הזה פתוח לך שוב בעוד כמה שבועות.",
+            en: "This development track opens again for you in a few weeks."
+          }), "bad");
+          return false;
+        }
+        if (gameState.education < 1 && gameState.reputation < 4) {
+          flashMessage(localize({
+            he: "מסלול הפיתוח דורש קצת לימודים או קצת שם.",
+            en: "The development track wants at least some schooling or some reputation."
+          }), "bad");
+          return false;
+        }
+        if (!spendHours(2, localize({
+          he: "פגישת פיתוח בקרן",
+          en: "Fund development meeting"
+        }))) {
+          return false;
+        }
+        const stipend = Math.round((320 + gameState.education * 90 + gameState.reputation * 35) * priceScale() * paceScale());
+        gameState.lastFundDevDay = gameState.day;
+        changeCash(stipend);
+        adjustStat("creativity", 2);
+        adjustStat("reputation", 2);
+        flashMessage(localize({
+          he: "קיבלת מענק פיתוח של " + formatMoney(stipend) + ".",
+          en: "You received a development grant of " + formatMoney(stipend) + "."
+        }), "good");
+        playSfx("success");
+        saveGame();
+        return true;
+      }
+
+      if (!project) {
+        flashMessage(t("needProject"), "bad");
+        return false;
+      }
+
+      if (kind === "finishing") {
+        if (!["shot", "post"].includes(project.stage)) {
+          flashMessage(localize({
+            he: "בקשת השלמה מתאימה רק לסרט שכבר צולם.",
+            en: "A finishing grant only fits a film that already has footage."
+          }), "bad");
+          return false;
+        }
+        if (project.finishGrant > 0) {
+          flashMessage(localize({
+            he: "כבר קיבלת מענק השלמה על הפרויקט הזה.",
+            en: "You already received a finishing grant for this project."
+          }), "bad");
+          return false;
+        }
+        if (gameState.reputation < 10) {
+          flashMessage(localize({
+            he: "הקרן רוצה לראות קצת יותר מוניטין לפני מענק השלמה.",
+            en: "The fund wants a bit more reputation before a finishing grant."
+          }), "bad");
+          return false;
+        }
+        if (!spendHours(3, localize({
+          he: "בקשת השלמה לקרן",
+          en: "Finishing grant meeting"
+        }))) {
+          return false;
+        }
+        const finishGrant = Math.round((760 + gameState.reputation * 28) * priceScale());
+        project.finishGrant = finishGrant;
+        project.fundRecoup += Math.round(finishGrant * 0.4);
+        project.qualityBoost += 0.05;
+        changeCash(finishGrant);
+        flashMessage(localize({
+          he: "הקרן השלימה " + formatMoney(finishGrant) + " כדי לסגור את הפוסט.",
+          en: "The fund added " + formatMoney(finishGrant) + " to help close post."
+        }), "good");
+        playSfx("success");
+        saveGame();
+        return true;
+      }
+
+      if (project.fundGrant > 0) {
+        flashMessage(localize({
+          he: "הקרן כבר בפנים. הם לא חותמים פעמיים על אותו חלום.",
+          en: "The fund is already in. They do not sign the same dream twice."
+        }), "bad");
+        return false;
+      }
+      if (gameState.reputation < 6) {
+        flashMessage(localize({
+          he: "הלקטור חייך ואמר שצריך עוד קצת מוניטין לפני הגשה.",
+          en: "The reader smiled and said you need a little more reputation before submitting."
+        }), "bad");
+        return false;
+      }
+      if (!spendHours(2, localize({
+        he: "הגשת תיק לקרן",
+        en: "Fund submission"
+      }))) {
+        return false;
+      }
+      const grant = Math.round((1200 + gameState.reputation * 40) * priceScale());
+      project.fundGrant = grant;
+      project.fundRecoup = grant;
+      changeCash(grant);
+      flashMessage(localize({
+        he: "הקרן הזרימה " + formatMoney(grant) + " ותיקח 50% מההכנסות עד החזר.",
+        en: "The fund wired " + formatMoney(grant) + " and will recoup 50% of revenues until paid back."
+      }), "good");
+      playSfx("success");
+      saveGame();
+      return true;
+    }
+
+    function doPinv(index) {
+      const project = projectByIndex(index);
+      if (!project) {
+        flashMessage(t("needProject"), "bad");
+        return false;
+      }
+      if (project.investorCut > 0) {
+        flashMessage(localize({
+          he: "משקיע כבר חתך נתח. יותר מזה זו פשיטת רגל עם חליפה.",
+          en: "You already gave away a cut. More than that is bankruptcy in formalwear."
+        }), "bad");
+        return false;
+      }
+      if (!spendHours(2, localize({
+        he: "פגישה עם משקיע: קפה קטן, אגו גדול.",
+        en: "Investor meeting: small coffee, giant ego."
+      }))) {
+        return false;
+      }
+      const raise = Math.round((1600 + rand() * 1200) * priceScale());
+      project.investorCut = 0.22 + rand() * 0.08;
+      changeCash(raise);
+      flashMessage(localize({
+        he: "משקיע הזרים " + formatMoney(raise) + " תמורת " + Math.round(project.investorCut * 100) + "% מההכנסות.",
+        en: "Investor injected " + formatMoney(raise) + " for " + Math.round(project.investorCut * 100) + "% of revenues."
+      }), "good");
+      playSfx("success");
+      saveGame();
+      return true;
+    }
+
+    function reviewForBuzz(buzz) {
+      if (buzz < 0.9) return "flop";
+      if (buzz < 1.2) return "meh";
+      if (buzz < 1.55) return "hit";
+      return "sleeper";
+    }
+
+    function genreBase(genreId) {
+      const genre = GENRES.find((entry) => entry.id === genreId) || GENRES[0];
+      return genre.baseGross;
+    }
+
+    function fatigueMultiplier(genreId) {
+      return Math.pow(0.7, gameState.genreReleases[genreId] || 0);
+    }
+
+    function settleRevenue(project, gross, label) {
+      let net = gross;
+      if (project.fundRecoup > 0) {
+        const fundShare = Math.min(project.fundRecoup, Math.round(net * 0.5));
+        project.fundRecoup -= fundShare;
+        net -= fundShare;
+      }
+      if (project.investorCut > 0) {
+        const cut = Math.round(net * project.investorCut);
+        net -= cut;
+      }
+      changeCash(net);
+      flashMessage(label + ": +" + formatMoney(net), "good");
+      playSfx("cash");
+      return net;
+    }
+
+    function doPremiere(index) {
+      const project = projectByIndex(index);
+      if (!project) {
+        flashMessage(t("needProject"), "bad");
+        return false;
+      }
+      if (project.stage !== "post") {
+        flashMessage(localize({
+          he: "צריך פוסט גמור לפני פרמיירה.",
+          en: "You need completed post before a premiere."
+        }), "bad");
+        return false;
+      }
+      const cost = Math.round(480 * priceScale());
+      if (gameState.cash < cost) {
+        flashMessage(localize({
+          he: "אין מספיק כסף למרקיזה נוצצת.",
+          en: "Not enough cash for a glowing marquee."
+        }), "bad");
+        return false;
+      }
+      if (!spendHours(4, localize({
+        he: "ערב פרמיירה",
+        en: "Premiere night"
+      }))) {
+        return false;
+      }
+      changeCash(-cost);
+      project.premiered = true;
+      project.qualityBoost += 0.08;
+      if (project.buzz > 1.45 && rand() < 0.25) {
+        adjustStat("reputation", 8);
+        note(localize({
+          he: "הסרט גרד פרס צדדי. זה עדיין פרס.",
+          en: "The film scraped a side prize. Still a prize."
+        }));
+      }
+      gameState.lastRelease = {
+        title: project.title,
+        verdict: reviewForBuzz(project.buzz),
+        copy: localize({
+          he: "המרקיזה נדלקה עבור " + project.title + ".",
+          en: "The marquee lit up for " + project.title + "."
+        })
+      };
+      flashMessage(localize({
+        he: "הפרמיירה נתנה לסרט הילה של 25%.",
+        en: "The premiere gave the film a 25% halo."
+      }), "good");
+      playSfx("release");
+      saveGame();
+      render();
+      return true;
+    }
+
+    function releaseProject(project, mode) {
+      const base = genreBase(project.genre);
+      const tier = SHOOT_TIERS[project.budgetTier || "lean"] || SHOOT_TIERS.lean;
+      const premiereBoost = project.premiered ? 1.25 : 1;
+      const fatigue = fatigueMultiplier(project.genre);
+      const gross = Math.round(base * project.buzz * tier.box * premiereBoost * fatigue * (1 + gameState.reputation * 0.01));
+      const equippedGross = Math.round(gross * (1 + equipmentBenefits().releaseBoost));
+      if (!project.released) {
+        project.released = true;
+        gameState.genreReleases[project.genre] = (gameState.genreReleases[project.genre] || 0) + 1;
+      }
+      project.stage = mode === "cinema" ? "run" : "tv";
+      const verdict = reviewForBuzz(project.buzz);
+      project.reviewed = verdict;
+      gameState.lastRelease = {
+        title: project.title,
+        verdict,
+        copy: t("review" + verdict[0].toUpperCase() + verdict.slice(1))
+      };
+      if (mode === "cinema") {
+        const schedule = [0.36, 0.24, 0.17, 0.13, 0.1];
+        schedule.forEach((fraction, index) => {
+          gameState.weeklyRevenue.push({
+            projectId: project.id,
+            amount: Math.round(equippedGross * fraction),
+            dueDay: gameState.day + 7 * (index + 1)
+          });
+        });
+        adjustStat("reputation", Math.round(project.buzz * 6 * paceScale()));
+        flashMessage(localize({
+          he: "הסרט יצא לקולנוע. חמישה תשלומים שבועיים בדרך.",
+          en: "The film opened in cinemas. Five weekly payouts are on the way."
+        }), "good");
+      } else {
+        adjustStat("reputation", Math.round(project.buzz * 4 * paceScale()));
+        settleRevenue(project, Math.round(equippedGross * 0.78), t("tvSale"));
+      }
+      playSfx("release");
+      saveGame();
+      checkEndings();
+      render();
+      return true;
+    }
+
+    function doCinema(index) {
+      const project = projectByIndex(index);
+      if (!project || project.stage !== "post") {
+        flashMessage(localize({
+          he: "צריך סרט ערוך ומוכן להפצה.",
+          en: "You need an edited film ready for release."
+        }), "bad");
+        return false;
+      }
+      if (!spendHours(3, localize({
+        he: "סגירת הפצה קולנועית",
+        en: "Closing theatrical distribution"
+      }))) {
+        return false;
+      }
+      return releaseProject(project, "cinema");
+    }
+
+    function doTv(index) {
+      const project = projectByIndex(index);
+      if (!project || project.stage !== "post") {
+        flashMessage(localize({
+          he: "צריך סרט גמור לפני מכירת טלוויזיה.",
+          en: "You need a completed film before a TV sale."
+        }), "bad");
+        return false;
+      }
+      if (!spendHours(2, localize({
+        he: "פגישת מכירה לטלוויזיה",
+        en: "TV sale meeting"
+      }))) {
+        return false;
+      }
+      return releaseProject(project, "tv");
+    }
+
+    function bankDo(action, amount = 500) {
+      const sum = Math.max(50, Math.round(amount));
+      if (action === "deposit") {
+        if (gameState.cash < sum) return false;
+        changeCash(-sum);
+        gameState.bank += sum;
+        flashMessage(t("deposit") + ": " + formatMoney(sum), "good");
+      } else if (action === "withdraw") {
+        if (gameState.bank < sum) return false;
+        gameState.bank -= sum;
+        changeCash(sum);
+        flashMessage(t("withdraw") + ": " + formatMoney(sum), "good");
+      } else if (action === "invest") {
+        if (gameState.cash < sum) return false;
+        changeCash(-sum);
+        gameState.fund += sum;
+        flashMessage(t("invest") + ": " + formatMoney(sum), "good");
+      } else if (action === "cashOut") {
+        if (gameState.fund < sum) return false;
+        gameState.fund -= sum;
+        changeCash(sum);
+        flashMessage(t("cashOut") + ": " + formatMoney(sum), "good");
+      } else if (action === "borrow") {
+        gameState.debt += sum;
+        changeCash(sum);
+        flashMessage(localize({ he: "הלוואה", en: "Loan" }) + ": " + formatMoney(sum), "bad");
+      } else if (action === "repay") {
+        const repay = Math.min(sum, gameState.debt, gameState.cash);
+        if (repay <= 0) return false;
+        gameState.debt -= repay;
+        changeCash(-repay);
+        flashMessage(t("repay") + ": " + formatMoney(repay), "good");
+      } else {
+        return false;
+      }
+      playSfx(action === "borrow" ? "danger" : "cash");
+      saveGame();
+      render();
+      return true;
+    }
+
+    function payRentAndHousing() {
+      const place = HOUSING[gameState.housing];
+      if (!place) {
+        return;
+      }
+      adjustStat("soul", place.soul);
+      if (gameState.housing === "couch") {
+        adjustStat("love", -1);
+        degradeWardrobe(5);
+        return;
+      }
+      if (gameState.day > 1 && (gameState.day - 1) % 30 === 0) {
+        const rent = Math.round(place.rent * gameState.rentMultiplier * economyProfile().rent);
+        if (gameState.cash >= rent) {
+          changeCash(-rent);
+          note(t("rentDue") + ": -" + formatMoney(rent));
+        } else {
+          gameState.housing = "couch";
+          adjustStat("soul", -8);
+          flashMessage(localize({
+            he: "לא שילמת שכירות. פונית חזרה לספה עם קופסה ומבט חלול.",
+            en: "You missed rent. Evicted back to the couch with a box and a hollow stare."
+          }), "bad");
+          playSfx("danger");
+        }
+      }
+      if (gameState.housing === "cheap" && rand() < 0.035 * economyProfile().incident) {
+        const loss = Math.min(gameState.cash, Math.round(120 + rand() * 200));
+        changeCash(-loss);
+        flashMessage(localize({
+          he: "מישהו עבר בדירה הזולה. נעלמו " + formatMoney(loss),
+          en: "Someone visited the cheap flat. " + formatMoney(loss) + " disappeared."
+        }), "bad");
+      }
+    }
+
+    function settleWeeklyRevenue() {
+      const due = gameState.weeklyRevenue.filter((entry) => entry.dueDay <= gameState.day);
+      if (!due.length) {
+        return;
+      }
+      due.forEach((entry) => {
+        const project = gameState.projects.find((item) => item.id === entry.projectId);
+        if (project) {
+          settleRevenue(project, entry.amount, t("weeklyRevenue"));
+        }
+      });
+      gameState.weeklyRevenue = gameState.weeklyRevenue.filter((entry) => entry.dueDay > gameState.day);
+    }
+
+    function advanceEconomy() {
+      gameState.bank = Math.round(gameState.bank * 1.003);
+      gameState.debt = Math.round(gameState.debt * 1.005);
+      if (gameState.fund > 0) {
+        if (rand() < 0.005) {
+          gameState.fund = 0;
+          flashMessage(localize({
+            he: "ארקדי נעלם עם הקרן. הוא שלח גלויה בלי כתובת חזרה.",
+            en: "Arkady vanished with the fund. He mailed a postcard with no return address."
+          }), "bad");
+          playSfx("danger");
+        } else {
+          const drift = 1 + (rand() < 0.5 ? -1 : 1) * (0.05 + rand() * 0.03);
+          gameState.fund = Math.max(0, Math.round(gameState.fund * drift));
+        }
+      }
+      gameState.pricesDrift = clamp(0.98 + rand() * 0.05, 0.96, 1.04);
+    }
+
+    function maybeTriggerEvents() {
+      if (rand() < 0.12 * economyProfile().incident) {
+        const event = pick(MINI_EVENTS);
+        if (event) {
+          event.apply();
+          note(localize({ he: event.he, en: event.en }));
+        }
+      }
+      const month = currentMonth();
+      if (gameState.monthCounter !== month) {
+        gameState.monthCounter = month;
+        gameState.rentMultiplier += 0.06;
+        if (month >= 4) {
+          const trouble = pick(MONTHLY_TROUBLES);
+          if (trouble) {
+            trouble.apply();
+            flashMessage(localize({ he: trouble.he, en: trouble.en }), "bad");
+          }
+        }
+      }
+    }
+
+    function endDay() {
+      if (gameState.hour < 23) {
+        gameState.hour = 23;
+      }
+      if (canRender && dom && dom.nightVeil) {
+        dom.nightVeil.classList.add("active");
+      }
+      playSfx("sleep");
+      root.setTimeout(() => {
+        gameState.day += 1;
+        gameState.hour = 7;
+        payRentAndHousing();
+        settleWeeklyRevenue();
+        advanceEconomy();
+        maybeTriggerEvents();
+        updateUnlocks();
+        checkEndings();
+        saveGame();
+        if (canRender && dom && dom.nightVeil) {
+          dom.nightVeil.classList.remove("active");
+        }
+        render();
+      }, canRender ? 320 : 0);
+      return true;
+    }
+
+    function updateDailySystems() {
+      settleWeeklyRevenue();
+      updateUnlocks();
+      checkEndings();
+    }
+
+    function checkEndings() {
+      if (gameState.debt >= 60000) {
+        gameState.winState = { win: false, title: t("youLost"), copy: localize({
+          he: "החוב עבר 60,000$. הכריש שלח לך מבט סופי.",
+          en: "Debt passed $60,000. The shark sent you a final look."
+        }) };
+      } else if (allGoalsMet()) {
+        gameState.winState = { win: true, title: t("youWon"), copy: t("winCopy") };
+        recordScore(true);
+      } else if (gameState.day > seasonLength()) {
+        gameState.winState = { win: false, title: t("youLost"), copy: t("loseCopy") };
+        recordScore(false);
+      }
+    }
+
+    function recordScore(won) {
+      const entry = {
+        name: gameState.playerName,
+        won,
+        day: gameState.day,
+        city: gameState.city,
+        wealth: scoreWealth(),
+        career: scoreCareer(),
+        education: scoreEducation(),
+        happiness: scoreHappiness()
+      };
+      const duplicate = gameState.highscores.find((item) => item.day === entry.day && item.name === entry.name && item.won === entry.won);
+      if (!duplicate) {
+        gameState.highscores.unshift(entry);
+        gameState.highscores = gameState.highscores
+          .sort((a, b) => (b.won - a.won) || (b.wealth + b.career * 120) - (a.wealth + a.career * 120))
+          .slice(0, 10);
+        saveScores();
+      }
+    }
+
+    function currentHint() {
+      const project = getFocusedProject();
+      if (!gameState.jobId) return { building: "employment", copy: t("boardHintJob") };
+      if (gameState.wardrobeTier < 1) return { building: "wardrobe", copy: t("boardHintWardrobe") };
+      if (gameState.housing === "couch" && gameState.cash >= Math.round(HOUSING.cheap.rent * gameState.rentMultiplier)) {
+        return { building: "home", copy: t("boardHintHousing") };
+      }
+      if (gameState.education < 1) return { building: "filmSchool", copy: t("boardHintSchool") };
+      if (!gameState.equipment.camera) return { building: "gear", copy: t("boardHintCamera") };
+      if (!gameState.filmUnlocked) return { building: "gear", copy: t("boardHintCamera") };
+      if (!project) return { building: "script", copy: t("boardHintScript") };
+      if (project.cast.length < 2) return { building: "casting", copy: t("boardHintCast") };
+      if (project.crew.length < 3) return { building: "crew", copy: t("boardHintCrew") };
+      if (project.shoots < 2) return { building: "set", copy: t("boardHintSet") };
+      if (project.stage !== "post") return { building: "post", copy: t("boardHintPost") };
+      return { building: "festival", copy: t("boardHintRelease") };
+    }
+
+    function cityHasBuilding(buildingId) {
+      return getCity().buildings.includes(buildingId);
+    }
+
+    function renderHud() {
+      const activeJob = getJob(gameState.jobId);
+      dom.hud.innerHTML = `
+        <div class="status-box hud-summary">
+          <div class="metric">
+            <div class="metric-label">${t("cash")}</div>
+            <div class="metric-value">${formatMoney(gameState.cash)}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">${t("job")}</div>
+            <div class="metric-value">${activeJob ? localize(activeJob.title) : t("noJob")}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">${t("housing")}</div>
+            <div class="metric-value">${localize(HOUSING[gameState.housing].name)}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">${t("city")}</div>
+            <div class="metric-value">${localize(getCity().name)}</div>
+          </div>
+        </div>
+        <div class="controls-box">
+          <button class="icon-btn status-open-btn" data-action="toggleStatusWindow" data-value="" title="${localize({ he: "סטטוס יומי", en: "Daily status" })}">${localize({ he: "סטטוס", en: "Status" })}</button>
+          <button class="icon-btn" data-action="setLanguage" data-value="${gameState.language === "he" ? "en" : "he"}">${gameState.language === "he" ? "EN" : "עב"}</button>
+          <button class="icon-btn" data-action="saveGame" title="${localize({ he: "שמור", en: "Save" })}">${localize({ he: "שמור", en: "Save" })}</button>
+          <button class="icon-btn" data-action="toggleMute" title="${t("mute")}">${gameState.muted ? localize({ he: "שקט", en: "Muted" }) : localize({ he: "צליל", en: "Sound" })}</button>
+          <button class="icon-btn" data-action="showStart" title="${t("newYear")}">${localize({ he: "חדש", en: "New" })}</button>
+        </div>
+      `;
+    }
+
+    function buildingPos(index, total) {
+      const angle = (-90 + (360 / total) * index) * Math.PI / 180;
+      const rx = total > 8 ? 40 : 38;
+      const ry = total > 8 ? 34 : 31;
+      return {
+        left: 50 + Math.cos(angle) * rx,
+        top: 50 + Math.sin(angle) * ry
+      };
+    }
+
+    function buildingMarkup(buildingId, index, total, hintBuilding) {
+      const building = getBuilding(buildingId);
+      const pos = buildingPos(index, total);
+      const selected = buildingId === gameState.currentBuilding;
+      const active = buildingId === hintBuilding;
+      return `
+        <button class="building ${selected ? "selected" : ""} ${active ? "target" : ""}" style="left:${pos.left}%;top:${pos.top}%;" data-action="goToBuilding" data-value="${buildingId}">
+          <div class="building-card" style="--b1:${building.color[0]};--b2:${building.color[1]}">
+            <div class="roof"></div>
+            <div class="sign">${localize(building.label)}</div>
+            <div class="facade">
+              <div class="windows">
+                <span class="window"></span>
+                <span class="window"></span>
+                <span class="window"></span>
+                <span class="window"></span>
+              </div>
+              <div class="door"></div>
+            </div>
+          </div>
+          <div class="building-tag"><span>${localize(building.short)}</span></div>
+        </button>
+      `;
+    }
+
+    function avatarMarkup() {
+      const city = getCity();
+      const buildings = visibleBuildings(city);
+      const index = Math.max(0, buildings.indexOf(gameState.currentBuilding));
+      const pos = buildingPos(index, buildings.length || 1);
+      return `
+        <div class="avatar" style="left:${pos.left}%;top:${pos.top}%;">
+          <div class="shadow"></div>
+          <div class="body">
+            <div class="head"></div>
+            <div class="torso"></div>
+            <div class="legs"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderBoard() {
+      const city = getCity();
+      const hint = currentHint();
+      const month = currentMonth();
+      const currentBuilding = getBuilding(gameState.currentBuilding);
+      const activeJob = getJob(gameState.jobId);
+      const focusedProject = getFocusedProject();
+      const buildings = visibleBuildings(city);
+      const inCityHint = buildings.includes(hint.building) ? hint.building : null;
+      dom.boardStage.innerHTML = `
+        <div class="win95-shell">
+          <section class="win95-status">
+            <div class="win95-panel-title">${localize({ he: "חשבונות", en: "Ledger" })}</div>
+            <div class="ledger-stack">
+              ${statusRowMarkup(t("cash"), formatMoney(gameState.cash), "cash")}
+              ${statusRowMarkup(t("bank"), formatMoney(gameState.bank), "bank")}
+              ${statusRowMarkup(localize({ he: "חוב", en: "Debt" }), formatMoney(-gameState.debt), gameState.debt ? "debt" : "")}
+              ${statusRowMarkup(t("reputation"), String(gameState.reputation), "plain")}
+              ${statusRowMarkup(t("education"), String(gameState.education), "plain")}
+              ${statusRowMarkup(t("creativity"), String(gameState.creativity), "plain")}
+            </div>
+            <div class="win95-note">
+              <strong>${t("job")}</strong>
+              <span>${activeJob ? localize(activeJob.title) : t("noJob")}</span>
+            </div>
+            <div class="win95-note">
+              <strong>${t("housing")}</strong>
+              <span>${localize(HOUSING[gameState.housing].name)}</span>
+            </div>
+          </section>
+          <section class="win95-main">
+            <div class="win95-strip">
+              <div class="strip-place">
+                <strong>${localize(city.name)}</strong>
+                <span>${gameState.playerName} • ${t("daysLeft")}: ${daysLeft()}</span>
+              </div>
+              <div class="strip-clock">
+                <strong>${formatHour(gameState.hour)}</strong>
+                <span>${t("timeStrip", { day: gameState.day, month })}</span>
+              </div>
+              <div class="strip-actions">
+                <button class="icon-btn strip-btn" data-action="endDay">${localize({ he: "לישון / מעבר יום", en: "Sleep / End day" })}</button>
+              </div>
+            </div>
+            <div class="board-route-row">
+              <div class="destination-block city-block">
+                <div class="dest-header">${localize({ he: "מיקומים בעיר", en: "City locations" })}</div>
+                <div class="dest-grid">
+                  ${buildings.map((buildingId) => {
+                    const building = getBuilding(buildingId);
+                    const selected = buildingId === gameState.currentBuilding;
+                    const target = buildingId === inCityHint;
+                    return `
+                      <button class="dest-btn ${selected ? "selected" : ""} ${target ? "target" : ""}" style="--tone-a:${building.color[0]};--tone-b:${building.color[1]};" data-action="goToBuilding" data-value="${buildingId}">
+                        <strong>${localize(building.short)}</strong>
+                        <span>${localize(building.sub || building.label)}</span>
+                      </button>
+                    `;
+                  }).join("")}
+                </div>
+              </div>
+              <div class="destination-block travel-block">
+                <div class="dest-header">${localize({ he: "מעבר בין ערים", en: "City travel" })}</div>
+                <div class="travel-grid">
+                  ${CITIES.filter((entry) => entry.id !== gameState.city).map((entry) => `
+                    <button class="dest-btn travel-btn" style="--tone-a:${entry.palette.a};--tone-b:${entry.palette.b};" data-action="flyTo" data-value="${entry.id}">
+                      <strong>${localize(entry.name)}</strong>
+                      <span>${t("flyCost", { hours: 3, cost: formatMoney(Math.round(180 * priceScale())) })}</span>
+                    </button>
+                  `).join("")}
+                </div>
+              </div>
+            </div>
+            <div class="scene-block" style="--scene-a:${currentBuilding.color[0]};--scene-b:${currentBuilding.color[1]};">
+              <div class="scene-title">${localize(currentBuilding.label)}</div>
+              <div class="scene-copy">${buildingSpeech(gameState.currentBuilding)}</div>
+              <div class="scene-hint">${hint.copy || gameState.ticker || t("interiorPrompt")}</div>
+              <div class="scene-footer">
+                <div class="scene-chip">
+                  <strong>${t("city")}</strong>
+                  <span>${localize(city.mood)}</span>
+                </div>
+                <div class="scene-chip">
+                  <strong>${localize({ he: "פוקוס", en: "Focus" })}</strong>
+                  <span>${focusedProject ? focusedProject.title : t("noProjects")}</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      `;
+    }
+
+    function renderGoalRow(category) {
+      return `
+        <div class="goal-row">
+          <strong>${t(category)}</strong>
+          <div>
+            <strong>${goalProgress(category)}%</strong>
+            <span>${goalValue(category)} / ${goalTarget(category)}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderGoalCard(category) {
+      return `
+        <div class="goal-card">
+          <div class="goal-top">
+            <strong>${t(category)}</strong>
+            <span>${goalValue(category)} / ${goalTarget(category)}</span>
+          </div>
+          <div class="goal-bar"><div class="goal-fill" style="width:${goalProgress(category)}%"></div></div>
+        </div>
+      `;
+    }
+
+    function projectStageName(project) {
+      if (project.released) {
+        return project.stage === "run"
+          ? localize({ he: "רץ בקולנוע", en: "In cinemas" })
+          : localize({ he: "נמכר ל-TV", en: "Sold to TV" });
+      }
+      const map = {
+        script: { he: "תסריט נקנה", en: "Script bought" },
+        shooting: { he: "בצילומים", en: "Shooting" },
+        shot: { he: "צולם", en: "Shot" },
+        post: { he: "מוכן להפצה", en: "Ready to release" }
+      };
+      return localize(map[project.stage] || { he: "בפיתוח", en: "In development" });
+    }
+
+    function renderProjectsPanel() {
+      const focusedProject = getFocusedProject();
+      const marquee = gameState.lastRelease
+        ? `<div class="marquee ${gameState.lastRelease.verdict === "sleeper" || gameState.lastRelease.verdict === "hit" ? "fireworks" : gameState.lastRelease.verdict === "flop" ? "flop" : ""}">
+             <h3>${gameState.lastRelease.title}</h3>
+             <p>${gameState.lastRelease.copy}</p>
+           </div>`
+        : `<div class="marquee"><h3>${t("release")}</h3><p>${t("marqueeWaiting")}</p></div>`;
+      return `
+        <section class="panel">
+          <h2>${t("projects")}</h2>
+          <div class="project-list">
+            ${gameState.projects.length ? gameState.projects.map((project) => `
+              <button class="project-card ${focusedProject && focusedProject.id === project.id ? "focused" : ""}" data-action="setFocusedProject" data-value="${project.id}">
+                <div class="project-top">
+                  <strong>${project.title}</strong>
+                  <span>${projectStageName(project)}</span>
+                </div>
+                <div class="project-meta">
+                  <span class="pill">${localize((GENRES.find((genre) => genre.id === project.genre) || GENRES[0]).name)}</span>
+                  <span class="pill">${t("testBuzz")}: ${project.buzz ? project.buzz.toFixed(2) : "?"}</span>
+                  <span class="pill">${localize({ he: "קאסט " + project.cast.length + "/2", en: "Cast " + project.cast.length + "/2" })}</span>
+                  <span class="pill">${localize({ he: "צוות " + project.crew.length + "/3", en: "Crew " + project.crew.length + "/3" })}</span>
+                </div>
+              </button>
+            `).join("") : `<div class="project-card">${t("noProjects")}</div>`}
+          </div>
+          ${marquee}
+        </section>
+      `;
+    }
+
+    function renderStatsPanel() {
+      return `
+        <section class="panel">
+          <h2>${t("stats")}</h2>
+          <div class="stat-grid">
+            <div class="stat-chip">${t("reputation")}<strong>${gameState.reputation}</strong></div>
+            <div class="stat-chip">${t("education")}<strong>${gameState.education}</strong></div>
+            <div class="stat-chip">${t("career")}<strong>${scoreCareer()}</strong></div>
+            <div class="stat-chip">${t("soul")}<strong>${gameState.soul}</strong></div>
+            <div class="stat-chip">${t("creativity")}<strong>${gameState.creativity}</strong></div>
+            <div class="stat-chip">${t("love")}<strong>${gameState.love}</strong></div>
+            <div class="stat-chip">${t("wardrobe")}<strong>${gameState.wardrobeTier ? "T" + gameState.wardrobeTier : "-"}</strong></div>
+            <div class="stat-chip">${t("bank")}<strong>${formatMoney(gameState.bank)}</strong></div>
+            <div class="stat-chip">Arkady<strong>${formatMoney(gameState.fund)}</strong></div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderScoresPanel() {
+      return `
+        <section class="panel highscores">
+          <h3>${t("highScores")}</h3>
+          <div class="score-list">
+            ${gameState.highscores.length ? gameState.highscores.map((entry) => `
+              <div class="score-card">
+                <div class="score-top">
+                  <strong>${entry.name}</strong>
+                  <span>${entry.won ? "★" : "…"}</span>
+                </div>
+                <div class="project-meta">
+                  <span class="pill">${localize(getCity(entry.city).name)}</span>
+                  <span class="pill">${t("wealth")}: ${entry.wealth}</span>
+                  <span class="pill">${t("career")}: ${entry.career}</span>
+                  <span class="pill">${t("education")}: ${entry.education}</span>
+                  <span class="pill">${t("happiness")}: ${entry.happiness}</span>
+                </div>
+              </div>
+            `).join("") : `<div class="score-card">${t("noScores")}</div>`}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderSidePanel() {
+      dom.sidePanel.innerHTML = `
+        <section class="panel">
+          <h2>${localize({ he: "משימות", en: "Tasks" })}</h2>
+          <div class="action-groups">
+            <div class="action-group">
+              <h3>${localize({ he: "יום", en: "Day" })}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("endDay", "", t("sleep"), t("sleepCopy"), formatHour(23))}
+              </div>
+            </div>
+            ${renderInteriorActions(gameState.currentBuilding, { includeSleep: false })}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderStatusWindow() {
+      if (!dom || !dom.statusWindow) {
+        return;
+      }
+      if (!dom.statusWindowOpen) {
+        dom.statusWindow.classList.add("hidden");
+        dom.statusWindow.innerHTML = "";
+        return;
+      }
+      dom.statusWindow.classList.remove("hidden");
+      dom.statusWindow.innerHTML = `
+        <div class="status-dialog">
+          <div class="status-dialog-head">
+            <strong>${localize({ he: "סטטוס יומי", en: "Daily status" })}</strong>
+            <button class="mini-btn" data-action="toggleStatusWindow">${t("close")}</button>
+          </div>
+          <div class="status-dialog-body">
+            <div class="quick-grid">
+              <div class="quick-item">${t("cash")}<strong>${formatMoney(gameState.cash)}</strong></div>
+              <div class="quick-item">${t("bank")}<strong>${formatMoney(gameState.bank)}</strong></div>
+              <div class="quick-item">${localize({ he: "חוב", en: "Debt" })}<strong>${formatMoney(-gameState.debt)}</strong></div>
+              <div class="quick-item">${t("wardrobe")}<strong>${gameState.wardrobeTier ? "T" + gameState.wardrobeTier : "-"}</strong></div>
+              <div class="quick-item">${t("education")}<strong>${gameState.education}</strong></div>
+              <div class="quick-item">${t("reputation")}<strong>${gameState.reputation}</strong></div>
+            </div>
+            <div class="goal-rows">
+              ${renderGoalRow("wealth")}
+              ${renderGoalRow("career")}
+              ${renderGoalRow("education")}
+              ${renderGoalRow("happiness")}
+            </div>
+            <div class="stat-grid">
+              <div class="stat-chip">${t("career")}<strong>${scoreCareer()}</strong></div>
+              <div class="stat-chip">${t("soul")}<strong>${gameState.soul}</strong></div>
+              <div class="stat-chip">${t("creativity")}<strong>${gameState.creativity}</strong></div>
+              <div class="stat-chip">${t("love")}<strong>${gameState.love}</strong></div>
+              <div class="stat-chip">Arkady<strong>${formatMoney(gameState.fund)}</strong></div>
+              <div class="stat-chip">${localize({ he: "מוניטין", en: "Reputation" })}<strong>${gameState.reputation}</strong></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderNoticeWindow() {
+      if (!dom || !dom.incidentWindow) {
+        return;
+      }
+      if (!gameState.activeNotice) {
+        dom.incidentWindow.classList.add("hidden");
+        dom.incidentWindow.innerHTML = "";
+        return;
+      }
+      const notice = gameState.activeNotice;
+      dom.incidentWindow.classList.remove("hidden");
+      dom.incidentWindow.innerHTML = `
+        <div class="notice-dialog ${notice.tone}">
+          <div class="notice-dialog-head">
+            <strong>${notice.title}</strong>
+            <button class="mini-btn" data-action="closeNotice">${t("close")}</button>
+          </div>
+          <div class="notice-dialog-body">${notice.copy}</div>
+        </div>
+      `;
+    }
+
+    function buttonMarkup(action, value, title, copy, meta) {
+      return `
+        <button class="action-btn" data-action="${action}" data-value="${value}">
+          <div class="topline"><span>${adaptUiText(title || "")}</span><span>${adaptUiText(meta || "")}</span></div>
+          <div class="subline">${adaptUiText(copy || "")}</div>
+        </button>
+      `;
+    }
+
+    function renderOfferCard(offer, index) {
+      return `
+        <div class="offer-card">
+          <div class="offer-head">
+            <strong>${offer.name}</strong>
+            <span>${formatMoney(offer.price)}</span>
+          </div>
+          <div class="offer-copy">${offer.copy}</div>
+          <div class="offer-actions">
+            <button class="mini-btn" data-action="${offer.kind === "script" ? "buyScript" : "hire"}" data-value="${offer.kind === "script" ? index : offer.kind + ":" + index}">${t("directBuy")}</button>
+            <button class="mini-btn secondary" data-action="haggle" data-value="${index}:0">${t("haggle10")}</button>
+            <button class="mini-btn secondary" data-action="haggle" data-value="${index}:1">${t("haggle25")}</button>
+            <button class="mini-btn secondary" data-action="haggle" data-value="${index}:2">${t("haggle40")}</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderInteriorActions(buildingId, options = {}) {
+      const project = getFocusedProject();
+      const activeJob = getJob(gameState.jobId);
+      const includeSleep = options.includeSleep !== false;
+      switch (buildingId) {
+        case "home":
+          return `
+            <div class="action-group">
+              <h3>${t("housing")}</h3>
+              <div class="action-buttons">
+                ${Object.keys(HOUSING).map((id) => {
+                  const place = HOUSING[id];
+                  const cost = id === "couch" ? "$0" : formatMoney(Math.round(place.rent * gameState.rentMultiplier * economyProfile().rent));
+                  return buttonMarkup("switchHousing", id, localize(place.name), localize(place.desc), cost);
+                }).join("")}
+              </div>
+            </div>
+            ${includeSleep ? `
+              <div class="action-group">
+                <h3>${t("sleep")}</h3>
+                <div class="action-buttons">
+                  ${buttonMarkup("endDay", "", t("sleep"), t("sleepCopy"), "23:00")}
+                </div>
+              </div>
+            ` : ""}
+          `;
+        case "employment":
+          return `
+            <div class="action-group">
+              <h3>${t("salaryPath")}</h3>
+              <div class="action-buttons">
+                ${JOBS.map((job) => buttonMarkup("applyJob", job.id, localize(job.title), localize({
+                  he: "דרישות: השכלה " + job.req.education + ", מלתחה " + job.req.wardrobe + ", ניסיון " + job.req.experience + ", מוניטין " + job.req.reputation,
+                  en: "Requires edu " + job.req.education + ", wardrobe " + job.req.wardrobe + ", exp " + job.req.experience + ", rep " + job.req.reputation
+                }), "$" + Math.round(job.wage * economyProfile().wages) + "/h")).join("")}
+              </div>
+            </div>
+            ${activeJob ? `
+              <div class="action-group">
+                <h3>${t("shift")}</h3>
+                <div class="action-buttons">
+                  ${buttonMarkup("workShift", "4", t("work4"), localize({ he: "שכר: " + formatMoney(Math.round(activeJob.wage * 4 * economyProfile().wages)), en: "Pay: " + formatMoney(Math.round(activeJob.wage * 4 * economyProfile().wages)) }), "4h")}
+                  ${buttonMarkup("workShift", "6", t("work6"), localize({ he: "שכר: " + formatMoney(Math.round(activeJob.wage * 6 * economyProfile().wages)), en: "Pay: " + formatMoney(Math.round(activeJob.wage * 6 * economyProfile().wages)) }), "6h")}
+                  ${buttonMarkup("workShift", "8", t("work8"), localize({ he: "שכר: " + formatMoney(Math.round(activeJob.wage * 8 * economyProfile().wages)), en: "Pay: " + formatMoney(Math.round(activeJob.wage * 8 * economyProfile().wages)) }), "8h")}
+                </div>
+              </div>
+            ` : ""}
+          `;
+        case "wardrobe":
+          return `
+            <div class="action-group">
+              <h3>${t("wardrobe")}</h3>
+              <div class="action-buttons">
+                ${WARDROBES.map((item) => buttonMarkup("buyWardrobe", String(item.tier), localize(item.name), localize(item.desc), formatMoney(Math.round(item.price * priceScale())))).join("")}
+              </div>
+            </div>
+          `;
+        case "cafe":
+          return `
+            <div class="action-group">
+              <h3>${t("freelancePath")}</h3>
+              <div class="action-buttons">
+                ${GIGS.map((gig) => buttonMarkup("takeGig", gig.id, localize(gig.name), localize({
+                  he: "גיג קצר ומעט מבזה, אבל מזומן מיידי.",
+                  en: "A short and slightly degrading gig, but immediate cash."
+                }), gig.hours + "h • " + formatMoney(gig.pay))).join("")}
+              </div>
+            </div>
+            <div class="action-group">
+              <h3>${t("lifestyle")}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("softAction", "coffee", localize(SOFT_ACTIONS.coffee.name), localize(SOFT_ACTIONS.coffee.menu), formatDuration(SOFT_ACTIONS.coffee.hours) + " • " + formatMoney(SOFT_ACTIONS.coffee.cost))}
+                ${buttonMarkup("softAction", "beer", localize(SOFT_ACTIONS.beer.name), localize(SOFT_ACTIONS.beer.menu), formatDuration(SOFT_ACTIONS.beer.hours) + " • " + formatMoney(SOFT_ACTIONS.beer.cost))}
+                ${buttonMarkup("softAction", "cocktail", localize(SOFT_ACTIONS.cocktail.name), localize(SOFT_ACTIONS.cocktail.menu), formatDuration(SOFT_ACTIONS.cocktail.hours) + " • " + formatMoney(SOFT_ACTIONS.cocktail.cost))}
+              </div>
+            </div>
+          `;
+        case "cinematheque":
+          return `
+            <div class="action-group">
+              <h3>${t("training")}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("softAction", "watchFilm", localize(SOFT_ACTIONS.watchFilm.name), localize(SOFT_ACTIONS.watchFilm.menu), formatDuration(SOFT_ACTIONS.watchFilm.hours) + " • " + formatMoney(SOFT_ACTIONS.watchFilm.cost))}
+              </div>
+            </div>
+          `;
+        case "airport":
+          return `
+            <div class="action-group">
+              <h3>${localize({ he: "יעדים", en: "Destinations" })}</h3>
+              <div class="action-buttons">
+                ${CITIES.filter((city) => city.id !== gameState.city).map((city) => buttonMarkup("flyTo", city.id, localize(city.name), localize(city.mood), "3h • " + formatMoney(Math.round(180 * priceScale())))).join("")}
+              </div>
+            </div>
+          `;
+        case "script":
+          return `
+            <div class="action-group">
+              <h3>${t("production")}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("openOfferDeck", "script", localize({ he: "לעלעל בדוכן תסריטים", en: "Browse the script stall" }), localize({ he: "3 הצעות חדשות, כל אחת עם מחיר חבוי לאגו.", en: "3 fresh offers, each with a hidden floor for your ego." }), "2h")}
+              </div>
+            </div>
+            ${gameState.offers.length && gameState.offers[0].kind === "script" ? `<div class="action-group"><h3>${localize({ he: "הצעות פתוחות", en: "Open offers" })}</h3><div class="offer-list">${gameState.offers.map(renderOfferCard).join("")}</div></div>` : ""}
+          `;
+        case "casting":
+          return `
+            <div class="action-group">
+              <h3>${localize({ he: "ליהוק לפרויקט בפוקוס", en: "Casting for focused project" })}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("openOfferDeck", "cast", localize({ he: "לפתוח אודישנים", en: "Open auditions" }), localize({ he: "צריך 2 שחקנים. כל אחד עולה כסף וגם שעות של חיוך כפוי.", en: "You need 2 cast hires. Each costs money and hours of forced smiling." }), "2h")}
+              </div>
+            </div>
+            ${gameState.offers.length && gameState.offers[0].kind === "cast" ? `<div class="action-group"><h3>${localize({ he: "מועמדים", en: "Candidates" })}</h3><div class="offer-list">${gameState.offers.map(renderOfferCard).join("")}</div></div>` : ""}
+          `;
+        case "fund":
+          return `
+            <div class="action-group">
+              <h3>${t("finance")}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("doFund", "development", localize({ he: "מסלול פיתוח", en: "Development track" }), localize({ he: "2ש • מענק קטן, יצירתיות ומוניטין", en: "2h • small grant, creativity, and reputation" }), formatDuration(2))}
+                ${buttonMarkup("doFund", "production", localize({ he: "הגשת הפקה", en: "Production grant" }), localize({ he: "מוניטין 6+ • 2ש • מענק בתמורה ל-50% החזר", en: "Rep 6+ • 2h • grant recouped from 50% of revenue" }), formatDuration(2))}
+                ${buttonMarkup("doFund", "finishing", localize({ he: "בקשת השלמה", en: "Finishing grant" }), localize({ he: "לסרט שצולם • 3ש • כסף לפוסט והשלמה", en: "For a shot film • 3h • cash for post and finishing" }), formatDuration(3))}
+              </div>
+            </div>
+          `;
+        case "crew":
+          return `
+            <div class="action-group">
+              <h3>${localize({ he: "אנשי צוות", en: "Crew hires" })}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("openOfferDeck", "crew", localize({ he: "לפתוח ספר צוות", en: "Open crew book" }), localize({ he: "צריך 3 אנשי צוות כדי לצאת לצילום.", en: "You need 3 crew hires to go shoot." }), "2h")}
+              </div>
+            </div>
+            ${gameState.offers.length && gameState.offers[0].kind === "crew" ? `<div class="action-group"><h3>${localize({ he: "חבילות צוות", en: "Crew packages" })}</h3><div class="offer-list">${gameState.offers.map(renderOfferCard).join("")}</div></div>` : ""}
+          `;
+        case "filmSchool":
+          return `
+            <div class="action-group">
+              <h3>${t("training")}</h3>
+              <div class="action-buttons">
+                ${COURSES.map((course) => buttonMarkup("attendClass", course.id, localize(course.name), localize({
+                  he: "+" + course.credits + " קרדיט לימודי • +" + course.creativity + " יצירתיות",
+                  en: "+" + course.credits + " education credit • +" + course.creativity + " creativity"
+                }), course.hours + "h • " + formatMoney(Math.round(course.cost * priceScale())))).join("")}
+              </div>
+            </div>
+          `;
+        case "bank":
+          return `
+            <div class="action-group">
+              <h3>${t("finance")}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("bankDo", "deposit:500", t("deposit"), localize({ he: "להעביר מזומן לבנק עם ריבית יומית 0.3%", en: "Move cash into the bank at 0.3% daily interest" }), formatMoney(500))}
+                ${buttonMarkup("bankDo", "withdraw:500", t("withdraw"), localize({ he: "למשוך חזרה לכיס", en: "Pull cash back into your pocket" }), formatMoney(500))}
+                ${buttonMarkup("bankDo", "borrow:1500", localize({ he: "הלוואה בנקאית", en: "Bank loan" }), localize({ he: "מסודר יותר מכריש, אבל עדיין חוב לכל דבר.", en: "More orderly than a shark, still debt all the same." }), formatMoney(1500))}
+                ${buttonMarkup("bankDo", "repay:1000", t("repay"), localize({ he: "להוריד את החוב לפני שהוא חונק את החודש.", en: "Trim the debt before it chokes the month." }), formatMoney(1000))}
+                ${buttonMarkup("bankDo", "invest:500", t("invest"), localize({ he: "הקרן של ארקדי: תנודתית, יהירה, מסוכנת", en: "Arkady fund: volatile, arrogant, risky" }), formatMoney(500))}
+                ${buttonMarkup("bankDo", "cashOut:500", t("cashOut"), localize({ he: "לחלץ כסף לפני שארקדי ייעלם", en: "Pull cash before Arkady disappears" }), formatMoney(500))}
+              </div>
+            </div>
+          `;
+        case "post":
+          return `
+            <div class="action-group">
+              <h3>${t("production")}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("doPost", "", localize({ he: "לבצע פוסט לפרויקט בפוקוס", en: "Run post on focused project" }), localize({ he: "6h • עריכה, סאונד, וקצת שקר ערכי", en: "6h • edit, sound, and a little narrative fraud" }), "6h • " + formatMoney(postCost(920)))}
+              </div>
+            </div>
+          `;
+        case "gear":
+          return `
+            <div class="action-group">
+              <h3>${localize({ he: "צילום וציוד מקצועי", en: "Camera and pro gear" })}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("buyEquip", "camera", localize({ he: "מצלמת כתף מקצועית", en: "Professional shoulder camera" }), localize({ he: "פותחת את המשחק הקולנועי • מוזילה ימי צילום • מעלה איכות.", en: "Unlocks the film loop • reduces shoot costs • raises quality." }), formatMoney(Math.round(1700 * priceScale())))}
+                ${buttonMarkup("buyEquip", "studio", localize({ he: "מחשב עריכה ועמדה", en: "Editing workstation" }), localize({ he: "מוזיל פוסט משמעותית • מוסיף באזז ותחושת מקצוענות.", en: "Cuts post costs hard • adds buzz and professionalism." }), formatMoney(Math.round(3600 * priceScale())))}
+                ${buttonMarkup("buyEquip", "insurance", localize({ he: "קיט סאונד ותאורה", en: "Sound and light kit" }), localize({ he: "מוזיל צילום ופוסט • הופך את ההפקה לפחות חובבנית.", en: "Reduces shoot and post costs • makes the production feel less amateur." }), formatMoney(Math.round(1450 * priceScale())))}
+              </div>
+            </div>
+          `;
+        case "investor":
+          return `
+            <div class="action-group">
+              <h3>${t("finance")}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("doPinv", "", localize({ he: "לפגוש משקיע פרטי", en: "Meet a private investor" }), localize({ he: "2h • כסף מיידי תמורת אחוזי הכנסות", en: "2h • immediate cash for a revenue percentage" }), "2h")}
+              </div>
+            </div>
+          `;
+        case "festival":
+          return `
+            <div class="action-group">
+              <h3>${t("release")}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("doPremiere", "", localize({ he: "להרים פרמיירה", en: "Stage a premiere" }), localize({ he: "4h • +25% הילה מסחרית, אולי פרס צדדי", en: "4h • +25% commercial halo, maybe a side prize" }), "4h • " + formatMoney(Math.round(480 * priceScale())))}
+              </div>
+            </div>
+          `;
+        case "cinema":
+          return `
+            <div class="action-group">
+              <h3>${t("release")}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("doCinema", "", localize({ he: "להוציא לריצה קולנועית", en: "Launch a theatrical run" }), localize({ he: "3h • 5 תשלומים שבועיים יורדים", en: "3h • 5 decaying weekly payouts" }), "3h")}
+              </div>
+            </div>
+          `;
+        case "set":
+          return `
+            <div class="action-group">
+              <h3>${t("production")}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("doShoot", "lean", localize({ he: "יום צילום רזה", en: "Lean shoot day" }), localize({ he: "6h • קטן, מהיר, לחוץ", en: "6h • small, fast, stressed" }), "6h • " + formatMoney(shootCost(SHOOT_TIERS.lean.cost)))}
+                ${buttonMarkup("doShoot", "bold", localize({ he: "יום צילום נועז", en: "Bold shoot day" }), localize({ he: "6h • עולה יותר, נשמע טוב יותר", en: "6h • costs more, sounds better" }), "6h • " + formatMoney(shootCost(SHOOT_TIERS.bold.cost)))}
+                ${buttonMarkup("doShoot", "decadent", localize({ he: "יום צילום ראוותני", en: "Decadent shoot day" }), localize({ he: "6h • כסף נשרף, אבל אולי יראו את זה", en: "6h • money burns, but maybe it shows" }), "6h • " + formatMoney(shootCost(SHOOT_TIERS.decadent.cost)))}
+              </div>
+            </div>
+          `;
+        case "tv":
+          return `
+            <div class="action-group">
+              <h3>${t("release")}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("doTv", "", localize({ he: "לסגור מכירה לטלוויזיה", en: "Close a TV sale" }), localize({ he: "2h • כסף מיידי, פחות תהילת קופות", en: "2h • immediate money, less box-office glory" }), "2h")}
+              </div>
+            </div>
+          `;
+        case "loan":
+          return `
+            <div class="action-group">
+              <h3>${t("finance")}</h3>
+              <div class="action-buttons">
+                ${buttonMarkup("bankDo", "borrow:2000", t("borrow"), localize({ he: "0.5% ריבית יומית. זה לא אמור להיות נוח.", en: "0.5% daily interest. Comfort is not included." }), formatMoney(2000))}
+                ${buttonMarkup("bankDo", "repay:1000", t("repay"), localize({ he: "להחזיר לפני שהמבט נהיה אישי", en: "Repay before the stare becomes personal" }), formatMoney(1000))}
+              </div>
+            </div>
+          `;
+        default:
+          return "";
+      }
+    }
+
+    function clerkMood() {
+      if (gameState.lastOutcome === "bad") return "frown";
+      if (gameState.travelFlash) return "smirk";
+      return "smile";
+    }
+
+    function clerkSvg(buildingId) {
+      const building = getBuilding(buildingId);
+      const mood = clerkMood();
+      const faceY = mood === "frown" ? 154 : mood === "smirk" ? 148 : 151;
+      const mouthPath = mood === "frown"
+        ? "M102 154 Q128 140 154 154"
+        : mood === "smirk"
+          ? "M103 150 Q132 162 154 147"
+          : "M102 148 Q128 166 154 148";
+      const accent = building.color[0];
+      return `
+        <div class="clerk-wrap">
+          <svg viewBox="0 0 320 420" width="100%" height="100%" aria-hidden="true">
+            <defs>
+              <linearGradient id="coat" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="${accent}"></stop>
+                <stop offset="100%" stop-color="#33211b"></stop>
+              </linearGradient>
+            </defs>
+            <rect x="40" y="300" width="240" height="86" rx="16" fill="rgba(37,24,18,0.18)"></rect>
+            <rect x="92" y="148" width="136" height="168" rx="28" fill="url(#coat)"></rect>
+            <circle cx="160" cy="112" r="56" fill="#efc98b" stroke="rgba(39,24,15,0.18)"></circle>
+            <path d="M108 84 Q160 28 212 84 L212 96 Q160 74 108 96 Z" fill="#35211b"></path>
+            <circle cx="137" cy="120" r="6" fill="#241712"></circle>
+            <circle cx="182" cy="120" r="6" fill="#241712"></circle>
+            <path d="${mouthPath}" fill="none" stroke="#5d3428" stroke-width="6" stroke-linecap="round"></path>
+            <path d="M132 92 Q160 80 188 92" fill="none" stroke="#4c2f25" stroke-width="6" stroke-linecap="round"></path>
+            <rect x="146" y="164" width="28" height="62" rx="10" fill="#f1d5a6"></rect>
+            <rect x="108" y="316" width="40" height="80" rx="14" fill="#2a1d18"></rect>
+            <rect x="172" y="316" width="40" height="80" rx="14" fill="#2a1d18"></rect>
+            <rect x="68" y="188" width="42" height="104" rx="20" fill="url(#coat)"></rect>
+            <rect x="210" y="188" width="42" height="104" rx="20" fill="url(#coat)"></rect>
+            <circle cx="86" cy="282" r="15" fill="#efc98b"></circle>
+            <circle cx="234" cy="282" r="15" fill="#efc98b"></circle>
+            ${buildingId === "bank" ? '<rect x="118" y="210" width="84" height="16" rx="8" fill="#e6c35d"></rect>' : ""}
+            ${buildingId === "loan" ? '<rect x="118" y="104" width="84" height="18" rx="9" fill="#18181a"></rect>' : ""}
+            ${buildingId === "festival" ? '<circle cx="232" cy="78" r="18" fill="#f7d766"></circle>' : ""}
+            ${buildingId === "script" ? '<rect x="232" y="224" width="34" height="68" rx="6" fill="#f6e8c4" stroke="#7a5231"></rect>' : ""}
+            ${buildingId === "wardrobe" ? '<path d="M250 220 Q262 220 266 236 Q252 258 240 236 Z" fill="#fff1d4"></path>' : ""}
+          </svg>
+          <div class="clerk-nameplate">${localize(building.clerk)}</div>
+        </div>
+      `;
+    }
+
+    function buildingSpeech(buildingId) {
+      const base = {
+        home: {
+          he: "הספה חורקת, המקרר שופט, והלילה מציע רק סוף ליום.",
+          en: "The couch creaks, the fridge judges, and night offers only an end to the day."
+        },
+        employment: {
+          he: "הקלרקית אומרת: 'כאן מחליפים חלומות באקסל ובכרטיס עובד.'",
+          en: "The clerk says: 'This is where dreams are exchanged for spreadsheets and shifts.'"
+        },
+        wardrobe: {
+          he: "החייט מחייך: 'יש לנו מראה של הצלחה, האחריות על הצלחה עצמה עליך.'",
+          en: "The tailor smiles: 'We sell the look of success. Actual success is your department.'"
+        },
+        cafe: {
+          he: "הבריסטה אומר: 'יש קפה, בירה, קוקטיילים, וגם אנשים שטוענים שהם עובדים בתעשייה.'",
+          en: "The barista says: 'We have coffee, beer, cocktails, and people who claim to work in the industry.'"
+        },
+        cinematheque: {
+          he: "האוצר אומר: 'תראה סרט ישן, תרגיש חכם, תחזור לעניות הנוכחית.'",
+          en: "The curator says: 'Watch an old film, feel brilliant, return to your current poverty.'"
+        },
+        airport: {
+          he: t("airportCopy"),
+          en: t("airportCopy")
+        },
+        script: {
+          he: "הסוחר מרים גבה: 'הכול מקורי עד שמישהו בודק.'",
+          en: "The dealer raises an eyebrow: 'Everything is original until somebody checks.'"
+        },
+        casting: {
+          he: "הסוכנת אומרת: 'כולם מוכשרים, חלקם גם מופיעים בזמן.'",
+          en: "The agent says: 'Everyone is talented. Some also arrive on time.'"
+        },
+        fund: {
+          he: "הלקטור מחייך בעצב מקצועי: 'שכנע אותי שהסרט חשוב, לא רק דחוף.'",
+          en: "The reader smiles with professional sorrow: 'Convince me the film is important, not merely urgent.'"
+        },
+        crew: {
+          he: "איש האיגוד מגרד בזקן: 'צוות טוב עולה כסף, צוות רע עולה פעמיים.'",
+          en: "The union rep scratches his beard: 'A good crew costs money. A bad crew costs twice.'"
+        },
+        filmSchool: {
+          he: "המרצה אומר: 'פה לומדים לעשות טעויות עם מילים יפות.'",
+          en: "The lecturer says: 'Here you learn to make mistakes with elegant vocabulary.'"
+        },
+        bank: {
+          he: "ארקדי קורץ: 'בנק זה לאומללים. הקרן שלי היא לשאפתנים חסרי שינה.'",
+          en: "Arkady winks: 'Banks are for the timid. My fund is for ambitious insomniacs.'"
+        },
+        post: {
+          he: "העורכת אומרת: 'תן לי כאוס. אני אחזיר לך מבנה.'",
+          en: "The editor says: 'Give me chaos. I will return structure.'"
+        },
+        gear: {
+          he: "המוכר אומר: 'מצלמה, מחשב עריכה, סאונד. פה מפסיקים להיראות חובבנים.'",
+          en: "The seller says: 'Camera, edit rig, sound. This is where you stop looking amateur.'"
+        },
+        investor: {
+          he: "המשקיע בודק שעון: 'אני מאמין באנשים. בעיקר אם המספרים נכנעים.'",
+          en: "The investor checks his watch: 'I believe in people. Mostly when the numbers surrender.'"
+        },
+        festival: {
+          he: "המנהלת לוחשת: 'נוצץ פה רק מה שיש לו יחצנות או מזל.'",
+          en: "The director whispers: 'Only publicity or luck truly sparkles here.'"
+        },
+        cinema: {
+          he: "מנהל האולם אומר: 'תן לי באזז, אני אתן לך מושבים נפתחים.'",
+          en: "The manager says: 'Give me buzz, I'll give you seats that open.'"
+        },
+        set: {
+          he: "מנהל הסט מניף ווקי: 'הזמן בורח, התקציב רודף אחריו.'",
+          en: "The set boss waves a walkie: 'Time runs. Budget chases it.'"
+        },
+        tv: {
+          he: "הרוכשת אומרת: 'אם זה מרגש תוך חצי דקה, נדבר.'",
+          en: "The buyer says: 'If it lands emotionally within thirty seconds, we'll talk.'"
+        },
+        loan: {
+          he: "האיש במשקפיים לא מחייך. הוא לא חייב.",
+          en: "The man in sunglasses does not smile. He is not required to."
+        }
+      };
+      return localize(base[buildingId] || base.home);
+    }
+
+    function scenePalette(buildingId) {
+      const colors = {
+        home: ["#f3d8af", "#9a6546"],
+        employment: ["#dfe6f5", "#8aa0cf"],
+        wardrobe: ["#f0d5d8", "#ac5d73"],
+        cafe: ["#f0ddb3", "#a06f3d"],
+        cinematheque: ["#cfdcd7", "#51736e"],
+        airport: ["#dae7f0", "#6887a8"],
+        script: ["#f2ddae", "#a77739"],
+        casting: ["#f0cdc0", "#aa6a55"],
+        fund: ["#d9e1bb", "#748451"],
+        crew: ["#d4d6cf", "#63685e"],
+        filmSchool: ["#ddd0ec", "#835da0"],
+        bank: ["#dce5c8", "#668057"],
+        post: ["#d2d7ef", "#5f6f98"],
+        gear: ["#efd6be", "#956341"],
+        investor: ["#e0d4b4", "#7f6842"],
+        festival: ["#f0cbc9", "#a04d4b"],
+        cinema: ["#f2dfae", "#9a7a2e"],
+        set: ["#e5cfba", "#8c6546"],
+        tv: ["#d3e3ed", "#5e89a7"],
+        loan: ["#dec7cf", "#784557"]
+      };
+      return colors[buildingId] || colors.home;
+    }
+
+    function renderStartScreen() {
+      if (gameState.started && !dom.forceStart) {
+        dom.startScreen.classList.add("hidden");
+        dom.startScreen.innerHTML = "";
+        return;
+      }
+      dom.startScreen.classList.remove("hidden");
+      dom.startScreen.innerHTML = `
+        <div class="start-card">
+          <h1>${t("title")}</h1>
+          <p class="subtitle">${t("subtitle")}</p>
+          <p>${t("startIntro")}</p>
+          <div class="start-grid">
+            <div class="field">
+              <label>${t("playerName")}</label>
+              <input id="startName" value="${escapeAttr(gameState.playerName)}">
+            </div>
+            <div class="field">
+              <label>${t("economyDiff")}</label>
+              <select id="startEconomy">
+                ${["modest", "ambitious", "legendary"].map((level) => `<option value="${level}" ${gameState.economyDifficulty === level ? "selected" : ""}>${t(level)}</option>`).join("")}
+              </select>
+            </div>
+            <div class="field">
+              <label>${t("seasonLength")}</label>
+              <select id="startSeason">
+                ${[30, 90, 365].map((len) => `<option value="${len}" ${seasonLength() === len ? "selected" : ""}>${t("season" + len)}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+          <div class="goal-picks">
+            ${[
+              ["wealth", t("goalWealth")],
+              ["career", t("goalCareer")],
+              ["education", t("goalEducation")],
+              ["happiness", t("goalHappiness")]
+            ].map(([id, label]) => `
+              <div class="field">
+                <label>${label}</label>
+                <select id="goal-${id}">
+                  ${["modest", "ambitious", "legendary"].map((level) => `<option value="${level}" ${gameState.goalLevels[id] === level ? "selected" : ""}>${t(level)}</option>`).join("")}
+                </select>
+              </div>
+            `).join("")}
+          </div>
+          <div class="start-actions">
+            <div>
+              <button class="icon-btn" data-action="setLanguage" data-value="${gameState.language === "he" ? "en" : "he"}">${gameState.language === "he" ? "EN" : "עב"}</button>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="start-card button" data-action="loadGame">${t("resumeButton")}</button>
+              <button class="lead-btn" data-action="startFromScreen">${t("startButton")}</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderWinLoss() {
+      if (!gameState.winState) {
+        dom.winLoss.classList.add("hidden");
+        dom.winLoss.innerHTML = "";
+        return;
+      }
+      dom.winLoss.classList.remove("hidden");
+      dom.winLoss.innerHTML = `
+        <div class="win-card">
+          <h2>${gameState.winState.title}</h2>
+          <p>${gameState.winState.copy}</p>
+          <p>${t("wealth")}: ${scoreWealth()} • ${t("career")}: ${scoreCareer()} • ${t("education")}: ${scoreEducation()} • ${t("happiness")}: ${scoreHappiness()}</p>
+          <button class="lead-btn" data-action="resetGame">${t("playAgain")}</button>
+        </div>
+      `;
+    }
+
+    function escapeAttr(value) {
+      return String(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+    }
+
+    function render() {
+      if (!canRender || !dom) {
+        return;
+      }
+      normalizeCurrentBuilding();
+      syncDocument();
+      applyTheme();
+      renderHud();
+      renderBoard();
+      renderSidePanel();
+      renderStatusWindow();
+      renderNoticeWindow();
+      renderStartScreen();
+      renderWinLoss();
+    }
+
+    function bindEvents() {
+      document.body.addEventListener("click", (event) => {
+        const target = event.target.closest("[data-action]");
+        if (!target) {
+          return;
+        }
+        const action = target.getAttribute("data-action");
+        const value = target.getAttribute("data-value");
+        if (action === "goToBuilding") {
+          goToBuilding(value);
+        } else if (action === "applyJob") {
+          applyJob(value);
+        } else if (action === "workShift") {
+          workShift(Number(value));
+        } else if (action === "switchHousing") {
+          switchHousing(value);
+        } else if (action === "buyWardrobe") {
+          buyWardrobe(Number(value));
+        } else if (action === "takeGig") {
+          takeGig(value);
+        } else if (action === "softAction") {
+          doSoftAction(value);
+        } else if (action === "flyTo") {
+          flyTo(value);
+        } else if (action === "openOfferDeck") {
+          openOfferDeck(value);
+        } else if (action === "buyScript") {
+          buyScript(Number(value || 0));
+        } else if (action === "hire") {
+          const parts = String(value).split(":");
+          hire(parts[0], Number(parts[1] || 0));
+        } else if (action === "haggle") {
+          const parts = String(value).split(":");
+          haggle(Number(parts[0]), Number(parts[1]));
+        } else if (action === "attendClass") {
+          attendClass(value);
+        } else if (action === "buyEquip") {
+          buyEquip(value);
+        } else if (action === "doFund") {
+          doFund(value || "production");
+        } else if (action === "doPinv") {
+          doPinv();
+        } else if (action === "doPost") {
+          doPost();
+        } else if (action === "doPremiere") {
+          doPremiere();
+        } else if (action === "doCinema") {
+          doCinema();
+        } else if (action === "doTv") {
+          doTv();
+        } else if (action === "doShoot") {
+          doShoot(undefined, value);
+        } else if (action === "bankDo") {
+          const parts = String(value).split(":");
+          bankDo(parts[0], Number(parts[1] || 0));
+        } else if (action === "endDay") {
+          endDay();
+        } else if (action === "setFocusedProject") {
+          setFocusedProject(value);
+        } else if (action === "toggleStatusWindow") {
+          dom.statusWindowOpen = !dom.statusWindowOpen;
+          render();
+        } else if (action === "closeNotice") {
+          if (dom.noticeTimer) {
+            root.clearTimeout(dom.noticeTimer);
+            dom.noticeTimer = null;
+          }
+          gameState.activeNotice = null;
+          render();
+        } else if (action === "toggleMute") {
+          toggleMute();
+        } else if (action === "cycleTheme") {
+          cycleTheme();
+        } else if (action === "saveGame") {
+          saveGame();
+        } else if (action === "setLanguage") {
+          setLanguage(value);
+        } else if (action === "showStart") {
+          dom.forceStart = true;
+          renderStartScreen();
+        } else if (action === "loadGame") {
+          dom.forceStart = false;
+          loadGame();
+        } else if (action === "startFromScreen") {
+          startFromScreen();
+        } else if (action === "resetGame") {
+          resetGame();
+        }
+      });
+    }
+
+    function startFromScreen() {
+      const nameField = document.getElementById("startName");
+      const economyField = document.getElementById("startEconomy");
+      const seasonField = document.getElementById("startSeason");
+      const goals = {
+        wealth: document.getElementById("goal-wealth").value,
+        career: document.getElementById("goal-career").value,
+        education: document.getElementById("goal-education").value,
+        happiness: document.getElementById("goal-happiness").value
+      };
+      startGame({
+        playerName: (nameField.value || "").trim() || (gameState.language === "he" ? "קובי" : "Jones"),
+        economyDifficulty: economyField.value,
+        seasonLength: Number(seasonField.value),
+        goalLevels: goals
+      });
+    }
+
+    function resetGame() {
+      const prefs = loadPrefs();
+      gameState = createState({
+        language: prefs.language || gameState.language,
+        themeIndex: Number.isInteger(prefs.themeIndex) ? prefs.themeIndex : gameState.themeIndex,
+        muted: !!prefs.muted,
+        highscores: loadScores()
+      });
+      if (dom) {
+        dom.forceStart = true;
+        dom.statusWindowOpen = false;
+      }
+      savePrefs();
+      applyTheme();
+      syncDocument();
+      render();
+      return true;
+    }
+
+    function startGame(options = {}) {
+      const highscores = loadScores();
+      const prefs = loadPrefs();
+      gameState = createState({
+        started: true,
+        playerName: options.playerName || prefs.playerName || gameState.playerName,
+        economyDifficulty: options.economyDifficulty || prefs.economyDifficulty || "modest",
+        goalLevels: options.goalLevels || prefs.goalLevels || { wealth: "modest", career: "modest", education: "modest", happiness: "modest" },
+        seasonLength: [30, 90, 365].includes(options.seasonLength) ? options.seasonLength : (gameState.seasonLength || 365),
+        language: gameState.language,
+        themeIndex: gameState.themeIndex,
+        muted: gameState.muted,
+        highscores
+      });
+      if (dom) {
+        dom.forceStart = false;
+        dom.statusWindowOpen = false;
+      }
+      savePrefs();
+      saveGame();
+      render();
+      return true;
+    }
+
+    function init() {
+      dom = {
+        hud: document.getElementById("hud"),
+        boardStage: document.getElementById("boardStage"),
+        sidePanel: document.getElementById("sidePanel"),
+        startScreen: document.getElementById("startScreen"),
+        winLoss: document.getElementById("winLoss"),
+        statusWindow: document.getElementById("statusWindow"),
+        incidentWindow: document.getElementById("incidentWindow"),
+        floatLayer: document.getElementById("floatLayer"),
+        nightVeil: document.getElementById("nightVeil"),
+        noticeTimer: null,
+        statusWindowOpen: false,
+        forceStart: false
+      };
+      bindEvents();
+      applyTheme();
+      syncDocument();
+      render();
+    }
+
+    root.getState = () => gameState;
+    root.startGame = startGame;
+    root.resetGame = resetGame;
+    root.setLanguage = setLanguage;
+    root.cycleTheme = cycleTheme;
+    root.toggleMute = toggleMute;
+    root.goToBuilding = goToBuilding;
+    root.flyTo = flyTo;
+    root.endDay = endDay;
+    root.applyJob = applyJob;
+    root.workShift = workShift;
+    root.switchHousing = switchHousing;
+    root.buyWardrobe = buyWardrobe;
+    root.takeGig = takeGig;
+    root.attendClass = attendClass;
+    root.buyEquip = buyEquip;
+    root.openOfferDeck = openOfferDeck;
+    root.buyScript = buyScript;
+    root.hire = hire;
+    root.haggle = haggle;
+    root.doShoot = doShoot;
+    root.doPost = doPost;
+    root.doPremiere = doPremiere;
+    root.doCinema = doCinema;
+    root.doTv = doTv;
+    root.doFund = doFund;
+    root.doPinv = doPinv;
+    root.bankDo = bankDo;
+    root.setFocusedProject = setFocusedProject;
+    root.saveGame = saveGame;
+    root.loadGame = loadGame;
+
+    if (canRender) {
+      init();
+    }
+  })();
+  </script>
+</body>
+</html>
