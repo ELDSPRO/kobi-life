@@ -4936,6 +4936,24 @@
       return "neutral";
     }
 
+    /*
+     * outcomeAllowed — relGate filter.
+     * outcome.relGate = { id, min, max } restricts an outcome to a
+     * relationship range with the named NPC. min:5 means rel must be
+     * >= 5 (friend bonus). max:-5 means rel must be <= -5 (enemy
+     * penalty). Used before weight resolution to fully hide gated
+     * outcomes from RNG until the relationship qualifies.
+     */
+    function outcomeAllowed(outcome) {
+      if (!outcome.relGate) return true;
+      const gate = outcome.relGate;
+      const npc = gameState.npcs && gameState.npcs[gate.id];
+      const rel = npc ? (npc.relationship | 0) : 0;
+      if (typeof gate.min === "number" && rel < gate.min) return false;
+      if (typeof gate.max === "number" && rel > gate.max) return false;
+      return true;
+    }
+
     function resolveOutcomeWeight(outcome, card) {
       let w = outcome.weight || 1;
       if (card.npcInfluence && card.npcInfluence.id) {
@@ -4991,7 +5009,8 @@
         outcomes: [
           { weight: 60, tone: "neutral", flavor: { he: "מאיה הנהנה. היא יודעת להנהן.", en: "Maya nodded. She's good at nodding." }, effects: {}, npc: { id: "maya_barista", rel: 0 } },
           { weight: 30, tone: "good", flavor: { he: "מאיה חידדה לך את הסצנה השנייה. +יצירתיות גדולה.", en: "Maya sharpened your second scene. +big creativity." }, effects: { creativity: 4, soul: 1 }, npc: { id: "maya_barista", rel: 2 } },
-          { weight: 10, tone: "bad", flavor: { he: "היא חזרה על הפיץ' שלך לחבר שלה. בקול. אנשים שמעו.", en: "She repeated your pitch to her friend. Loudly. People heard." }, effects: { reputation: -2, soul: -1 }, npc: { id: "maya_barista", rel: -2 } }
+          { weight: 10, tone: "bad", flavor: { he: "היא חזרה על הפיץ' שלך לחבר שלה. בקול. אנשים שמעו.", en: "She repeated your pitch to her friend. Loudly. People heard." }, effects: { reputation: -2, soul: -1 }, npc: { id: "maya_barista", rel: -2 } },
+          { weight: 8, tone: "good", relGate: { id: "maya_barista", min: 5 }, flavor: { he: "מאיה כתבה מספר על מפית: 'אירוע משוררים הלילה. בוא, הזמנה אישית.'", en: "Maya wrote a number on a napkin: 'poets' night tonight. Come — personal invite.'" }, effects: { love: 4, creativity: 3, soul: 2 }, npc: { id: "maya_barista", rel: 1 } }
         ]
       },
       script_write_solo: {
@@ -5031,7 +5050,9 @@
           { weight: 60, tone: "neutral", flavor: { he: "נתת כרטיס. ליאור נתן כרטיס. אף אחד לא יתקשר.", en: "Gave a card. Lior gave a card. Nobody is calling." }, effects: {}, npc: { id: "lior_agent", rel: 1 } },
           { weight: 25, tone: "good", flavor: { he: "ליאור הקשיב יותר משצריך. +מוניטין.", en: "Lior listened longer than required. +reputation." }, effects: { reputation: 3 }, npc: { id: "lior_agent", rel: 3 } },
           { weight: 10, tone: "good", sfx: "cash", flavor: { he: "ליאור הזמין אותך לפגישה אמיתית. סימן את היומן.", en: "Lior booked a real meeting. Marked his calendar." }, effects: { reputation: 4, creativity: 1 }, npc: { id: "lior_agent", rel: 5 } },
-          { weight: 5, tone: "bad", flavor: { he: "ליאור ראה אותך מבקש. אנשים ראו אותו רואה.", en: "Lior saw you begging. People saw him seeing." }, effects: { reputation: -3, soul: -2 }, npc: { id: "lior_agent", rel: -4 } }
+          { weight: 5, tone: "bad", flavor: { he: "ליאור ראה אותך מבקש. אנשים ראו אותו רואה.", en: "Lior saw you begging. People saw him seeing." }, effects: { reputation: -3, soul: -2 }, npc: { id: "lior_agent", rel: -4 } },
+          { weight: 12, tone: "good", sfx: "cash", relGate: { id: "lior_agent", min: 5 }, flavor: { he: "ליאור: 'אני מסדר לך פגישה עם רגב נשר השבוע. תהיה מוכן.'", en: "Lior: 'I'm setting you up with Regev Nesher this week. Be ready.'" }, effects: { reputation: 6, creativity: 2 }, npc: { id: "lior_agent", rel: 2 } },
+          { weight: 10, tone: "bad", relGate: { id: "lior_agent", max: -5 }, flavor: { he: "ליאור הסתובב לחברים: 'הילד הזה — אתה זוכר?'. כולם זוכרים.", en: "Lior turned to his crew: 'this kid — you remember?'. Everyone remembers." }, effects: { reputation: -6, soul: -4 }, npc: { id: "lior_agent", rel: -2 } }
         ]
       },
       cinema_alexis_chat: {
@@ -5059,7 +5080,8 @@
           { weight: 50, tone: "neutral", flavor: { he: "חקר אותך על תחביר קולנועי ארבעים דקות. לא קיבלת תשובה.", en: "Grilled you on film syntax for forty minutes. No answer given." }, effects: { creativity: 1 }, npc: { id: "nikos_lecturer", rel: 1 } },
           { weight: 30, tone: "good", flavor: { he: "נתן לך רשימת קריאה אישית. +קרדיט לימודי.", en: "Handed you a personal reading list. +education credit." }, effects: { creativity: 2 }, npc: { id: "nikos_lecturer", rel: 2 } },
           { weight: 15, tone: "good", flavor: { he: "הזמין אותך להקרנת בוגרים שלו. +מוניטין אקדמי.", en: "Invited you to his alumni screening. +academic reputation." }, effects: { reputation: 3, creativity: 1 }, npc: { id: "nikos_lecturer", rel: 3 } },
-          { weight: 5, tone: "bad", flavor: { he: "פיטר אותך פומבית מול סטודנטים אחרים: 'תחזור כשתבין סרט'.", en: "Dismissed you in front of other students: 'come back when you understand cinema.'" }, effects: { reputation: -3, soul: -2 }, npc: { id: "nikos_lecturer", rel: -4 } }
+          { weight: 5, tone: "bad", flavor: { he: "פיטר אותך פומבית מול סטודנטים אחרים: 'תחזור כשתבין סרט'.", en: "Dismissed you in front of other students: 'come back when you understand cinema.'" }, effects: { reputation: -3, soul: -2 }, npc: { id: "nikos_lecturer", rel: -4 } },
+          { weight: 10, tone: "bad", relGate: { id: "nikos_lecturer", max: -5 }, flavor: { he: "ניקוס לא פתח את הדלת. שמעת אותו מבעד: 'לא היום. לא לעולם.'", en: "Nikos didn't open the door. You heard him through it: 'not today. Not ever.'" }, effects: { reputation: -4, soul: -4 }, npc: { id: "nikos_lecturer", rel: -1 } }
         ]
       },
       school_audit_class: {
@@ -5086,7 +5108,8 @@
           { weight: 50, tone: "neutral", flavor: { he: "סופיה אמרה 'מעניין'. לא הצלחת לפענח.", en: "Sofia said 'interesting.' Couldn't decode it." }, effects: {}, npc: { id: "sofia_editor", rel: 1 } },
           { weight: 30, tone: "good", flavor: { he: "חתכה סצנה שלמה באכזריות. הסרט שלך נראה יותר טוב.", en: "Cut a whole sequence brutally. Your film is now better." }, effects: { creativity: 3, reputation: 1 }, npc: { id: "sofia_editor", rel: 2 } },
           { weight: 15, tone: "good", sfx: "cash", flavor: { he: "הציעה לך עסקת פוסט להפקה הבאה.", en: "Offered you a post deal for the next project." }, effects: { reputation: 3, creativity: 1 }, npc: { id: "sofia_editor", rel: 3 } },
-          { weight: 5, tone: "bad", flavor: { he: "הקרינה את הקאט לצוות שלה. הם צחקו. היא לא עצרה אותם.", en: "Screened the cut to her crew. They laughed. She didn't stop them." }, effects: { reputation: -3, soul: -3 }, npc: { id: "sofia_editor", rel: -3 } }
+          { weight: 5, tone: "bad", flavor: { he: "הקרינה את הקאט לצוות שלה. הם צחקו. היא לא עצרה אותם.", en: "Screened the cut to her crew. They laughed. She didn't stop them." }, effects: { reputation: -3, soul: -3 }, npc: { id: "sofia_editor", rel: -3 } },
+          { weight: 10, tone: "good", sfx: "cash", relGate: { id: "sofia_editor", min: 5 }, flavor: { he: "סופיה: 'תפסיק לפחד. אני עורכת לך את הסרט הבא. המפגש הראשון חינם.'", en: "Sofia: 'stop being afraid. I'll cut your next film. First meeting on the house.'" }, effects: { reputation: 5, creativity: 3 }, npc: { id: "sofia_editor", rel: 2 } }
         ]
       },
       cast_offer_to_model: {
@@ -5138,13 +5161,14 @@
       if (!spendHours(card.hours || 1, localize(card.label))) return false;
       if (card.cost) changeCash(-card.cost);
       if (card.once) gameState.dailyGigLedger[ledgerKey] = true;
-      const resolvedWeights = card.outcomes.map((o) => resolveOutcomeWeight(o, card));
+      const allowed = card.outcomes.filter(outcomeAllowed);
+      const resolvedWeights = allowed.map((o) => resolveOutcomeWeight(o, card));
       const totalWeight = resolvedWeights.reduce((s, w) => s + w, 0);
       let roll = Math.random() * totalWeight;
-      let picked = card.outcomes[0];
-      for (let i = 0; i < card.outcomes.length; i++) {
+      let picked = allowed[0];
+      for (let i = 0; i < allowed.length; i++) {
         roll -= resolvedWeights[i];
-        if (roll <= 0) { picked = card.outcomes[i]; break; }
+        if (roll <= 0) { picked = allowed[i]; break; }
       }
       const fx = picked.effects || {};
       if (typeof fx.cash === "number") changeCash(fx.cash);
