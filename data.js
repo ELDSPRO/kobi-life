@@ -354,6 +354,46 @@
           he: "השם שלך עולה בהקשר 'חסר רצינות'. השבוע. אל תגיש כלום.",
           en: "Your name comes up framed 'not serious.' This week. Don't submit anything."
         }
+      },
+      {
+        id: "frank_friendly_lot",
+        weight: 4, tone: "good",
+        requires: function (s) { return s.npcs && s.npcs.frank_set && s.npcs.frank_set.relationship >= 5; },
+        headline: { he: "פרנק שלח SMS: 'הלוט שלי פנוי ביום ראשון'", en: "Frank texted: 'my lot's free Sunday'" },
+        body: {
+          he: "אם תצליח להגיע לניו יורק עד אז — אין לך תירוץ.",
+          en: "Make it to NYC by then — you've run out of excuses."
+        }
+      },
+      {
+        id: "karen_friendly_meeting",
+        weight: 4, tone: "good",
+        requires: function (s) { return s.npcs && s.npcs.karen_tv && s.npcs.karen_tv.relationship >= 5; },
+        headline: { he: "קארן ביקשה את הטיוטה", en: "Karen wants the draft" },
+        body: {
+          he: "התחנה בניו יורק. אחר הצהריים. תיכנס אישית, לא מייל.",
+          en: "Station in NYC. This afternoon. In person — not email."
+        }
+      },
+      {
+        id: "tony_friendly_tip",
+        weight: 3, tone: "good",
+        requires: function (s) { return s.npcs && s.npcs.tony_loan && s.npcs.tony_loan.relationship >= 5; },
+        headline: { he: "טוני העביר רמז דרך השוער", en: "Tony left a tip through the doorman" },
+        body: {
+          he: "'אם תקפוץ הלילה לבר — יש מישהו ששווה לדעת עליו.'",
+          en: "'Stop by the bar tonight — there's someone you'll want to know about.'"
+        }
+      },
+      {
+        id: "tony_hostile_followers",
+        weight: 3, tone: "bad",
+        requires: function (s) { return s.npcs && s.npcs.tony_loan && s.npcs.tony_loan.relationship <= -5; },
+        headline: { he: "שני בחורים עוקבים אחריך מהבר", en: "Two guys are tailing you from the bar" },
+        body: {
+          he: "לא נראה שזה אישי. נראה שזה כן. עדיף לא לחזור לאותו אזור.",
+          en: "Doesn't look personal. It is. Better not to revisit that block."
+        }
       }
     ]
   };

@@ -4934,6 +4934,27 @@
         name: { he: "פטרה", en: "Petra" },
         role: { he: "תכניתנית סינמטק, יודעת הכל", en: "Cinematheque programmer, knows everyone" },
         emoji: "📽️"
+      },
+      frank_set: {
+        id: "frank_set",
+        city: "nyc",
+        name: { he: "פרנק", en: "Frank" },
+        role: { he: "מנהל סט ציני, ניו יורק", en: "Cynical set boss, NYC" },
+        emoji: "🎬"
+      },
+      karen_tv: {
+        id: "karen_tv",
+        city: "nyc",
+        name: { he: "קארן", en: "Karen" },
+        role: { he: "קונה תוכן ב-TV, אפס זמן", en: "TV content buyer, zero time" },
+        emoji: "📺"
+      },
+      tony_loan: {
+        id: "tony_loan",
+        city: "nyc",
+        name: { he: "טוני", en: "Tony" },
+        role: { he: "כריש הלוואות עם נימוסים", en: "Loan shark with manners" },
+        emoji: "🕶️"
       }
     };
 
@@ -5080,6 +5101,67 @@
           { weight: 5, tone: "bad", flavor: { he: "ליאור ראה אותך מבקש. אנשים ראו אותו רואה.", en: "Lior saw you begging. People saw him seeing." }, effects: { reputation: -3, soul: -2 }, npc: { id: "lior_agent", rel: -4 } },
           { weight: 12, tone: "good", sfx: "cash", relGate: { id: "lior_agent", min: 5 }, flavor: { he: "ליאור: 'אני מסדר לך פגישה עם רגב נשר השבוע. תהיה מוכן.'", en: "Lior: 'I'm setting you up with Regev Nesher this week. Be ready.'" }, effects: { reputation: 6, creativity: 2 }, npc: { id: "lior_agent", rel: 2 } },
           { weight: 10, tone: "bad", relGate: { id: "lior_agent", max: -5 }, flavor: { he: "ליאור הסתובב לחברים: 'הילד הזה — אתה זוכר?'. כולם זוכרים.", en: "Lior turned to his crew: 'this kid — you remember?'. Everyone remembers." }, effects: { reputation: -6, soul: -4 }, npc: { id: "lior_agent", rel: -2 } }
+        ]
+      },
+      set_frank_favor: {
+        location: "set",
+        cities: ["nyc"],
+        label: { he: "לבקש מפרנק חצי יום לא רשמי", en: "Ask Frank for an off-the-books half day" },
+        copy: { he: "פרנק ראה הכל פעמיים. תבקש יפה ותביא קפה.", en: "Frank's seen it all twice. Ask nicely. Bring coffee." },
+        hours: 2, cost: 50, once: true,
+        npcInfluence: { id: "frank_set" },
+        outcomes: [
+          { weight: 50, tone: "neutral", flavor: { he: "פרנק ציטט לך תעריפי SAG ומשך כתפיים. 'תחזור עם תקציב.'", en: "Frank quoted SAG rates and shrugged. 'Come back with a budget.'" }, effects: {}, npc: { id: "frank_set", rel: 1 } },
+          { weight: 25, tone: "good", flavor: { he: "נתן לך חלון של שעתיים בלוקיישן אמיתי. +יצירתיות.", en: "Gave you a 2h window at a real location. +creativity." }, effects: { creativity: 3, reputation: 2 }, npc: { id: "frank_set", rel: 2 } },
+          { weight: 15, tone: "good", flavor: { he: "חיבר אותך לגאפר שעובד זול. רשת חדשה.", en: "Hooked you up with a gaffer who works cheap. New connection." }, effects: { reputation: 3, creativity: 1 }, npc: { id: "frank_set", rel: 3 } },
+          { weight: 10, tone: "bad", flavor: { he: "פרנק צחק חזק: 'שעות החובבנים נגמרו.' אנשים שמעו.", en: "Frank laughed loud: 'rookie hours are over.' People heard." }, effects: { reputation: -3, soul: -2 }, npc: { id: "frank_set", rel: -3 } },
+          { weight: 10, tone: "good", sfx: "cash", relGate: { id: "frank_set", min: 5 }, flavor: { he: "פרנק: 'תיכנס לסט שלי ביום ראשון. אף אחד לא ידע.'", en: "Frank: 'use my lot Sunday. Nobody'll know.'" }, effects: { creativity: 5, reputation: 3 }, npc: { id: "frank_set", rel: 1 } },
+          { weight: 8, tone: "bad", relGate: { id: "frank_set", max: -5 }, flavor: { he: "פרנק התקשר למשטרה על הצילומים שלך בטלפון. קנס.", en: "Frank tipped off the cops about your phone shoots. Fine." }, effects: { cash: -200, reputation: -3 }, npc: { id: "frank_set", rel: -1 } }
+        ]
+      },
+      tv_karen_pitch: {
+        location: "tv",
+        cities: ["nyc"],
+        label: { he: "לפיץ' לקארן קונספט", en: "Pitch Karen a concept" },
+        copy: { he: "קארן יושבת על שלוש שיחות במקביל. אם תפסיק לדבר, תפסידי.", en: "Karen's on three calls at once. Stop talking, lose her." },
+        hours: 2, cost: 0, once: true,
+        npcInfluence: { id: "karen_tv" },
+        outcomes: [
+          { weight: 55, tone: "neutral", flavor: { he: "קארן הייתה על שתי שיחות במהלך הפיץ' שלך. נתנה כרטיס.", en: "Karen was on two calls during your pitch. Gave you a card." }, effects: {}, npc: { id: "karen_tv", rel: 1 } },
+          { weight: 25, tone: "good", flavor: { he: "אמרה 'תשלח חד-עמודי'. זה רחוק מ-yes אבל לא no.", en: "Said 'send a one-pager.' Not yes, not no." }, effects: { creativity: 1, reputation: 1 }, npc: { id: "karen_tv", rel: 2 } },
+          { weight: 15, tone: "good", flavor: { he: "סידרה לך פגישה עם פיתוח. הכרטיסייה אמיתית.", en: "Booked you with development. The card is real." }, effects: { reputation: 4 }, npc: { id: "karen_tv", rel: 3 } },
+          { weight: 5, tone: "bad", flavor: { he: "חתכה אותך באמצע: 'אנחנו לא עושים את זה יותר.' פומבי.", en: "Cut you off mid-pitch: 'we don't do this anymore.' Public." }, effects: { reputation: -3, soul: -2 }, npc: { id: "karen_tv", rel: -3 } },
+          { weight: 10, tone: "good", sfx: "cash", relGate: { id: "karen_tv", min: 5 }, flavor: { he: "קארן: 'אני קונה את הספיישל. 30 דקות. תפיק.'", en: "Karen: 'I'm buying the special. 30 minutes. Produce it.'" }, effects: { cash: 1800, reputation: 4 }, npc: { id: "karen_tv", rel: 2 } },
+          { weight: 8, tone: "bad", relGate: { id: "karen_tv", max: -5 }, flavor: { he: "קארן הזכירה את שמך לשתי רשתות. דלת אחת פחות. שתיים.", en: "Karen mentioned your name to two networks. One door less. Two." }, effects: { reputation: -5, soul: -2 }, npc: { id: "karen_tv", rel: -1 } }
+        ]
+      },
+      tv_karen_morning: {
+        location: "tv",
+        cities: ["nyc"],
+        label: { he: "להופיע בבוקר כשקארן מכינה תוכנית", en: "Drop by morning prep at Karen's" },
+        copy: { he: "התחנה בלגן. אם תביא קפה לעוזרת — תזכרי בך אחר כך.", en: "Station's chaos. Bring coffee for the assistant — she'll remember." },
+        hours: 1, cost: 15, once: true,
+        npcInfluence: { id: "karen_tv" },
+        outcomes: [
+          { weight: 55, tone: "neutral", flavor: { he: "קארן הייתה בקאסטינג. ראית אותה רק במסדרון. שלום.", en: "Karen was in casting. Saw her just in the hallway. Hello." }, effects: {}, npc: { id: "karen_tv", rel: 1 } },
+          { weight: 30, tone: "good", flavor: { he: "העוזרת זכרה אותך. סידרה לך 5 דקות אחה\"צ. +מוניטין שקט.", en: "The assistant remembered you. Booked you 5 min in the afternoon. +quiet rep." }, effects: { reputation: 2 }, npc: { id: "karen_tv", rel: 2 } },
+          { weight: 15, tone: "good", flavor: { he: "קארן עברה: 'אה, אתה.' רשמה משהו. אולי לא כלום.", en: "Karen walked past: 'oh, you.' Wrote something. Maybe nothing." }, effects: { reputation: 1, creativity: 1 }, npc: { id: "karen_tv", rel: 1 } }
+        ]
+      },
+      loan_tony_chat: {
+        location: "loan",
+        cities: ["nyc"],
+        label: { he: "לדבר עם טוני בבר", en: "Talk to Tony at the bar" },
+        copy: { he: "האיש במשקפיים שותה לבד. הוא לא לבד.", en: "The Sunglasses Man drinks alone. He's not alone." },
+        hours: 1, cost: 30, once: true,
+        npcInfluence: { id: "tony_loan" },
+        outcomes: [
+          { weight: 60, tone: "neutral", flavor: { he: "טוני הסתכל. שלוש מילים. עברת.", en: "Tony stared. Three words. You moved on." }, effects: {}, npc: { id: "tony_loan", rel: 1 } },
+          { weight: 25, tone: "good", flavor: { he: "סיפר לך על ילד עשיר שמפסיד בפוקר. מי שיודע, יודע.", en: "Told you about a rich kid losing at poker. Those who know, know." }, effects: { reputation: 2, creativity: 1 }, npc: { id: "tony_loan", rel: 2 } },
+          { weight: 10, tone: "good", flavor: { he: "טוני: 'אתה צריך קו אשראי? אצלי 500 בלי תיק.'", en: "Tony: 'need a line? With me, 500 with no file.'" }, effects: { cash: 300, reputation: 1 }, npc: { id: "tony_loan", rel: 3 } },
+          { weight: 5, tone: "bad", flavor: { he: "פתח לך טאב על שמך. אתה חייב 80 ברגע הזה.", en: "Opened a tab in your name. You owe $80 right now." }, effects: { cash: -80, soul: -1 }, npc: { id: "tony_loan", rel: -1 } },
+          { weight: 10, tone: "good", sfx: "cash", relGate: { id: "tony_loan", min: 5 }, flavor: { he: "טוני: 'אני מכבד שחזרת. הנה שם. אל תגיד מאיפה.'", en: "Tony: 'I respect that you came back. Here's a name. Don't say where.'" }, effects: { reputation: 5, creativity: 2 }, npc: { id: "tony_loan", rel: 1 } },
+          { weight: 8, tone: "bad", relGate: { id: "tony_loan", max: -5 }, flavor: { he: "טוני הצביע עליך מעבר לבר. שני בחורים הלכו אחריך. -נפש, -אושר.", en: "Tony pointed across the bar. Two guys followed you out. -soul, -happiness." }, effects: { soul: -4, happiness: -3 }, npc: { id: "tony_loan", rel: 0 } }
         ]
       },
       gear_klaus_negotiate: {
@@ -7213,7 +7295,8 @@
               </div>
             </div>
           `;
-        case "set":
+        case "set": {
+          const setScene = sceneCardButtons("set");
           return `
             <div class="action-group">
               <h3>${t("production")}</h3>
@@ -7223,8 +7306,11 @@
                 ${buttonMarkup("doShoot", "decadent", localize({ he: "יום צילום ראוותני", en: "Decadent shoot day" }), localize({ he: "6h • כסף נשרף, אבל אולי יראו את זה", en: "6h • money burns, but maybe it shows" }), "6h • " + formatMoney(shootCost(SHOOT_TIERS.decadent.cost)))}
               </div>
             </div>
+            ${setScene ? `<div class="action-group"><h3>${localize({ he: "אנשי המקום", en: "The locals" })}</h3><div class="action-buttons">${setScene}</div></div>` : ""}
           `;
-        case "tv":
+        }
+        case "tv": {
+          const tvScene = sceneCardButtons("tv");
           return `
             <div class="action-group">
               <h3>${t("release")}</h3>
@@ -7232,8 +7318,11 @@
                 ${buttonMarkup("doTv", "", localize({ he: "לסגור מכירה לטלוויזיה", en: "Close a TV sale" }), localize({ he: "2h • כסף מיידי, פחות תהילת קופות", en: "2h • immediate money, less box-office glory" }), "2h")}
               </div>
             </div>
+            ${tvScene ? `<div class="action-group"><h3>${localize({ he: "אנשי המקום", en: "The locals" })}</h3><div class="action-buttons">${tvScene}</div></div>` : ""}
           `;
-        case "loan":
+        }
+        case "loan": {
+          const loanScene = sceneCardButtons("loan");
           return `
             <div class="action-group">
               <h3>${t("finance")}</h3>
@@ -7242,7 +7331,9 @@
                 ${buttonMarkup("bankDo", "repay:1000", t("repay"), localize({ he: "להחזיר לפני שהמבט נהיה אישי", en: "Repay before the stare becomes personal" }), formatMoney(1000))}
               </div>
             </div>
+            ${loanScene ? `<div class="action-group"><h3>${localize({ he: "אנשי המקום", en: "The locals" })}</h3><div class="action-buttons">${loanScene}</div></div>` : ""}
           `;
+        }
         default:
           return "";
       }
