@@ -2024,6 +2024,48 @@
     }
     .film-clock-block.overdue .film-task-deadline { color: #ff6666; }
     .film-task-copy { font-size: 10px; color: #cccccc; line-height: 1.35; }
+    .npc-priority-stack { display: grid; gap: 6px; }
+    .npc-priority-row {
+      display: grid;
+      gap: 2px;
+      padding: 6px 8px;
+      background: #fff;
+      border-inline-start: 3px solid #888;
+      box-shadow:
+        inset -1px -1px var(--win-light),
+        inset 1px 1px var(--win-dark);
+    }
+    .npc-priority-row.npc-need   { border-inline-start-color: #2a4ba0; }
+    .npc-priority-row.npc-angry  { border-inline-start-color: #b13c3c; background: #fff4f4; }
+    .npc-priority-row.npc-danger { border-inline-start-color: #7a5577; background: #f6f0f5; }
+    .npc-priority-label {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666;
+      font-weight: 700;
+    }
+    .npc-priority-row.npc-need   .npc-priority-label { color: #2a4ba0; }
+    .npc-priority-row.npc-angry  .npc-priority-label { color: #b13c3c; }
+    .npc-priority-row.npc-danger .npc-priority-label { color: #7a5577; }
+    .npc-priority-head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .npc-city-tag {
+      margin-inline-start: auto;
+      font-style: normal;
+      font-size: 10px;
+      color: #444;
+      background: #eee;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    .npc-priority-role { font-size: 10px; color: #444; }
+    .npc-priority-status { font-size: 10px; color: #2a4ba0; font-variant-numeric: tabular-nums; }
     .npc-empty-block .npc-empty-copy {
       font-size: 10px;
       line-height: 1.5;
@@ -7397,49 +7439,102 @@
       return { he: "אויב/ת", en: "Enemy" };
     }
 
+    /*
+     * Task → NPC map. When the next film task fires, the sidebar shows
+     * who can help you finish it. Names the city if they aren't where
+     * you are right now.
+     */
+    const TASK_NPC_MAP = {
+      have_idea:    "maya_barista",
+      treatment:    "petra_programmer",
+      producer:     "ulrich_investor",
+      lead:         "lior_agent",
+      crew:         "klaus_gear",
+      first_shoot:  "frank_set",
+      raw_footage:  "frank_set",
+      music:        "emilie_wardrobe",
+      rough_cut:    "sofia_editor",
+      distribution: "henry_festival",
+      finishing:    "sofia_editor",
+      premiere:     "henry_festival"
+    };
+
+    function npcCityName(npcId) {
+      const npc = NPCS[npcId];
+      if (!npc) return "";
+      const city = CITIES.find((c) => c.id === npc.city);
+      return city ? localize(city.name) : "";
+    }
+
     function renderNpcsBlock() {
       if (!gameState.npcs) gameState.npcs = {};
       const met = Object.keys(gameState.npcs).filter((id) => gameState.npcs[id] && gameState.npcs[id].met && NPCS[id]);
-      if (!met.length) {
+
+      // Slot priorities: who you NEED, who is ANGRY, who is DANGEROUS.
+      const task = nextFilmTask();
+      const needId = task ? TASK_NPC_MAP[task.id] : null;
+      let angryId = null, angryRel = -2; // surface only at rel <= -3
+      met.forEach((id) => {
+        const rel = gameState.npcs[id].relationship | 0;
+        if (rel < angryRel) { angryRel = rel; angryId = id; }
+      });
+      let dangerId = null;
+      if (gameState.debt > 10000) {
+        if (gameState.npcs.tony_loan && gameState.npcs.tony_loan.met) dangerId = "tony_loan";
+        else dangerId = "tony_loan"; // surface as "go meet"
+      }
+
+      const slots = [];
+      const seen = new Set();
+      function addSlot(id, kind, label) {
+        if (!id || !NPCS[id] || seen.has(id)) return;
+        seen.add(id);
+        slots.push({ id, kind, label });
+      }
+      addSlot(needId, "need",   { he: "צריך השבוע", en: "Need this week" });
+      addSlot(angryId, "angry", { he: "כועס עליך",   en: "Angry at you" });
+      addSlot(dangerId, "danger", { he: "פתרון מסוכן", en: "Dangerous option" });
+
+      if (!slots.length) {
         return `
           <div class="inventory-block npc-empty-block">
             <div class="win95-panel-title">${localize({ he: "🤝 אנשים שאני מכיר", en: "🤝 People I know" })}</div>
             <div class="npc-empty-copy">${localize({
-              he: "עוד לא פגשת אף אחד. כנס לקפה, שוק תסריטים או משרד ליהוק בעיר — תראה ✨ על כפתורים עם דמויות חדשות.",
-              en: "You haven't met anyone yet. Visit the cafe, script market, or casting agency in town — buttons with new characters are marked ✨."
+              he: "עוד לא פגשת אף אחד. כנס לקפה, שוק תסריטים או משרד ליהוק — תראה ✨ על כפתורים עם דמויות חדשות.",
+              en: "You haven't met anyone yet. Visit cafe, script market, or casting agency — buttons with new characters are marked ✨."
             })}</div>
           </div>
         `;
       }
-      const rows = met.map((id) => {
-        const npc = NPCS[id];
-        const state = gameState.npcs[id];
-        const rel = state.relationship | 0;
+
+      const rows = slots.map((slot) => {
+        const npc = NPCS[slot.id];
+        const state = gameState.npcs[slot.id];
+        const rel = state ? (state.relationship | 0) : 0;
         const sign = rel > 0 ? "+" : "";
-        const cls = rel >= 1 ? "good" : rel <= -1 ? "bad" : "neutral";
-        const partners = npcLinkPartners(id)
-          .filter((pid) => NPCS[pid])
-          .map((pid) => localize(NPCS[pid].name));
-        const linkLine = partners.length
-          ? `<div class="npc-row-links">↔ ${partners.join(" • ")}</div>`
-          : "";
+        const cityName = npcCityName(slot.id);
+        const inOtherCity = npc.city !== gameState.city;
+        const status = state && state.met
+          ? localize(relationshipLabel(rel)) + " · " + sign + rel
+          : localize({ he: "עוד לא פגשת — נמצא ב", en: "Not yet met — in " }) + cityName;
         return `
-          <div class="npc-row ${cls}">
-            <div class="npc-row-head">
+          <div class="npc-priority-row npc-${slot.kind}">
+            <div class="npc-priority-label">${localize(slot.label)}</div>
+            <div class="npc-priority-head">
               <span class="npc-emoji">${npc.emoji || "👤"}</span>
               <strong>${localize(npc.name)}</strong>
-              <em class="npc-rel">${sign}${rel}</em>
+              ${inOtherCity ? `<em class="npc-city-tag">${cityName}</em>` : ""}
             </div>
-            <div class="npc-row-role">${localize(npc.role)}</div>
-            <div class="npc-row-status">${localize(relationshipLabel(rel))}</div>
-            ${linkLine}
+            <div class="npc-priority-role">${localize(npc.role)}</div>
+            <div class="npc-priority-status">${status}</div>
           </div>
         `;
       }).join("");
+
       return `
         <div class="inventory-block">
-          <div class="win95-panel-title">${localize({ he: "🤝 אנשים שאני מכיר", en: "🤝 People I know" })}</div>
-          <div class="npc-list">${rows}</div>
+          <div class="win95-panel-title">${localize({ he: "🤝 שלוש דמויות שחשובות עכשיו", en: "🤝 Three people who matter now" })}</div>
+          <div class="npc-priority-stack">${rows}</div>
         </div>
       `;
     }
