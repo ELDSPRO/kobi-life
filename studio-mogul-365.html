@@ -1843,6 +1843,76 @@
       transition: width 0.25s ease;
     }
 
+    .project-tiles {
+      display: grid;
+      gap: 5px;
+    }
+    .project-tile {
+      display: grid;
+      gap: 4px;
+      padding: 7px;
+      text-align: start;
+      background: #ffffff;
+      cursor: pointer;
+      color: inherit;
+      box-shadow:
+        inset -1px -1px var(--win-light),
+        inset 1px 1px var(--win-dark),
+        inset -2px -2px var(--win-mid),
+        inset 2px 2px var(--win-black);
+    }
+    .project-tile.focused {
+      background: #fff8d6;
+    }
+    .project-tile-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .project-tile-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 8px;
+      font-size: 10px;
+      color: #444;
+    }
+    .project-tile-roster summary {
+      cursor: pointer;
+      font-size: 10px;
+      color: #2a4ba0;
+      padding: 2px 0;
+    }
+    .roster-group {
+      margin-top: 4px;
+      font-size: 10px;
+    }
+    .roster-group strong {
+      font-size: 10px;
+    }
+    .roster-group ul {
+      list-style: none;
+      padding: 0;
+      margin: 2px 0 0;
+      display: grid;
+      gap: 2px;
+    }
+    .roster-group li {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .roster-group li.muted {
+      color: #888;
+      font-style: italic;
+    }
+    .roster-group em {
+      font-style: normal;
+      color: #0b7d3a;
+      font-weight: 600;
+    }
+
     .mod-chip-good {
       color: #08311f;
       background: #6cf0b0;
@@ -4699,6 +4769,60 @@
       return true;
     }
 
+    // LSL-style flirt action. Free, 1h, daily-locked. Outcome biased by
+    // wardrobe tier (no tier = -10%, T1 = 0, T2 = +10%, T3 = +20%) and
+    // light soul cost on rejection. Tone is Larry Laffer — desperate man,
+    // cynical world.
+    function flirtAtCafe() {
+      const ledgerKey = gameState.day + ":flirt";
+      if (!gameState.dailyGigLedger) gameState.dailyGigLedger = {};
+      if (gameState.dailyGigLedger[ledgerKey]) {
+        flashMessage(localize({
+          he: "הבריסטה כבר רואה אותך מהקפה הקודם. אל תהיה ההוא.",
+          en: "The barista already pegged you from the last attempt. Don't be that guy."
+        }), "bad");
+        return false;
+      }
+      if (!spendHours(1, localize({ he: "פלרטוט במאמץ", en: "Strained flirting" }))) {
+        return false;
+      }
+      gameState.dailyGigLedger[ledgerKey] = true;
+      const wardrobeBoost = (gameState.wardrobeTier || 0) * 0.08 - 0.10; // -0.10 .. +0.14
+      const rng = Math.random();
+      // Buckets: viral (top 4%+boost), phone (next 25%+boost), rejection (rest)
+      if (rng < 0.04 + Math.max(0, wardrobeBoost)) {
+        adjustStat("reputation", 4);
+        adjustStat("happiness", 3);
+        adjustStat("creativity", 1);
+        flashMessage(localize({
+          he: "פלרטטת בקול רם. מצולם. בטיק-טוק. 14k צפיות עד הבוקר. אגדה מקומית.",
+          en: "You flirted loudly. Filmed. Tiktoked. 14k views by sunrise. A local legend."
+        }), "good");
+        playSfx("cash");
+      } else if (rng < 0.30 + wardrobeBoost) {
+        adjustStat("happiness", 2);
+        adjustStat("soul", 1);
+        flashMessage(localize({
+          he: "מספר נשמט על מפית. כתב יד של מי שלא חוזרת. עדיין — מספר.",
+          en: "A number slipped onto a napkin. Handwriting of someone who won't answer. Still — a number."
+        }), "good");
+      } else {
+        adjustStat("soul", -2);
+        adjustStat("happiness", -1);
+        const lines = [
+          { he: "החזירה ליין-טוניק כאילו לא דיברת. הזכוכית קלטה את הרמז.", en: "She returned to her gin and tonic as if you hadn't spoken. The glass understood." },
+          { he: "ענתה: 'אני בקבוצת עזרה לאחיינים של במאים'. לא הבנת אם זה כן או לא.", en: "She replied: 'I'm in a support group for directors' nephews.' You couldn't tell if it was yes or no." },
+          { he: "החבר/ה שלה הגיע. בעלה גם הגיע. אתה למדת המון על מבנה משפחתי.", en: "Her partner showed up. So did her husband. You learned a lot about family structures." },
+          { he: "אמרה 'אני מצלמת תיעודי על אנשים כמוך'. הסתובבת. היא לא הזיזה את המצלמה.", en: "She said 'I shoot docs about guys like you.' You turned. She didn't move the camera." }
+        ];
+        const line = lines[Math.floor(rng * lines.length)] || lines[0];
+        flashMessage(localize(line), "bad");
+        playSfx("fail");
+      }
+      saveGame();
+      return true;
+    }
+
     // Phone-indie path: free, time-only, low chance to go viral.
     // Available from day 1. RNG payout gives the underdog narrative
     // (Sean Baker on iPhone, Tangerine vibes) without breaking economy.
@@ -5875,6 +5999,55 @@
       `;
     }
 
+    // Sidebar projects block. The legacy renderProjectsPanel exists but was
+    // never wired into the DOM, so users with active projects had no way to
+    // see cast/crew, budget, or stage. This block lives in win95-status.
+    function renderProjectsBlock() {
+      const focusedId = gameState.focusedProjectId;
+      const rows = gameState.projects.map((project) => {
+        const isFocused = project.id === focusedId;
+        const stage = projectStageName(project);
+        const castList = project.cast.length
+          ? project.cast.map((c) => `<li><span>${c.name}</span><em>${formatMoney(c.price)}</em></li>`).join("")
+          : `<li class="muted">${localize({ he: "עוד אין שחקנים", en: "No cast yet" })}</li>`;
+        const crewList = project.crew.length
+          ? project.crew.map((c) => `<li><span>${c.name}</span><em>${formatMoney(c.price)}</em></li>`).join("")
+          : `<li class="muted">${localize({ he: "עוד אין צוות", en: "No crew yet" })}</li>`;
+        const totalCast = project.cast.reduce((sum, c) => sum + c.price, 0);
+        const totalCrew = project.crew.reduce((sum, c) => sum + c.price, 0);
+        return `
+          <button class="project-tile ${isFocused ? "focused" : ""}" data-action="setFocusedProject" data-value="${project.id}">
+            <div class="project-tile-head">
+              <strong>${project.title}</strong>
+              <span>${stage}</span>
+            </div>
+            <div class="project-tile-meta">
+              <span>${localize({ he: "קאסט " + project.cast.length + "/2", en: "Cast " + project.cast.length + "/2" })}</span>
+              <span>${localize({ he: "צוות " + project.crew.length + "/3", en: "Crew " + project.crew.length + "/3" })}</span>
+              <span>${localize({ he: "צילם " + project.shoots + "/2", en: "Shot " + project.shoots + "/2" })}</span>
+            </div>
+            <details class="project-tile-roster">
+              <summary>${localize({ he: "מי על הפרויקט", en: "Who's on it" })}</summary>
+              <div class="roster-group">
+                <strong>${localize({ he: "שחקנים", en: "Cast" })} • ${formatMoney(totalCast)}</strong>
+                <ul>${castList}</ul>
+              </div>
+              <div class="roster-group">
+                <strong>${localize({ he: "צוות", en: "Crew" })} • ${formatMoney(totalCrew)}</strong>
+                <ul>${crewList}</ul>
+              </div>
+            </details>
+          </button>
+        `;
+      }).join("");
+      return `
+        <div class="inventory-block">
+          <div class="win95-panel-title">${localize({ he: "🎬 הפרויקטים שלי", en: "🎬 My projects" })}</div>
+          <div class="project-tiles">${rows}</div>
+        </div>
+      `;
+    }
+
     function renderBoard() {
       const city = getCity();
       const hint = currentHint();
@@ -5939,6 +6112,7 @@
               </div>
             ` : ""}
             ${gameState.filmUnlocked ? "" : renderUnlockProgress()}
+            ${gameState.projects && gameState.projects.length ? renderProjectsBlock() : ""}
           </section>
           <section class="win95-main">
             <div class="win95-strip">
@@ -6343,6 +6517,7 @@
               <h3>${localize({ he: "מסלול אינדי", en: "Indie path" })}</h3>
               <div class="action-buttons">
                 ${buttonMarkup("shootOnPhone", "cafe", localize({ he: "צלם בטלפון", en: "Shoot on phone" }), localize({ he: "סצנה אחת, יד רועדת, חלום אחד. 5% סיכוי לוויראלי.", en: "One scene, shaky hand, one dream. 5% viral shot." }), "4h • $0")}
+                ${buttonMarkup("flirtAtCafe", "", localize({ he: "לפלרטט", en: "Flirt" }), localize({ he: "השולחן ליד מסתכל. תנסה. כי אם לא, מי יחזור איתך?", en: "The next table is looking. Try. Because if you don't, who comes home?" }), "1h • $0")}
               </div>
             </div>
             <div class="action-group">
@@ -6414,7 +6589,13 @@
             </div>
             ${gameState.offers.length && gameState.offers[0].kind === "crew" ? `<div class="action-group"><h3>${localize({ he: "חבילות צוות", en: "Crew packages" })}</h3><div class="offer-list">${gameState.offers.map(renderOfferCard).join("")}</div></div>` : ""}
           `;
-        case "filmSchool":
+        case "filmSchool": {
+          const courseMod = modifierMultiplier("course");
+          const courseLabel = courseMod < 1
+            ? localize({ he: " 🔥 (−" + Math.round((1 - courseMod) * 100) + "%)", en: " 🔥 (−" + Math.round((1 - courseMod) * 100) + "%)" })
+            : courseMod > 1
+              ? localize({ he: " ⚠️ (+" + Math.round((courseMod - 1) * 100) + "%)", en: " ⚠️ (+" + Math.round((courseMod - 1) * 100) + "%)" })
+              : "";
           return `
             <div class="action-group">
               <h3>${t("training")}</h3>
@@ -6422,10 +6603,11 @@
                 ${COURSES.map((course) => buttonMarkup("attendClass", course.id, localize(course.name), localize({
                   he: "+" + course.credits + " קרדיט לימודי • +" + course.creativity + " יצירתיות",
                   en: "+" + course.credits + " education credit • +" + course.creativity + " creativity"
-                }), course.hours + "h • " + formatMoney(Math.round(course.cost * priceScale())))).join("")}
+                }), course.hours + "h • " + formatMoney(Math.round(course.cost * priceScale() * courseMod)) + courseLabel)).join("")}
               </div>
             </div>
           `;
+        }
         case "bank":
           return `
             <div class="action-group">
@@ -6449,17 +6631,25 @@
               </div>
             </div>
           `;
-        case "gear":
+        case "gear": {
+          const gearMod = modifierMultiplier("gear");
+          const modLabel = gearMod < 1
+            ? localize({ he: " 🔥 (−" + Math.round((1 - gearMod) * 100) + "%)", en: " 🔥 (−" + Math.round((1 - gearMod) * 100) + "%)" })
+            : gearMod > 1
+              ? localize({ he: " ⚠️ (+" + Math.round((gearMod - 1) * 100) + "%)", en: " ⚠️ (+" + Math.round((gearMod - 1) * 100) + "%)" })
+              : "";
+          const gearPrice = (base) => formatMoney(Math.round(base * priceScale() * gearMod)) + modLabel;
           return `
             <div class="action-group">
               <h3>${localize({ he: "צילום וציוד מקצועי", en: "Camera and pro gear" })}</h3>
               <div class="action-buttons">
-                ${buttonMarkup("buyEquip", "camera", localize({ he: "מצלמת כתף מקצועית", en: "Professional shoulder camera" }), localize({ he: "פותחת את המשחק הקולנועי • מוזילה ימי צילום • מעלה איכות.", en: "Unlocks the film loop • reduces shoot costs • raises quality." }), formatMoney(Math.round(1700 * priceScale())))}
-                ${buttonMarkup("buyEquip", "studio", localize({ he: "מחשב עריכה ועמדה", en: "Editing workstation" }), localize({ he: "מוזיל פוסט משמעותית • מוסיף באזז ותחושת מקצוענות.", en: "Cuts post costs hard • adds buzz and professionalism." }), formatMoney(Math.round(3600 * priceScale())))}
-                ${buttonMarkup("buyEquip", "insurance", localize({ he: "קיט סאונד ותאורה", en: "Sound and light kit" }), localize({ he: "מוזיל צילום ופוסט • הופך את ההפקה לפחות חובבנית.", en: "Reduces shoot and post costs • makes the production feel less amateur." }), formatMoney(Math.round(1450 * priceScale())))}
+                ${buttonMarkup("buyEquip", "camera", localize({ he: "מצלמת כתף מקצועית", en: "Professional shoulder camera" }), localize({ he: "פותחת את המשחק הקולנועי • מוזילה ימי צילום • מעלה איכות.", en: "Unlocks the film loop • reduces shoot costs • raises quality." }), gearPrice(1700))}
+                ${buttonMarkup("buyEquip", "studio", localize({ he: "מחשב עריכה ועמדה", en: "Editing workstation" }), localize({ he: "מוזיל פוסט משמעותית • מוסיף באזז ותחושת מקצוענות.", en: "Cuts post costs hard • adds buzz and professionalism." }), gearPrice(3600))}
+                ${buttonMarkup("buyEquip", "insurance", localize({ he: "קיט סאונד ותאורה", en: "Sound and light kit" }), localize({ he: "מוזיל צילום ופוסט • הופך את ההפקה לפחות חובבנית.", en: "Reduces shoot and post costs • makes the production feel less amateur." }), gearPrice(1450))}
               </div>
             </div>
           `;
+        }
         case "investor":
           return `
             <div class="action-group">
@@ -6872,6 +7062,8 @@
           toggleFullscreen();
         } else if (action === "shootOnPhone") {
           if (shootOnPhone(value)) render();
+        } else if (action === "flirtAtCafe") {
+          if (flirtAtCafe()) render();
         }
       });
     }
@@ -6994,6 +7186,7 @@
     root.sellStock = sellStock;
     root.shootOnPhone = shootOnPhone;
     root.toggleFullscreen = toggleFullscreen;
+    root.flirtAtCafe = flirtAtCafe;
 
     if (canRender) {
       init();
