@@ -2593,6 +2593,167 @@
       margin-top: 6px;
     }
 
+    /* ---- cross-career collection screen ---- */
+    .collection-window {
+      position: fixed;
+      inset: 0;
+      z-index: 97;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(17, 15, 12, 0.28);
+    }
+
+    .collection-dialog {
+      width: min(620px, calc(100vw - 36px));
+      max-height: min(82vh, 720px);
+      display: flex;
+      flex-direction: column;
+      background: var(--win-face);
+      box-shadow:
+        inset -1px -1px var(--win-black),
+        inset 1px 1px var(--win-light),
+        inset -2px -2px var(--win-dark),
+        inset 2px 2px var(--win-mid);
+      padding: 4px;
+    }
+
+    .collection-dialog-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 6px;
+      background: linear-gradient(90deg, #000080, #1084d0);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      flex: none;
+    }
+
+    .collection-dialog-body {
+      display: grid;
+      gap: 16px;
+      padding: 10px;
+      background: var(--win-face);
+      overflow-y: auto;
+    }
+
+    .collection-section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .collection-section-head h3 {
+      margin: 0;
+      font-size: 0.92rem;
+    }
+
+    .collection-progress {
+      font-variant-numeric: tabular-nums;
+      font-size: 0.72rem;
+      background: rgba(39, 24, 15, 0.1);
+      border-radius: 999px;
+      padding: 2px 8px;
+    }
+
+    .achv-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 8px;
+    }
+
+    .achv-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 3px;
+      padding: 10px 8px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(39,24,15,0.1);
+    }
+
+    .achv-tile.locked {
+      opacity: 0.5;
+      filter: grayscale(0.6);
+    }
+
+    .achv-tile.unlocked {
+      background: rgba(235, 173, 83, 0.22);
+      border-color: rgba(180, 79, 42, 0.32);
+    }
+
+    .achv-icon {
+      font-size: 1.3rem;
+      line-height: 1;
+    }
+
+    .achv-tile strong {
+      font-size: 0.76rem;
+    }
+
+    .achv-tile span:last-child {
+      font-size: 0.66rem;
+      opacity: 0.78;
+      line-height: 1.25;
+    }
+
+    .career-log-list {
+      display: grid;
+      gap: 6px;
+      max-height: 260px;
+      overflow-y: auto;
+      padding-inline-end: 2px;
+    }
+
+    .career-log-row {
+      background: rgba(255,255,255,0.42);
+      border: 1px solid rgba(39, 24, 15, 0.08);
+      border-radius: 12px;
+      padding: 8px 10px;
+      border-inline-start: 3px solid rgba(39,24,15,0.18);
+    }
+
+    .career-log-row.won {
+      border-inline-start-color: #b45f1a;
+    }
+
+    .career-log-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+    }
+
+    .career-log-mark {
+      opacity: 0.8;
+    }
+
+    .career-log-ending {
+      margin-top: 3px;
+      font-size: 0.76rem;
+      opacity: 0.8;
+    }
+
+    .collection-empty {
+      font-size: 0.82rem;
+      opacity: 0.72;
+      padding: 6px 2px;
+    }
+
+    .win-card-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
     .panel h2 + h2 {
       margin-top: 12px;
     }
@@ -2824,6 +2985,7 @@
   <section id="winLoss" class="win-loss hidden"></section>
   <section id="statusWindow" class="status-window hidden"></section>
   <section id="incidentWindow" class="incident-window hidden"></section>
+  <section id="collectionWindow" class="collection-window hidden"></section>
   <div id="floatLayer" class="float-layer"></div>
   <div id="nightVeil" class="night-veil"></div>
 
@@ -2840,7 +3002,8 @@
     const STORAGE_KEYS = {
       save: "sm365-save",
       prefs: "sm365-prefs",
-      scores: "sm365-scores"
+      scores: "sm365-scores",
+      careerLog: "sm365-career-log"
     };
 
     const TEXT = {
@@ -2946,6 +3109,13 @@
         unlockedFilms: "תעשיית הסרטים פתוחה",
         highScores: "שיאי שנה",
         noScores: "עדיין אין סיפורי הצלחה. זה דווקא עקבי.",
+        myCollection: "🏆 הקריירה שלי",
+        viewCollection: "🏆 צפה באוסף",
+        collectionTitle: "הקריירה שלי בקולנוע",
+        achievementsHeader: "הישגים",
+        careerLogHeader: "יומן קריירות",
+        noCareerLog: "עדיין אין קריירות שהסתיימו. תתחיל אחת.",
+        dayLabel: "יום",
         youWon: "ניצחת את השנה",
         youLost: "השנה נגמרה",
         winCopy: "מזוג עבודה, הישרדות וסרטים בלי להתפרק. קלאסה חשודה.",
@@ -3083,6 +3253,13 @@
         unlockedFilms: "Film industry unlocked",
         highScores: "High Scores",
         noScores: "No success stories yet. Consistent, at least.",
+        myCollection: "🏆 My Career",
+        viewCollection: "🏆 View Collection",
+        collectionTitle: "My Career in Film",
+        achievementsHeader: "Achievements",
+        careerLogHeader: "Career Log",
+        noCareerLog: "No careers finished yet. Start one.",
+        dayLabel: "Day",
         youWon: "You beat the year",
         youLost: "The year ran out",
         winCopy: "You balanced work, survival, and filmmaking without exploding. Suspiciously classy.",
@@ -3768,6 +3945,7 @@
         log: [],
         dailyGigLedger: {},
         highscores: loadScores(),
+        careerLog: loadCareerLog(),
         winState: null,
         seed: 1337,
         briefSeed: 99991,
@@ -3941,6 +4119,30 @@
       }
     }
 
+    // careerLog is the FULL history of every career that ever ended, win or
+    // lose — unlike highscores (top 10 by score only), nothing here gets
+    // dropped. It is the backbone of the cross-career collection screen.
+    function loadCareerLog() {
+      try {
+        if (!root.localStorage) {
+          return [];
+        }
+        return JSON.parse(root.localStorage.getItem(STORAGE_KEYS.careerLog) || "[]");
+      } catch (_err) {
+        return [];
+      }
+    }
+
+    function saveCareerLog() {
+      try {
+        if (!root.localStorage) {
+          return;
+        }
+        root.localStorage.setItem(STORAGE_KEYS.careerLog, JSON.stringify(gameState.careerLog.slice(0, 200)));
+      } catch (_err) {
+      }
+    }
+
     // saveGame is called after most actions to persist progress.
     // We only show the toast when the user explicitly clicks "Save" in the
     // HUD — auto-saves stay silent so they don't pollute the screen.
@@ -3974,6 +4176,9 @@
         gameState.activeNotice = null;
         if (!Array.isArray(gameState.highscores)) {
           gameState.highscores = loadScores();
+        }
+        if (!Array.isArray(gameState.careerLog)) {
+          gameState.careerLog = loadCareerLog();
         }
         gameState.started = true;
         if (dom) {
@@ -7236,7 +7441,7 @@
     function checkEndings() {
       // Hard liquidation: debt runs away mid-arc
       if (gameState.debt >= 60000) {
-        gameState.winState = { win: false, title: localize({ he: "ארקדי לא צוחק יותר", en: "Arkady stopped smiling" }), copy: localize({
+        gameState.winState = { win: false, endingId: "collapse", title: localize({ he: "ארקדי לא צוחק יותר", en: "Arkady stopped smiling" }), copy: localize({
           he: "החוב חצה 60,000$. ארקדי שלח את 'העוזרים' לאסוף את חומרי הגלם. המשחק הסתיים מוקדם.",
           en: "Debt passed $60,000. Arkady sent the 'helpers' to collect the footage. The game ended early."
         }) };
@@ -7247,9 +7452,10 @@
       if (gameState.day > seasonLength()) {
         const filmDone = filmTasksComplete();
         const debtClear = gameState.debt <= 0;
-        let title, copy, won;
+        let title, copy, won, endingId;
         if (filmDone && debtClear) {
           won = true;
+          endingId = "clean_win";
           title = localize({ he: "הסרט יצא. ארקדי נחנק בקפה.", en: "The film is out. Arkady choked on his coffee." });
           copy = localize({
             he: "בכורה, חוב סגור, הקרדיט שלך. אגדה מקומית קטנה. אנשים מעתיקים את החיוך שלך.",
@@ -7257,6 +7463,7 @@
           });
         } else if (filmDone && !debtClear) {
           won = true;
+          endingId = "half_win";
           title = localize({ he: "סיימת את הסרט. החוב סיים אותך חצי.", en: "You finished the film. The debt finished half of you." });
           copy = localize({
             he: "ארקדי לוקח 50% מההכנסות לכל החיים. אבל הקרדיט שלך, והסרט שלך. זה הסיום הצנוע.",
@@ -7264,6 +7471,7 @@
           });
         } else if (!filmDone && debtClear) {
           won = false;
+          endingId = "debt_free_no_film";
           title = localize({ he: "החוב נסגר. הסרט לא.", en: "The debt closed. The film didn't." });
           copy = localize({
             he: "סיימת חופשי מארקדי, אבל בלי סרט. הקרנת לעצמך, לחבר אחד שהביא יין. הבמאי שלא עשה סרט.",
@@ -7271,13 +7479,14 @@
           });
         } else {
           won = false;
+          endingId = "arkady_takes_all";
           title = localize({ he: "'הישראלי שחיפש את עצמו באירופה'", en: "'The Israeli Who Searched for Himself in Europe'" });
           copy = localize({
             he: "ארקדי לקח את חומרי הגלם, מכר לערוץ גרסה מקוצרת בשם הזה. אתה מקבל קרדיט: 'תחקיר נוסף'. הוא חייך בקבלת הכסף.",
             en: "Arkady took the footage, sold the channel a short cut by that name. You got the credit: 'additional research'. He smiled cashing the check."
           });
         }
-        gameState.winState = { win: won, title, copy };
+        gameState.winState = { win: won, endingId, title, copy };
         if (!gameState.endingShown) { gameState.endingShown = true; recordScore(won); }
       }
     }
@@ -7301,6 +7510,136 @@
           .slice(0, 10);
         saveScores();
       }
+      recordCareerLog(won);
+    }
+
+    // recordCareerLog appends EVERY finished career (not just top scores) so
+    // the collection screen can show a full history and unlock cross-career
+    // achievements. Called once per game via the endingShown guard.
+    function recordCareerLog(won) {
+      const state = gameState.winState || {};
+      gameState.careerLog.unshift({
+        name: gameState.playerName,
+        won,
+        endingId: state.endingId || (won ? "clean_win" : "collapse"),
+        endingTitle: state.title || "",
+        day: gameState.day,
+        seasonLength: seasonLength(),
+        city: gameState.city,
+        economyDifficulty: gameState.economyDifficulty,
+        wealth: scoreWealth(),
+        career: scoreCareer(),
+        education: scoreEducation(),
+        happiness: scoreHappiness(),
+        debt: gameState.debt,
+        date: Date.now()
+      });
+      if (gameState.careerLog.length > 200) {
+        gameState.careerLog = gameState.careerLog.slice(0, 200);
+      }
+      saveCareerLog();
+    }
+
+    // Cross-career achievements — evaluated purely against gameState.careerLog,
+    // so they unlock the moment a qualifying career is recorded, and stay
+    // unlocked forever after (persisted history, not live run state).
+    const ACHIEVEMENTS = [
+      {
+        id: "first_wrap",
+        icon: "🎬",
+        label: { he: "הקאט הראשון", en: "First wrap" },
+        desc: { he: "סיימת קריירה אחת, טובה או רעה.", en: "Finished one career, good or bad." },
+        check: (log) => log.length >= 1
+      },
+      {
+        id: "first_win",
+        icon: "🏆",
+        label: { he: "בכורה", en: "Premiere" },
+        desc: { he: "סיימת קריירה בניצחון — הסרט יצא.", en: "Finished a career as a win — the film got out." },
+        check: (log) => log.some((c) => c.won)
+      },
+      {
+        id: "debt_free",
+        icon: "🧾",
+        label: { he: "בלי ארקדי", en: "Arkady-free" },
+        desc: { he: "סגרת קריירה עם חוב אפס.", en: "Closed out a career with zero debt." },
+        check: (log) => log.some((c) => c.debt <= 0)
+      },
+      {
+        id: "all_endings",
+        icon: "🎞️",
+        label: { he: "ראית הכל", en: "Seen it all" },
+        desc: { he: "חווית את כל חמשת סיומי ארקדי.", en: "Hit all five Arkady endings." },
+        check: (log) => new Set(log.map((c) => c.endingId)).size >= 5
+      },
+      {
+        id: "five_careers",
+        icon: "🎟️",
+        label: { he: "חמש קריירות", en: "Five careers" },
+        desc: { he: "סיימת 5 קריירות בסה\"כ.", en: "Finished 5 careers total." },
+        check: (log) => log.length >= 5
+      },
+      {
+        id: "ten_careers",
+        icon: "🎫",
+        label: { he: "עשר קריירות", en: "Ten careers" },
+        desc: { he: "סיימת 10 קריירות בסה\"כ.", en: "Finished 10 careers total." },
+        check: (log) => log.length >= 10
+      },
+      {
+        id: "city_hopper",
+        icon: "✈️",
+        label: { he: "נודד", en: "City hopper" },
+        desc: { he: "סיימת קריירות בשתי ערים שונות לפחות.", en: "Finished careers in at least two different cities." },
+        check: (log) => new Set(log.map((c) => c.city)).size >= 2
+      },
+      {
+        id: "all_seasons",
+        icon: "⏱️",
+        label: { he: "כל הקצבים", en: "Every pace" },
+        desc: { he: "סיימת קריירה בכל אחד משלושת אורכי העונה.", en: "Finished a career at all three season lengths." },
+        check: (log) => new Set(log.map((c) => c.seasonLength)).size >= 3
+      },
+      {
+        id: "legendary_win",
+        icon: "🌟",
+        label: { he: "אגדי", en: "Legendary" },
+        desc: { he: "ניצחת בקושי 'אגדי'.", en: "Won on 'legendary' difficulty." },
+        check: (log) => log.some((c) => c.won && c.economyDifficulty === "legendary")
+      },
+      {
+        id: "rich_ending",
+        icon: "💰",
+        label: { he: "עשיר", en: "Rich" },
+        desc: { he: "סיימת קריירה עם ציון עושר גבוה.", en: "Finished a career with a high wealth score." },
+        check: (log) => log.some((c) => c.wealth >= 15)
+      },
+      {
+        id: "clean_and_wealthy",
+        icon: "👑",
+        label: { he: "שולט במגרש שלו", en: "Runs the lot" },
+        desc: { he: "ניצחון נקי (בלי חוב) יחד עם ציון עושר גבוה, באותה קריירה.", en: "A clean win (no debt) with a high wealth score, same career." },
+        check: (log) => log.some((c) => c.endingId === "clean_win" && c.wealth >= 12)
+      },
+      {
+        id: "collapse_and_back",
+        icon: "🔁",
+        label: { he: "לא נשברתי", en: "Didn't break" },
+        desc: { he: "אחרי קריירה שקרסה, חזרת וניצחת.", en: "After a career collapsed, came back and won." },
+        check: (log) => {
+          for (let i = log.length - 1; i >= 1; i -= 1) {
+            if (log[i].endingId === "collapse" && log.slice(0, i).some((c) => c.won)) {
+              return true;
+            }
+          }
+          return false;
+        }
+      }
+    ];
+
+    function unlockedAchievements() {
+      const log = gameState.careerLog || [];
+      return ACHIEVEMENTS.map((a) => ({ ...a, unlocked: a.check(log) }));
     }
 
     function currentHint() {
@@ -8058,6 +8397,73 @@
       `;
     }
 
+    // renderCollectionWindow — the cross-career collection screen. Unlike
+    // every other dialog in this file it does NOT read from gameState's
+    // live run; it reads gameState.careerLog, which survives resetGame and
+    // startGame (persisted separately, see loadCareerLog/saveCareerLog).
+    function renderCollectionWindow() {
+      if (!dom || !dom.collectionWindow) {
+        return;
+      }
+      if (!dom.collectionWindowOpen) {
+        dom.collectionWindow.classList.add("hidden");
+        dom.collectionWindow.innerHTML = "";
+        return;
+      }
+      const achievements = unlockedAchievements();
+      const unlockedCount = achievements.filter((a) => a.unlocked).length;
+      const log = gameState.careerLog || [];
+      dom.collectionWindow.classList.remove("hidden");
+      dom.collectionWindow.innerHTML = `
+        <div class="collection-dialog">
+          <div class="collection-dialog-head">
+            <strong>🏆 ${t("collectionTitle")}</strong>
+            <button class="mini-btn" data-action="toggleCollectionWindow">${t("close")}</button>
+          </div>
+          <div class="collection-dialog-body">
+            <div class="collection-section">
+              <div class="collection-section-head">
+                <h3>${t("achievementsHeader")}</h3>
+                <span class="collection-progress">${unlockedCount}/${achievements.length}</span>
+              </div>
+              <div class="achv-grid">
+                ${achievements.map((a) => `
+                  <div class="achv-tile ${a.unlocked ? "unlocked" : "locked"}" title="${escapeAttr(localize(a.desc))}">
+                    <span class="achv-icon">${a.unlocked ? a.icon : "🔒"}</span>
+                    <strong>${localize(a.label)}</strong>
+                    <span>${localize(a.desc)}</span>
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+            <div class="collection-section">
+              <div class="collection-section-head">
+                <h3>${t("careerLogHeader")}</h3>
+                <span class="collection-progress">${log.length}</span>
+              </div>
+              <div class="career-log-list">
+                ${log.length ? log.map((entry) => `
+                  <div class="career-log-row ${entry.won ? "won" : "lost"}">
+                    <div class="career-log-top">
+                      <strong>${entry.name}</strong>
+                      <span class="career-log-mark">${entry.won ? "★" : "…"}</span>
+                    </div>
+                    <div class="career-log-ending">${entry.endingTitle}</div>
+                    <div class="project-meta">
+                      <span class="pill">${localize(getCity(entry.city).name)}</span>
+                      <span class="pill">${t("dayLabel")} ${entry.day}</span>
+                      <span class="pill">${t("wealth")}: ${entry.wealth}</span>
+                      <span class="pill">${t("career")}: ${entry.career}</span>
+                    </div>
+                  </div>
+                `).join("") : `<div class="collection-empty">${t("noCareerLog")}</div>`}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     /*
      * sceneCardButtons — renders all SCENE_CARDS matching the building,
      * filtered by current city. Each card's button gets the npcInfluence
@@ -8662,6 +9068,9 @@
               <button class="start-card button" data-action="loadGame">${t("resumeButton")}</button>
               <button class="lead-btn" data-action="startFromScreen">${t("startButton")}</button>
             </div>
+            <div class="start-actions-secondary">
+              <button class="mini-btn secondary" data-action="toggleCollectionWindow">${t("myCollection")}</button>
+            </div>
           </div>
         </div>
       `;
@@ -8679,7 +9088,10 @@
           <h2>${gameState.winState.title}</h2>
           <p>${gameState.winState.copy}</p>
           <p>${t("wealth")}: ${scoreWealth()} • ${t("career")}: ${scoreCareer()} • ${t("education")}: ${scoreEducation()} • ${t("happiness")}: ${scoreHappiness()}</p>
-          <button class="lead-btn" data-action="resetGame">${t("playAgain")}</button>
+          <div class="win-card-actions">
+            <button class="lead-btn" data-action="resetGame">${t("playAgain")}</button>
+            <button class="mini-btn secondary" data-action="toggleCollectionWindow">${t("viewCollection")}</button>
+          </div>
         </div>
       `;
     }
@@ -8700,6 +9112,7 @@
       renderSidePanel();
       renderStatusWindow();
       renderNoticeWindow();
+      renderCollectionWindow();
       renderStartScreen();
       renderWinLoss();
     }
@@ -8770,6 +9183,9 @@
         } else if (action === "toggleStatusWindow") {
           dom.statusWindowOpen = !dom.statusWindowOpen;
           render();
+        } else if (action === "toggleCollectionWindow") {
+          dom.collectionWindowOpen = !dom.collectionWindowOpen;
+          render();
         } else if (action === "closeNotice") {
           if (dom.noticeTimer) {
             root.clearTimeout(dom.noticeTimer);
@@ -8836,7 +9252,8 @@
         language: prefs.language || gameState.language,
         themeIndex: Number.isInteger(prefs.themeIndex) ? prefs.themeIndex : gameState.themeIndex,
         muted: !!prefs.muted,
-        highscores: loadScores()
+        highscores: loadScores(),
+        careerLog: loadCareerLog()
       });
       if (dom) {
         dom.forceStart = true;
@@ -8851,6 +9268,7 @@
 
     function startGame(options = {}) {
       const highscores = loadScores();
+      const careerLog = loadCareerLog();
       const prefs = loadPrefs();
       gameState = createState({
         started: true,
@@ -8861,7 +9279,8 @@
         language: gameState.language,
         themeIndex: gameState.themeIndex,
         muted: gameState.muted,
-        highscores
+        highscores,
+        careerLog
       });
       if (dom) {
         dom.forceStart = false;
@@ -8883,10 +9302,12 @@
         winLoss: document.getElementById("winLoss"),
         statusWindow: document.getElementById("statusWindow"),
         incidentWindow: document.getElementById("incidentWindow"),
+        collectionWindow: document.getElementById("collectionWindow"),
         floatLayer: document.getElementById("floatLayer"),
         nightVeil: document.getElementById("nightVeil"),
         noticeTimer: null,
         statusWindowOpen: false,
+        collectionWindowOpen: false,
         forceStart: false
       };
       bindEvents();
