@@ -8857,7 +8857,7 @@
         playerName: options.playerName || prefs.playerName || gameState.playerName,
         economyDifficulty: options.economyDifficulty || prefs.economyDifficulty || "modest",
         goalLevels: options.goalLevels || prefs.goalLevels || { wealth: "modest", career: "modest", education: "modest", happiness: "modest" },
-        seasonLength: 90,
+        seasonLength: [30, 90, 365].includes(options.seasonLength) ? options.seasonLength : (prefs.seasonLength || 90),
         language: gameState.language,
         themeIndex: gameState.themeIndex,
         muted: gameState.muted,
