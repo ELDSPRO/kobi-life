@@ -2593,6 +2593,491 @@
       margin-top: 6px;
     }
 
+    /* ---- focus mode: Apple HIG-style parallel flow (one decision per screen) ---- */
+    :root.focus-active {
+      --fm-deep: color-mix(in srgb, var(--accent-2) 8%, #0a0a0c 92%);
+      --fm-card: color-mix(in srgb, var(--accent-2) 6%, #131316 94%);
+      --fm-card-2: color-mix(in srgb, var(--accent-2) 5%, #1a1a1e 95%);
+      --fm-line: rgba(255, 255, 255, 0.09);
+      --fm-tint: color-mix(in srgb, var(--accent) 14%, transparent);
+    }
+
+    .icon-btn.active {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .focus-active .board-stage {
+      border-color: var(--fm-line);
+    }
+
+    .focus-active #hud {
+      background: var(--fm-deep);
+      border-bottom: 1px solid var(--fm-line);
+    }
+
+    .focus-active .status-box.hud-summary .metric {
+      background: var(--fm-card);
+      box-shadow: none;
+      border: 1px solid var(--fm-line);
+      border-radius: 10px;
+    }
+
+    .focus-active .status-box.hud-summary .metric-label {
+      color: var(--paper);
+      opacity: 0.6;
+    }
+
+    .focus-active .status-box.hud-summary .metric-value {
+      color: var(--paper);
+    }
+
+    .focus-active .hud .icon-btn {
+      background: var(--fm-card);
+      color: var(--paper);
+      border: 1px solid var(--fm-line);
+    }
+
+    .focus-active .hud .icon-btn.active {
+      background: var(--fm-tint);
+      color: var(--accent);
+    }
+
+    .focus-shell {
+      --fm-deep: color-mix(in srgb, var(--accent-2) 8%, #0a0a0c 92%);
+      --fm-card: color-mix(in srgb, var(--accent-2) 6%, #131316 94%);
+      --fm-card-2: color-mix(in srgb, var(--accent-2) 5%, #1a1a1e 95%);
+      --fm-line: rgba(255, 255, 255, 0.09);
+      --fm-tint: color-mix(in srgb, var(--accent) 14%, transparent);
+      height: 100%;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 22px 16px 26px;
+      box-sizing: border-box;
+      color: var(--paper);
+      background: var(--fm-deep);
+    }
+
+    .focus-today {
+      width: min(560px, 100%);
+      background: var(--fm-card);
+      border-radius: 14px;
+      border: 1px solid var(--fm-line);
+      padding: 22px 22px 20px;
+      box-sizing: border-box;
+    }
+
+    .focus-place {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      opacity: 0.7;
+      text-transform: uppercase;
+    }
+
+    .focus-plaza {
+      position: relative;
+      margin-top: 12px;
+      aspect-ratio: 16 / 9;
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--fm-deep);
+      border: 1px solid var(--fm-line);
+    }
+
+    .focus-plaza .building-card,
+    .focus-plaza .building.selected .building-card {
+      background: var(--fm-card-2);
+      border: 1px solid var(--fm-line);
+      box-shadow: none;
+    }
+
+    .focus-plaza .building.selected .building-card {
+      background: var(--fm-tint);
+      border-color: var(--accent);
+    }
+
+    .focus-plaza .sign,
+    .focus-plaza .building.selected .sign {
+      background: transparent;
+      border: none;
+      color: var(--paper);
+    }
+
+    .focus-plaza .building.target .sign {
+      animation: none;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .focus-plaza .avatar .torso {
+      background: var(--accent);
+      border-color: var(--fm-line);
+    }
+
+    .focus-copy {
+      margin-top: 12px;
+      font-size: 15px;
+      line-height: 1.55;
+      opacity: 0.88;
+    }
+
+    .focus-cta {
+      width: 100%;
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 16px 18px;
+      cursor: pointer;
+      text-align: start;
+      transition: filter 0.12s ease;
+    }
+
+    .focus-cta:hover {
+      filter: brightness(1.08);
+    }
+
+    .focus-cta-icon {
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .focus-cta-body {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .focus-cta-body strong {
+      font-size: 15px;
+    }
+
+    .focus-cta-body span {
+      font-size: 12px;
+      opacity: 0.85;
+    }
+
+    .focus-here {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .focus-here-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      opacity: 0.7;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .focus-here .action-groups {
+      gap: 16px;
+    }
+
+    .focus-here .action-group {
+      background: var(--fm-card-2);
+      border: 1px solid var(--fm-line);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    .focus-here .action-group h3 {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      margin-bottom: 10px;
+    }
+
+    .focus-here .action-buttons {
+      gap: 10px;
+    }
+
+    .focus-here .action-btn {
+      background: var(--fm-card);
+      border: 1px solid var(--fm-line);
+      border-radius: 10px;
+      padding: 13px 16px;
+      color: var(--paper);
+    }
+
+    .focus-here .action-btn:hover {
+      border-color: color-mix(in srgb, var(--accent) 45%, var(--fm-line));
+    }
+
+    .focus-here .action-btn .subline {
+      opacity: 0.75;
+    }
+
+    /* sheet content — the shared Win95-era components (npc rows, project tiles,
+       story beats, market table, travel grid, wardrobe rows) render white/light
+       by default; override them here so nothing inside a dark sheet reverts. */
+    .focus-sheet-body .destination-block,
+    .focus-sheet-body .win95-note,
+    .focus-sheet-body .inv-line,
+    .focus-sheet-body .unlock-list,
+    .focus-sheet-body .project-tile,
+    .focus-sheet-body .npc-row,
+    .focus-sheet-body .npc-priority-row,
+    .focus-sheet-body .story-choice {
+      background: var(--fm-card);
+      box-shadow: none;
+      border: 1px solid var(--fm-line);
+      border-inline-start-width: 3px;
+      color: var(--paper);
+    }
+
+    .focus-sheet-body .project-tile.focused {
+      background: color-mix(in srgb, var(--accent) 22%, var(--fm-card));
+      border-color: var(--accent);
+    }
+
+    .focus-sheet-body .npc-row.good,
+    .focus-sheet-body .npc-priority-row.npc-need { border-inline-start-color: color-mix(in srgb, #2e8b3d 65%, var(--paper)); }
+    .focus-sheet-body .npc-row.bad,
+    .focus-sheet-body .npc-priority-row.npc-angry,
+    .focus-sheet-body .npc-priority-row.npc-danger { border-inline-start-color: color-mix(in srgb, #d9534f 65%, var(--paper)); }
+    .focus-sheet-body .npc-row.good .npc-rel { color: color-mix(in srgb, #2e8b3d 45%, var(--paper)); }
+    .focus-sheet-body .npc-row.bad .npc-rel { color: color-mix(in srgb, #d9534f 45%, var(--paper)); }
+    .focus-sheet-body .npc-row-role,
+    .focus-sheet-body .npc-priority-role,
+    .focus-sheet-body .project-tile-meta,
+    .focus-sheet-body .story-choice-copy,
+    .focus-sheet-body .npc-row-links,
+    .focus-sheet-body .npc-empty-copy {
+      color: var(--paper);
+      opacity: 0.7;
+    }
+    .focus-sheet-body .npc-priority-row .npc-priority-label {
+      color: color-mix(in srgb, var(--accent) 55%, var(--paper));
+      opacity: 1;
+    }
+    .focus-sheet-body .npc-row-status,
+    .focus-sheet-body .npc-priority-status,
+    .focus-sheet-body .project-tile-roster summary {
+      color: color-mix(in srgb, var(--accent) 55%, var(--paper));
+    }
+    .focus-sheet-body .npc-city-tag {
+      background: var(--fm-deep);
+      color: var(--paper);
+      opacity: 0.85;
+    }
+
+    .focus-sheet-body .inv-wear,
+    .focus-sheet-body .unlock-bar {
+      background: var(--fm-deep);
+      box-shadow: none;
+    }
+
+    .focus-sheet-body .inv-chip {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: none;
+    }
+
+    .focus-sheet-body .inv-empty {
+      color: var(--paper);
+      opacity: 0.55;
+    }
+
+    .focus-sheet-body .unlock-row.done .unlock-row-head {
+      color: color-mix(in srgb, #2e8b3d 45%, var(--paper));
+    }
+
+    .focus-sheet-body .story-beat-block {
+      background: color-mix(in srgb, var(--accent) 20%, var(--fm-card));
+      border: 1px solid var(--fm-line);
+      box-shadow: none;
+    }
+
+    .focus-sheet-body .story-beat-title,
+    .focus-sheet-body .story-beat-copy,
+    .focus-sheet-body .story-choice-label {
+      color: var(--paper);
+    }
+
+    .focus-sheet-body .story-beat-copy {
+      opacity: 0.85;
+    }
+
+    .focus-sheet-body .destination-block {
+      padding: 10px;
+      border-radius: 14px;
+    }
+
+    .focus-sheet-body .dest-btn,
+    .focus-sheet-body .travel-btn {
+      background: var(--fm-card);
+      box-shadow: none;
+      border: 1px solid var(--fm-line);
+      border-radius: 12px;
+      color: var(--paper);
+    }
+
+    .focus-sheet-body .dest-btn span {
+      color: var(--paper);
+      opacity: 0.7;
+    }
+
+    .focus-sheet-body .dest-btn.selected {
+      background: color-mix(in srgb, var(--accent) 25%, var(--fm-card));
+      color: var(--paper);
+      border-color: var(--accent);
+    }
+
+    .focus-sheet-body .dest-btn.target span {
+      color: var(--accent);
+      opacity: 1;
+    }
+
+    .focus-sheet-body .news-pane,
+    .focus-sheet-body .market-pane {
+      background: var(--fm-card);
+      box-shadow: none;
+      border: 1px solid var(--fm-line);
+      border-radius: 14px;
+    }
+
+    .focus-sheet-body .news-item {
+      border-bottom-color: var(--fm-line);
+    }
+
+    .focus-sheet-body .news-item .news-body span {
+      color: var(--paper);
+      opacity: 0.65;
+    }
+
+    .focus-sheet-body .market-table th {
+      color: var(--paper);
+      opacity: 0.65;
+      border-bottom-color: var(--fm-line);
+    }
+
+    .focus-sheet-body .market-table td {
+      border-bottom-color: var(--fm-line);
+      color: var(--paper);
+    }
+
+    .focus-sheet-body .market-table .ticker .ticker-code {
+      color: var(--paper);
+      opacity: 0.6;
+    }
+
+    .focus-sheet-body .news-up,
+    .focus-sheet-body .market-table .delta-up {
+      color: color-mix(in srgb, #2e8b3d 55%, var(--paper));
+    }
+
+    .focus-sheet-body .news-down,
+    .focus-sheet-body .market-table .delta-down {
+      color: color-mix(in srgb, #d9534f 55%, var(--paper));
+    }
+
+    .focus-sheet-body .market-table .delta-flat {
+      color: var(--paper);
+      opacity: 0.6;
+    }
+
+    .focus-triggers {
+      width: min(560px, 100%);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .focus-trigger {
+      background: var(--fm-card, var(--paper-2));
+      border: 1px solid var(--fm-line, rgba(0, 0, 0, 0.08));
+      border-radius: 999px;
+      padding: 9px 15px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--paper);
+    }
+
+    .focus-trigger.active {
+      background: var(--fm-tint, var(--accent));
+      color: var(--accent);
+      border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+    }
+
+    .focus-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 140;
+      cursor: pointer;
+    }
+
+    .focus-sheet {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: min(560px, calc(100% - 24px));
+      max-height: 78%;
+      z-index: 141;
+      display: flex;
+      flex-direction: column;
+      background: var(--fm-card, var(--paper-2));
+      border: 1px solid var(--fm-line, transparent);
+      border-bottom: none;
+      border-radius: 14px 14px 0 0;
+      animation: focusSheetIn 0.18s ease-out;
+      overflow: hidden;
+    }
+
+    .focus-sheet-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 18px;
+      background: var(--fm-deep, var(--paper));
+      border-bottom: 1px solid var(--fm-line, rgba(0, 0, 0, 0.08));
+      font-size: 14px;
+    }
+
+    .focus-sheet-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .focus-sheet-icon {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--fm-card-2, var(--paper-2));
+      font-size: 15px;
+    }
+
+    .focus-sheet-body {
+      padding: 16px 18px 20px;
+      overflow-y: auto;
+      display: grid;
+      gap: 14px;
+    }
+
+    @keyframes focusSheetIn {
+      from { transform: translateX(-50%) translateY(24px); opacity: 0; }
+      to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+
     /* ---- cross-career collection screen ---- */
     .collection-window {
       position: fixed;
@@ -3912,6 +4397,7 @@
         seasonLength: [30, 90, 365].includes(prefs.seasonLength) ? prefs.seasonLength : 365,
         themeIndex: Number.isInteger(prefs.themeIndex) ? prefs.themeIndex : 0,
         muted: !!prefs.muted,
+        focusMode: !!prefs.focusMode,
         started: false,
         cash: 300,
         bank: 0,
@@ -4092,7 +4578,8 @@
           goalLevels: gameState.goalLevels,
           seasonLength: gameState.seasonLength,
           themeIndex: gameState.themeIndex,
-          muted: gameState.muted
+          muted: gameState.muted,
+          focusMode: gameState.focusMode
         }));
       } catch (_err) {
       }
@@ -4209,6 +4696,7 @@
       }
       document.documentElement.lang = gameState.language;
       document.documentElement.dir = gameState.language === "he" ? "rtl" : "ltr";
+      document.documentElement.classList.toggle("focus-active", !!gameState.focusMode);
       document.title = t("title");
       document.documentElement.style.setProperty("--window-title", JSON.stringify(t("title")));
     }
@@ -7690,6 +8178,7 @@
           <button class="icon-btn" data-action="setLanguage" data-value="${gameState.language === "he" ? "en" : "he"}">${gameState.language === "he" ? "EN" : "עב"}</button>
           <button class="icon-btn" data-action="saveGame" title="${localize({ he: "שמור", en: "Save" })}">${localize({ he: "שמור", en: "Save" })}</button>
           <button class="icon-btn" data-action="toggleMute" title="${t("mute")}">${gameState.muted ? localize({ he: "שקט", en: "Muted" }) : localize({ he: "צליל", en: "Sound" })}</button>
+          <button class="icon-btn ${gameState.focusMode ? "active" : ""}" data-action="toggleFocusMode" title="${localize({ he: "מסך ממוקד", en: "Focus mode" })}">${gameState.focusMode ? localize({ he: "ממוקד", en: "Focus" }) : localize({ he: "קלאסי", en: "Classic" })}</button>
           <button class="icon-btn" data-action="showStart" title="${t("newYear")}">${localize({ he: "חדש", en: "New" })}</button>
           <button class="icon-btn fs-btn" data-action="toggleFullscreen" title="${localize({ he: "מסך מלא", en: "Fullscreen" })}">⛶</button>
         </div>
@@ -7723,8 +8212,14 @@
       const pos = buildingPos(index, total);
       const selected = buildingId === gameState.currentBuilding;
       const active = buildingId === hintBuilding;
+      const city = getCity();
+      const visitKey = city.id + ":" + buildingId;
+      const visited = gameState.buildingVisits && gameState.buildingVisits[visitKey];
+      const hasScene = sceneCardButtons(buildingId).length > 0;
+      const fresh = hasScene && !visited;
       return `
         <button class="building ${selected ? "selected" : ""} ${active ? "target" : ""}" style="left:${pos.left}%;top:${pos.top}%;" data-action="goToBuilding" data-value="${buildingId}">
+          ${fresh ? `<span class="fresh-badge" title="${localize({ he: "אנשי מקום חדשים", en: "New locals here" })}">✨</span>` : ""}
           <div class="building-card" style="--b1:${building.color[0]};--b2:${building.color[1]}">
             <div class="roof"></div>
             <div class="sign">${localize(building.label)}</div>
@@ -8113,44 +8608,7 @@
               </div>
             </div>
             <div class="board-route-row">
-              <div class="destination-block city-block">
-                <div class="dest-header">${localize({ he: "מיקומים בעיר", en: "City locations" })}</div>
-                <div class="dest-grid">
-                  ${buildings.map((buildingId) => {
-                    const building = getBuilding(buildingId);
-                    const selected = buildingId === gameState.currentBuilding;
-                    const target = buildingId === inCityHint;
-                    const visitKey = city.id + ":" + buildingId;
-                    const visited = gameState.buildingVisits && gameState.buildingVisits[visitKey];
-                    const hasScene = sceneCardButtons(buildingId).length > 0;
-                    const fresh = hasScene && !visited;
-                    return `
-                      <button class="dest-btn ${selected ? "selected" : ""} ${target ? "target" : ""} ${fresh ? "fresh-locals" : ""}" style="--tone-a:${building.color[0]};--tone-b:${building.color[1]};" data-action="goToBuilding" data-value="${buildingId}">
-                        ${fresh ? `<span class="fresh-badge" title="${localize({ he: "אנשי מקום חדשים", en: "New locals here" })}">✨</span>` : ""}
-                        <strong>${localize(building.short)}</strong>
-                        <span>${localize(building.sub || building.label)}</span>
-                      </button>
-                    `;
-                  }).join("")}
-                </div>
-              </div>
-              <div class="destination-block travel-block">
-                <div class="dest-header">${localize({ he: "מעבר בין ערים", en: "City travel" })}</div>
-                <div class="travel-grid">
-                  ${CITIES.filter((entry) => entry.id !== gameState.city).map((entry) => {
-                    const cost = flightCost(entry.id);
-                    const idx = (gameState.flightIndex && gameState.flightIndex[entry.id]) || 1;
-                    const trendClass = idx < 0.9 ? "cheap" : (idx > 1.15 ? "spicy" : "");
-                    const trendIcon = idx < 0.9 ? "▼" : (idx > 1.15 ? "▲" : "·");
-                    return `
-                      <button class="dest-btn travel-btn ${trendClass}" style="--tone-a:${entry.palette.a};--tone-b:${entry.palette.b};" data-action="flyTo" data-value="${entry.id}">
-                        <strong>${localize(entry.name)}</strong>
-                        <span>${t("flyCost", { hours: 3, cost: formatMoney(cost) })} ${trendIcon}</span>
-                      </button>
-                    `;
-                  }).join("")}
-                </div>
-              </div>
+              ${cityTravelMarkup(city, buildings, inCityHint)}
             </div>
             ${suggestedMoves.length ? `
               <div class="suggested-header">${localize({ he: "💡 לאן ללכת עכשיו", en: "💡 Where to go now" })}</div>
@@ -8162,39 +8620,212 @@
               <div class="scene-title">${localize(currentBuilding.label)}</div>
               <div class="scene-copy">${buildingSpeech(gameState.currentBuilding)}</div>
               <div class="scene-hint">${hint.copy || gameState.ticker || t("interiorPrompt")}</div>
-              <div class="newsletter">
-                <div class="news-pane">
-                  <div class="news-head">
-                    <span>📰 ${localize({ he: "ניוזלטר היום", en: "Today's newsletter" })}</span>
-                    <span>${localize(city.name)}</span>
-                  </div>
-                  <div class="news-list">
-                    ${newsItems.length ? newsItems.map(newsItemMarkup).join("") : `<div class="news-item"><span class="news-icon">·</span><div class="news-body"><strong>${localize({ he: "יום שקט", en: "Quiet day" })}</strong><span>${localize({ he: "אין כותרות חדשות. אולי תייצר אחת.", en: "No headlines. Make one." })}</span></div></div>`}
-                  </div>
-                </div>
-                <div class="market-pane">
-                  <div class="market-head">
-                    <span>📈 ${localize({ he: "שוק קולנוע + קריפטו", en: "Cinema + crypto market" })}</span>
-                    <span>${localize({ he: "מזומן: " + formatMoney(gameState.cash), en: "Cash: " + formatMoney(gameState.cash) })}</span>
-                  </div>
-                  <table class="market-table">
-                    <thead>
-                      <tr>
-                        <th>${localize({ he: "סימול", en: "Ticker" })}</th>
-                        <th>${localize({ he: "מחיר", en: "Price" })}</th>
-                        <th>${localize({ he: "שינוי", en: "Δ" })}</th>
-                        <th>${localize({ he: "שלי", en: "Mine" })}</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${STOCK_DEFS.map(stockRowMarkup).join("")}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+              ${newsMarketMarkup(city, newsItems)}
             </div>
           </section>
+        </div>
+      `;
+    }
+
+    function cityTravelMarkup(city, buildings, inCityHint) {
+      return `
+        <div class="destination-block city-block">
+          <div class="dest-header">${localize({ he: "מיקומים בעיר", en: "City locations" })}</div>
+          <div class="dest-grid">
+            ${buildings.map((buildingId) => {
+              const building = getBuilding(buildingId);
+              const selected = buildingId === gameState.currentBuilding;
+              const target = buildingId === inCityHint;
+              const visitKey = city.id + ":" + buildingId;
+              const visited = gameState.buildingVisits && gameState.buildingVisits[visitKey];
+              const hasScene = sceneCardButtons(buildingId).length > 0;
+              const fresh = hasScene && !visited;
+              return `
+                <button class="dest-btn ${selected ? "selected" : ""} ${target ? "target" : ""} ${fresh ? "fresh-locals" : ""}" style="--tone-a:${building.color[0]};--tone-b:${building.color[1]};" data-action="goToBuilding" data-value="${buildingId}">
+                  ${fresh ? `<span class="fresh-badge" title="${localize({ he: "אנשי מקום חדשים", en: "New locals here" })}">✨</span>` : ""}
+                  <strong>${localize(building.short)}</strong>
+                  <span>${localize(building.sub || building.label)}</span>
+                </button>
+              `;
+            }).join("")}
+          </div>
+        </div>
+        ${travelMarkup(city)}
+      `;
+    }
+
+    function travelMarkup(city) {
+      return `
+        <div class="destination-block travel-block">
+          <div class="dest-header">${localize({ he: "מעבר בין ערים", en: "City travel" })}</div>
+          <div class="travel-grid">
+            ${CITIES.filter((entry) => entry.id !== gameState.city).map((entry) => {
+              const cost = flightCost(entry.id);
+              const idx = (gameState.flightIndex && gameState.flightIndex[entry.id]) || 1;
+              const trendClass = idx < 0.9 ? "cheap" : (idx > 1.15 ? "spicy" : "");
+              const trendIcon = idx < 0.9 ? "▼" : (idx > 1.15 ? "▲" : "·");
+              return `
+                <button class="dest-btn travel-btn ${trendClass}" style="--tone-a:${entry.palette.a};--tone-b:${entry.palette.b};" data-action="flyTo" data-value="${entry.id}">
+                  <strong>${localize(entry.name)}</strong>
+                  <span>${t("flyCost", { hours: 3, cost: formatMoney(cost) })} ${trendIcon}</span>
+                </button>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function newsMarketMarkup(city, newsItems) {
+      return `
+        <div class="newsletter">
+          <div class="news-pane">
+            <div class="news-head">
+              <span>📰 ${localize({ he: "ניוזלטר היום", en: "Today's newsletter" })}</span>
+              <span>${localize(city.name)}</span>
+            </div>
+            <div class="news-list">
+              ${newsItems.length ? newsItems.map(newsItemMarkup).join("") : `<div class="news-item"><span class="news-icon">·</span><div class="news-body"><strong>${localize({ he: "יום שקט", en: "Quiet day" })}</strong><span>${localize({ he: "אין כותרות חדשות. אולי תייצר אחת.", en: "No headlines. Make one." })}</span></div></div>`}
+            </div>
+          </div>
+          <div class="market-pane">
+            <div class="market-head">
+              <span>📈 ${localize({ he: "שוק קולנוע + קריפטו", en: "Cinema + crypto market" })}</span>
+              <span>${localize({ he: "מזומן: " + formatMoney(gameState.cash), en: "Cash: " + formatMoney(gameState.cash) })}</span>
+            </div>
+            <table class="market-table">
+              <thead>
+                <tr>
+                  <th>${localize({ he: "סימול", en: "Ticker" })}</th>
+                  <th>${localize({ he: "מחיר", en: "Price" })}</th>
+                  <th>${localize({ he: "שינוי", en: "Δ" })}</th>
+                  <th>${localize({ he: "שלי", en: "Mine" })}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                ${STOCK_DEFS.map(stockRowMarkup).join("")}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderBoardFocus() {
+      const city = getCity();
+      const hint = currentHint();
+      const currentBuilding = getBuilding(gameState.currentBuilding);
+      const buildings = visibleBuildings(city);
+      const inCityHint = buildings.includes(hint.building) ? hint.building : null;
+      const suggestedMoves = computeSuggestedMoves();
+      const topMove = suggestedMoves[0];
+      const hasStory = (gameState.projects && gameState.projects.length) || !gameState.filmUnlocked;
+      dom.boardStage.innerHTML = `
+        <div class="focus-shell">
+          <div class="focus-today" style="--scene-a:${currentBuilding.color[0]};--scene-b:${currentBuilding.color[1]};">
+            <div class="focus-place">${localize(city.name)} · ${localize(currentBuilding.label)}</div>
+            <div class="focus-plaza">
+              ${buildings.map((buildingId, i) => buildingMarkup(buildingId, i, buildings.length, inCityHint)).join("")}
+              ${avatarMarkup()}
+            </div>
+            <div class="focus-copy">${buildingSpeech(gameState.currentBuilding)}</div>
+            ${topMove ? `
+              <button class="focus-cta" data-action="${topMove.action}" data-value="${topMove.value}">
+                <span class="focus-cta-icon">${topMove.icon}</span>
+                <span class="focus-cta-body">
+                  <strong>${localize(topMove.title)}</strong>
+                  <span>${localize(topMove.reason)}</span>
+                </span>
+              </button>
+            ` : ""}
+            <div class="focus-here">
+              <div class="focus-here-title">${localize({ he: "אפשר לעשות כאן", en: "You can do here" })}</div>
+              <div class="action-groups">
+                ${renderInteriorActions(gameState.currentBuilding, { includeSleep: true })}
+              </div>
+            </div>
+          </div>
+          <div class="focus-triggers">
+            <button class="focus-trigger" data-action="toggleStatusWindow" title="${localize({ he: "סטטוס", en: "Status" })}">📊 ${localize({ he: "סטטוס", en: "Status" })}</button>
+            <button class="focus-trigger ${dom.openSheet === "wardrobe" ? "active" : ""}" data-action="openSheet" data-value="wardrobe" title="${localize({ he: "מלתחה וציוד", en: "Wardrobe & gear" })}">👕 ${localize({ he: "מלתחה", en: "Wardrobe" })}</button>
+            <button class="focus-trigger ${dom.openSheet === "travel" ? "active" : ""}" data-action="openSheet" data-value="travel" title="${localize({ he: "טיסות בין ערים", en: "Travel between cities" })}">✈️ ${localize({ he: "טיסות", en: "Travel" })}</button>
+            <button class="focus-trigger ${dom.openSheet === "people" ? "active" : ""}" data-action="openSheet" data-value="people" title="${localize({ he: "אנשים", en: "People" })}">👥 ${localize({ he: "אנשים", en: "People" })}</button>
+            <button class="focus-trigger ${dom.openSheet === "market" ? "active" : ""}" data-action="openSheet" data-value="market" title="${localize({ he: "חדשות ושוק", en: "News & market" })}">📰 ${localize({ he: "שוק", en: "Market" })}</button>
+            ${hasStory ? `<button class="focus-trigger ${dom.openSheet === "story" ? "active" : ""}" data-action="openSheet" data-value="story" title="${localize({ he: "עלילה", en: "Story" })}">🎬 ${localize({ he: "עלילה", en: "Story" })}</button>` : ""}
+          </div>
+          ${renderFocusSheet(city)}
+        </div>
+      `;
+    }
+
+    function renderFocusSheet(city) {
+      const sheet = dom.openSheet;
+      if (!sheet) {
+        return "";
+      }
+      const titles = {
+        wardrobe: { he: "מלתחה וציוד", en: "Wardrobe & gear" },
+        travel: { he: "טיסות", en: "Travel" },
+        people: { he: "אנשים", en: "People" },
+        market: { he: "חדשות ושוק", en: "News & market" },
+        story: { he: "עלילה", en: "Story" }
+      };
+      const icons = { wardrobe: "👕", travel: "✈️", people: "👥", market: "📰", story: "🎬" };
+      let body = "";
+      if (sheet === "wardrobe") {
+        const wornWardrobe = gameState.wardrobeTier ? WARDROBES.find((w) => w.tier === gameState.wardrobeTier) : null;
+        const ownedGear = [
+          gameState.equipment.camera && localize({ he: "מצלמת כתף", en: "Shoulder camera" }),
+          gameState.equipment.studio && localize({ he: "עמדת עריכה", en: "Edit station" }),
+          gameState.equipment.insurance && localize({ he: "סאונד ותאורה", en: "Sound & light" })
+        ].filter(Boolean);
+        const activeModifiers = Array.isArray(gameState.activeModifiers) ? gameState.activeModifiers : [];
+        body = `
+          <div class="inventory-block">
+            <div class="inv-line">
+              <strong>${localize({ he: "לבוש", en: "Wearing" })}</strong>
+              <span>${wornWardrobe ? localize(wornWardrobe.name) : localize({ he: "הבגדים שלי, בלי שדרוג", en: "My own clothes, no upgrade" })}</span>
+              ${wornWardrobe ? `<div class="inv-wear"><div class="inv-wear-fill" style="width:${Math.max(0, Math.min(100, gameState.wardrobeWear))}%;"></div></div>` : ""}
+            </div>
+            <div class="inv-line">
+              <strong>${localize({ he: "ציוד שקניתי", en: "Gear I bought" })}</strong>
+              <div class="inv-chips">
+                ${ownedGear.length ? ownedGear.map((g) => `<span class="inv-chip">${g}</span>`).join("") : `<span class="inv-empty">${localize({ he: "עוד אין ציוד", en: "No gear yet" })}</span>`}
+              </div>
+            </div>
+          </div>
+          ${activeModifiers.length ? `
+            <div class="inventory-block">
+              <div class="win95-panel-title">${localize({ he: "אפקטים פעילים היום", en: "Active effects today" })}</div>
+              <div class="inv-line"><div class="inv-chips">${activeModifiers.map(modifierChipMarkup).join("")}</div></div>
+            </div>
+          ` : ""}
+        `;
+      } else if (sheet === "travel") {
+        body = travelMarkup(city);
+      } else if (sheet === "people") {
+        body = renderNpcsBlock();
+      } else if (sheet === "market") {
+        body = newsMarketMarkup(city, computeNewsItems());
+      } else if (sheet === "story") {
+        body = `
+          ${gameState.filmUnlocked ? "" : renderUnlockProgress()}
+          ${renderStoryBeatBlock()}
+          ${gameState.projects && gameState.projects.length ? renderProjectsBlock() : ""}
+        `;
+      }
+      return `
+        <div class="focus-backdrop" data-action="closeSheet"></div>
+        <div class="focus-sheet">
+          <div class="focus-sheet-head">
+            <span class="focus-sheet-title">
+              <span class="focus-sheet-icon">${icons[sheet] || ""}</span>
+              <strong>${localize(titles[sheet] || { he: "", en: "" })}</strong>
+            </span>
+            <button class="mini-btn" data-action="closeSheet">${t("close")}</button>
+          </div>
+          <div class="focus-sheet-body">${body}</div>
         </div>
       `;
     }
@@ -9108,8 +9739,13 @@
       syncDocument();
       applyTheme();
       renderHud();
-      renderBoard();
-      renderSidePanel();
+      if (gameState.focusMode) {
+        renderBoardFocus();
+        dom.sidePanel.innerHTML = "";
+      } else {
+        renderBoard();
+        renderSidePanel();
+      }
       renderStatusWindow();
       renderNoticeWindow();
       renderCollectionWindow();
@@ -9186,6 +9822,17 @@
         } else if (action === "toggleCollectionWindow") {
           dom.collectionWindowOpen = !dom.collectionWindowOpen;
           render();
+        } else if (action === "toggleFocusMode") {
+          gameState.focusMode = !gameState.focusMode;
+          dom.openSheet = null;
+          savePrefs();
+          render();
+        } else if (action === "openSheet") {
+          dom.openSheet = dom.openSheet === value ? null : value;
+          render();
+        } else if (action === "closeSheet") {
+          dom.openSheet = null;
+          render();
         } else if (action === "closeNotice") {
           if (dom.noticeTimer) {
             root.clearTimeout(dom.noticeTimer);
@@ -9252,6 +9899,7 @@
         language: prefs.language || gameState.language,
         themeIndex: Number.isInteger(prefs.themeIndex) ? prefs.themeIndex : gameState.themeIndex,
         muted: !!prefs.muted,
+        focusMode: !!prefs.focusMode,
         highscores: loadScores(),
         careerLog: loadCareerLog()
       });
@@ -9279,6 +9927,7 @@
         language: gameState.language,
         themeIndex: gameState.themeIndex,
         muted: gameState.muted,
+        focusMode: gameState.focusMode,
         highscores,
         careerLog
       });
@@ -9308,6 +9957,7 @@
         noticeTimer: null,
         statusWindowOpen: false,
         collectionWindowOpen: false,
+        openSheet: null,
         forceStart: false
       };
       bindEvents();
