@@ -1611,7 +1611,7 @@
 
     .win95-shell {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 248px;
+      grid-template-columns: minmax(0, 1fr);
       grid-template-rows: minmax(0, 1fr);
       gap: 4px;
       min-height: 100%;
@@ -1664,6 +1664,23 @@
     .win95-status {
       grid-column: 2;
       grid-row: 1;
+    }
+
+    .win95-aside {
+      display: none;
+    }
+
+    @media (min-width: 1100px) {
+      .win95-shell {
+        grid-template-columns: minmax(0, 1fr) 260px;
+      }
+      .win95-aside {
+        display: grid;
+        grid-column: 2;
+        grid-row: 1;
+        align-content: start;
+        gap: 8px;
+      }
     }
 
     .board-route-row {
@@ -2812,15 +2829,9 @@
       opacity: 0.8;
     }
 
-    .dest-btn {
-      background: color-mix(in srgb, var(--tone-a, var(--kc-line-strong)) 22%, var(--kc-card) 78%) !important;
-      border-color: color-mix(in srgb, var(--tone-a, var(--kc-line-strong)) 45%, var(--kc-line) 55%) !important;
-    }
-
-    .dest-btn.selected {
-      background: color-mix(in srgb, var(--tone-a, var(--kc-accent)) 38%, var(--kc-card) 62%) !important;
-      border-color: var(--tone-a, var(--kc-accent)) !important;
-      color: var(--kc-text) !important;
+    .dest-btn.target {
+      border-color: var(--kc-accent);
+      background: var(--kc-accent-soft);
     }
 
     .panel-open-btn {
@@ -3043,6 +3054,191 @@
     .panel-open-badge {
       animation: freshPulse 2.2s ease-in-out infinite;
     }
+
+    /* ---- classic mode: compact sticky command bar ---- */
+    .cmd-bar {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+    }
+
+    .cmd-metric {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      flex: 0 0 auto;
+    }
+
+    .cmd-metric-label {
+      font-size: 10px;
+      color: var(--kc-text-faint);
+    }
+
+    .cmd-metric-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--kc-text);
+      white-space: nowrap;
+    }
+
+    .cmd-time .cmd-metric-value {
+      font-size: 14px;
+    }
+
+    .cmd-goal {
+      flex: 1 1 140px;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--kc-text-dim);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .cmd-cta, .cmd-cta-static {
+      flex: 0 0 auto;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .cmd-cta {
+      background: var(--kc-accent);
+      color: #0a0a0c;
+      border: none;
+      cursor: pointer;
+    }
+
+    .cmd-cta-static {
+      background: var(--kc-card-2);
+      color: var(--kc-text-dim);
+      border: 1px solid var(--kc-line);
+    }
+
+    .cmd-sleep {
+      flex: 0 0 auto;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--kc-card-2);
+      color: var(--kc-text);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
+      cursor: pointer;
+    }
+
+    .cmd-bar .hud-more-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+
+    .cmd-bar .hud-secondary-group {
+      display: none;
+    }
+
+    .cmd-bar .hud-secondary-group.open {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: absolute;
+      top: calc(100% + 4px);
+      inset-inline-end: 8px;
+      min-width: 140px;
+      padding: 6px;
+      background: var(--kc-card);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
+      z-index: 50;
+    }
+
+    .cmd-bar .hud-secondary-group.open .icon-btn {
+      width: 100%;
+    }
+
+    @media (max-width: 760px) {
+      .cmd-bar {
+        padding: 6px 8px;
+      }
+      .cmd-goal {
+        order: 3;
+        flex-basis: 100%;
+      }
+    }
+
+    .ctx-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 4px 2px;
+    }
+
+    .ctx-place {
+      font-size: 11px;
+      color: var(--kc-text-faint);
+    }
+
+    .ctx-info-btn {
+      position: relative;
+      min-width: 30px;
+      max-width: 30px;
+      padding: 0;
+      font-size: 13px;
+    }
+
+    .aside-block {
+      padding: 9px 10px;
+      background: var(--kc-card);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
+    }
+
+    .aside-block-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      color: var(--kc-text-faint);
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .aside-goal-text {
+      font-size: 12px;
+      color: var(--kc-text);
+      line-height: 1.35;
+    }
+
+    .aside-log {
+      display: grid;
+      gap: 5px;
+    }
+
+    .aside-log-row {
+      font-size: 11px;
+      color: var(--kc-text-dim);
+      line-height: 1.3;
+      padding-bottom: 5px;
+      border-bottom: 1px solid var(--kc-line);
+    }
+
+    .aside-log-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .aside-log-good { color: var(--kc-good); }
+    .aside-log-bad { color: var(--kc-bad); }
 
     /* ---- focus mode: Apple HIG-style parallel flow (one decision per screen) ---- */
     :root.focus-active {
@@ -5263,23 +5459,26 @@
         if (gameState.wardrobeTier < 1) {
           const suitCost = formatMoney(Math.round(WARDROBES[0].price * priceScale()));
           return {
+            short: localize({ he: "צריך/ה מלתחה 1", en: "Need wardrobe tier 1" }),
             title: localize({ he: "השג/י מלתחה 1 כדי להתקבל לעבודה הראשונה", en: "Get wardrobe tier 1 to land your first job" }),
-            sub: localize({ he: "חליפה יד שנייה: " + suitCost, en: "Second-hand suit: " + suitCost }),
-            ctaLabel: localize({ he: "עבור/י לחנות", en: "Go to the shop" }),
+            ctaLabel: localize({ he: "לכו לחנות · " + suitCost, en: "Go to the shop · " + suitCost }),
             ctaBuilding: "wardrobe"
           };
         }
         return {
+          short: localize({ he: "התקבל/י לעבודה הראשונה", en: "Get your first job" }),
           title: localize({ he: "התקבל/י לעבודה ראשונה", en: "Get hired for your first job" }),
-          sub: localize({ he: "לך/י ללשכת התעסוקה ובחר/י תפקיד", en: "Go to the employment office and pick a role" }),
-          ctaLabel: localize({ he: "ללשכת התעסוקה", en: "To the employment office" }),
+          ctaLabel: localize({ he: "הגישו מועמדות", en: "Apply for a job" }),
           ctaBuilding: "employment"
         };
       }
       if (gameState.experience === 0) {
+        const job = getJob(gameState.jobId);
+        const previewPay = formatMoney(Math.round(job.wage * 4 * economyProfile().wages * paceScale()));
         return {
+          short: localize({ he: "בחר/י משמרת", en: "Pick a shift" }),
           title: localize({ he: "בחר/י משמרת כדי להרוויח כסף וניסיון", en: "Pick a shift to earn cash and experience" }),
-          ctaLabel: localize({ he: "ללשכת התעסוקה", en: "To the employment office" }),
+          ctaLabel: localize({ he: "משמרת 4ש׳ · +" + previewPay, en: "4h shift · +" + previewPay }),
           ctaBuilding: "employment"
         };
       }
@@ -5287,6 +5486,7 @@
       const nextJob = JOBS.find((j) => j.tier === current.tier + 1);
       if (!nextJob) {
         return {
+          short: localize({ he: "הגעת לפסגת מסלול העבודה", en: "You've topped the job ladder" }),
           title: localize({ he: "הגעת לפסגת מסלול העבודה — הזמן להתמקד בקולנוע", en: "You've topped the job ladder — time to focus on the film itself" })
         };
       }
@@ -5295,20 +5495,27 @@
         .filter((r) => r.need > 0 && r.have < r.need);
       if (!gaps.length) {
         return {
+          short: localize({ he: "עומד/ת בדרישות ל" + localize(nextJob.title), en: "Qualified for " + localize(nextJob.title) }),
           title: localize({ he: "את/ה עומד/ת בדרישות ל" + localize(nextJob.title) + " — לך/י להירשם", en: "You qualify for " + localize(nextJob.title) + " — go apply" }),
-          ctaLabel: localize({ he: "ללשכת התעסוקה", en: "To the employment office" }),
+          ctaLabel: localize({ he: "הגישו מועמדות", en: "Apply for a job" }),
           ctaBuilding: "employment"
         };
       }
       gaps.sort((a, b) => (b.need - b.have) / b.need - (a.need - a.have) / a.need);
       const top = gaps[0];
       const label = localize(reqLabels[top.key]);
+      const gapShort = localize({
+        he: `חסר/ה ${top.need - top.have} ${label} לתפקיד הבא`,
+        en: `Missing ${top.need - top.have} ${label} for the next role`
+      });
+      const suitCost = formatMoney(Math.round(WARDROBES[0].price * priceScale()));
       return {
+        short: gapShort,
         title: localize({
           he: `השג/י ${label} ${top.have}/${top.need} כדי להתקדם ל${localize(nextJob.title)}`,
           en: `Reach ${label} ${top.have}/${top.need} to advance to ${localize(nextJob.title)}`
         }),
-        ctaLabel: top.key === "wardrobe" ? localize({ he: "עבור/י לחנות", en: "Go to the shop" }) : null,
+        ctaLabel: top.key === "wardrobe" ? localize({ he: "לכו לחנות · " + suitCost, en: "Go to the shop · " + suitCost }) : null,
         ctaBuilding: top.key === "wardrobe" ? "wardrobe" : null
       };
     }
@@ -8672,43 +8879,71 @@
       return getCity().buildings.includes(buildingId);
     }
 
-    function renderHud() {
-      const activeJob = getJob(gameState.jobId);
-      const month = currentMonth();
-      dom.hud.innerHTML = `
-        <div class="status-box hud-summary">
-          <div class="metric hud-clock">
-            <div class="metric-label">${formatHour(gameState.hour)}</div>
-            <div class="metric-value">${t("timeStrip", { day: gameState.day, month })}</div>
-          </div>
-          <div class="metric">
-            <div class="metric-label">${t("cash")}</div>
-            <div class="metric-value">${formatMoney(gameState.cash)}</div>
-          </div>
-          <div class="metric">
-            <div class="metric-label">${t("job")}</div>
-            <div class="metric-value">${activeJob ? localize(activeJob.title) : t("noJob")}</div>
-          </div>
-          <div class="metric">
-            <div class="metric-label">${t("housing")}</div>
-            <div class="metric-value">${localize(HOUSING[gameState.housing].name)}</div>
-          </div>
-          <div class="metric">
-            <div class="metric-label">${t("city")}</div>
-            <div class="metric-value">${localize(getCity().name)}</div>
-          </div>
-        </div>
-        <div class="controls-box">
-          <button class="icon-btn status-open-btn" data-action="toggleStatusWindow" data-value="" title="${localize({ he: "סטטוס יומי", en: "Daily status" })}">${localize({ he: "סטטוס", en: "Status" })}</button>
+    function hudMenuMarkup() {
+      return `
+        <button class="icon-btn hud-more-btn ${dom.hudMenuOpen ? "active" : ""}" data-action="toggleHudMenu" title="${localize({ he: "עוד אפשרויות", en: "More options" })}">⋯</button>
+        <div class="hud-secondary-group ${dom.hudMenuOpen ? "open" : ""}">
+          <button class="icon-btn" data-action="toggleStatusWindow" title="${localize({ he: "סטטוס יומי", en: "Daily status" })}">${localize({ he: "סטטוס", en: "Status" })}</button>
           <button class="icon-btn ${gameState.focusMode ? "active" : ""}" data-action="toggleFocusMode" title="${localize({ he: "מסך ממוקד", en: "Focus mode" })}">${gameState.focusMode ? localize({ he: "ממוקד", en: "Focus" }) : localize({ he: "קלאסי", en: "Classic" })}</button>
-          <button class="icon-btn hud-more-btn ${dom.hudMenuOpen ? "active" : ""}" data-action="toggleHudMenu" title="${localize({ he: "עוד אפשרויות", en: "More options" })}">⋯</button>
-          <div class="hud-secondary-group ${dom.hudMenuOpen ? "open" : ""}">
-            <button class="icon-btn" data-action="setLanguage" data-value="${gameState.language === "he" ? "en" : "he"}">${gameState.language === "he" ? "EN" : "עב"}</button>
-            <button class="icon-btn" data-action="saveGame" title="${localize({ he: "שמור", en: "Save" })}">${localize({ he: "שמור", en: "Save" })}</button>
-            <button class="icon-btn" data-action="toggleMute" title="${t("mute")}">${gameState.muted ? localize({ he: "שקט", en: "Muted" }) : localize({ he: "צליל", en: "Sound" })}</button>
-            <button class="icon-btn" data-action="showStart" title="${t("newYear")}">${localize({ he: "חדש", en: "New" })}</button>
-            <button class="icon-btn fs-btn" data-action="toggleFullscreen" title="${localize({ he: "מסך מלא", en: "Fullscreen" })}">⛶</button>
+          <button class="icon-btn" data-action="setLanguage" data-value="${gameState.language === "he" ? "en" : "he"}">${gameState.language === "he" ? "EN" : "עב"}</button>
+          <button class="icon-btn" data-action="saveGame" title="${localize({ he: "שמור", en: "Save" })}">${localize({ he: "שמור", en: "Save" })}</button>
+          <button class="icon-btn" data-action="toggleMute" title="${t("mute")}">${gameState.muted ? localize({ he: "שקט", en: "Muted" }) : localize({ he: "צליל", en: "Sound" })}</button>
+          <button class="icon-btn" data-action="showStart" title="${t("newYear")}">${localize({ he: "חדש", en: "New" })}</button>
+          <button class="icon-btn fs-btn" data-action="toggleFullscreen" title="${localize({ he: "מסך מלא", en: "Fullscreen" })}">⛶</button>
+        </div>
+      `;
+    }
+
+    function renderHud() {
+      if (gameState.focusMode) {
+        const activeJob = getJob(gameState.jobId);
+        const month = currentMonth();
+        dom.hud.innerHTML = `
+          <div class="status-box hud-summary">
+            <div class="metric hud-clock">
+              <div class="metric-label">${formatHour(gameState.hour)}</div>
+              <div class="metric-value">${t("timeStrip", { day: gameState.day, month })}</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">${t("cash")}</div>
+              <div class="metric-value">${formatMoney(gameState.cash)}</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">${t("job")}</div>
+              <div class="metric-value">${activeJob ? localize(activeJob.title) : t("noJob")}</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">${t("housing")}</div>
+              <div class="metric-value">${localize(HOUSING[gameState.housing].name)}</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">${t("city")}</div>
+              <div class="metric-value">${localize(getCity().name)}</div>
+            </div>
           </div>
+          <div class="controls-box">
+            ${hudMenuMarkup()}
+          </div>
+        `;
+        return;
+      }
+      const nextGoal = computeNextGoal();
+      dom.hud.innerHTML = `
+        <div class="cmd-bar">
+          <div class="cmd-metric">
+            <span class="cmd-metric-label">${t("cash")}</span>
+            <strong class="cmd-metric-value">${formatMoney(gameState.cash)}</strong>
+          </div>
+          <div class="cmd-metric cmd-time">
+            <strong class="cmd-metric-value">${formatHour(gameState.hour)}</strong>
+            <span class="cmd-metric-label">${t("timeStrip", { day: gameState.day, month: currentMonth() })}</span>
+          </div>
+          <div class="cmd-goal">🎯 <span>${nextGoal.short}</span></div>
+          ${nextGoal.ctaBuilding
+            ? `<button class="cmd-cta" data-action="goAndShowActions" data-value="${nextGoal.ctaBuilding}">${nextGoal.ctaLabel}</button>`
+            : (nextGoal.ctaLabel ? `<span class="cmd-cta-static">${nextGoal.ctaLabel}</span>` : "")}
+          <button class="cmd-sleep" data-action="endDay">${localize({ he: "לישון", en: "Sleep" })}</button>
+          ${hudMenuMarkup()}
         </div>
       `;
     }
@@ -9055,7 +9290,6 @@
     function renderBoard() {
       const city = getCity();
       const hint = currentHint();
-      const month = currentMonth();
       const currentBuilding = getBuilding(gameState.currentBuilding);
       const buildings = visibleBuildings(city);
       const inCityHint = buildings.includes(hint.building) ? hint.building : null;
@@ -9067,27 +9301,11 @@
       dom.boardStage.innerHTML = `
         <div class="win95-shell">
           <section class="win95-main">
-            <div class="win95-strip">
-              <div class="strip-place">
-                <strong>${localize(city.name)}</strong>
-                <span>${gameState.playerName} • ${t("daysLeft")}: ${daysLeft()}</span>
-              </div>
-              <div class="strip-clock">
-                <strong>${formatHour(gameState.hour)}</strong>
-                <span>${t("timeStrip", { day: gameState.day, month })}</span>
-              </div>
-              <div class="strip-actions">
-                <button class="icon-btn panel-open-btn" data-action="openClassicPanel" data-value="ledger" title="${localize({ he: "פרטים — חשבונות, מה שיש לי, אנשים, עלילה", en: "Details — ledger, inventory, people, story" })}">
-                  ℹ️${taskUrgent ? `<span class="panel-open-badge"></span>` : ""}
-                </button>
-                <button class="icon-btn strip-btn" data-action="endDay">${localize({ he: "לישון / מעבר יום", en: "Sleep / End day" })}</button>
-              </div>
-            </div>
-            <div class="next-goal">
-              <div class="next-goal-label">🎯 ${localize({ he: "היעד הבא", en: "Next goal" })}</div>
-              <div class="next-goal-title">${nextGoal.title}</div>
-              ${nextGoal.sub ? `<div class="next-goal-sub">${nextGoal.sub}</div>` : ""}
-              ${nextGoal.ctaBuilding ? `<button class="next-goal-cta" data-action="goAndShowActions" data-value="${nextGoal.ctaBuilding}">${nextGoal.ctaLabel}</button>` : ""}
+            <div class="ctx-strip">
+              <span class="ctx-place">${localize(city.name)} · ${gameState.playerName} · ${t("daysLeft")}: ${daysLeft()}</span>
+              <button class="icon-btn ctx-info-btn" data-action="openClassicPanel" data-value="ledger" title="${localize({ he: "פרטים — חשבונות, מה שיש לי, אנשים, עלילה", en: "Details — ledger, inventory, people, story" })}">
+                ℹ️${taskUrgent ? `<span class="panel-open-badge"></span>` : ""}
+              </button>
             </div>
             <div class="board-route-row">
               ${cityTravelMarkup(city, buildings, inCityHint)}
@@ -9108,10 +9326,29 @@
               ${newsMarketMarkup(city, newsItems)}
             </div>
           </section>
+          <aside class="win95-aside">
+            ${renderAside(nextGoal)}
+          </aside>
         </div>
         ${renderClassicPanel()}
         ${renderLocationDetail()}
         ${renderHereActionsModal()}
+      `;
+    }
+
+    function renderAside(nextGoal) {
+      const recent = (gameState.log || []).slice(0, 6);
+      return `
+        <div class="aside-block">
+          <div class="aside-block-title">🎯 ${localize({ he: "היעד הבא", en: "Next goal" })}</div>
+          <div class="aside-goal-text">${nextGoal.title}</div>
+        </div>
+        <div class="aside-block">
+          <div class="aside-block-title">${localize({ he: "הפעולה האחרונה", en: "Recent activity" })}</div>
+          <div class="aside-log">
+            ${recent.length ? recent.map((entry) => `<div class="aside-log-row aside-log-${entry.tone}">${entry.copy}</div>`).join("") : `<div class="aside-log-row">${localize({ he: "עדיין לא קרה כלום", en: "Nothing yet" })}</div>`}
+          </div>
+        </div>
       `;
     }
 
