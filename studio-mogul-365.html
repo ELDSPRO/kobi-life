@@ -1083,8 +1083,8 @@
       --street: #9a9a9a;
       --street-edge: #6f6f6f;
       --marquee: #000000;
-      --font-title: "Tahoma", "MS Sans Serif", "Verdana", sans-serif;
-      --font-body: "Tahoma", "MS Sans Serif", "Verdana", sans-serif;
+      --font-title: -apple-system, "SF Pro Display", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      --font-body: -apple-system, "SF Pro Text", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
       --hud-height: 92px;
       --win-bg: #008080;
       --win-face: #c0c0c0;
@@ -2967,6 +2967,81 @@
       background: var(--kc-accent) !important;
       color: #0a0a0c !important;
       font-weight: 700;
+    }
+
+    /* ---- classic mode: typography hierarchy + micro-motion polish ---- */
+    html, body {
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .win95-shell, .win95-shell * {
+      font-family: var(--font-body);
+    }
+
+    .next-goal-label, .dest-group-label, .scene-here-title, .win95-panel-title,
+    .req-chip, .panel-tab {
+      letter-spacing: 0.4px;
+    }
+
+    .next-goal-title {
+      font-size: 15px;
+      letter-spacing: -0.1px;
+    }
+
+    .scene-title {
+      font-size: 13px;
+      letter-spacing: 0.2px;
+    }
+
+    .job-card-head strong, .panel-head strong, .detail-head strong {
+      font-size: 13px;
+      letter-spacing: -0.1px;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes modalPop {
+      from { opacity: 0; transform: scale(0.97) translateY(4px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .next-goal {
+      animation: fadeInUp 0.28s ease;
+    }
+
+    .panel-backdrop, .detail-backdrop {
+      animation: fadeIn 0.15s ease;
+    }
+
+    .panel-modal, .detail-modal, .start-card, .win-card, .notice-dialog, .status-dialog {
+      animation: modalPop 0.18s ease;
+    }
+
+    .dest-btn, .job-card, .action-btn, .panel-tab, .icon-btn, .mini-btn,
+    .next-goal-cta, .job-blocker-cta, .scene-here-trigger, .suggested-move {
+      transition: transform 0.12s ease, border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .dest-btn:hover, .job-card:hover, .action-btn:hover, .suggested-move:hover {
+      transform: translateY(-1px);
+    }
+
+    .dest-btn:active, .job-card:active, .action-btn:active, .icon-btn:active,
+    .mini-btn:active, .next-goal-cta:active, .panel-tab:active {
+      transform: scale(0.97);
+    }
+
+    .panel-open-badge {
+      animation: freshPulse 2.2s ease-in-out infinite;
     }
 
     /* ---- focus mode: Apple HIG-style parallel flow (one decision per screen) ---- */
