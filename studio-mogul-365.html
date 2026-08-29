@@ -888,6 +888,11 @@
       opacity: 0.92;
     }
 
+    .start-howto {
+      font-size: 0.8rem;
+      opacity: 0.68;
+    }
+
     .start-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1437,6 +1442,8 @@
 
     .mini-btn.secondary {
       background: var(--kc-card);
+      color: var(--kc-text);
+      border-color: var(--kc-line);
     }
 
     .start-screen,
@@ -3783,7 +3790,7 @@
       display: grid;
       place-items: center;
       padding: 18px;
-      background: rgba(17, 15, 12, 0.28);
+      background: rgba(0, 0, 0, 0.6);
     }
 
     .collection-dialog {
@@ -3791,13 +3798,12 @@
       max-height: min(82vh, 720px);
       display: flex;
       flex-direction: column;
-      background: var(--win-face);
-      box-shadow:
-        inset -1px -1px var(--win-black),
-        inset 1px 1px var(--win-light),
-        inset -2px -2px var(--win-dark),
-        inset 2px 2px var(--win-mid);
-      padding: 4px;
+      background: var(--kc-card);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius);
+      overflow: hidden;
+      padding: 0;
     }
 
     .collection-dialog-head {
@@ -3805,9 +3811,9 @@
       justify-content: space-between;
       align-items: center;
       gap: 8px;
-      padding: 4px 6px;
-      background: linear-gradient(90deg, #000080, #1084d0);
-      color: #ffffff;
+      padding: 8px 10px;
+      background: var(--kc-card-2);
+      color: var(--kc-text);
       font-size: 12px;
       font-weight: 700;
       flex: none;
@@ -3817,7 +3823,8 @@
       display: grid;
       gap: 16px;
       padding: 10px;
-      background: var(--win-face);
+      background: transparent;
+      color: var(--kc-text);
       overflow-y: auto;
     }
 
@@ -3832,12 +3839,14 @@
     .collection-section-head h3 {
       margin: 0;
       font-size: 0.92rem;
+      color: var(--kc-text);
     }
 
     .collection-progress {
       font-variant-numeric: tabular-nums;
       font-size: 0.72rem;
-      background: rgba(39, 24, 15, 0.1);
+      background: var(--kc-card-2);
+      color: var(--kc-text-dim);
       border-radius: 999px;
       padding: 2px 8px;
     }
@@ -3856,18 +3865,19 @@
       gap: 3px;
       padding: 10px 8px;
       border-radius: 12px;
-      background: rgba(255,255,255,0.5);
-      border: 1px solid rgba(39,24,15,0.1);
+      background: var(--kc-card-2);
+      border: 1px solid var(--kc-line);
+      color: var(--kc-text);
     }
 
     .achv-tile.locked {
-      opacity: 0.5;
+      opacity: 0.55;
       filter: grayscale(0.6);
     }
 
     .achv-tile.unlocked {
-      background: rgba(235, 173, 83, 0.22);
-      border-color: rgba(180, 79, 42, 0.32);
+      background: color-mix(in srgb, var(--kc-warn) 16%, var(--kc-card-2) 84%);
+      border-color: color-mix(in srgb, var(--kc-warn) 40%, var(--kc-line) 60%);
     }
 
     .achv-icon {
@@ -3894,15 +3904,16 @@
     }
 
     .career-log-row {
-      background: rgba(255,255,255,0.42);
-      border: 1px solid rgba(39, 24, 15, 0.08);
+      background: var(--kc-card-2);
+      border: 1px solid var(--kc-line);
       border-radius: 12px;
       padding: 8px 10px;
-      border-inline-start: 3px solid rgba(39,24,15,0.18);
+      border-inline-start: 3px solid var(--kc-line-strong);
+      color: var(--kc-text);
     }
 
     .career-log-row.won {
-      border-inline-start-color: #b45f1a;
+      border-inline-start-color: var(--kc-warn);
     }
 
     .career-log-top {
@@ -4211,6 +4222,7 @@
         daysLeft: "ימים נותרו",
         nextMove: "מה עכשיו",
         startIntro: "מתחילים עם 300$, ספה של חבר, בלי עבודה, בלי דירה ובלי קריירה. תתלבש כמו בן אדם, תשיג משמרות, תשלם שכירות, תקנה מצלמה ורק אז תנסה להיות אגדה.",
+        startHowTo: "כל יום מתחלק לשעות שאת/ה מחלק/ת בין עבודה, לימודים וחיי היומיום; המיקומים בעיר מקובצים לפי נושא כדי שיהיה קל למצוא לאן ללכת. המטרה: לעמוד ביעדים שתבחר/י למטה — עושר, קריירה, השכלה ואושר — לפני שהעונה נגמרת.",
         playerName: "שם הדמות",
         economyDiff: "קושי כלכלי",
         language: "שפה",
@@ -4355,6 +4367,7 @@
         daysLeft: "Days left",
         nextMove: "What now",
         startIntro: "You begin with $300, a borrowed couch, no job, no apartment, and no film career. Dress like a professional, land shifts, pay rent, buy a camera, then try to become a legend.",
+        startHowTo: "Each day splits into hours you spend on work, training, and daily life; locations in the city are grouped by topic so it's easy to find where to go. The goal: hit the targets you pick below — wealth, career, education, happiness — before the season runs out.",
         playerName: "Character name",
         economyDiff: "Economy difficulty",
         language: "Language",
@@ -10680,6 +10693,7 @@
           <h1>${t("title")}</h1>
           <p class="subtitle">${t("subtitle")}</p>
           <p>${t("startIntro")}</p>
+          <p class="start-howto">${t("startHowTo")}</p>
           <div class="start-grid">
             <div class="field">
               <label>${t("playerName")}</label>
