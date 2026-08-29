@@ -1318,8 +1318,10 @@
     }
 
     .lead-btn {
-      color: var(--kc-good);
+      background: linear-gradient(90deg, var(--kc-accent), var(--kc-good)) !important;
+      color: #0a0a0c !important;
       font-weight: 700;
+      border: none !important;
     }
 
     .goal-row,
@@ -1454,7 +1456,14 @@
 
     .start-card h1,
     .win-card h2 {
-      font-size: 22px;
+      font-size: 24px;
+    }
+
+    .start-card h1 {
+      background: linear-gradient(90deg, var(--kc-accent), #b06ee0, var(--kc-warn));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
 
     @media (max-width: 1060px) {
@@ -2640,11 +2649,16 @@
     }
 
     .dest-group-label {
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.3px;
-      color: var(--kc-text-faint);
+      color: var(--cat-color, var(--kc-text-faint));
       padding: 0 2px;
+    }
+
+    .dest-group .dest-btn:not(.selected):not(.target) {
+      background: color-mix(in srgb, var(--cat-color, var(--kc-line-strong)) 20%, var(--kc-card) 80%);
+      border-color: color-mix(in srgb, var(--cat-color, var(--kc-line)) 42%, var(--kc-line) 58%);
     }
 
     .next-goal {
@@ -9363,6 +9377,15 @@
         release: { he: "הפצה ושיווק", en: "Release" }
       };
       const categoryOrder = ["salary", "lifestyle", "production", "finance", "training", "release"];
+      const categoryColors = {
+        salary: "#5b8def",
+        lifestyle: "#e0975b",
+        production: "#b06ee0",
+        finance: "#4fbf7f",
+        training: "#4fbfbf",
+        release: "#e05b8f",
+        travel: "#8f9bb3"
+      };
       const groups = {};
       buildings.forEach((buildingId) => {
         const building = getBuilding(buildingId);
@@ -9412,13 +9435,13 @@
       const sections = categoryOrder
         .filter((cat) => groups[cat] && groups[cat].length)
         .map((cat) => `
-          <div class="dest-group">
+          <div class="dest-group" style="--cat-color:${categoryColors[cat]};">
             <div class="dest-group-label">${localize(categoryLabels[cat])}</div>
             <div class="dest-grid">${groups[cat].map(buildingButton).join("")}</div>
           </div>
         `).join("");
       const travelSection = otherCities.length ? `
-        <div class="dest-group">
+        <div class="dest-group" style="--cat-color:${categoryColors.travel};">
           <div class="dest-group-label">${localize({ he: "טיסות בין ערים", en: "City travel" })}</div>
           <div class="dest-grid">${otherCities.map(travelButton).join("")}</div>
         </div>
