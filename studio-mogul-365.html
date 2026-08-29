@@ -2592,20 +2592,42 @@
       margin-top: 6px;
     }
 
-    /* ---- classic mode: "you can do here" folded into the scene, thematic locations, tabbed panel + location detail modal ---- */
-    .scene-here {
-      display: grid;
+    /* ---- classic mode: "you can do here" as a trigger + modal, grouped thematic locations, tabbed panel + location detail modal ---- */
+    .scene-here-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       gap: 6px;
       padding: 8px;
-      background: var(--kc-card-2);
-      border: 1px solid var(--kc-line);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--kc-accent);
+      background: var(--kc-accent-soft);
+      border: 1px solid var(--kc-accent);
       border-radius: var(--kc-radius-sm);
+      cursor: pointer;
     }
 
-    .scene-here-title {
-      font-size: 11px;
+    .here-modal .panel-body {
+      max-height: min(70vh, 560px);
+    }
+
+    .dest-group {
+      display: grid;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .dest-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .dest-group-label {
+      font-size: 10px;
       font-weight: 700;
-      color: var(--kc-text-dim);
+      letter-spacing: 0.3px;
+      color: var(--kc-text-faint);
+      padding: 0 2px;
     }
 
     .travel-tag {
@@ -2627,6 +2649,10 @@
 
     .panel-open-btn {
       position: relative;
+      min-width: 34px;
+      max-width: 34px;
+      padding: 0;
+      font-size: 15px;
     }
 
     .panel-open-badge {
@@ -8728,7 +8754,7 @@
               </div>
               <div class="strip-actions">
                 <button class="icon-btn panel-open-btn" data-action="openClassicPanel" data-value="ledger" title="${localize({ he: "פרטים — חשבונות, מה שיש לי, אנשים, עלילה", en: "Details — ledger, inventory, people, story" })}">
-                  ${localize({ he: "פרטים", en: "Details" })}${taskUrgent ? `<span class="panel-open-badge"></span>` : ""}
+                  ℹ️${taskUrgent ? `<span class="panel-open-badge"></span>` : ""}
                 </button>
                 <button class="icon-btn strip-btn" data-action="endDay">${localize({ he: "לישון / מעבר יום", en: "Sleep / End day" })}</button>
               </div>
@@ -8745,12 +8771,9 @@
             <div class="scene-block" style="--scene-a:${currentBuilding.color[0]};--scene-b:${currentBuilding.color[1]};">
               <div class="scene-title">${localize(currentBuilding.label)}</div>
               <div class="scene-copy">${buildingSpeech(gameState.currentBuilding)}</div>
-              <div class="scene-here">
-                <div class="scene-here-title">${localize({ he: "אפשר לעשות כאן", en: "You can do here" })}</div>
-                <div class="action-groups">
-                  ${renderInteriorActions(gameState.currentBuilding, { includeSleep: false })}
-                </div>
-              </div>
+              <button class="scene-here-trigger" data-action="openHereActions">
+                <span>🛠️</span> ${localize({ he: "אפשר לעשות כאן", en: "You can do here" })}
+              </button>
               <div class="scene-hint">${hint.copy || gameState.ticker || t("interiorPrompt")}</div>
               ${newsMarketMarkup(city, newsItems)}
             </div>
@@ -8758,44 +8781,95 @@
         </div>
         ${renderClassicPanel()}
         ${renderLocationDetail()}
+        ${renderHereActionsModal()}
       `;
     }
 
     function cityTravelMarkup(city, buildings, inCityHint) {
       const otherCities = CITIES.filter((entry) => entry.id !== gameState.city);
+      const categoryLabels = {
+        salary: { he: "עבודה ופרנסה", en: "Work & income" },
+        lifestyle: { he: "חיי היומיום", en: "Daily life" },
+        production: { he: "תעשיית הקולנוע", en: "Film industry" },
+        finance: { he: "כספים והשקעות", en: "Money & investing" },
+        training: { he: "לימודים והכשרה", en: "Training" },
+        release: { he: "הפצה ושיווק", en: "Release" }
+      };
+      const categoryOrder = ["salary", "lifestyle", "production", "finance", "training", "release"];
+      const groups = {};
+      buildings.forEach((buildingId) => {
+        const building = getBuilding(buildingId);
+        const cat = building.category || "lifestyle";
+        (groups[cat] = groups[cat] || []).push(buildingId);
+      });
+      function buildingButton(buildingId) {
+        const building = getBuilding(buildingId);
+        const selected = buildingId === gameState.currentBuilding;
+        const target = buildingId === inCityHint;
+        const visitKey = city.id + ":" + buildingId;
+        const visited = gameState.buildingVisits && gameState.buildingVisits[visitKey];
+        const hasScene = sceneCardButtons(buildingId).length > 0;
+        const fresh = hasScene && !visited;
+        return `
+          <button class="dest-btn ${selected ? "selected" : ""} ${target ? "target" : ""} ${fresh ? "fresh-locals" : ""}" style="--tone-a:${building.color[0]};--tone-b:${building.color[1]};" data-action="openLocationDetail" data-value="building:${buildingId}">
+            ${fresh ? `<span class="fresh-badge" title="${localize({ he: "אנשי מקום חדשים", en: "New locals here" })}">✨</span>` : ""}
+            <strong>${localize(building.short)}</strong>
+            <span>${localize(building.sub || building.label)}</span>
+          </button>
+        `;
+      }
+      function travelButton(entry) {
+        const cost = flightCost(entry.id);
+        const idx = (gameState.flightIndex && gameState.flightIndex[entry.id]) || 1;
+        const trendClass = idx < 0.9 ? "cheap" : (idx > 1.15 ? "spicy" : "");
+        const trendIcon = idx < 0.9 ? "▼" : (idx > 1.15 ? "▲" : "·");
+        return `
+          <button class="dest-btn travel-btn ${trendClass}" style="--tone-a:${entry.palette.a};--tone-b:${entry.palette.b};" data-action="openLocationDetail" data-value="city:${entry.id}">
+            <span class="travel-tag">✈️</span>
+            <strong>${localize(entry.name)}</strong>
+            <span>${t("flyCost", { hours: 3, cost: formatMoney(cost) })} ${trendIcon}</span>
+          </button>
+        `;
+      }
+      const sections = categoryOrder
+        .filter((cat) => groups[cat] && groups[cat].length)
+        .map((cat) => `
+          <div class="dest-group">
+            <div class="dest-group-label">${localize(categoryLabels[cat])}</div>
+            <div class="dest-grid">${groups[cat].map(buildingButton).join("")}</div>
+          </div>
+        `).join("");
+      const travelSection = otherCities.length ? `
+        <div class="dest-group">
+          <div class="dest-group-label">${localize({ he: "טיסות בין ערים", en: "City travel" })}</div>
+          <div class="dest-grid">${otherCities.map(travelButton).join("")}</div>
+        </div>
+      ` : "";
       return `
         <div class="destination-block city-block">
           <div class="dest-header">${localize({ he: "מיקומים", en: "Places" })}</div>
-          <div class="dest-grid">
-            ${buildings.map((buildingId) => {
-              const building = getBuilding(buildingId);
-              const selected = buildingId === gameState.currentBuilding;
-              const target = buildingId === inCityHint;
-              const visitKey = city.id + ":" + buildingId;
-              const visited = gameState.buildingVisits && gameState.buildingVisits[visitKey];
-              const hasScene = sceneCardButtons(buildingId).length > 0;
-              const fresh = hasScene && !visited;
-              return `
-                <button class="dest-btn ${selected ? "selected" : ""} ${target ? "target" : ""} ${fresh ? "fresh-locals" : ""}" style="--tone-a:${building.color[0]};--tone-b:${building.color[1]};" data-action="openLocationDetail" data-value="building:${buildingId}">
-                  ${fresh ? `<span class="fresh-badge" title="${localize({ he: "אנשי מקום חדשים", en: "New locals here" })}">✨</span>` : ""}
-                  <strong>${localize(building.short)}</strong>
-                  <span>${localize(building.sub || building.label)}</span>
-                </button>
-              `;
-            }).join("")}
-            ${otherCities.map((entry) => {
-              const cost = flightCost(entry.id);
-              const idx = (gameState.flightIndex && gameState.flightIndex[entry.id]) || 1;
-              const trendClass = idx < 0.9 ? "cheap" : (idx > 1.15 ? "spicy" : "");
-              const trendIcon = idx < 0.9 ? "▼" : (idx > 1.15 ? "▲" : "·");
-              return `
-                <button class="dest-btn travel-btn ${trendClass}" style="--tone-a:${entry.palette.a};--tone-b:${entry.palette.b};" data-action="openLocationDetail" data-value="city:${entry.id}">
-                  <span class="travel-tag">✈️</span>
-                  <strong>${localize(entry.name)}</strong>
-                  <span>${t("flyCost", { hours: 3, cost: formatMoney(cost) })} ${trendIcon}</span>
-                </button>
-              `;
-            }).join("")}
+          ${sections}
+          ${travelSection}
+        </div>
+      `;
+    }
+
+    function renderHereActionsModal() {
+      if (!dom.hereActionsOpen) {
+        return "";
+      }
+      const building = getBuilding(gameState.currentBuilding);
+      return `
+        <div class="panel-backdrop" data-action="closeHereActions"></div>
+        <div class="panel-modal here-modal">
+          <div class="panel-head">
+            <strong>${localize(building.label)} — ${localize({ he: "אפשר לעשות כאן", en: "You can do here" })}</strong>
+            <button class="mini-btn" data-action="closeHereActions">${t("close")}</button>
+          </div>
+          <div class="panel-body">
+            <div class="action-groups">
+              ${renderInteriorActions(gameState.currentBuilding, { includeSleep: false })}
+            </div>
           </div>
         </div>
       `;
@@ -10132,10 +10206,18 @@
           render();
         } else if (action === "confirmGoToBuilding") {
           dom.locationDetail = null;
+          dom.hereActionsOpen = false;
           goToBuilding(value);
         } else if (action === "confirmFlyTo") {
           dom.locationDetail = null;
+          dom.hereActionsOpen = false;
           flyTo(value);
+        } else if (action === "openHereActions") {
+          dom.hereActionsOpen = true;
+          render();
+        } else if (action === "closeHereActions") {
+          dom.hereActionsOpen = false;
+          render();
         } else if (action === "closeNotice") {
           if (dom.noticeTimer) {
             root.clearTimeout(dom.noticeTimer);
@@ -10263,6 +10345,7 @@
         openSheet: null,
         classicPanelTab: null,
         locationDetail: null,
+        hereActionsOpen: false,
         forceStart: false
       };
       bindEvents();
