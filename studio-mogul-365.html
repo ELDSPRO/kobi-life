@@ -2649,11 +2649,47 @@
     }
 
     .dest-group-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      font: inherit;
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.3px;
       color: var(--cat-color, var(--kc-text-faint));
-      padding: 0 2px;
+      padding: 7px 8px;
+      background: color-mix(in srgb, var(--cat-color, var(--kc-line-strong)) 12%, var(--kc-card) 88%);
+      border: 1px solid color-mix(in srgb, var(--cat-color, var(--kc-line)) 34%, var(--kc-line) 66%);
+      border-radius: var(--kc-radius-sm);
+      cursor: pointer;
+    }
+
+    .dest-group-name {
+      flex: 1 1 auto;
+      text-align: start;
+    }
+
+    .dest-group-count {
+      font-weight: 400;
+      color: var(--kc-text-faint);
+    }
+
+    .dest-group-chevron {
+      display: inline-block;
+      transition: transform 0.15s ease;
+    }
+
+    .dest-group.open .dest-group-chevron {
+      transform: rotate(90deg);
+    }
+
+    .dest-group.open .dest-group-label {
+      background: color-mix(in srgb, var(--cat-color, var(--kc-line-strong)) 22%, var(--kc-card) 78%);
+    }
+
+    .dest-group .dest-grid {
+      animation: fadeInUp 0.2s ease;
     }
 
     .dest-group .dest-btn:not(.selected):not(.target) {
@@ -4736,7 +4772,7 @@
       home: {
         id: "home",
         label: { he: "בית", en: "Home" },
-        short: { he: "שינה", en: "Sleep" },
+        short: { he: "דיור", en: "Housing" },
         color: ["#d88362", "#7f4a39"],
         category: "lifestyle",
         clerk: { he: "דוד מהספה", en: "Couch Cousin" }
@@ -6146,6 +6182,7 @@
       }
       gameState.currentBuilding = id;
       gameState.travelFlash = true;
+      dom.openCategoryGroup = null;
       if (!gameState.buildingVisits) gameState.buildingVisits = {};
       gameState.buildingVisits[city.id + ":" + id] = true;
       playSfx(distance > 0 ? "travel" : "cash");
@@ -6179,6 +6216,7 @@
       changeCash(-cost);
       gameState.city = cityId;
       gameState.currentBuilding = visibleBuildings(target)[0] || "home";
+      dom.openCategoryGroup = null;
       flashMessage(localize({
         he: "נחתת ב" + localize(target.name) + ".",
         en: "You landed in " + localize(target.name) + "."
@@ -9432,18 +9470,39 @@
           </button>
         `;
       }
+      const availableCats = categoryOrder.filter((cat) => groups[cat] && groups[cat].length);
+      const currentCat = (getBuilding(gameState.currentBuilding) || {}).category || "lifestyle";
+      const hasTravel = otherCities.length > 0;
+      const requestedOpen = dom.openCategoryGroup;
+      const requestedValid = requestedOpen === "travel" ? hasTravel : availableCats.includes(requestedOpen);
+      const openKey = requestedValid
+        ? requestedOpen
+        : (availableCats.includes(currentCat) ? currentCat : (availableCats[0] || (hasTravel ? "travel" : null)));
+      function groupHeader(key, label, count) {
+        return `
+          <button class="dest-group-label" data-action="toggleCategoryGroup" data-value="${key}">
+            <span class="dest-group-name">${localize(label)}</span>
+            <span class="dest-group-count">${count}</span>
+            <span class="dest-group-chevron">›</span>
+          </button>
+        `;
+      }
       const sections = categoryOrder
         .filter((cat) => groups[cat] && groups[cat].length)
-        .map((cat) => `
-          <div class="dest-group" style="--cat-color:${categoryColors[cat]};">
-            <div class="dest-group-label">${localize(categoryLabels[cat])}</div>
-            <div class="dest-grid">${groups[cat].map(buildingButton).join("")}</div>
-          </div>
-        `).join("");
-      const travelSection = otherCities.length ? `
-        <div class="dest-group" style="--cat-color:${categoryColors.travel};">
-          <div class="dest-group-label">${localize({ he: "טיסות בין ערים", en: "City travel" })}</div>
-          <div class="dest-grid">${otherCities.map(travelButton).join("")}</div>
+        .map((cat) => {
+          const open = cat === openKey;
+          return `
+            <div class="dest-group ${open ? "open" : ""}" style="--cat-color:${categoryColors[cat]};">
+              ${groupHeader(cat, categoryLabels[cat], groups[cat].length)}
+              ${open ? `<div class="dest-grid">${groups[cat].map(buildingButton).join("")}</div>` : ""}
+            </div>
+          `;
+        }).join("");
+      const travelOpen = openKey === "travel";
+      const travelSection = hasTravel ? `
+        <div class="dest-group ${travelOpen ? "open" : ""}" style="--cat-color:${categoryColors.travel};">
+          ${groupHeader("travel", { he: "טיסות בין ערים", en: "City travel" }, otherCities.length)}
+          ${travelOpen ? `<div class="dest-grid">${otherCities.map(travelButton).join("")}</div>` : ""}
         </div>
       ` : "";
       return `
@@ -10821,6 +10880,9 @@
         } else if (action === "closeHereActions") {
           dom.hereActionsOpen = false;
           render();
+        } else if (action === "toggleCategoryGroup") {
+          dom.openCategoryGroup = dom.openCategoryGroup === value ? null : value;
+          render();
         } else if (action === "toggleHudMenu") {
           dom.hudMenuOpen = !dom.hudMenuOpen;
           render();
@@ -10953,6 +11015,7 @@
         locationDetail: null,
         hereActionsOpen: false,
         hudMenuOpen: false,
+        openCategoryGroup: null,
         forceStart: false
       };
       bindEvents();
