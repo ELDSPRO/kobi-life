@@ -3947,6 +3947,188 @@
       padding: 6px 2px;
     }
 
+    /* ---- morning brief: daily causal briefing screen ---- */
+    .morning-brief-window {
+      position: fixed;
+      inset: 0;
+      z-index: 98;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .brief-dialog {
+      width: min(460px, calc(100vw - 36px));
+      max-height: min(88vh, 720px);
+      display: flex;
+      flex-direction: column;
+      background: var(--kc-card);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius);
+      overflow: hidden;
+    }
+
+    .brief-head {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 12px 14px;
+      background: var(--kc-card-2);
+      color: var(--kc-text);
+    }
+
+    .brief-head strong {
+      font-size: 15px;
+    }
+
+    .brief-daytag {
+      font-size: 11px;
+      color: var(--kc-text-faint);
+    }
+
+    .brief-body {
+      display: grid;
+      gap: 10px;
+      padding: 12px 14px;
+      overflow-y: auto;
+      color: var(--kc-text);
+    }
+
+    .brief-snapshot {
+      display: grid;
+      gap: 4px;
+      padding: 8px 10px;
+      background: var(--kc-card-2);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
+    }
+
+    .brief-snap-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+
+    .brief-snap-goal {
+      font-size: 12px;
+      color: var(--kc-text-dim);
+    }
+
+    .brief-snap-delta {
+      font-size: 11px;
+      color: var(--kc-text-faint);
+    }
+
+    .brief-event {
+      display: grid;
+      gap: 5px;
+      padding: 10px 12px;
+      border-radius: var(--kc-radius-sm);
+      background: var(--kc-card-2);
+      border: 1px solid var(--kc-line);
+      border-inline-start: 3px solid var(--kc-line-strong);
+    }
+
+    .brief-event.good { border-inline-start-color: var(--kc-good); }
+    .brief-event.bad { border-inline-start-color: var(--kc-bad); }
+    .brief-event.neutral { border-inline-start-color: var(--kc-accent); }
+
+    .brief-event-source {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      color: var(--kc-text-faint);
+    }
+
+    .brief-event-head {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .brief-event-body {
+      margin: 0;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: var(--kc-text-dim);
+    }
+
+    .brief-result {
+      margin: 2px 0 0;
+      font-size: 12.5px;
+      font-style: italic;
+      color: var(--kc-text);
+    }
+
+    .brief-choices {
+      display: grid;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .brief-choice-btn {
+      padding: 8px 10px;
+      font-size: 12.5px;
+      font-weight: 600;
+      text-align: start;
+      background: var(--kc-card);
+      color: var(--kc-text);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
+      cursor: pointer;
+    }
+
+    .brief-choice-btn:hover:not(.disabled) {
+      border-color: var(--kc-accent);
+      color: var(--kc-accent);
+    }
+
+    .brief-choice-btn.disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .brief-plan {
+      display: grid;
+      gap: 6px;
+      padding-top: 4px;
+      border-top: 1px solid var(--kc-line);
+    }
+
+    .brief-plan-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      color: var(--kc-text-faint);
+    }
+
+    .brief-plan-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .brief-cta {
+      flex: 1 1 auto;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--kc-accent);
+      color: #ffffff;
+      border: 0;
+      border-radius: var(--kc-radius-sm);
+      cursor: pointer;
+    }
+
+    .brief-cta-static {
+      flex: 1 1 auto;
+      font-size: 12.5px;
+      color: var(--kc-text-dim);
+    }
+
     .win-card-actions {
       display: flex;
       flex-direction: column;
@@ -4187,10 +4369,11 @@
   <section id="statusWindow" class="status-window hidden"></section>
   <section id="incidentWindow" class="incident-window hidden"></section>
   <section id="collectionWindow" class="collection-window hidden"></section>
+  <section id="morningBriefWindow" class="morning-brief-window hidden"></section>
   <div id="floatLayer" class="float-layer"></div>
   <div id="nightVeil" class="night-veil"></div>
 
-  <script src="data.js?v=20260608"></script>
+  <script src="data.js?v=20260830"></script>
   <script>
   (() => {
     "use strict";
@@ -5155,6 +5338,11 @@
         briefSeed: 99991,
         dailyBriefing: null,
         lastBriefId: null,
+        briefCooldowns: {},
+        briefBadStreak: 0,
+        pendingFollowUps: [],
+        dayDelta: null,
+        storyDiary: [],
         monthCounter: 1,
         lastFundDevDay: -30,
         incidentBase: 0.4,
@@ -5225,30 +5413,102 @@
       return gameState.briefSeed / 4294967296;
     }
 
-    function triggerDailyBriefing() {
-      const events = (root.GAME_DATA && root.GAME_DATA.dailyEvents) || [];
-      if (!events.length) {
+    // defaultBriefSource — the small attribution tag shown on a briefing card
+    // when the event data itself doesn't declare a specific `source`. Keeps
+    // every briefing traceable to something ("why did this show up today").
+    function defaultBriefSource(isFollowUp) {
+      if (isFollowUp) {
+        return localize({ he: "תוצאה מבחירה קודמת", en: "Result of an earlier choice" });
+      }
+      return localize({ he: "{city} היום", en: "{city} today" }).replace("{city}", localize(getCity().name));
+    }
+
+    function applyBriefEffects(effects) {
+      if (!effects) {
         return;
       }
-      // A calendar-pinned event (minDay === maxDay === today) always wins its day.
-      let chosen = events.find((e) => e.minDay === gameState.day && e.maxDay === gameState.day);
+      if (typeof effects.cash === "number") changeCash(effects.cash);
+      if (typeof effects.debt === "number") gameState.debt = Math.max(0, gameState.debt + effects.debt);
+      if (typeof effects.experience === "number") gameState.experience = Math.max(0, gameState.experience + effects.experience);
+      if (typeof effects.wardrobeTier === "number") {
+        gameState.wardrobeTier = Math.max(0, Math.min(3, gameState.wardrobeTier + effects.wardrobeTier));
+      }
+      if (effects.equipment && gameState.equipment) {
+        gameState.equipment[effects.equipment] = true;
+      }
+      ["reputation", "education", "soul", "creativity", "love"].forEach((key) => {
+        if (typeof effects[key] === "number") adjustStat(key, effects[key]);
+      });
+    }
+
+    // logDiary — one line in "יומן העונה" (season diary): only significant,
+    // player-facing beats (a resolved briefing choice, a calendar/follow-up
+    // event), not every minor tick. Read by renderStoryDiaryBlock().
+    function logDiary(title, source, result) {
+      if (!Array.isArray(gameState.storyDiary)) {
+        gameState.storyDiary = [];
+      }
+      gameState.storyDiary.unshift({ day: gameState.day, title, source, result: result || null });
+      gameState.storyDiary = gameState.storyDiary.slice(0, 200);
+    }
+
+    function triggerDailyBriefing() {
+      if (gameState.winState) {
+        gameState.dailyBriefing = null;
+        return;
+      }
+      const events = (root.GAME_DATA && root.GAME_DATA.dailyEvents) || [];
+      if (!events.length) {
+        gameState.dailyBriefing = null;
+        return;
+      }
+      if (!Array.isArray(gameState.pendingFollowUps)) gameState.pendingFollowUps = [];
+      if (!gameState.briefCooldowns) gameState.briefCooldowns = {};
+      const byId = {};
+      events.forEach((e) => { byId[e.id] = e; });
+
+      // 1) A due follow-up (the consequence of an earlier choice) always wins —
+      // this is what makes yesterday's decision feel remembered, not random.
+      let chosen = null;
+      let followUpIndex = -1;
+      for (let i = 0; i < gameState.pendingFollowUps.length; i += 1) {
+        const f = gameState.pendingFollowUps[i];
+        if (f.day <= gameState.day && byId[f.id]) {
+          chosen = byId[f.id];
+          followUpIndex = i;
+          break;
+        }
+      }
+      const isFollowUp = chosen !== null;
+      if (followUpIndex >= 0) {
+        gameState.pendingFollowUps.splice(followUpIndex, 1);
+      }
+
+      // 2) A calendar-pinned event (minDay === maxDay === today) wins next.
       if (!chosen) {
-        // Events may declare requires(state) — used for NPC memory-callbacks
-        // that only surface when relationship thresholds have been crossed.
+        chosen = events.find((e) => e.minDay === gameState.day && e.maxDay === gameState.day);
+      }
+
+      if (!chosen) {
+        const onCooldown = (e) => {
+          const until = gameState.briefCooldowns[e.id];
+          return typeof until === "number" && gameState.day < until;
+        };
         const meetsRequires = (e) => !e.requires || (function () {
           try { return !!e.requires(gameState); } catch (_err) { return false; }
         })();
-        const eligible = events.filter((e) =>
-          (e.weight || 0) > 0 &&
-          gameState.day >= (e.minDay || 1) &&
-          (!e.maxDay || gameState.day <= e.maxDay) &&
-          e.id !== gameState.lastBriefId &&
-          meetsRequires(e)
-        );
-        const pool = eligible.length
-          ? eligible
-          : events.filter((e) => (e.weight || 0) > 0 && gameState.day >= (e.minDay || 1) && (!e.maxDay || gameState.day <= e.maxDay) && meetsRequires(e));
+        const inWindow = (e) => gameState.day >= (e.minDay || 1) && (!e.maxDay || gameState.day <= e.maxDay);
+        const baseFilter = (e) => (e.weight || 0) > 0 && inWindow(e) && e.id !== gameState.lastBriefId && meetsRequires(e) && !onCooldown(e);
+        // Pity: two "bad" mornings in a row exhausts the streak — the third
+        // morning excludes bad-tone events so a hard run always gets a breath.
+        const pityActive = (gameState.briefBadStreak || 0) >= 2;
+        let eligible = events.filter((e) => baseFilter(e) && (!pityActive || e.tone !== "bad"));
+        if (!eligible.length) {
+          eligible = events.filter(baseFilter);
+        }
+        const pool = eligible.length ? eligible : events.filter((e) => inWindow(e) && meetsRequires(e) && !onCooldown(e));
         if (!pool.length) {
+          gameState.dailyBriefing = null;
           return;
         }
         const total = pool.reduce((sum, e) => sum + (e.weight || 1), 0);
@@ -5262,15 +5522,76 @@
           }
         }
       }
+
       const headline = localize(chosen.headline);
       const body = localize(chosen.body);
       const tone = chosen.tone || "neutral";
+      const source = chosen.source ? localize(chosen.source) : defaultBriefSource(isFollowUp);
       gameState.lastBriefId = chosen.id;
-      gameState.dailyBriefing = { id: chosen.id, headline, body, tone, day: gameState.day };
-      gameState.activeNotice = { id: "brief-" + gameState.day, title: headline, copy: body, tone };
+      gameState.briefBadStreak = tone === "bad" ? (gameState.briefBadStreak || 0) + 1 : 0;
+      if (chosen.cooldownDays) {
+        gameState.briefCooldowns[chosen.id] = gameState.day + chosen.cooldownDays;
+      }
+      const rawChoices = Array.isArray(chosen.choices) && chosen.choices.length
+        ? chosen.choices
+        : [{ id: "ack", label: { he: "הבנתי, בוא/י נתחיל את היום", en: "Got it, let's start the day" } }];
+      gameState.dailyBriefing = {
+        id: chosen.id,
+        headline,
+        body,
+        tone,
+        source,
+        day: gameState.day,
+        resolved: false,
+        dismissed: false,
+        pickedChoiceId: null,
+        resultCopy: null,
+        choices: rawChoices.map((c) => ({
+          id: c.id,
+          label: localize(c.label),
+          cost: c.cost || null,
+          afford: !c.cost || !c.cost.cash || c.cost.cash <= gameState.cash
+        }))
+      };
       applyBriefingModifier(chosen);
       note(headline + " — " + body, tone);
       maybeTriggerStoryBeat();
+    }
+
+    function resolveBriefChoice(choiceId) {
+      const brief = gameState.dailyBriefing;
+      if (!brief || brief.resolved) {
+        return;
+      }
+      const events = (root.GAME_DATA && root.GAME_DATA.dailyEvents) || [];
+      const eventDef = events.find((e) => e.id === brief.id);
+      const choiceDef = (eventDef && Array.isArray(eventDef.choices) && eventDef.choices.find((c) => c.id === choiceId)) || { id: "ack" };
+      if (choiceDef.cost && choiceDef.cost.cash && choiceDef.cost.cash > gameState.cash) {
+        flashMessage(localize({ he: "אין מספיק מזומן.", en: "Not enough cash." }), "bad");
+        return;
+      }
+      if (choiceDef.cost) {
+        if (choiceDef.cost.cash) changeCash(-choiceDef.cost.cash);
+        if (choiceDef.cost.hours) gameState.hour += choiceDef.cost.hours;
+      }
+      applyBriefEffects(choiceDef.effects);
+      if (choiceDef.followUpEventId) {
+        if (!Array.isArray(gameState.pendingFollowUps)) gameState.pendingFollowUps = [];
+        gameState.pendingFollowUps.push({ id: choiceDef.followUpEventId, day: gameState.day + (choiceDef.followUpInDays || 1) });
+      }
+      brief.resolved = true;
+      brief.pickedChoiceId = choiceId;
+      brief.resultCopy = choiceDef.result ? localize(choiceDef.result) : null;
+      logDiary(brief.headline, brief.source, brief.resultCopy);
+      saveGame();
+      render();
+    }
+
+    function dismissMorningBrief() {
+      if (gameState.dailyBriefing) {
+        gameState.dailyBriefing.dismissed = true;
+      }
+      render();
     }
 
     function loadPrefs() {
@@ -8698,6 +9019,7 @@
         dom.nightVeil.classList.add("active");
       }
       playSfx("sleep");
+      const before = { cash: gameState.cash, experience: gameState.experience, reputation: gameState.reputation, happiness: scoreHappiness() };
       root.setTimeout(() => {
         gameState.day += 1;
         gameState.hour = 7;
@@ -8710,6 +9032,12 @@
         maybeTriggerEvents();
         updateUnlocks();
         checkEndings();
+        gameState.dayDelta = {
+          cash: gameState.cash - before.cash,
+          experience: gameState.experience - before.experience,
+          reputation: gameState.reputation - before.reputation,
+          happiness: scoreHappiness() - before.happiness
+        };
         saveGame();
         triggerDailyBriefing();
         if (canRender && dom && dom.nightVeil) {
@@ -9290,6 +9618,36 @@
       `;
     }
 
+    // renderStoryDiaryBlock — "יומן העונה": a chronological, player-facing
+    // record of resolved morning-brief choices (see logDiary()). Distinct
+    // from the scripted STORY_BEATS below and from careerLog (cross-career,
+    // survives resetGame) — this one is season-scoped, in gameState directly.
+    function renderStoryDiaryBlock() {
+      const diary = gameState.storyDiary || [];
+      if (!diary.length) {
+        return "";
+      }
+      return `
+        <div class="collection-section diary-section">
+          <div class="collection-section-head">
+            <h3>${localize({ he: "יומן העונה", en: "Season diary" })}</h3>
+            <span class="collection-progress">${diary.length}</span>
+          </div>
+          <div class="career-log-list">
+            ${diary.slice(0, 12).map((entry) => `
+              <div class="career-log-row">
+                <div class="career-log-top">
+                  <strong>${entry.title}</strong>
+                  <span class="career-log-mark">${localize({ he: "יום", en: "Day" })} ${entry.day}</span>
+                </div>
+                <div class="career-log-ending">${entry.source}${entry.result ? " · " + entry.result : ""}</div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
+
     function renderStoryBeatBlock() {
       if (!gameState.activeStoryBeat) return "";
       const beat = STORY_BEATS.find((b) => b.id === gameState.activeStoryBeat);
@@ -9652,6 +10010,7 @@
         body = renderNpcsBlock();
       } else if (tab === "story") {
         body = `
+          ${renderStoryDiaryBlock()}
           ${renderStoryBeatBlock()}
           ${gameState.projects && gameState.projects.length ? renderProjectsBlock() : ""}
         `;
@@ -10099,6 +10458,77 @@
                     </div>
                   </div>
                 `).join("") : `<div class="collection-empty">${t("noCareerLog")}</div>`}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // renderMorningBrief — the daily-briefing screen. Shows once per day,
+    // gated purely on gameState.dailyBriefing existing and not yet
+    // resolved/dismissed (survives reload: a resolved/dismissed brief just
+    // stays that way in the save, so refreshing never re-shows it).
+    function renderMorningBrief() {
+      if (!dom || !dom.morningBriefWindow) {
+        return;
+      }
+      const brief = gameState.dailyBriefing;
+      const open = brief && !brief.dismissed;
+      if (!open) {
+        dom.morningBriefWindow.classList.add("hidden");
+        dom.morningBriefWindow.innerHTML = "";
+        return;
+      }
+      const delta = gameState.dayDelta;
+      const deltaParts = [];
+      if (delta) {
+        if (delta.cash) deltaParts.push((delta.cash > 0 ? "+" : "") + formatMoney(delta.cash));
+        if (delta.experience) deltaParts.push((delta.experience > 0 ? "+" : "") + Math.round(delta.experience) + " " + localize({ he: "ניסיון", en: "exp" }));
+        if (delta.reputation) deltaParts.push((delta.reputation > 0 ? "+" : "") + delta.reputation + " " + localize({ he: "מוניטין", en: "rep" }));
+        if (delta.happiness) deltaParts.push((delta.happiness > 0 ? "+" : "") + delta.happiness + " " + localize({ he: "אושר", en: "happiness" }));
+      }
+      const nextGoal = computeNextGoal();
+      dom.morningBriefWindow.classList.remove("hidden");
+      dom.morningBriefWindow.innerHTML = `
+        <div class="brief-dialog">
+          <div class="brief-head">
+            <strong>☀️ ${localize({ he: "בוקר טוב", en: "Good morning" })}, ${escapeAttr(gameState.playerName)}</strong>
+            <span class="brief-daytag">${t("timeStrip", { day: gameState.day, month: currentMonth() })} · ${localize(getCity().name)}</span>
+          </div>
+          <div class="brief-body">
+            <div class="brief-snapshot">
+              <div class="brief-snap-row">
+                <span>${formatHour(gameState.hour)}</span>
+                <strong>${formatMoney(gameState.cash)}</strong>
+              </div>
+              <div class="brief-snap-goal">🎯 ${nextGoal.short}</div>
+              ${deltaParts.length ? `<div class="brief-snap-delta">${localize({ he: "מאתמול", en: "Since yesterday" })}: ${deltaParts.join(" · ")}</div>` : ""}
+            </div>
+            <div class="brief-event ${brief.tone}">
+              <div class="brief-event-source">${brief.source}</div>
+              <div class="brief-event-head">${brief.headline}</div>
+              <p class="brief-event-body">${brief.body}</p>
+              ${brief.resolved ? `
+                ${brief.resultCopy ? `<p class="brief-result">${brief.resultCopy}</p>` : ""}
+                <button class="brief-choice-btn" data-action="dismissMorningBrief">${localize({ he: "המשך", en: "Continue" })}</button>
+              ` : `
+                <div class="brief-choices">
+                  ${brief.choices.map((c) => `
+                    <button class="brief-choice-btn ${c.afford ? "" : "disabled"}" data-action="pickBriefChoice" data-value="${c.id}" ${c.afford ? "" : "disabled"}>
+                      ${c.label}
+                    </button>
+                  `).join("")}
+                </div>
+              `}
+            </div>
+            <div class="brief-plan">
+              <div class="brief-plan-label">${localize({ he: "תוכנית היום", en: "Today's plan" })}</div>
+              <div class="brief-plan-actions">
+                ${nextGoal.ctaBuilding
+                  ? `<button class="brief-cta" data-action="briefCtaGo" data-value="${nextGoal.ctaBuilding}">${nextGoal.ctaLabel}</button>`
+                  : (nextGoal.ctaLabel ? `<span class="brief-cta-static">${nextGoal.ctaLabel}</span>` : "")}
+                <button class="mini-btn secondary" data-action="dismissMorningBrief">${localize({ he: "להיכנס לעיר", en: "Enter the city" })}</button>
               </div>
             </div>
           </div>
@@ -10789,6 +11219,7 @@
       renderStatusWindow();
       renderNoticeWindow();
       renderCollectionWindow();
+      renderMorningBrief();
       renderStartScreen();
       renderWinLoss();
     }
@@ -10902,6 +11333,14 @@
         } else if (action === "closeHereActions") {
           dom.hereActionsOpen = false;
           render();
+        } else if (action === "pickBriefChoice") {
+          resolveBriefChoice(value);
+        } else if (action === "dismissMorningBrief") {
+          dismissMorningBrief();
+        } else if (action === "briefCtaGo") {
+          dismissMorningBrief();
+          dom.hereActionsOpen = true;
+          goToBuilding(value);
         } else if (action === "toggleCategoryGroup") {
           dom.openCategoryGroup = dom.openCategoryGroup === value ? null : value;
           render();
@@ -11027,6 +11466,7 @@
         statusWindow: document.getElementById("statusWindow"),
         incidentWindow: document.getElementById("incidentWindow"),
         collectionWindow: document.getElementById("collectionWindow"),
+        morningBriefWindow: document.getElementById("morningBriefWindow"),
         floatLayer: document.getElementById("floatLayer"),
         nightVeil: document.getElementById("nightVeil"),
         noticeTimer: null,
@@ -11095,6 +11535,9 @@
     root.FILM_TASKS = FILM_TASKS;
     root.nextFilmTask = nextFilmTask;
     root.filmTasksComplete = filmTasksComplete;
+    root.resolveBriefChoice = resolveBriefChoice;
+    root.dismissMorningBrief = dismissMorningBrief;
+    root.triggerDailyBriefing = triggerDailyBriefing;
 
     if (canRender) {
       init();
