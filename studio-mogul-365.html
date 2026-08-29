@@ -2630,6 +2630,182 @@
       padding: 0 2px;
     }
 
+    .next-goal {
+      display: grid;
+      gap: 3px;
+      padding: 9px 10px;
+      background: var(--kc-accent-soft);
+      border: 1px solid var(--kc-accent);
+      border-radius: var(--kc-radius-sm);
+    }
+
+    .next-goal-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      color: var(--kc-accent);
+      text-transform: uppercase;
+    }
+
+    .next-goal-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--kc-text);
+      line-height: 1.3;
+    }
+
+    .next-goal-sub {
+      font-size: 11px;
+      color: var(--kc-text-dim);
+    }
+
+    .hud-more-btn {
+      display: none;
+    }
+
+    .hud-secondary-group {
+      display: contents;
+    }
+
+    @media (max-width: 760px) {
+      .controls-box {
+        position: relative;
+      }
+
+      .hud-more-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .hud-secondary-group {
+        display: none;
+      }
+
+      .hud-secondary-group.open {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        position: absolute;
+        top: calc(100% + 4px);
+        inset-inline-end: 0;
+        min-width: 140px;
+        padding: 6px;
+        background: var(--kc-card);
+        border: 1px solid var(--kc-line);
+        border-radius: var(--kc-radius-sm);
+        z-index: 50;
+      }
+
+      .hud-secondary-group.open .icon-btn {
+        width: 100%;
+      }
+    }
+
+    .dest-lock-hint {
+      display: block;
+      margin-top: 3px;
+      font-size: 9px;
+      color: var(--kc-text-faint);
+    }
+
+    .outcome-delta {
+      margin-top: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--kc-accent);
+    }
+
+    .job-cards {
+      display: grid;
+      gap: 6px;
+    }
+
+    .job-card {
+      display: grid;
+      gap: 5px;
+      padding: 8px;
+      background: var(--kc-card);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
+    }
+
+    .job-card.qualifies {
+      border-color: var(--kc-good);
+    }
+
+    .job-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--kc-text);
+    }
+
+    .job-reqs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .req-chip {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+    }
+
+    .req-chip.ok {
+      color: var(--kc-good);
+      background: var(--kc-good-soft);
+    }
+
+    .req-chip.bad {
+      color: var(--kc-bad);
+      background: var(--kc-bad-soft);
+    }
+
+    .job-blocker {
+      display: grid;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--kc-text-dim);
+    }
+
+    .job-blocker-cta {
+      justify-self: start;
+      padding: 4px 10px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--kc-warn);
+      background: var(--kc-warn-soft);
+      border: 1px solid var(--kc-warn);
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .job-apply-btn {
+      justify-self: start;
+      min-height: 0;
+      padding: 5px 12px;
+      font-size: 11px;
+    }
+
+    .next-goal-cta {
+      justify-self: start;
+      margin-top: 2px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--kc-accent);
+      color: #0a0a0c;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
     .travel-tag {
       display: block;
       font-size: 11px;
@@ -5001,6 +5177,67 @@
 
     // Suggested moves panel — three soft hints the player can ignore. Each
     // move scores higher when an active modifier makes its action timely.
+    function computeNextGoal() {
+      const reqLabels = {
+        wardrobe: { he: "מלתחה", en: "Wardrobe" },
+        education: { he: "השכלה", en: "Education" },
+        experience: { he: "ניסיון", en: "Experience" },
+        reputation: { he: "מוניטין", en: "Reputation" }
+      };
+      if (!gameState.jobId) {
+        if (gameState.wardrobeTier < 1) {
+          const suitCost = formatMoney(Math.round(WARDROBES[0].price * priceScale()));
+          return {
+            title: localize({ he: "השג/י מלתחה 1 כדי להתקבל לעבודה הראשונה", en: "Get wardrobe tier 1 to land your first job" }),
+            sub: localize({ he: "חליפה יד שנייה: " + suitCost, en: "Second-hand suit: " + suitCost }),
+            ctaLabel: localize({ he: "עבור/י לחנות", en: "Go to the shop" }),
+            ctaBuilding: "wardrobe"
+          };
+        }
+        return {
+          title: localize({ he: "התקבל/י לעבודה ראשונה", en: "Get hired for your first job" }),
+          sub: localize({ he: "לך/י ללשכת התעסוקה ובחר/י תפקיד", en: "Go to the employment office and pick a role" }),
+          ctaLabel: localize({ he: "ללשכת התעסוקה", en: "To the employment office" }),
+          ctaBuilding: "employment"
+        };
+      }
+      if (gameState.experience === 0) {
+        return {
+          title: localize({ he: "בחר/י משמרת כדי להרוויח כסף וניסיון", en: "Pick a shift to earn cash and experience" }),
+          ctaLabel: localize({ he: "ללשכת התעסוקה", en: "To the employment office" }),
+          ctaBuilding: "employment"
+        };
+      }
+      const current = getJob(gameState.jobId);
+      const nextJob = JOBS.find((j) => j.tier === current.tier + 1);
+      if (!nextJob) {
+        return {
+          title: localize({ he: "הגעת לפסגת מסלול העבודה — הזמן להתמקד בקולנוע", en: "You've topped the job ladder — time to focus on the film itself" })
+        };
+      }
+      const gaps = ["wardrobe", "education", "experience", "reputation"]
+        .map((key) => ({ key, have: key === "wardrobe" ? gameState.wardrobeTier : gameState[key], need: nextJob.req[key] }))
+        .filter((r) => r.need > 0 && r.have < r.need);
+      if (!gaps.length) {
+        return {
+          title: localize({ he: "את/ה עומד/ת בדרישות ל" + localize(nextJob.title) + " — לך/י להירשם", en: "You qualify for " + localize(nextJob.title) + " — go apply" }),
+          ctaLabel: localize({ he: "ללשכת התעסוקה", en: "To the employment office" }),
+          ctaBuilding: "employment"
+        };
+      }
+      gaps.sort((a, b) => (b.need - b.have) / b.need - (a.need - a.have) / a.need);
+      const top = gaps[0];
+      const label = localize(reqLabels[top.key]);
+      return {
+        title: localize({
+          he: `השג/י ${label} ${top.have}/${top.need} כדי להתקדם ל${localize(nextJob.title)}`,
+          en: `Reach ${label} ${top.have}/${top.need} to advance to ${localize(nextJob.title)}`
+        }),
+        ctaLabel: top.key === "wardrobe" ? localize({ he: "עבור/י לחנות", en: "Go to the shop" }) : null,
+        ctaBuilding: top.key === "wardrobe" ? "wardrobe" : null
+      };
+    }
+
     function computeSuggestedMoves() {
       const moves = [];
       const studyBuilding = cityHasBuilding("filmSchool")
@@ -5520,6 +5757,10 @@
       }
     }
 
+    function outcomeDelta(parts) {
+      return `<div class="outcome-delta">${parts.join(" · ")}</div>`;
+    }
+
     function flashMessage(copy, tone = "neutral") {
       note(copy, tone);
       openNotice(copy, tone);
@@ -5667,12 +5908,8 @@
         gameState.experience < job.req.experience ||
         gameState.reputation < job.req.reputation;
       if (missing) {
-        flashMessage(localize(job.reject), "bad");
+        note(localize(job.reject), "bad");
         playSfx("fail");
-        spendHours(1, localize({
-          he: "בזבזת שעה על טופס ודחייה מנומסת.",
-          en: "You burned an hour on paperwork and polite rejection."
-        }));
         render();
         return false;
       }
@@ -5685,9 +5922,10 @@
       gameState.jobId = job.id;
       gameState.jobTier = job.tier;
       adjustStat("reputation", 1);
+      const hiredDelta = outcomeDelta(["+1 " + localize({ he: "מוניטין", en: "reputation" })]);
       flashMessage(localize({
-        he: "התקבלת: " + localize(job.title),
-        en: "Hired: " + localize(job.title)
+        he: "התקבלת: " + localize(job.title) + hiredDelta,
+        en: "Hired: " + localize(job.title) + hiredDelta
       }), "good");
       playSfx("success");
       updateUnlocks();
@@ -5723,15 +5961,21 @@
         return false;
       }
       const pay = Math.round(job.wage * hours * economyProfile().wages * paceScale());
+      const xpGain = Math.round(job.exp * (hours / 4));
       changeCash(pay);
-      gameState.experience += Math.round(job.exp * (hours / 4));
+      gameState.experience += xpGain;
       adjustStat("reputation", job.rep);
       adjustStat("soul", hours >= 8 ? -3 : -1);
       adjustStat("creativity", -1);
       degradeWardrobe(hours * 6 + job.tier * 2);
+      const shiftDelta = outcomeDelta([
+        "+" + formatMoney(pay),
+        "+" + xpGain + " " + localize({ he: "ניסיון", en: "exp" }),
+        hours + " " + localize({ he: "שעות", en: "h" })
+      ]);
       flashMessage(localize({
-        he: "משמרת הסתיימה: +" + formatMoney(pay),
-        en: "Shift complete: +" + formatMoney(pay)
+        he: "משמרת הסתיימה" + shiftDelta,
+        en: "Shift complete" + shiftDelta
       }), "good");
       playSfx("cash");
       updateUnlocks();
@@ -5798,9 +6042,10 @@
       changeCash(-cost);
       gameState.wardrobeTier = item.tier;
       gameState.wardrobeWear = 100;
+      const wardrobeDelta = outcomeDelta([formatMoney(-cost), "+1 " + localize({ he: "מלתחה", en: "wardrobe" })]);
       flashMessage(localize({
-        he: "המלתחה עלתה לדרגה " + item.tier + ".",
-        en: "Wardrobe upgraded to tier " + item.tier + "."
+        he: "המלתחה עלתה לדרגה " + item.tier + "." + wardrobeDelta,
+        en: "Wardrobe upgraded to tier " + item.tier + "." + wardrobeDelta
       }), "good");
       playSfx("cash");
       saveGame();
@@ -8380,12 +8625,15 @@
         </div>
         <div class="controls-box">
           <button class="icon-btn status-open-btn" data-action="toggleStatusWindow" data-value="" title="${localize({ he: "סטטוס יומי", en: "Daily status" })}">${localize({ he: "סטטוס", en: "Status" })}</button>
-          <button class="icon-btn" data-action="setLanguage" data-value="${gameState.language === "he" ? "en" : "he"}">${gameState.language === "he" ? "EN" : "עב"}</button>
-          <button class="icon-btn" data-action="saveGame" title="${localize({ he: "שמור", en: "Save" })}">${localize({ he: "שמור", en: "Save" })}</button>
-          <button class="icon-btn" data-action="toggleMute" title="${t("mute")}">${gameState.muted ? localize({ he: "שקט", en: "Muted" }) : localize({ he: "צליל", en: "Sound" })}</button>
           <button class="icon-btn ${gameState.focusMode ? "active" : ""}" data-action="toggleFocusMode" title="${localize({ he: "מסך ממוקד", en: "Focus mode" })}">${gameState.focusMode ? localize({ he: "ממוקד", en: "Focus" }) : localize({ he: "קלאסי", en: "Classic" })}</button>
-          <button class="icon-btn" data-action="showStart" title="${t("newYear")}">${localize({ he: "חדש", en: "New" })}</button>
-          <button class="icon-btn fs-btn" data-action="toggleFullscreen" title="${localize({ he: "מסך מלא", en: "Fullscreen" })}">⛶</button>
+          <button class="icon-btn hud-more-btn ${dom.hudMenuOpen ? "active" : ""}" data-action="toggleHudMenu" title="${localize({ he: "עוד אפשרויות", en: "More options" })}">⋯</button>
+          <div class="hud-secondary-group ${dom.hudMenuOpen ? "open" : ""}">
+            <button class="icon-btn" data-action="setLanguage" data-value="${gameState.language === "he" ? "en" : "he"}">${gameState.language === "he" ? "EN" : "עב"}</button>
+            <button class="icon-btn" data-action="saveGame" title="${localize({ he: "שמור", en: "Save" })}">${localize({ he: "שמור", en: "Save" })}</button>
+            <button class="icon-btn" data-action="toggleMute" title="${t("mute")}">${gameState.muted ? localize({ he: "שקט", en: "Muted" }) : localize({ he: "צליל", en: "Sound" })}</button>
+            <button class="icon-btn" data-action="showStart" title="${t("newYear")}">${localize({ he: "חדש", en: "New" })}</button>
+            <button class="icon-btn fs-btn" data-action="toggleFullscreen" title="${localize({ he: "מסך מלא", en: "Fullscreen" })}">⛶</button>
+          </div>
         </div>
       `;
     }
@@ -8740,6 +8988,7 @@
       const newsItems = computeNewsItems();
       const nextTask = nextFilmTask();
       const taskUrgent = nextTask && ((gameState.day > nextTask.day) || (nextTask.day - gameState.day) <= 3);
+      const nextGoal = computeNextGoal();
       dom.boardStage.innerHTML = `
         <div class="win95-shell">
           <section class="win95-main">
@@ -8758,6 +9007,12 @@
                 </button>
                 <button class="icon-btn strip-btn" data-action="endDay">${localize({ he: "לישון / מעבר יום", en: "Sleep / End day" })}</button>
               </div>
+            </div>
+            <div class="next-goal">
+              <div class="next-goal-label">🎯 ${localize({ he: "היעד הבא", en: "Next goal" })}</div>
+              <div class="next-goal-title">${nextGoal.title}</div>
+              ${nextGoal.sub ? `<div class="next-goal-sub">${nextGoal.sub}</div>` : ""}
+              ${nextGoal.ctaBuilding ? `<button class="next-goal-cta" data-action="goAndShowActions" data-value="${nextGoal.ctaBuilding}">${nextGoal.ctaLabel}</button>` : ""}
             </div>
             <div class="board-route-row">
               ${cityTravelMarkup(city, buildings, inCityHint)}
@@ -8802,6 +9057,15 @@
         const cat = building.category || "lifestyle";
         (groups[cat] = groups[cat] || []).push(buildingId);
       });
+      function buildingLockHint(buildingId) {
+        if (["fund", "investor", "casino"].includes(buildingId) && !gameState.jobId) {
+          return localize({ he: "ייפתח אחרי עבודה ראשונה", en: "Unlocks after your first job" });
+        }
+        if (buildingId === "bank" && gameState.cash < 500 && gameState.bank <= 0) {
+          return localize({ he: "דורש 500 ₪ נזילים", en: "Needs 500 ₪ liquid" });
+        }
+        return null;
+      }
       function buildingButton(buildingId) {
         const building = getBuilding(buildingId);
         const selected = buildingId === gameState.currentBuilding;
@@ -8810,11 +9074,13 @@
         const visited = gameState.buildingVisits && gameState.buildingVisits[visitKey];
         const hasScene = sceneCardButtons(buildingId).length > 0;
         const fresh = hasScene && !visited;
+        const lockHint = buildingLockHint(buildingId);
         return `
-          <button class="dest-btn ${selected ? "selected" : ""} ${target ? "target" : ""} ${fresh ? "fresh-locals" : ""}" style="--tone-a:${building.color[0]};--tone-b:${building.color[1]};" data-action="openLocationDetail" data-value="building:${buildingId}">
+          <button class="dest-btn ${selected ? "selected" : ""} ${target ? "target" : ""} ${fresh ? "fresh-locals" : ""}" style="--tone-a:${building.color[0]};--tone-b:${building.color[1]};" data-action="goAndShowActions" data-value="${buildingId}">
             ${fresh ? `<span class="fresh-badge" title="${localize({ he: "אנשי מקום חדשים", en: "New locals here" })}">✨</span>` : ""}
             <strong>${localize(building.short)}</strong>
             <span>${localize(building.sub || building.label)}</span>
+            ${lockHint ? `<span class="dest-lock-hint">🔒 ${lockHint}</span>` : ""}
           </button>
         `;
       }
@@ -8998,32 +9264,6 @@
       const d = dom.locationDetail;
       if (!d) {
         return "";
-      }
-      if (d.type === "building") {
-        const building = getBuilding(d.id);
-        if (!building) return "";
-        const city = getCity();
-        const visitKey = city.id + ":" + d.id;
-        const visited = gameState.buildingVisits && gameState.buildingVisits[visitKey];
-        const isHere = d.id === gameState.currentBuilding;
-        return `
-          <div class="detail-backdrop" data-action="closeLocationDetail"></div>
-          <div class="detail-modal" style="--tone-a:${building.color[0]};--tone-b:${building.color[1]};">
-            <div class="detail-head">
-              <strong>${localize(building.label)}</strong>
-              <button class="mini-btn" data-action="closeLocationDetail">${t("close")}</button>
-            </div>
-            <div class="detail-body">
-              <p class="detail-copy">${localize(building.sub || building.label)}</p>
-              ${visited ? "" : `<p class="detail-fresh">✨ ${localize({ he: "עוד לא ביקרת כאן", en: "You haven't visited yet" })}</p>`}
-            </div>
-            <div class="detail-actions">
-              ${isHere
-                ? `<span class="detail-here-tag">${localize({ he: "אתה כבר כאן", en: "You're already here" })}</span>`
-                : `<button class="action-btn detail-go" data-action="confirmGoToBuilding" data-value="${d.id}">${localize({ he: "לך לשם", en: "Go there" })}</button>`}
-            </div>
-          </div>
-        `;
       }
       if (d.type === "city") {
         const entry = CITIES.find((c) => c.id === d.id);
@@ -9483,6 +9723,38 @@
       `;
     }
 
+    function jobCardMarkup(job) {
+      const wage = "$" + Math.round(job.wage * economyProfile().wages) + "/h";
+      const reqDefs = [
+        { key: "education", have: gameState.education, need: job.req.education, label: t("education") },
+        { key: "wardrobe", have: gameState.wardrobeTier, need: job.req.wardrobe, label: localize({ he: "מלתחה", en: "Wardrobe" }) },
+        { key: "experience", have: gameState.experience, need: job.req.experience, label: localize({ he: "ניסיון", en: "Experience" }) },
+        { key: "reputation", have: gameState.reputation, need: job.req.reputation, label: t("reputation") }
+      ].filter((r) => r.need > 0);
+      const missing = reqDefs.filter((r) => r.have < r.need);
+      const qualifies = missing.length === 0;
+      const chips = reqDefs.map((r) => `<span class="req-chip ${r.have >= r.need ? "ok" : "bad"}">${r.label}: ${r.have}/${r.need}</span>`).join("");
+      const onlyWardrobeMissing = missing.length === 1 && missing[0].key === "wardrobe";
+      const suitCost = formatMoney(Math.round(WARDROBES[0].price * priceScale()));
+      const blockerLine = !qualifies ? `
+        <div class="job-blocker">
+          <span>${localize({ he: "חסר: " + missing.map((r) => r.label).join(", "), en: "Missing: " + missing.map((r) => r.label).join(", ") })}</span>
+          ${onlyWardrobeMissing ? `<button class="job-blocker-cta" data-action="goAndShowActions" data-value="wardrobe">${localize({ he: "צריך חליפה — עבור/י לחנות (" + suitCost + ")", en: "Need a suit — go to the shop (" + suitCost + ")" })}</button>` : ""}
+        </div>
+      ` : "";
+      return `
+        <div class="job-card ${qualifies ? "qualifies" : "blocked"}">
+          <div class="job-card-head">
+            <strong>${localize(job.title)}</strong>
+            <span>${wage}</span>
+          </div>
+          <div class="job-reqs">${chips}</div>
+          ${blockerLine}
+          <button class="action-btn job-apply-btn" data-action="applyJob" data-value="${job.id}">${localize({ he: "הגש/י מועמדות", en: "Apply" })}</button>
+        </div>
+      `;
+    }
+
     function renderOfferCard(offer, index) {
       return `
         <div class="offer-card">
@@ -9531,11 +9803,8 @@
           return `
             <div class="action-group">
               <h3>${t("salaryPath")}</h3>
-              <div class="action-buttons">
-                ${JOBS.map((job) => buttonMarkup("applyJob", job.id, localize(job.title), localize({
-                  he: "דרישות: השכלה " + job.req.education + ", מלתחה " + job.req.wardrobe + ", ניסיון " + job.req.experience + ", מוניטין " + job.req.reputation,
-                  en: "Requires edu " + job.req.education + ", wardrobe " + job.req.wardrobe + ", exp " + job.req.experience + ", rep " + job.req.reputation
-                }), "$" + Math.round(job.wage * economyProfile().wages) + "/h")).join("")}
+              <div class="job-cards">
+                ${JOBS.map(jobCardMarkup).join("")}
               </div>
             </div>
             ${activeJob ? (() => {
@@ -10204,9 +10473,8 @@
         } else if (action === "closeLocationDetail") {
           dom.locationDetail = null;
           render();
-        } else if (action === "confirmGoToBuilding") {
-          dom.locationDetail = null;
-          dom.hereActionsOpen = false;
+        } else if (action === "goAndShowActions") {
+          dom.hereActionsOpen = true;
           goToBuilding(value);
         } else if (action === "confirmFlyTo") {
           dom.locationDetail = null;
@@ -10217,6 +10485,9 @@
           render();
         } else if (action === "closeHereActions") {
           dom.hereActionsOpen = false;
+          render();
+        } else if (action === "toggleHudMenu") {
+          dom.hudMenuOpen = !dom.hudMenuOpen;
           render();
         } else if (action === "closeNotice") {
           if (dom.noticeTimer) {
@@ -10346,6 +10617,7 @@
         classicPanelTab: null,
         locationDetail: null,
         hereActionsOpen: false,
+        hudMenuOpen: false,
         forceStart: false
       };
       bindEvents();
