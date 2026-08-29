@@ -1470,6 +1470,7 @@
         height: auto;
         min-height: 100vh;
         grid-template-rows: auto auto;
+        overflow: visible;
       }
 
       .hud {
@@ -1532,14 +1533,33 @@
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 4px;
       padding: 24px 6px 6px;
+      position: sticky;
+      top: 0;
+      z-index: 15;
     }
 
     .status-box.hud-summary {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 4px;
       padding: 0;
       background: transparent;
       box-shadow: none;
+    }
+
+    .status-box.hud-summary .metric.hud-clock {
+      background: var(--kc-accent-soft);
+      border-color: var(--kc-accent);
+    }
+
+    .status-box.hud-summary .metric.hud-clock .metric-label {
+      color: var(--kc-text);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .status-box.hud-summary .metric.hud-clock .metric-value {
+      color: var(--kc-accent);
+      font-weight: 600;
     }
 
     .status-box.hud-summary .metric {
@@ -1575,9 +1595,13 @@
     }
 
     .layout {
-      grid-template-columns: 300px minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr);
       gap: 4px;
       padding: 4px;
+    }
+
+    .side-panel {
+      display: none;
     }
 
     .board-stage {
@@ -2566,6 +2590,181 @@
 
     .notice-dialog-body p + p {
       margin-top: 6px;
+    }
+
+    /* ---- classic mode: "you can do here" folded into the scene, thematic locations, tabbed panel + location detail modal ---- */
+    .scene-here {
+      display: grid;
+      gap: 6px;
+      padding: 8px;
+      background: var(--kc-card-2);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
+    }
+
+    .scene-here-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--kc-text-dim);
+    }
+
+    .travel-tag {
+      display: block;
+      font-size: 11px;
+      opacity: 0.8;
+    }
+
+    .dest-btn {
+      background: color-mix(in srgb, var(--tone-a, var(--kc-line-strong)) 22%, var(--kc-card) 78%) !important;
+      border-color: color-mix(in srgb, var(--tone-a, var(--kc-line-strong)) 45%, var(--kc-line) 55%) !important;
+    }
+
+    .dest-btn.selected {
+      background: color-mix(in srgb, var(--tone-a, var(--kc-accent)) 38%, var(--kc-card) 62%) !important;
+      border-color: var(--tone-a, var(--kc-accent)) !important;
+      color: var(--kc-text) !important;
+    }
+
+    .panel-open-btn {
+      position: relative;
+    }
+
+    .panel-open-badge {
+      position: absolute;
+      top: -3px;
+      inset-inline-end: -3px;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--kc-bad);
+      box-shadow: 0 0 0 2px var(--kc-bg);
+    }
+
+    .panel-backdrop,
+    .detail-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 92;
+    }
+
+    .panel-modal {
+      position: fixed;
+      inset-inline-end: 12px;
+      inset-block: 12px;
+      width: min(360px, calc(100vw - 24px));
+      z-index: 93;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      background: var(--kc-card);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--kc-card-2);
+      color: var(--kc-text);
+      font-size: 13px;
+    }
+
+    .panel-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      padding: 8px;
+      border-bottom: 1px solid var(--kc-line);
+    }
+
+    .panel-tab {
+      padding: 5px 8px;
+      font-size: 11px;
+      background: var(--kc-card-2);
+      color: var(--kc-text-dim);
+      border: 1px solid var(--kc-line);
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .panel-tab.active {
+      background: var(--kc-accent-soft);
+      color: var(--kc-accent);
+      border-color: var(--kc-accent);
+    }
+
+    .panel-body {
+      padding: 10px;
+      overflow: auto;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .detail-modal {
+      position: fixed;
+      inset-inline: 12px;
+      bottom: 12px;
+      max-width: 420px;
+      margin-inline: auto;
+      z-index: 93;
+      display: grid;
+      gap: 8px;
+      padding: 4px;
+      background: var(--kc-card);
+      border: 1px solid color-mix(in srgb, var(--tone-a, var(--kc-line)) 45%, var(--kc-line) 55%);
+      border-radius: var(--kc-radius);
+    }
+
+    .detail-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: color-mix(in srgb, var(--tone-a, var(--kc-card-2)) 22%, var(--kc-card-2) 78%);
+      color: var(--kc-text);
+      border-radius: calc(var(--kc-radius) - 3px) calc(var(--kc-radius) - 3px) 0 0;
+    }
+
+    .detail-body {
+      padding: 0 10px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .detail-copy {
+      margin: 0;
+      font-size: 12px;
+      color: var(--kc-text-dim);
+      line-height: 1.4;
+    }
+
+    .detail-fresh {
+      margin: 0;
+      font-size: 11px;
+      color: var(--kc-warn);
+    }
+
+    .detail-actions {
+      display: flex;
+      justify-content: flex-end;
+      padding: 6px 10px 10px;
+    }
+
+    .detail-here-tag {
+      font-size: 11px;
+      color: var(--kc-text-faint);
+    }
+
+    .detail-go {
+      background: var(--kc-accent) !important;
+      color: #0a0a0c !important;
+      font-weight: 700;
     }
 
     /* ---- focus mode: Apple HIG-style parallel flow (one decision per screen) ---- */
@@ -8129,8 +8328,13 @@
 
     function renderHud() {
       const activeJob = getJob(gameState.jobId);
+      const month = currentMonth();
       dom.hud.innerHTML = `
         <div class="status-box hud-summary">
+          <div class="metric hud-clock">
+            <div class="metric-label">${formatHour(gameState.hour)}</div>
+            <div class="metric-value">${t("timeStrip", { day: gameState.day, month })}</div>
+          </div>
           <div class="metric">
             <div class="metric-label">${t("cash")}</div>
             <div class="metric-value">${formatMoney(gameState.cash)}</div>
@@ -8504,70 +8708,14 @@
       const hint = currentHint();
       const month = currentMonth();
       const currentBuilding = getBuilding(gameState.currentBuilding);
-      const activeJob = getJob(gameState.jobId);
-      const focusedProject = getFocusedProject();
       const buildings = visibleBuildings(city);
       const inCityHint = buildings.includes(hint.building) ? hint.building : null;
-      const wornWardrobe = gameState.wardrobeTier ? WARDROBES.find((w) => w.tier === gameState.wardrobeTier) : null;
-      const ownedGear = [
-        gameState.equipment.camera && localize({ he: "מצלמת כתף", en: "Shoulder camera" }),
-        gameState.equipment.studio && localize({ he: "עמדת עריכה", en: "Edit station" }),
-        gameState.equipment.insurance && localize({ he: "סאונד ותאורה", en: "Sound & light" })
-      ].filter(Boolean);
-      const activeModifiers = Array.isArray(gameState.activeModifiers) ? gameState.activeModifiers : [];
       const suggestedMoves = computeSuggestedMoves();
       const newsItems = computeNewsItems();
+      const nextTask = nextFilmTask();
+      const taskUrgent = nextTask && ((gameState.day > nextTask.day) || (nextTask.day - gameState.day) <= 3);
       dom.boardStage.innerHTML = `
         <div class="win95-shell">
-          <section class="win95-status">
-            ${renderFilmTaskBlock()}
-            <div class="win95-panel-title">${localize({ he: "חשבונות", en: "Ledger" })}</div>
-            <div class="ledger-stack">
-              ${statusRowMarkup(t("cash"), formatMoney(gameState.cash), "cash")}
-              ${statusRowMarkup(t("bank"), formatMoney(gameState.bank), "bank")}
-              ${statusRowMarkup(localize({ he: "חוב", en: "Debt" }), formatMoney(-gameState.debt), gameState.debt ? "debt" : "")}
-              ${statusRowMarkup(t("reputation"), String(gameState.reputation), "plain")}
-              ${statusRowMarkup(t("education"), String(gameState.education), "plain")}
-              ${statusRowMarkup(localize({ he: "ניסיון", en: "Experience" }), String(gameState.experience | 0), "plain")}
-              ${statusRowMarkup(t("creativity"), String(gameState.creativity), "plain")}
-            </div>
-            <div class="win95-note">
-              <strong>${t("job")}</strong>
-              <span>${activeJob ? localize(activeJob.title) : t("noJob")}</span>
-            </div>
-            <div class="win95-note">
-              <strong>${t("housing")}</strong>
-              <span>${localize(HOUSING[gameState.housing].name)}</span>
-            </div>
-            <div class="inventory-block">
-              <div class="win95-panel-title">${localize({ he: "מה שיש לי", en: "What I own" })}</div>
-              <div class="inv-line">
-                <strong>${localize({ he: "לבוש", en: "Wearing" })}</strong>
-                <span>${wornWardrobe ? localize(wornWardrobe.name) : localize({ he: "הבגדים שלי, בלי שדרוג", en: "My own clothes, no upgrade" })}</span>
-                ${wornWardrobe ? `<div class="inv-wear"><div class="inv-wear-fill" style="width:${Math.max(0, Math.min(100, gameState.wardrobeWear))}%;"></div></div>` : ""}
-              </div>
-              <div class="inv-line">
-                <strong>${localize({ he: "ציוד שקניתי", en: "Gear I bought" })}</strong>
-                <div class="inv-chips">
-                  ${ownedGear.length ? ownedGear.map((g) => `<span class="inv-chip">${g}</span>`).join("") : `<span class="inv-empty">${localize({ he: "עוד אין ציוד", en: "No gear yet" })}</span>`}
-                </div>
-              </div>
-            </div>
-            ${activeModifiers.length ? `
-              <div class="inventory-block">
-                <div class="win95-panel-title">${localize({ he: "אפקטים פעילים היום", en: "Active effects today" })}</div>
-                <div class="inv-line">
-                  <div class="inv-chips">
-                    ${activeModifiers.map(modifierChipMarkup).join("")}
-                  </div>
-                </div>
-              </div>
-            ` : ""}
-            ${gameState.filmUnlocked ? "" : renderUnlockProgress()}
-            ${renderStoryBeatBlock()}
-            ${gameState.projects && gameState.projects.length ? renderProjectsBlock() : ""}
-            ${renderNpcsBlock()}
-          </section>
           <section class="win95-main">
             <div class="win95-strip">
               <div class="strip-place">
@@ -8579,6 +8727,9 @@
                 <span>${t("timeStrip", { day: gameState.day, month })}</span>
               </div>
               <div class="strip-actions">
+                <button class="icon-btn panel-open-btn" data-action="openClassicPanel" data-value="ledger" title="${localize({ he: "פרטים — חשבונות, מה שיש לי, אנשים, עלילה", en: "Details — ledger, inventory, people, story" })}">
+                  ${localize({ he: "פרטים", en: "Details" })}${taskUrgent ? `<span class="panel-open-badge"></span>` : ""}
+                </button>
                 <button class="icon-btn strip-btn" data-action="endDay">${localize({ he: "לישון / מעבר יום", en: "Sleep / End day" })}</button>
               </div>
             </div>
@@ -8594,18 +8745,27 @@
             <div class="scene-block" style="--scene-a:${currentBuilding.color[0]};--scene-b:${currentBuilding.color[1]};">
               <div class="scene-title">${localize(currentBuilding.label)}</div>
               <div class="scene-copy">${buildingSpeech(gameState.currentBuilding)}</div>
+              <div class="scene-here">
+                <div class="scene-here-title">${localize({ he: "אפשר לעשות כאן", en: "You can do here" })}</div>
+                <div class="action-groups">
+                  ${renderInteriorActions(gameState.currentBuilding, { includeSleep: false })}
+                </div>
+              </div>
               <div class="scene-hint">${hint.copy || gameState.ticker || t("interiorPrompt")}</div>
               ${newsMarketMarkup(city, newsItems)}
             </div>
           </section>
         </div>
+        ${renderClassicPanel()}
+        ${renderLocationDetail()}
       `;
     }
 
     function cityTravelMarkup(city, buildings, inCityHint) {
+      const otherCities = CITIES.filter((entry) => entry.id !== gameState.city);
       return `
         <div class="destination-block city-block">
-          <div class="dest-header">${localize({ he: "מיקומים בעיר", en: "City locations" })}</div>
+          <div class="dest-header">${localize({ he: "מיקומים", en: "Places" })}</div>
           <div class="dest-grid">
             ${buildings.map((buildingId) => {
               const building = getBuilding(buildingId);
@@ -8616,16 +8776,28 @@
               const hasScene = sceneCardButtons(buildingId).length > 0;
               const fresh = hasScene && !visited;
               return `
-                <button class="dest-btn ${selected ? "selected" : ""} ${target ? "target" : ""} ${fresh ? "fresh-locals" : ""}" style="--tone-a:${building.color[0]};--tone-b:${building.color[1]};" data-action="goToBuilding" data-value="${buildingId}">
+                <button class="dest-btn ${selected ? "selected" : ""} ${target ? "target" : ""} ${fresh ? "fresh-locals" : ""}" style="--tone-a:${building.color[0]};--tone-b:${building.color[1]};" data-action="openLocationDetail" data-value="building:${buildingId}">
                   ${fresh ? `<span class="fresh-badge" title="${localize({ he: "אנשי מקום חדשים", en: "New locals here" })}">✨</span>` : ""}
                   <strong>${localize(building.short)}</strong>
                   <span>${localize(building.sub || building.label)}</span>
                 </button>
               `;
             }).join("")}
+            ${otherCities.map((entry) => {
+              const cost = flightCost(entry.id);
+              const idx = (gameState.flightIndex && gameState.flightIndex[entry.id]) || 1;
+              const trendClass = idx < 0.9 ? "cheap" : (idx > 1.15 ? "spicy" : "");
+              const trendIcon = idx < 0.9 ? "▼" : (idx > 1.15 ? "▲" : "·");
+              return `
+                <button class="dest-btn travel-btn ${trendClass}" style="--tone-a:${entry.palette.a};--tone-b:${entry.palette.b};" data-action="openLocationDetail" data-value="city:${entry.id}">
+                  <span class="travel-tag">✈️</span>
+                  <strong>${localize(entry.name)}</strong>
+                  <span>${t("flyCost", { hours: 3, cost: formatMoney(cost) })} ${trendIcon}</span>
+                </button>
+              `;
+            }).join("")}
           </div>
         </div>
-        ${travelMarkup(city)}
       `;
     }
 
@@ -8649,6 +8821,157 @@
           </div>
         </div>
       `;
+    }
+
+    function renderClassicPanel() {
+      const tab = dom.classicPanelTab;
+      if (!tab) {
+        return "";
+      }
+      const wornWardrobe = gameState.wardrobeTier ? WARDROBES.find((w) => w.tier === gameState.wardrobeTier) : null;
+      const ownedGear = [
+        gameState.equipment.camera && localize({ he: "מצלמת כתף", en: "Shoulder camera" }),
+        gameState.equipment.studio && localize({ he: "עמדת עריכה", en: "Edit station" }),
+        gameState.equipment.insurance && localize({ he: "סאונד ותאורה", en: "Sound & light" })
+      ].filter(Boolean);
+      const activeModifiers = Array.isArray(gameState.activeModifiers) ? gameState.activeModifiers : [];
+      const activeJob = getJob(gameState.jobId);
+      const tabs = [
+        { id: "ledger", icon: "💰", label: { he: "חשבונות", en: "Ledger" } },
+        { id: "own", icon: "🎒", label: { he: "מה שיש לי", en: "What I own" } },
+        { id: "job", icon: "🏠", label: { he: "עבודה ודיור", en: "Job & housing" } },
+        ...(gameState.filmUnlocked ? [] : [{ id: "progress", icon: "🎬", label: { he: "התקדמות", en: "Progress" } }]),
+        { id: "people", icon: "👥", label: { he: "אנשים", en: "People" } },
+        { id: "story", icon: "📖", label: { he: "עלילה", en: "Story" } },
+        { id: "tasks", icon: "📋", label: { he: "משימות הסרט", en: "Film tasks" } }
+      ];
+      let body = "";
+      if (tab === "ledger") {
+        body = `
+          <div class="ledger-stack">
+            ${statusRowMarkup(t("cash"), formatMoney(gameState.cash), "cash")}
+            ${statusRowMarkup(t("bank"), formatMoney(gameState.bank), "bank")}
+            ${statusRowMarkup(localize({ he: "חוב", en: "Debt" }), formatMoney(-gameState.debt), gameState.debt ? "debt" : "")}
+            ${statusRowMarkup(t("reputation"), String(gameState.reputation), "plain")}
+            ${statusRowMarkup(t("education"), String(gameState.education), "plain")}
+            ${statusRowMarkup(localize({ he: "ניסיון", en: "Experience" }), String(gameState.experience | 0), "plain")}
+            ${statusRowMarkup(t("creativity"), String(gameState.creativity), "plain")}
+          </div>
+        `;
+      } else if (tab === "own") {
+        body = `
+          <div class="inventory-block">
+            <div class="inv-line">
+              <strong>${localize({ he: "לבוש", en: "Wearing" })}</strong>
+              <span>${wornWardrobe ? localize(wornWardrobe.name) : localize({ he: "הבגדים שלי, בלי שדרוג", en: "My own clothes, no upgrade" })}</span>
+              ${wornWardrobe ? `<div class="inv-wear"><div class="inv-wear-fill" style="width:${Math.max(0, Math.min(100, gameState.wardrobeWear))}%;"></div></div>` : ""}
+            </div>
+            <div class="inv-line">
+              <strong>${localize({ he: "ציוד שקניתי", en: "Gear I bought" })}</strong>
+              <div class="inv-chips">
+                ${ownedGear.length ? ownedGear.map((g) => `<span class="inv-chip">${g}</span>`).join("") : `<span class="inv-empty">${localize({ he: "עוד אין ציוד", en: "No gear yet" })}</span>`}
+              </div>
+            </div>
+          </div>
+          ${activeModifiers.length ? `
+            <div class="inventory-block">
+              <div class="win95-panel-title">${localize({ he: "אפקטים פעילים היום", en: "Active effects today" })}</div>
+              <div class="inv-line"><div class="inv-chips">${activeModifiers.map(modifierChipMarkup).join("")}</div></div>
+            </div>
+          ` : ""}
+        `;
+      } else if (tab === "job") {
+        body = `
+          <div class="win95-note">
+            <strong>${t("job")}</strong>
+            <span>${activeJob ? localize(activeJob.title) : t("noJob")}</span>
+          </div>
+          <div class="win95-note">
+            <strong>${t("housing")}</strong>
+            <span>${localize(HOUSING[gameState.housing].name)}</span>
+          </div>
+        `;
+      } else if (tab === "progress") {
+        body = renderUnlockProgress();
+      } else if (tab === "people") {
+        body = renderNpcsBlock();
+      } else if (tab === "story") {
+        body = `
+          ${renderStoryBeatBlock()}
+          ${gameState.projects && gameState.projects.length ? renderProjectsBlock() : ""}
+        `;
+      } else if (tab === "tasks") {
+        body = renderFilmTaskBlock();
+      }
+      return `
+        <div class="panel-backdrop" data-action="closeClassicPanel"></div>
+        <div class="panel-modal">
+          <div class="panel-head">
+            <strong>${localize({ he: "פרטים", en: "Details" })}</strong>
+            <button class="mini-btn" data-action="closeClassicPanel">${t("close")}</button>
+          </div>
+          <div class="panel-tabs">
+            ${tabs.map((tb) => `
+              <button class="panel-tab ${tab === tb.id ? "active" : ""}" data-action="setClassicPanelTab" data-value="${tb.id}">${tb.icon} ${localize(tb.label)}</button>
+            `).join("")}
+          </div>
+          <div class="panel-body">${body}</div>
+        </div>
+      `;
+    }
+
+    function renderLocationDetail() {
+      const d = dom.locationDetail;
+      if (!d) {
+        return "";
+      }
+      if (d.type === "building") {
+        const building = getBuilding(d.id);
+        if (!building) return "";
+        const city = getCity();
+        const visitKey = city.id + ":" + d.id;
+        const visited = gameState.buildingVisits && gameState.buildingVisits[visitKey];
+        const isHere = d.id === gameState.currentBuilding;
+        return `
+          <div class="detail-backdrop" data-action="closeLocationDetail"></div>
+          <div class="detail-modal" style="--tone-a:${building.color[0]};--tone-b:${building.color[1]};">
+            <div class="detail-head">
+              <strong>${localize(building.label)}</strong>
+              <button class="mini-btn" data-action="closeLocationDetail">${t("close")}</button>
+            </div>
+            <div class="detail-body">
+              <p class="detail-copy">${localize(building.sub || building.label)}</p>
+              ${visited ? "" : `<p class="detail-fresh">✨ ${localize({ he: "עוד לא ביקרת כאן", en: "You haven't visited yet" })}</p>`}
+            </div>
+            <div class="detail-actions">
+              ${isHere
+                ? `<span class="detail-here-tag">${localize({ he: "אתה כבר כאן", en: "You're already here" })}</span>`
+                : `<button class="action-btn detail-go" data-action="confirmGoToBuilding" data-value="${d.id}">${localize({ he: "לך לשם", en: "Go there" })}</button>`}
+            </div>
+          </div>
+        `;
+      }
+      if (d.type === "city") {
+        const entry = CITIES.find((c) => c.id === d.id);
+        if (!entry) return "";
+        const cost = flightCost(d.id);
+        return `
+          <div class="detail-backdrop" data-action="closeLocationDetail"></div>
+          <div class="detail-modal" style="--tone-a:${entry.palette.a};--tone-b:${entry.palette.b};">
+            <div class="detail-head">
+              <strong>${localize(entry.name)}</strong>
+              <button class="mini-btn" data-action="closeLocationDetail">${t("close")}</button>
+            </div>
+            <div class="detail-body">
+              <p class="detail-copy">${t("flyCost", { hours: 3, cost: formatMoney(cost) })}</p>
+            </div>
+            <div class="detail-actions">
+              <button class="action-btn detail-go" data-action="confirmFlyTo" data-value="${d.id}">${localize({ he: "טוס לשם", en: "Fly there" })}</button>
+            </div>
+          </div>
+        `;
+      }
+      return "";
     }
 
     function newsMarketMarkup(city, newsItems) {
@@ -8920,22 +9243,6 @@
       `;
     }
 
-    function renderSidePanel() {
-      dom.sidePanel.innerHTML = `
-        <section class="panel">
-          <h2>${localize({ he: "משימות", en: "Tasks" })}</h2>
-          <div class="action-groups">
-            <div class="action-group">
-              <h3>${localize({ he: "יום", en: "Day" })}</h3>
-              <div class="action-buttons">
-                ${buttonMarkup("endDay", "", t("sleep"), t("sleepCopy"), formatHour(23))}
-              </div>
-            </div>
-            ${renderInteriorActions(gameState.currentBuilding, { includeSleep: false })}
-          </div>
-        </section>
-      `;
-    }
 
     function renderStatusWindow() {
       if (!dom || !dom.statusWindow) {
@@ -9714,12 +10021,11 @@
       syncDocument();
       applyTheme();
       renderHud();
+      dom.sidePanel.innerHTML = "";
       if (gameState.focusMode) {
         renderBoardFocus();
-        dom.sidePanel.innerHTML = "";
       } else {
         renderBoard();
-        renderSidePanel();
       }
       renderStatusWindow();
       renderNoticeWindow();
@@ -9808,6 +10114,28 @@
         } else if (action === "closeSheet") {
           dom.openSheet = null;
           render();
+        } else if (action === "openClassicPanel") {
+          dom.classicPanelTab = dom.classicPanelTab ? null : (value || "ledger");
+          render();
+        } else if (action === "setClassicPanelTab") {
+          dom.classicPanelTab = value;
+          render();
+        } else if (action === "closeClassicPanel") {
+          dom.classicPanelTab = null;
+          render();
+        } else if (action === "openLocationDetail") {
+          const parts = String(value).split(":");
+          dom.locationDetail = { type: parts[0], id: parts[1] };
+          render();
+        } else if (action === "closeLocationDetail") {
+          dom.locationDetail = null;
+          render();
+        } else if (action === "confirmGoToBuilding") {
+          dom.locationDetail = null;
+          goToBuilding(value);
+        } else if (action === "confirmFlyTo") {
+          dom.locationDetail = null;
+          flyTo(value);
         } else if (action === "closeNotice") {
           if (dom.noticeTimer) {
             root.clearTimeout(dom.noticeTimer);
@@ -9933,6 +10261,8 @@
         statusWindowOpen: false,
         collectionWindowOpen: false,
         openSheet: null,
+        classicPanelTab: null,
+        locationDetail: null,
         forceStart: false
       };
       bindEvents();
