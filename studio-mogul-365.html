@@ -3299,11 +3299,15 @@
 
     /* ---- focus mode: Apple HIG-style parallel flow (one decision per screen) ---- */
     :root.focus-active {
-      --fm-deep: color-mix(in srgb, var(--accent-2) 8%, #0a0a0c 92%);
-      --fm-card: color-mix(in srgb, var(--accent-2) 6%, #131316 94%);
-      --fm-card-2: color-mix(in srgb, var(--accent-2) 5%, #1a1a1e 95%);
-      --fm-line: rgba(255, 255, 255, 0.09);
-      --fm-tint: color-mix(in srgb, var(--accent) 14%, transparent);
+      --paper: var(--kc-text);
+      --paper-2: var(--kc-card-2);
+      --accent: var(--kc-accent);
+      --accent-2: var(--kc-accent);
+      --fm-deep: var(--kc-bg);
+      --fm-card: var(--kc-card);
+      --fm-card-2: var(--kc-card-2);
+      --fm-line: var(--kc-line);
+      --fm-tint: var(--kc-accent-soft);
     }
 
     .icon-btn.active {
@@ -3348,11 +3352,15 @@
     }
 
     .focus-shell {
-      --fm-deep: color-mix(in srgb, var(--accent-2) 8%, #0a0a0c 92%);
-      --fm-card: color-mix(in srgb, var(--accent-2) 6%, #131316 94%);
-      --fm-card-2: color-mix(in srgb, var(--accent-2) 5%, #1a1a1e 95%);
-      --fm-line: rgba(255, 255, 255, 0.09);
-      --fm-tint: color-mix(in srgb, var(--accent) 14%, transparent);
+      --paper: var(--kc-text);
+      --paper-2: var(--kc-card-2);
+      --accent: var(--kc-accent);
+      --accent-2: var(--kc-accent);
+      --fm-deep: var(--kc-bg);
+      --fm-card: var(--kc-card);
+      --fm-card-2: var(--kc-card-2);
+      --fm-line: var(--kc-line);
+      --fm-tint: var(--kc-accent-soft);
       height: 100%;
       overflow-y: auto;
       display: flex;
