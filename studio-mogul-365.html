@@ -5444,6 +5444,10 @@
     .career-choice-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-top:17px; }
     .career-choice { min-height:218px; display:grid; grid-template-rows:auto auto minmax(42px,1fr) auto auto; gap:7px; padding:14px; overflow:hidden; text-align:start; color:var(--studio-cream); background:rgba(255,255,255,.035); border:1px solid rgba(229,238,255,.15); border-radius:12px; transition:transform .16s ease,border-color .16s ease,background .16s ease; }
     .career-choice:hover { transform:translateY(-3px); color:var(--studio-cream); background:rgba(244,185,66,.075); border-color:var(--studio-gold); }
+    .career-choice.current,
+    .career-choice:disabled { cursor:not-allowed; opacity:.42; filter:saturate(.45); }
+    .career-choice.current:hover,
+    .career-choice:disabled:hover { transform:none; color:var(--studio-cream); background:rgba(255,255,255,.035); border-color:rgba(229,238,255,.15); }
     .career-choice-mark { color:var(--career-tone); font:800 1.1rem/1 ui-monospace,SFMono-Regular,Menlo,monospace; text-shadow:0 0 14px color-mix(in srgb,var(--career-tone),transparent 45%); }
     .career-choice-index { color:var(--studio-muted); font:.63rem/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.1em; }
     .career-choice strong { font-size:1.07rem; }
@@ -5523,6 +5527,17 @@
     .annual-billing-note { padding-top:10px; border-top:1px solid rgba(229,238,255,.1); }
     .annual-billing-note span { display:block; color:var(--studio-gold); font-size:.68rem; font-weight:800; }
     .annual-billing-note p { margin:4px 0 0; color:var(--studio-muted); font-size:.72rem; line-height:1.4; }
+    .annual-contacts { padding-top:10px; border-top:1px solid rgba(229,238,255,.1); }
+    .annual-contacts-head { display:flex; align-items:center; justify-content:space-between; gap:8px; color:var(--studio-gold); font-size:.68rem; font-weight:800; }
+    .annual-contacts-head b { color:var(--studio-muted); font-size:.7rem; }
+    .annual-contacts > p { margin:5px 0 0; color:var(--studio-muted); font-size:.72rem; line-height:1.4; }
+    .annual-contact-list { display:grid; gap:1px; margin-top:6px; }
+    .annual-contact { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:7px; padding:7px 0; border-top:1px solid rgba(229,238,255,.08); }
+    .annual-contact i { width:20px; height:20px; display:grid; place-items:center; color:var(--contact-tone); font-style:normal; font-size:.8rem; border:1px solid color-mix(in srgb,var(--contact-tone) 55%,transparent); border-radius:50%; }
+    .annual-contact span { min-width:0; display:grid; gap:1px; }
+    .annual-contact strong { overflow:hidden; color:var(--studio-cream); font-size:.74rem; text-overflow:ellipsis; white-space:nowrap; }
+    .annual-contact small { overflow:hidden; color:var(--studio-muted); font-size:.63rem; text-overflow:ellipsis; white-space:nowrap; }
+    .annual-contact > b { color:var(--contact-tone); font-size:.7rem; }
     .life-week-clock { display:grid; grid-template-columns:minmax(190px,auto) minmax(180px,.75fr) minmax(220px,1fr); align-items:center; gap:18px; padding:10px 0 13px; border-bottom:1px solid rgba(229,238,255,.13); }
     .life-week-clock strong { display:block; margin-top:3px; color:var(--studio-cream); font-size:1.05rem; }
     .life-week-clock p { margin:0; color:var(--studio-muted); font-size:.76rem; line-height:1.45; text-align:end; }
@@ -6651,9 +6666,14 @@
         history: [],
         events: [],
         monthlyEvent: null,
+        seenEventIds: [],
+        contacts: {},
         introSeen: false,
         careerTrack: null,
         careerChoicePending: true,
+        careerPivotPending: false,
+        careerPivotOffered: false,
+        careerPivotUsed: false,
         studyCredits: 0,
         programStartedAt: null
       };
@@ -6684,6 +6704,8 @@
       life.yearActions = Array.isArray(life.yearActions) ? life.yearActions : life.completedThisYear.slice();
       life.history = Array.isArray(life.history) ? life.history : [];
       life.events = Array.isArray(life.events) ? life.events : [];
+      life.seenEventIds = Array.isArray(life.seenEventIds) ? life.seenEventIds.filter((id) => typeof id === "string").slice(-18) : [];
+      life.contacts = life.contacts && typeof life.contacts === "object" && !Array.isArray(life.contacts) ? life.contacts : {};
       life.completedMissionIds = Array.isArray(life.completedMissionIds) ? life.completedMissionIds : [];
       life.monthlyEvent = life.monthlyEvent && typeof life.monthlyEvent === "object" ? life.monthlyEvent : null;
       life.careerTrack = ["acting", "directing", "writing", "youtube"].includes(life.careerTrack) ? life.careerTrack : null;
@@ -6692,6 +6714,9 @@
         life.careerTrack = life.careerTrack || "directing";
         life.careerChoicePending = false;
       }
+      life.careerPivotPending = !!life.careerPivotPending;
+      life.careerPivotOffered = !!life.careerPivotOffered;
+      life.careerPivotUsed = !!life.careerPivotUsed;
       life.studyCredits = Math.max(0, Math.round(Number(life.studyCredits) || 0));
       life.programStartedAt = life.programStartedAt && typeof life.programStartedAt === "object" ? life.programStartedAt : null;
       return life;
@@ -6770,6 +6795,68 @@
       }
     };
 
+    const LIFE_CONTACTS = [
+      { id: "naama-producer", mark: "◆", name: { he: "נעמה כהן", en: "Naama Cohen" }, role: { he: "מפיקה עצמאית", en: "Independent producer" }, tone: "#f4bd4b" },
+      { id: "tali-programmer", mark: "○", name: { he: "טלי אסולין", en: "Tali Assouline" }, role: { he: "אוצרת פסטיבל", en: "Festival programmer" }, tone: "#d07c64" },
+      { id: "yaron-casting", mark: "◇", name: { he: "ירון לב", en: "Yaron Lev" }, role: { he: "מלהק", en: "Casting director" }, tone: "#f19a8f" },
+      { id: "mika-editor", mark: "▣", name: { he: "מיקה אדרי", en: "Mika Edri" }, role: { he: "עורכת", en: "Editor" }, tone: "#b79aea" },
+      { id: "omer-dop", mark: "◉", name: { he: "עומר גרין", en: "Omer Green" }, role: { he: "צלם", en: "Director of photography" }, tone: "#82b4d2" },
+      { id: "ruth-writer", mark: "✦", name: { he: "רותם בר", en: "Rotem Bar" }, role: { he: "תסריטאית", en: "Screenwriter" }, tone: "#9bcd8a" },
+      { id: "dana-creator", mark: "△", name: { he: "דנה פרץ", en: "Dana Peretz" }, role: { he: "יוצרת רשת", en: "Digital creator" }, tone: "#67cfc4" },
+      { id: "gil-agent", mark: "↗", name: { he: "גיל רונן", en: "Gil Ronen" }, role: { he: "סוכן/ת אמנים", en: "Talent agent" }, tone: "#ac9a6a" }
+    ];
+
+    function getLifeContact(contactId) {
+      return LIFE_CONTACTS.find((contact) => contact.id === contactId) || null;
+    }
+
+    function lifeContactTrust(contactId) {
+      const life = ensureLifeState();
+      return clamp(Math.round(Number(life.contacts[contactId]) || 0), 0, 10);
+    }
+
+    function changeLifeContact(contactId, amount) {
+      const contact = getLifeContact(contactId);
+      if (!contact) return null;
+      const life = ensureLifeState();
+      life.contacts[contactId] = clamp(lifeContactTrust(contactId) + Math.round(Number(amount) || 0), 0, 10);
+      return { contact, trust: life.contacts[contactId] };
+    }
+
+    function lifeContactEffectLabel(contactId, amount) {
+      const contact = getLifeContact(contactId);
+      if (!contact) return "";
+      const sign = amount > 0 ? "+" : "";
+      return sign + amount + " " + localize({ he: "אמון · " + contact.name.he, en: "trust · " + contact.name.en });
+    }
+
+    const LIFE_CAREER_STARTER_CONTACT = {
+      acting: "yaron-casting",
+      directing: "omer-dop",
+      writing: "ruth-writer",
+      youtube: "dana-creator"
+    };
+
+    // At two trust points, each person can open one short, location-specific
+    // professional action. The relationship is therefore an actual route,
+    // rather than a decorative counter in the sidebar.
+    const LIFE_CONTACT_OPPORTUNITIES = {
+      fund: { contact: "naama-producer", id: "contact-naama-development", icon: "◆", title: { he: "שיחת פיתוח עם נעמה", en: "Development meeting with Naama" }, copy: { he: "נעמה מפנה שעה כדי לשמוע את הרעיון. צריך להגיע עם תקציב, כיוון, וגם סיבה שהיא לא תתחרט.", en: "Naama makes an hour to hear the idea. Bring a budget, a direction, and a reason she will not regret it." }, effects: { reputation: 4, connections: 3, creativity: 2, cash: -90 }, weeks: 1 },
+      festival: { contact: "tali-programmer", id: "contact-tali-program", icon: "○", title: { he: "להגיש לטלי מסלול פסטיבל", en: "Send Tali a festival route" }, copy: { he: "טלי לא מבטיחה קבלה. היא כן אומרת בדיוק מה חסר לפני שמגישים.", en: "Tali does not promise acceptance. She does say exactly what is missing before you submit." }, effects: { reputation: 5, creativity: 3, education: 1, cash: -65 }, weeks: 1 },
+      casting: { contact: "yaron-casting", id: "contact-yaron-read", icon: "◇", title: { he: "אודישן אישי אצל ירון", en: "A private read with Yaron" }, copy: { he: "ירון לא מבטיח תפקיד; הוא כן מבטיח שיזכור אותך בפעם הבאה שיש משהו מדויק.", en: "Yaron does not promise a role; he does promise to remember you when something fits." }, effects: { reputation: 6, experience: 3, followers: 45, cash: -55 }, weeks: 1 },
+      post: { contact: "mika-editor", id: "contact-mika-cut", icon: "▣", title: { he: "לשבת עם מיקה על הגרסה", en: "Sit with Mika on the cut" }, copy: { he: "מיקה מצביעה על חמש דקות שאף אחד אחר לא העז להגיד שהן לא עובדות.", en: "Mika points to five minutes no one else dared say were not working." }, effects: { creativity: 6, reputation: 3, experience: 3, cash: -80 }, weeks: 1 },
+      crew: { contact: "omer-dop", id: "contact-omer-light", icon: "◉", title: { he: "יום אור עם עומר", en: "A lighting day with Omer" }, copy: { he: "עומר מביא ציוד, ידע, ותזכורת לכך שאור טוב הוא גם זמן וכסף.", en: "Omer brings gear, know-how, and a reminder that good light is also time and money." }, effects: { experience: 5, creativity: 4, reputation: 2, cash: -120 }, weeks: 1 },
+      script: { contact: "ruth-writer", id: "contact-ruth-page", icon: "✦", title: { he: "קריאת עמודים עם רותם", en: "A page read with Rotem" }, copy: { he: "רותם לא תשכתב במקומך. היא כן תסמן את הרגע שבו הסיפור מתחיל לנשום.", en: "Rotem will not rewrite it for you. She will mark the moment the story starts breathing." }, effects: { creativity: 7, education: 1, reputation: 3, cash: -45 }, weeks: 1 },
+      home: { contact: "dana-creator", id: "contact-dana-guest", icon: "△", title: { he: "לצלם עם דנה פרק אורח", en: "Film a guest episode with Dana" }, copy: { he: "הקהל שלה פוגש אותך, והפורמט שלך צריך להחזיק גם מחוץ לחדר.", en: "Her audience meets you, and your format has to hold up outside the room." }, effects: { followers: 260, creativity: 4, connections: 2, soul: -1 }, weeks: 1 },
+      employment: { contact: "gil-agent", id: "contact-gil-intro", icon: "↗", title: { he: "פגישת היכרות עם גיל", en: "An introduction meeting with Gil" }, copy: { he: "גיל לא חותם במקום. הוא בודק אם יש לך מה להבטיח ומה להראות.", en: "Gil does not sign on the spot. He checks whether you have something to promise and something to show." }, effects: { reputation: 5, connections: 4, experience: 2, cash: -60 }, weeks: 1 }
+    };
+
+    function lifeContactOpportunity(buildingId) {
+      const opportunity = LIFE_CONTACT_OPPORTUNITIES[buildingId];
+      if (!opportunity || lifeContactTrust(opportunity.contact) < 2) return null;
+      return { ...opportunity, contactTrust: 1 };
+    }
+
     function activeLifeCareer() {
       const life = ensureLifeState();
       return life.careerTrack ? LIFE_CAREERS[life.careerTrack] || null : null;
@@ -6828,6 +6915,440 @@
           { id: "submit", title: { he: "להגיש גרסה לא מושלמת", en: "Submit an imperfect draft" }, copy: { he: "להוציא לעולם עדיף מלהמשיך לשמור במגירה.", en: "Putting it into the world beats keeping it in a drawer." }, effects: { cash: -60, creativity: 5, reputation: 5, soul: -1 } },
           { id: "polish", title: { he: "לבקש הערה אחת חדה", en: "Ask for one sharp note" }, copy: { he: "פחות חשיפה עכשיו, יותר בהירות לפרויקט הבא.", en: "Less exposure now, more clarity for the next project." }, effects: { creativity: 7, love: 2, reputation: 1 } },
           { id: "skip", title: { he: "לוותר ולהגן על הכיוון", en: "Skip it and protect the direction" }, copy: { he: "לא כל תאריך יעד הוא הסיפור הנכון שלך.", en: "Not every deadline is your story." }, effects: { soul: 4, creativity: 3 } }
+        ]
+      },
+      {
+        id: "invoice-ghost", title: { he: "החשבונית נעלמה למגירה", en: "The invoice disappeared into a drawer" },
+        copy: { he: "לקוח מרוצה מהסרטון, אבל כבר שלושה שבועות לא עונה לגבי התשלום. זה הרגע שבו יצירתיות פוגשת הנהלת חשבונות.", en: "The client likes the video, but has ignored payment for three weeks. Creativity has met bookkeeping." },
+        choices: [
+          { id: "call", title: { he: "להתקשר ולדרוש תשלום", en: "Call and demand payment" }, copy: { he: "לא נעים, אבל הכסף הוא לא מחווה אמנותית.", en: "Uncomfortable, but money is not an artistic gesture." }, effects: { cash: 420, reputation: -1, soul: -1 }, weeks: 1 },
+          { id: "soft", title: { he: "לתת עוד שבוע ולשמור על הקשר", en: "Give it another week and keep the relationship" }, copy: { he: "הכסף קטן יותר, אבל השם שלך נשאר ברשימת הטלפונים שלהם.", en: "Less money, but your name stays in their phone." }, effects: { cash: 210, connections: 2, soul: 1 } },
+          { id: "loan", title: { he: "לסגור את הבור באשראי", en: "Close the gap with credit" }, copy: { he: "החודש ניצל. החוב קיבל עוד סיבה להכיר אותך.", en: "The month is saved. Debt has one more reason to know you." }, effects: { cash: 520, debt: 650, soul: -2 } }
+        ]
+      },
+      {
+        id: "location-pulled", title: { he: "הלוקיישן בוטל בלילה", en: "The location was cancelled overnight" },
+        copy: { he: "בעלת הדירה ראתה את רשימת הציוד והחליטה שהאמנות שלך גדולה על הסלון שלה.", en: "The apartment owner saw the equipment list and decided your art was too large for her living room." },
+        choices: [
+          { id: "favor", title: { he: "להפעיל טובה", en: "Call in a favor" }, copy: { he: "מישהו פותח דלת, ואת/ה מגיע/ה עם צוות, קפה ואשמה.", en: "Someone opens a door, and you arrive with crew, coffee, and guilt." }, effects: { connections: -1, experience: 3, reputation: 3, soul: -2 }, weeks: 1 },
+          { id: "rewrite", title: { he: "לשכתב את הסצנה למקום אחר", en: "Rewrite the scene for another place" }, copy: { he: "פחות אידיאלי, אבל לפעמים מגבלה מצילה רעיון.", en: "Less ideal, but a constraint can save an idea." }, effects: { creativity: 6, reputation: 2, cash: -70 }, weeks: 1 },
+          { id: "cancel", title: { he: "לבטל ולספוג את המכה", en: "Cancel and absorb the hit" }, copy: { he: "הפרויקט לא מת, רק מחכה לכסף ולזמן טובים יותר.", en: "The project is not dead; it is waiting for more money and better time." }, effects: { soul: 3, cash: -120, creativity: 2 } }
+        ]
+      },
+      {
+        id: "used-camera", title: { he: "מצלמה משומשת, סיפור מפוקפק", en: "A used camera with a suspicious history" },
+        copy: { he: "מישהו מוכר מצלמה במחיר נמוך מדי. היא נראית מצוין, חוץ מהעובדה שהיא כנראה ראתה שלוש מלחמות וחתונה אחת.", en: "Someone is selling a camera far too cheaply. It looks great, except it has probably seen three wars and one wedding." },
+        choices: [
+          { id: "buy", title: { he: "לקנות ולצלם מיד", en: "Buy it and shoot now" }, copy: { he: "ציוד ביד עדיף מציוד בפינטרסט.", en: "Gear in hand beats gear on Pinterest." }, effects: { cash: -460, experience: 4, followers: 40, creativity: 3 }, weeks: 1 },
+          { id: "rent", title: { he: "לשכור ליום ניסיון", en: "Rent it for a trial day" }, copy: { he: "יקר יותר בטווח הקצר, בטוח יותר מול לקוח.", en: "More expensive short-term, safer in front of a client." }, effects: { cash: -130, experience: 3, reputation: 2 } },
+          { id: "walk", title: { he: "להמשיך עם הסמארטפון", en: "Keep using the phone" }, copy: { he: "הקהל לא תמיד יודע באיזו מצלמה צילמת. הוא כן יודע אם שעמם לו.", en: "The audience does not always know which camera you used. It does know when it is bored." }, effects: { creativity: 4, soul: 2 } }
+        ]
+      },
+      {
+        id: "cut-from-credit", title: { he: "הקרדיט שלך נעלם מהפוסטר", en: "Your credit vanished from the poster" },
+        copy: { he: "הפרויקט עלה, השם שלך לא. כולם אומרים שזו 'טעות גרפית' בדיוק כשהיא עולה כסף.", en: "The project went up; your name did not. Everyone calls it a graphic error precisely when it costs money." },
+        choices: [
+          { id: "fight", title: { he: "לדרוש תיקון פומבי", en: "Demand a public correction" }, copy: { he: "נכון מקצועית, לא תמיד נוח חברתית.", en: "Professionally right, not always socially convenient." }, effects: { reputation: 4, connections: -2, soul: -1 } },
+          { id: "document", title: { he: "לשמור תיעוד וללכת הלאה", en: "Keep documentation and move on" }, copy: { he: "לא כל קרב בונה את התיק שלך.", en: "Not every fight builds your portfolio." }, effects: { soul: 3, creativity: 2 } },
+          { id: "post", title: { he: "לספר על העבודה לקהל שלך", en: "Tell your audience about the work" }, copy: { he: "לא נקמה — נראות. ההבדל חשוב לעורך הדין העתידי.", en: "Not revenge — visibility. The distinction matters to future lawyers." }, effects: { followers: 130, reputation: 2, connections: -1 }, weeks: 1 }
+        ]
+      },
+      {
+        id: "crew-fee", title: { he: "הצוות מבקש את מה שמגיע לו", en: "The crew asks for what they are owed" },
+        copy: { he: "אחרי יום צילום ארוך, הצוות מזכיר שהתעריף שסוכם לא מכסה אפילו נסיעה הביתה.", en: "After a long shoot, the crew reminds you that the agreed rate does not even cover the ride home." },
+        choices: [
+          { id: "pay", title: { he: "לשלם עכשיו", en: "Pay now" }, copy: { he: "יקר היום, זול יותר בפעם הבאה שתרצה/י צוות טוב.", en: "Expensive today, cheaper the next time you need a good crew." }, effects: { cash: -310, connections: 4, reputation: 3 } },
+          { id: "split", title: { he: "לפרוס תשלום ולתעד", en: "Set a payment plan and document it" }, copy: { he: "לא נעים, אבל ישר. זה הרבה יותר מהתעשייה הרגילה.", en: "Uncomfortable, but honest. That is already above industry average." }, effects: { cash: -120, connections: 2, debt: 90 } },
+          { id: "argue", title: { he: "להתווכח על ההסכם", en: "Argue the agreement" }, copy: { he: "חסכת כסף, והפסדת כנראה את קבוצת הווטסאפ החשובה בעיר.", en: "You saved money and probably lost the city's important WhatsApp group." }, effects: { cash: -40, connections: -4, reputation: -3, soul: -1 } }
+        ]
+      },
+      {
+        id: "acting-callback", when: ({ career }) => career && career.id === "acting",
+        title: { he: "קאסטינג מחזיר טלפון", en: "Casting calls back" },
+        copy: { he: "אודישן שני לתפקיד קטן הגיע בדיוק ביום שבו קבעת עבודה. התפקיד קטן; מי שיושב בחדר ממש לא.", en: "A second audition for a small role lands on the day you booked work. The role is small; the people in the room are not." },
+        choices: [
+          { id: "go", title: { he: "לבטל הכול וללכת", en: "Cancel everything and go" }, copy: { he: "אין הבטחה לתפקיד. יש הזדמנות להיות זכיר/ה.", en: "No role is guaranteed. Being memorable is." }, effects: { reputation: 6, connections: 3, cash: -180, soul: -2 }, weeks: 1, contact: "yaron-casting", contactTrust: 2 },
+          { id: "selftape", title: { he: "לבקש סלף־טייפ", en: "Ask for a self-tape" }, copy: { he: "פחות רושם בחדר, יותר שליטה בפריים שלך.", en: "Less impression in the room, more control over your frame." }, effects: { creativity: 4, followers: 75, reputation: 2 }, contact: "yaron-casting", contactTrust: 1 },
+          { id: "work", title: { he: "לשמור על העבודה", en: "Keep the work" }, copy: { he: "לוח הזמנים שלך עדיין קיים, וזה גם סוג של הישג.", en: "Your schedule still exists, which is also an achievement." }, effects: { cash: 240, soul: 2, reputation: -1 } }
+        ]
+      },
+      {
+        id: "directing-actor", when: ({ career }) => career && career.id === "directing",
+        title: { he: "השחקן הראשי רוצה לשכתב", en: "The lead actor wants a rewrite" },
+        copy: { he: "הוא אומר שזה 'לא הכיוון של הדמות'. יש לו גם 180 אלף עוקבים, כך שהדמות קיבלה עורך דין דיגיטלי.", en: "He says it is not the character's direction. He also has 180k followers, so the character has a digital lawyer." },
+        choices: [
+          { id: "listen", title: { he: "להקשיב ולשכתב יחד", en: "Listen and rewrite together" }, copy: { he: "הסצנה משתנה, אבל הוא מגיע לצילומים איתך ולא נגדך.", en: "The scene changes, but he comes to set with you rather than against you." }, effects: { connections: 3, reputation: 2, creativity: 2, soul: -1 }, weeks: 1, contact: "omer-dop", contactTrust: 1 },
+          { id: "hold", title: { he: "להגן על הסצנה", en: "Defend the scene" }, copy: { he: "בימוי הוא גם לדעת איפה לא לזוז.", en: "Directing is also knowing where not to move." }, effects: { reputation: 4, creativity: 3, connections: -2 } },
+          { id: "cut", title: { he: "לחתוך את הסצנה", en: "Cut the scene" }, copy: { he: "הכי זול, הכי כואב, ולפעמים בדיוק הסרט.", en: "The cheapest, the most painful, and sometimes exactly the film." }, effects: { cash: 140, creativity: 4, soul: -2 } }
+        ]
+      },
+      {
+        id: "writing-notes", when: ({ career }) => career && career.id === "writing",
+        title: { he: "הערות של מפיק/ה: 'תעשה את זה פחות אישי'", en: "Producer notes: make it less personal" },
+        copy: { he: "הם אוהבים את הקול שלך, כל עוד הוא נשמע כמו משהו שכבר הצליח בשנה שעברה.", en: "They love your voice, as long as it sounds like something that succeeded last year." },
+        choices: [
+          { id: "commercial", title: { he: "ללכת עם ההערות", en: "Follow the notes" }, copy: { he: "יותר דלתות, פחות טביעת אצבע כרגע.", en: "More doors, less fingerprint for now." }, effects: { cash: 260, connections: 3, reputation: 3, creativity: -3 }, weeks: 1 },
+          { id: "hybrid", title: { he: "למצוא פשרה חכמה", en: "Find a smart compromise" }, copy: { he: "מכרו שתי סצנות, הצלת את השלישית.", en: "Two scenes were sold; the third was saved." }, effects: { creativity: 3, reputation: 2, connections: 1 }, contact: "ruth-writer", contactTrust: 1 },
+          { id: "walk", title: { he: "לשמור על הטקסט וללכת", en: "Keep the script and walk" }, copy: { he: "לא כל 'לא' הוא כישלון. חלקם פשוט תקציב נמוך.", en: "Not every no is failure. Some are simply low budget." }, effects: { creativity: 6, soul: 3, cash: -120, connections: -1 } }
+        ]
+      },
+      {
+        id: "youtube-strike", when: ({ career }) => career && career.id === "youtube",
+        title: { he: "פלטפורמה הורידה סרטון", en: "The platform took down a video" },
+        copy: { he: "המוזיקה ברקע הייתה 'רק לשתי שניות'. האלגוריתם, כידוע, לא מתרגש מאמנות.", en: "The background music was only there for two seconds. The algorithm, famously, is unmoved by art." },
+        choices: [
+          { id: "appeal", title: { he: "להגיש ערעור", en: "File an appeal" }, copy: { he: "שבוע של טפסים בשביל סיכוי שהבוט יתעורר עם חמלה.", en: "A week of forms for a chance the bot wakes up compassionate." }, effects: { followers: 40, reputation: 2, soul: -2 }, weeks: 1 },
+          { id: "recut", title: { he: "לערוך מחדש ולהעלות", en: "Re-edit and repost" }, copy: { he: "קצת פחות קצב, הרבה יותר שליטה על הנכס שלך.", en: "A little less pace, a lot more control over your own asset." }, effects: { creativity: 5, followers: 100, cash: -40 }, weeks: 1, contact: "dana-creator", contactTrust: 1 },
+          { id: "ignore", title: { he: "למחוק ולהמשיך הלאה", en: "Delete it and move on" }, copy: { he: "הסרטון נעלם. את/ה לא חייב/ת להיעלם איתו.", en: "The video disappears. You do not have to disappear with it." }, effects: { soul: 4, creativity: 2, followers: -35 } }
+        ]
+      },
+      {
+        id: "family-weekend", title: { he: "החיים האמיתיים מתקשרים", en: "Real life calls" },
+        copy: { he: "אירוע משפחתי נפל בדיוק על סוף שבוע עבודה. כולם בטוחים שהסרט שלך יכול לחכות; הסרט פחות בטוח.", en: "A family event lands exactly on a work weekend. Everyone is sure your film can wait; the film is less sure." },
+        choices: [
+          { id: "go", title: { he: "לנסוע למשפחה", en: "Go to family" }, copy: { he: "הקרובים נשארים גם כשהפרויקט לא.", en: "The close ones remain even when the project does not." }, effects: { love: 7, soul: 4, reputation: -2 }, weeks: 1 },
+          { id: "split", title: { he: "להגיע רק לחלק", en: "Show up for part of it" }, copy: { he: "כולם קצת מאוכזבים, אבל לפחות זה דמוקרטי.", en: "Everyone is a little disappointed, which at least is democratic." }, effects: { love: 3, experience: 2, soul: -1 } },
+          { id: "stay", title: { he: "להישאר עם העבודה", en: "Stay with the work" }, copy: { he: "הספקת. גם ההודעות המשפחתיות יזכרו את זה.", en: "You delivered. The family group chat will remember it too." }, effects: { cash: 180, experience: 4, love: -4, reputation: 2 }, weeks: 1 }
+        ]
+      },
+      {
+        id: "bad-review", title: { he: "ביקורת קטנה, עקיצה גדולה", en: "A small review, a large sting" },
+        copy: { he: "מישהו כתב שהעבודה שלך 'מבטיחה, אבל לא בטוח שהיא יודעת מה היא רוצה להיות'. את/ה קורא/ת את זה שוב.", en: "Someone wrote that your work is promising, but not sure it knows what it wants to be. You read it again." },
+        choices: [
+          { id: "reply", title: { he: "להגיב בפומבי", en: "Reply publicly" }, copy: { he: "לפעמים להגן על עצמך נשמע כמו לקדם את הביקורת.", en: "Sometimes defending yourself sounds like promoting the review." }, effects: { followers: 85, reputation: -2, soul: -2 } },
+          { id: "learn", title: { he: "לפרק את ההערה וללמוד", en: "Break down the note and learn" }, copy: { he: "כואב יותר, שימושי הרבה יותר.", en: "More painful, much more useful." }, effects: { creativity: 6, education: 1, soul: -1 }, weeks: 1 },
+          { id: "ignore", title: { he: "לסגור את הדפדפן", en: "Close the browser" }, copy: { he: "לא כל אדם עם מקלדת הוא קהל היעד שלך.", en: "Not everyone with a keyboard is your audience." }, effects: { soul: 5, love: 2 } }
+        ]
+      },
+      {
+        id: "festival-volunteer", title: { he: "פסטיבל מחפש מתנדבים", en: "A festival needs volunteers" },
+        copy: { he: "שום כסף, תג שם, וסיכוי לפגוש את כל מי שמקבל החלטות תוך כדי חיפוש חשמל לטלפון.", en: "No money, a name badge, and a chance to meet decision-makers while looking for a phone charger." },
+        choices: [
+          { id: "yes", title: { he: "לקחת משמרות", en: "Take shifts" }, copy: { he: "עבודה אפורה עם תוצאות צבעוניות מאוד.", en: "Grey work with unexpectedly colorful results." }, effects: { connections: 5, reputation: 3, soul: -2 }, weeks: 1, contact: "tali-programmer", contactTrust: 2 },
+          { id: "attend", title: { he: "לקנות כרטיס וללכת רק לתוכן", en: "Buy a ticket and attend for the work" }, copy: { he: "פחות נטוורקינג כפוי, יותר השראה וחשבון.", en: "Less forced networking, more inspiration and a bill." }, effects: { cash: -120, creativity: 6, soul: 2 } },
+          { id: "skip", title: { he: "לשמור את הזמן לפרויקט", en: "Keep the time for your project" }, copy: { he: "הדלתות בחוץ, אבל גם הפרויקט צריך להיגמר מתישהו.", en: "The doors are outside, but the project needs to finish sometime too." }, effects: { creativity: 5, experience: 2 } }
+        ]
+      },
+      {
+        id: "debt-auto-debit", when: ({ state }) => state.debt >= 7000,
+        title: { he: "הבנק קבע עובדה", en: "The bank made a decision" },
+        copy: { he: "חיוב אוטומטי קטן ירד מהחשבון. קטן הוא מונח רגשי מאוד כשיש לך 300 ₪.", en: "A small automatic payment left the account. Small is an emotional term when you have 300 shekels." },
+        choices: [
+          { id: "pay", title: { he: "לשלם יותר ולצמצם ריבית", en: "Pay more and cut interest" }, copy: { he: "כואב עכשיו, אבל החוב מפסיק לדבר ראשון בכל בוקר.", en: "It hurts now, but debt stops being the first thing to speak each morning." }, effects: { cash: -380, debt: -520, soul: 2 } },
+          { id: "extend", title: { he: "לבקש פריסה", en: "Ask to extend the plan" }, copy: { he: "הנשימה חזרה, רק במחיר של חוב שמזדקן יפה.", en: "Breathing returns, at the price of debt aging gracefully." }, effects: { cash: 170, debt: 310, soul: -1 } },
+          { id: "sell", title: { he: "למכור משהו מהבית", en: "Sell something from home" }, copy: { he: "הדירה נראית ריקה יותר. העתיד קצת פחות.", en: "The apartment looks emptier. The future, a little less so." }, effects: { cash: 280, debt: -180, soul: -2 } }
+        ]
+      },
+      {
+        id: "rent-increase", when: ({ state }) => state.housing !== "couch",
+        title: { he: "בעל הבית גילה את השוק", en: "The landlord discovered the market" },
+        copy: { he: "הודעה קצרה: השכירות עולה. ההודעה ארוכה יותר אם קוראים את האותיות הקטנות.", en: "A short message: rent is going up. It gets longer if you read the fine print." },
+        choices: [
+          { id: "negotiate", title: { he: "לנהל משא ומתן", en: "Negotiate" }, copy: { he: "צריך אומץ, נתונים, ולפחות קפה אחד עם בעל הבית.", en: "It takes courage, data, and at least one coffee with the landlord." }, effects: { cash: -70, soul: -1, connections: 1 }, weeks: 1 },
+          { id: "roommate", title: { he: "להכניס שותף/ה", en: "Bring in a roommate" }, copy: { he: "פחות שקט, יותר מזומן, וסיכוי חדש למי אוכל את החלב שלך.", en: "Less quiet, more cash, and a new suspect for the missing milk." }, effects: { cash: 240, soul: -3, love: -1 } },
+          { id: "move", title: { he: "לחפש מקום זול", en: "Look for somewhere cheaper" }, copy: { he: "הדירה הבאה לא מושלמת. גם התקציב כבר לא.", en: "The next apartment is not perfect. Neither is the budget anymore." }, effects: { cash: -180, soul: 2, creativity: 2 }, weeks: 1 }
+        ]
+      },
+      {
+        id: "free-brand", when: ({ state }) => state.followers >= 100,
+        title: { he: "מותג מציע 'חשיפה'", en: "A brand offers exposure" },
+        copy: { he: "הם אוהבים את הסגנון שלך ורוצים שלושה סרטונים. התקציב הוא מוצר, חיוך, ומילה על העתיד.", en: "They love your style and want three videos. The budget is a product, a smile, and a word about the future." },
+        choices: [
+          { id: "take", title: { he: "לקחת את החשיפה", en: "Take the exposure" }, copy: { he: "זה באמת מגיע לקהל חדש. גם המייל הבא יהיה חינם.", en: "It really reaches a new audience. The next email will be free too." }, effects: { followers: 260, connections: 2, cash: -60, soul: -2 }, weeks: 1 },
+          { id: "counter", title: { he: "להציע הצעת מחיר", en: "Send a quote" }, copy: { he: "לא בטוח שיחתמו. בטוח שידעו שאת/ה מקצוען/ית.", en: "They may not sign. They will know you are a professional." }, effects: { cash: 220, reputation: 3, connections: -1 } },
+          { id: "no", title: { he: "לסרב בנימוס", en: "Decline politely" }, copy: { he: "לא כל תיוג הוא אסטרטגיה עסקית.", en: "Not every tag is a business strategy." }, effects: { soul: 4, creativity: 3 } }
+        ]
+      },
+      {
+        id: "tuition-due", when: ({ career, life }) => career && career.program && life.programStartedAt,
+        title: { he: "שכר הלימוד מקדים אותך", en: "Tuition gets there before you do" },
+        copy: { he: "התשלום הבא הגיע, וכך גם הודעה על קנס פיגור. בית ספר לקולנוע תמיד מלמד על דרמה.", en: "The next payment arrived, along with a late-fee warning. Film school always teaches drama." },
+        choices: [
+          { id: "pay", title: { he: "לשלם ולהישאר במסלול", en: "Pay and stay on track" }, copy: { he: "אין זוהר בתשלום, אבל יש עוד חודש לימודים.", en: "There is no glamour in payment, but there is another month of study." }, effects: { cash: -260, education: 1, soul: -1 } },
+          { id: "work", title: { he: "לקחת עבודת סוף שבוע", en: "Take a weekend job" }, copy: { he: "הכסף מגיע, השיעורים נשארים מאחור רגע.", en: "The money arrives; class slips behind for a moment." }, effects: { cash: 330, experience: 3, creativity: -2 }, weeks: 1 },
+          { id: "pause", title: { he: "להקפיא לחודש", en: "Pause for a month" }, copy: { he: "המסלול מתארך. הוא לא חייב להיעלם.", en: "The path gets longer. It does not have to disappear." }, effects: { soul: 4, cash: 90, reputation: -1 } }
+        ]
+      },
+      {
+        id: "hard-drive", when: ({ career }) => career && ["directing", "youtube"].includes(career.id),
+        title: { he: "הכונן עושה רעש לא טוב", en: "The hard drive makes a bad sound" },
+        copy: { he: "חומר גלם של חודש נמצא במקום שבין קיים לבין מיתוס. טכנאי אומר 'נראה' ולא מחייך.", en: "A month of footage is somewhere between existing and myth. The technician says we will see and does not smile." },
+        choices: [
+          { id: "recover", title: { he: "לשלם על שחזור", en: "Pay for recovery" }, copy: { he: "כסף נעלם, החומר אולי לא.", en: "Money disappears; the footage might not." }, effects: { cash: -340, experience: 2, soul: -2 } },
+          { id: "reshoot", title: { he: "לצלם מחדש", en: "Shoot again" }, copy: { he: "מעצבן, יקר, ולפעמים הגרסה השנייה היא הסרט האמיתי.", en: "Annoying, expensive, and sometimes the second version is the real film." }, effects: { cash: -170, creativity: 6, reputation: 2, soul: -3 }, weeks: 1 },
+          { id: "salvage", title: { he: "לבנות מה שנשאר", en: "Build from what remains" }, copy: { he: "פחות שלם, יותר ניסיוני, וכבר יש לך טייטל לפסטיבל.", en: "Less complete, more experimental, and you already have a festival tagline." }, effects: { creativity: 7, followers: 50, soul: -1 } }
+        ]
+      },
+      {
+        id: "industry-gossip", title: { he: "כולם מדברים על כולם", en: "Everyone is talking about everyone" },
+        copy: { he: "בקבוצה קטנה של אנשי מקצוע עולה שמועה על במאי/ת שאת/ה מכיר/ה. כולם מחכים לתגובה שלך.", en: "In a small professional group, a rumor appears about a director you know. Everyone waits for your response." },
+        choices: [
+          { id: "stay-out", title: { he: "לא להיכנס לזה", en: "Stay out of it" }, copy: { he: "משעמם, בוגר, ובדרך כלל בחירה טובה.", en: "Boring, grown-up, and usually the right choice." }, effects: { reputation: 2, soul: 2 } },
+          { id: "defend", title: { he: "להגן על האדם", en: "Defend the person" }, copy: { he: "נאמנות בונה קשרים, לפעמים גם אויבים.", en: "Loyalty builds connections, and sometimes enemies." }, effects: { connections: 3, reputation: -1, soul: -1 } },
+          { id: "share", title: { he: "לשתף את השמועה", en: "Share the rumor" }, copy: { he: "הטלפון מצלצל יותר. הדלתות פחות.", en: "The phone rings more. Doors, less." }, effects: { followers: 70, connections: -3, reputation: -4 } }
+        ]
+      },
+      {
+        id: "one-day-job", title: { he: "יום עבודה שנראה קטן מדי לסרב", en: "A one-day job too small to refuse" },
+        copy: { he: "הצעה לצלם, להפיק או לכתוב משהו ממש לא זוהר. התשלום מיידי והקרדיט כמעט בלתי נראה.", en: "An offer to shoot, produce, or write something unglamorous. The pay is immediate and the credit nearly invisible." },
+        choices: [
+          { id: "take", title: { he: "לקחת את היום", en: "Take the day" }, copy: { he: "פרנסה היא לפעמים הדבר הכי עצמאי שאפשר לעשות.", en: "Making a living is sometimes the most independent thing you can do." }, effects: { cash: 360, experience: 3, soul: -2 }, weeks: 1 },
+          { id: "trade", title: { he: "לבקש קרדיט והמלצה", en: "Ask for credit and a referral" }, copy: { he: "פחות כסף, אבל מישהו אמיתי מוכן לחתום על זה שעבדת.", en: "Less money, but someone real is willing to confirm you worked." }, effects: { cash: 160, reputation: 3, connections: 2 } },
+          { id: "pass", title: { he: "להישאר עם הפרויקט שלך", en: "Stay with your project" }, copy: { he: "החלום לא משלם היום, אבל גם לא נבנה בין משמרות בלבד.", en: "The dream does not pay today, but it is not built only between shifts." }, effects: { creativity: 5, soul: 2, cash: -90 } }
+        ]
+      },
+      {
+        id: "mentor-meeting", title: { he: "פגישה עם מישהו שכבר עשה את זה", en: "A meeting with someone who already did it" },
+        copy: { he: "איש/ה ותיק/ה מציע/ה קפה של 20 דקות. יש לך הרבה יותר שאלות מזמן.", en: "A veteran offers a 20-minute coffee. You have far more questions than time." },
+        choices: [
+          { id: "prepare", title: { he: "להתכונן עם שאלה אחת טובה", en: "Prepare one good question" }, copy: { he: "פחות הופעה, יותר הקשבה. זה נדיר בתעשייה ולכן זכיר.", en: "Less performance, more listening. Rare in this industry, therefore memorable." }, effects: { education: 1, connections: 3, reputation: 2 }, weeks: 1, contact: "naama-producer", contactTrust: 2 },
+          { id: "pitch", title: { he: "להציג את הפרויקט", en: "Pitch the project" }, copy: { he: "יכול להיות שזה מוקדם מדי. יכול להיות שזה בדיוק הזמן.", en: "It may be too early. It may be exactly the time." }, effects: { creativity: 3, reputation: 4, cash: -50 }, contact: "naama-producer", contactTrust: 1 },
+          { id: "cancel", title: { he: "לבטל בגלל העומס", en: "Cancel because it is too much" }, copy: { he: "לפעמים יש באמת עומס. לפעמים זו רק פחד עם לוח שנה.", en: "Sometimes there really is too much. Sometimes it is fear with a calendar." }, effects: { soul: 2, connections: -1 } }
+        ]
+      },
+      {
+        id: "permit-panic", title: { he: "מישהו שאל על אישור צילום", en: "Someone asked for a filming permit" },
+        copy: { he: "מאבטח מנומס מדי רוצה לדעת מי אישר את הצילום שלך. אף אחד לא עונה בקבוצת ההפקה.", en: "A very polite guard wants to know who approved your shoot. Nobody answers in the production chat." },
+        choices: [
+          { id: "permit", title: { he: "לסדר אישור מסודר", en: "Arrange a proper permit" }, copy: { he: "יקר, איטי, ובעיקר מאפשר לחזור לאותו מקום.", en: "Expensive, slow, and mostly lets you return to the same place." }, effects: { cash: -190, reputation: 3, experience: 2 }, weeks: 1 },
+          { id: "move", title: { he: "לעבור ללוקיישן חלופי", en: "Move to a backup location" }, copy: { he: "היום מתארך, הסיפור משנה רחוב.", en: "The day gets longer; the story changes streets." }, effects: { creativity: 4, soul: -2, cash: -60 } },
+          { id: "leave", title: { he: "לארוז ולוותר", en: "Pack up and walk away" }, copy: { he: "לא גיבוי. ניהול נזק.", en: "Not surrender. Damage control." }, effects: { soul: 2, reputation: -2, cash: -80 } }
+        ]
+      },
+      {
+        id: "sound-complaint", title: { he: "השכן נכנס לפריים עם תלונה", en: "A neighbor enters frame with a complaint" },
+        copy: { he: "הוא לא אוהב את הרעש, את האור, או את העובדה שמישהו אמר 'שקט על הסט' ליד הבית שלו.", en: "He does not like the noise, the light, or someone saying quiet on set near his home." },
+        choices: [
+          { id: "buy-coffee", title: { he: "לקנות קפה ולדבר", en: "Buy coffee and talk" }, copy: { he: "קפה הוא עדיין אפקט הקול הזול ביותר.", en: "Coffee remains the cheapest sound effect." }, effects: { cash: -45, connections: 1, soul: 1 } },
+          { id: "adapt", title: { he: "להפוך אותו לדמות", en: "Turn him into a character" }, copy: { he: "לפעמים המציאות עושה קאסטינג לעצמה.", en: "Sometimes reality casts itself." }, effects: { creativity: 5, followers: 35, reputation: 1 }, weeks: 1 },
+          { id: "fight", title: { he: "להמשיך לצלם", en: "Keep shooting" }, copy: { he: "הפריים נשמר. גם השם שלך אצל ועד הבית.", en: "The frame is saved. So is your name with the building committee." }, effects: { experience: 3, reputation: -3, soul: -2 } }
+        ]
+      },
+      {
+        id: "collaborator-ghost", title: { he: "השותף נעלם ביום חשוב", en: "Your collaborator disappears on an important day" },
+        copy: { he: "'רק שנייה' הפכה לשש שעות. האספקה, הקבצים או השחקן נמצאים אצלו.", en: "Just a second became six hours. The equipment, files, or actor are with them." },
+        choices: [
+          { id: "replace", title: { he: "למצוא מחליף/ה", en: "Find a replacement" }, copy: { he: "את/ה לומד/ת מי באמת עונה כשקשה.", en: "You learn who actually answers when things get hard." }, effects: { cash: -150, connections: 2, experience: 4, soul: -2 }, weeks: 1 },
+          { id: "solo", title: { he: "לעשות הכול לבד", en: "Do it all alone" }, copy: { he: "שליטה מלאה היא לפעמים פשוט עייפות עם קרדיט.", en: "Full control is sometimes just exhaustion with a credit." }, effects: { creativity: 5, experience: 3, soul: -4 } },
+          { id: "postpone", title: { he: "לדחות ולהגן על הצוות", en: "Postpone and protect the team" }, copy: { he: "היום נשרף, הקשר אולי לא.", en: "The day burns; the relationship might not." }, effects: { soul: 2, connections: 1, reputation: -1 } }
+        ]
+      },
+      {
+        id: "software-renewal", title: { he: "התוכנה חידשה מנוי", en: "The software renewed its subscription" },
+        copy: { he: "החיוב ירד באמצע הלילה. החודש התוכנה ערכה את התקציב שלך.", en: "The charge arrived overnight. This month the software edited your budget." },
+        choices: [
+          { id: "pay", title: { he: "להשאיר את המנוי", en: "Keep the subscription" }, copy: { he: "כלי עבודה הוא גם שקט נפשי, לפחות עד החיוב הבא.", en: "A work tool is also peace of mind, at least until the next bill." }, effects: { cash: -110, experience: 2 } },
+          { id: "learn", title: { he: "לעבור לכלי חינמי", en: "Switch to a free tool" }, copy: { he: "הכסף נשמר. סוף השבוע שלך פחות.", en: "The money stays. Less of your weekend does." }, effects: { cash: 60, education: 1, soul: -2 }, weeks: 1 },
+          { id: "share", title: { he: "להתחלק עם קולגה", en: "Share with a colleague" }, copy: { he: "זול יותר, מורכב יותר, ואיכשהו גם אינטימי מדי.", en: "Cheaper, more complicated, and somehow too intimate." }, effects: { cash: -35, connections: 2, soul: -1 } }
+        ]
+      },
+      {
+        id: "train-strike", title: { he: "השביתה הגיעה לפני הצילומים", en: "The strike arrived before the shoot" },
+        copy: { he: "התחבורה נעצרה, אבל הדדליין לא קיבל את ההודעה.", en: "Transit stopped, but the deadline did not get the memo." },
+        choices: [
+          { id: "taxi", title: { he: "לשלם על מוניות", en: "Pay for taxis" }, copy: { he: "הצוות מגיע, התקציב לא.", en: "The crew arrives. The budget does not." }, effects: { cash: -180, experience: 3, reputation: 2 } },
+          { id: "remote", title: { he: "להפוך את היום מרחוק", en: "Turn the day remote" }, copy: { he: "פחות קולנוע, יותר קבצים עם שמות סופיים-באמת-3.", en: "Less cinema, more files named final-really-3." }, effects: { education: 1, creativity: 3, soul: -1 }, weeks: 1 },
+          { id: "delay", title: { he: "לדחות את הצילום", en: "Delay the shoot" }, copy: { he: "הקושי לא נעלם, אבל לפחות לא משלם תעריף כפול.", en: "The difficulty does not vanish, but at least it does not charge double." }, effects: { soul: 2, reputation: -1, cash: -60 } }
+        ]
+      },
+      {
+        id: "grant-deadline", title: { he: "מענק קטן נסגר מחר", en: "A small grant closes tomorrow" },
+        copy: { he: "הסכום לא ישנה חיים, אבל ועדת הקריאה יכולה לשנות את רשימת השמות שמכירים אותך.", en: "The amount will not change your life, but the readers may change the names that know you." },
+        choices: [
+          { id: "submit", title: { he: "להגיש עד חצות", en: "Submit by midnight" }, copy: { he: "הגרסה לא מושלמת. היא קיימת בעולם.", en: "The draft is not perfect. It exists in the world." }, effects: { reputation: 4, creativity: 3, soul: -2 }, weeks: 1 },
+          { id: "ask", title: { he: "לבקש מכתב המלצה", en: "Ask for a recommendation" }, copy: { he: "קצת מביך, הרבה יותר חכם מלהגיש לבד.", en: "A little awkward, much smarter than applying alone." }, effects: { connections: 3, reputation: 2, love: 1 } },
+          { id: "skip", title: { he: "לא להגיש הפעם", en: "Skip this round" }, copy: { he: "לפעמים פרויקט צריך להישאר בבית עוד סיבוב.", en: "Sometimes a project needs another round at home." }, effects: { creativity: 4, soul: 2 } }
+        ]
+      },
+      {
+        id: "peer-premiere", title: { he: "קולגה עולה לבכורה", en: "A peer gets a premiere" },
+        copy: { he: "מישהו שהכרת מההתחלה מגיע למסך גדול. את/ה שמח/ה בשבילו/ה, ואז בודק/ת את היתרה.", en: "Someone you knew at the start reaches a big screen. You are happy for them, then check your balance." },
+        choices: [
+          { id: "go", title: { he: "ללכת ולפרגן", en: "Go and show up" }, copy: { he: "ההשוואה כואבת, אבל הנוכחות שלך נשארת בזיכרון.", en: "Comparison hurts, but your presence stays in memory." }, effects: { connections: 3, reputation: 2, soul: -2 }, weeks: 1 },
+          { id: "work", title: { he: "להישאר לעבוד", en: "Stay home and work" }, copy: { he: "אין תמונה מהשטיח האדום. יש עוד עמוד בתסריט.", en: "No red-carpet photo. One more script page." }, effects: { creativity: 6, experience: 2, soul: 1 } },
+          { id: "spiral", title: { he: "לגלול במקום", en: "Scroll instead" }, copy: { he: "שעתיים עברו. המוח לא קיבל שום קרדיט.", en: "Two hours passed. Your brain received no credit." }, effects: { soul: -4, creativity: -2, followers: 20 } }
+        ]
+      },
+      {
+        id: "wedding-favor", title: { he: "חבר/ה רוצה סרטון חתונה בחינם", en: "A friend wants a free wedding video" },
+        copy: { he: "הם אומרים שזה 'רק משהו קטן'. את/ה כבר יודע/ת שכל חתונה היא הפקה עם עוגה.", en: "They say it is just something small. You know every wedding is a production with cake." },
+        choices: [
+          { id: "gift", title: { he: "לתת את זה כמתנה", en: "Give it as a gift" }, copy: { he: "מחווה יפה. גם דיסק קשיח עולה כסף.", en: "A lovely gesture. Hard drives also cost money." }, effects: { love: 6, connections: 2, cash: -100, soul: -2 }, weeks: 1 },
+          { id: "rate", title: { he: "להציע מחיר חברי", en: "Offer a friend rate" }, copy: { he: "מקצועיות היא לא חוסר אהבה.", en: "Professionalism is not a lack of love." }, effects: { cash: 280, love: 2, reputation: 2 } },
+          { id: "no", title: { he: "לסרב", en: "Decline" }, copy: { he: "את/ה לא בוגד/ת בחברות. רק בלוח הזמנים שלה.", en: "You are not betraying the friendship. Just its schedule." }, effects: { soul: 3, love: -2, creativity: 2 } }
+        ]
+      },
+      {
+        id: "festival-rejection", title: { he: "מכתב דחייה הגיע", en: "A rejection letter arrived" },
+        copy: { he: "'לא נמצא מתאים השנה' הוא משפט קצר שמצליח למלא חדר שלם.", en: "Not a fit this year is a short sentence that fills an entire room." },
+        choices: [
+          { id: "submit-next", title: { he: "להגיש למקום הבא", en: "Submit to the next place" }, copy: { he: "לפני שהרגש מספיק להחליט בשבילך.", en: "Before the feeling decides for you." }, effects: { cash: -75, reputation: 2, soul: -1 }, weeks: 1 },
+          { id: "notes", title: { he: "לבקש הערה אחת", en: "Ask for one note" }, copy: { he: "לא תמיד תקבל/י תשובה. לפעמים כן, וזה מספיק.", en: "You will not always get an answer. Sometimes you do, and that is enough." }, effects: { creativity: 4, education: 1, soul: -1 } },
+          { id: "rest", title: { he: "לשים את הפרויקט בצד", en: "Put the project aside" }, copy: { he: "הדחייה לא נעלמה; גם את/ה לא חייב/ת להיעלם.", en: "The rejection did not vanish. You do not have to vanish either." }, effects: { soul: 5, love: 2 } }
+        ]
+      },
+      {
+        id: "burnout-week", title: { he: "הגוף שולח הערת הפקה", en: "Your body sends a production note" },
+        copy: { he: "את/ה מתעורר/ת עייף/ה, נרדם/ת עם הטלפון, ומכנה את זה 'תקופה'.", en: "You wake up tired, fall asleep with the phone, and call it a phase." },
+        choices: [
+          { id: "rest", title: { he: "לקחת שבוע שקט", en: "Take a quiet week" }, copy: { he: "אין קרדיט על מנוחה. יש סיכוי לשרוד את הקרדיטים הבאים.", en: "There is no credit for rest. There is a chance of surviving the next credits." }, effects: { soul: 10, creativity: 3, cash: -120 }, weeks: 1 },
+          { id: "delegate", title: { he: "לבקש עזרה", en: "Ask for help" }, copy: { he: "השליטה יורדת קצת, הצוות עולה הרבה.", en: "Control drops a little; the team rises a lot." }, effects: { connections: 3, soul: 5, cash: -80 } },
+          { id: "push", title: { he: "להמשיך כרגיל", en: "Push through" }, copy: { he: "הספקת יותר. גם הראש התחיל לכבות אור.", en: "You got more done. Your head started turning off lights." }, effects: { experience: 4, cash: 160, soul: -7, creativity: -2 } }
+        ]
+      },
+      {
+        id: "wrong-format", title: { he: "הלקוח ביקש פורמט אחר לגמרי", en: "The client wants a completely different format" },
+        copy: { he: "אחרי כמעט סיום, נזכרים שהסרטון צריך להיות אנכי, קצר, וללא כל מה שהפך אותו לטוב.", en: "Near the finish, they remember the video must be vertical, short, and without everything that made it good." },
+        choices: [
+          { id: "redo", title: { he: "לעשות מחדש", en: "Redo it" }, copy: { he: "הלקוח מרוצה. סוף השבוע נעלם.", en: "The client is happy. The weekend disappears." }, effects: { cash: 240, reputation: 3, soul: -3 }, weeks: 1 },
+          { id: "charge", title: { he: "לחייב על שינוי", en: "Charge for the change" }, copy: { he: "לא כולם ישלמו. אלה שישלמו יתקשרו שוב.", en: "Not everyone will pay. Those who do will call again." }, effects: { cash: 160, reputation: 2, connections: -1 } },
+          { id: "refuse", title: { he: "להגן על הגרסה", en: "Defend the original cut" }, copy: { he: "איכות היא גם גבול, לפעמים.", en: "Quality is also a boundary, sometimes." }, effects: { creativity: 4, soul: 2, cash: -90, reputation: -1 } }
+        ]
+      },
+      {
+        id: "producer-call", title: { he: "מפיק/ה רוצה שיחת 'רק עשר דקות'", en: "A producer wants a just ten minutes call" },
+        copy: { he: "יש להם רעיון גדול, תקציב קטן, ואמונה שלמה שתתרגש/י מהאתגר.", en: "They have a big idea, a small budget, and complete faith you will love the challenge." },
+        choices: [
+          { id: "listen", title: { he: "להקשיב להצעה", en: "Hear the offer" }, copy: { he: "לא כל עסקה טובה. כל עסקה מלמדת איך נשמעת אחת. גיל זוכר את השיחה.", en: "Not every deal is good. Every deal teaches how a good one sounds. Gil remembers the conversation." }, effects: { connections: 2, education: 1 }, weeks: 1, contact: "gil-agent", contactTrust: 2 },
+          { id: "negotiate", title: { he: "להציב תנאים", en: "Set terms" }, copy: { he: "הם מופתעים. את/ה פחות זול/ה ממה שקיוו.", en: "They are surprised. You are less cheap than they hoped." }, effects: { cash: 180, reputation: 3, connections: -1 } },
+          { id: "decline", title: { he: "לסרב מוקדם", en: "Decline early" }, copy: { he: "חסכת שבועות של תסכול עם אקסל.", en: "You saved weeks of frustration with Excel." }, effects: { soul: 4, creativity: 2 } }
+        ]
+      },
+      {
+        id: "contract-credit", title: { he: "החוזה הגיע בלי סעיף קרדיט", en: "The contract arrives without a credit clause" },
+        copy: { he: "הכסף סביר, אבל השם שלך נעלם מהמסמך בדיוק במקום שבו הוא אמור להתחיל לעבוד בשבילך.", en: "The money is fair, but your name disappears from the document exactly where it should start working for you." },
+        choices: [
+          { id: "edit", title: { he: "לבקש תיקון", en: "Ask for a correction" }, copy: { he: "חוזה הוא לא מבחן אישיות. הוא פשוט חוזה.", en: "A contract is not a personality test. It is simply a contract." }, effects: { reputation: 3, connections: 1, soul: -1 } },
+          { id: "sign", title: { he: "לחתום וללמוד", en: "Sign and learn" }, copy: { he: "יש כסף. יש גם שיעור לא זול.", en: "There is money. There is also an expensive lesson." }, effects: { cash: 360, experience: 2, reputation: -2 } },
+          { id: "walk", title: { he: "לוותר על העסקה", en: "Walk away from the deal" }, copy: { he: "לא תמיד אפשר להרשות לעצמך. לפעמים אי אפשר שלא.", en: "You cannot always afford it. Sometimes you cannot afford not to." }, effects: { soul: 3, creativity: 2, cash: -140 } }
+        ]
+      },
+      {
+        id: "acting-workshop", when: ({ career }) => career && career.id === "acting",
+        title: { he: "סדנה עם מלהקת חשובה", en: "A workshop with an important casting director" },
+        copy: { he: "יקר יותר ממה שתכננת, אבל השם שלה מופיע בכל קבוצת שחקנים בדיוק לפני המילה 'חובה'.", en: "It costs more than planned, but her name appears in every actor group right before the word must." },
+        choices: [
+          { id: "join", title: { he: "להירשם", en: "Enroll" }, copy: { he: "הכסף יורד. המבט שלך בחדר עולה.", en: "The money drops. Your presence in the room rises." }, effects: { cash: -260, reputation: 5, connections: 3, education: 1 }, weeks: 1 },
+          { id: "audit", title: { he: "לבקש לצפות בלבד", en: "Ask to observe" }, copy: { he: "פחות חשיפה, יותר חוכמה על החדר הבא.", en: "Less exposure, more insight for the next room." }, effects: { education: 1, creativity: 3, soul: 1 } },
+          { id: "skip", title: { he: "להתאמן עם חבר/ה", en: "Practice with a friend" }, copy: { he: "החדר קטן יותר. הסיכון גם.", en: "The room is smaller. So is the risk." }, effects: { creativity: 4, love: 2, followers: 30 } }
+        ]
+      },
+      {
+        id: "acting-dayplayer", when: ({ career }) => career && career.id === "acting",
+        title: { he: "תפקיד של שורה אחת", en: "A one-line role" },
+        copy: { he: "זה באמת משפט אחד. יש סיכוי שהוא נאמר מול מצלמה שאנשים רואים.", en: "It really is one line. It may be spoken in front of a camera people actually watch." },
+        choices: [
+          { id: "take", title: { he: "לקחת את התפקיד", en: "Take the role" }, copy: { he: "כל קריירה מורכבת גם ממשפטים שאף אחד לא זוכר, חוץ ממך.", en: "Every career includes lines no one remembers except you." }, effects: { cash: 260, experience: 4, reputation: 2 }, weeks: 1 },
+          { id: "negotiate", title: { he: "לבקש אודישן לתפקיד נוסף", en: "Ask to read for another role" }, copy: { he: "אמיץ, קצת מסוכן, לפעמים בדיוק מה שמלהקת זוכרת.", en: "Bold, a little risky, sometimes exactly what casting remembers." }, effects: { reputation: 4, connections: 2, cash: -40 } },
+          { id: "pass", title: { he: "לחכות למשהו אחר", en: "Wait for something else" }, copy: { he: "בחירה לגיטימית. גם חשבון החשמל לגיטימי.", en: "A legitimate choice. So is the electric bill." }, effects: { soul: 2, cash: -100, creativity: 2 } }
+        ]
+      },
+      {
+        id: "directing-budget-cut", when: ({ career }) => career && career.id === "directing",
+        title: { he: "התקציב איבד שליש", en: "The budget lost a third" },
+        copy: { he: "המפיק אומר שזה לא קיצוץ, זה 'הזדמנות להיות מדויק'.", en: "The producer says it is not a cut; it is an opportunity to be precise." },
+        choices: [
+          { id: "simplify", title: { he: "לפשט את הסרט", en: "Simplify the film" }, copy: { he: "פחות לוקיישנים, יותר רעיון שאי אפשר להחביא מאחורי ציוד.", en: "Fewer locations, more of an idea you cannot hide behind gear." }, effects: { creativity: 6, reputation: 3, cash: -70 }, weeks: 1 },
+          { id: "fundraise", title: { he: "לגייס השלמה", en: "Raise the difference" }, copy: { he: "יותר שיחות, יותר התחייבויות, אולי גם יותר סרט.", en: "More calls, more commitments, maybe more film." }, effects: { cash: 260, debt: 210, connections: 3, soul: -2 } },
+          { id: "delay", title: { he: "לדחות את ההפקה", en: "Delay production" }, copy: { he: "הסרט מחכה. התסכול לא.", en: "The film waits. The frustration does not." }, effects: { soul: -2, creativity: 3, cash: -90 } }
+        ]
+      },
+      {
+        id: "directing-producer-notes", when: ({ career }) => career && career.id === "directing",
+        title: { he: "המפיק רוצה סוף אופטימי", en: "The producer wants an optimistic ending" },
+        copy: { he: "הוא קורא לזה 'נגיש'. את/ה קורא/ת לזה 'הסרט התפרק בשלוש מילים'.", en: "He calls it accessible. You call it the film fell apart in three words." },
+        choices: [
+          { id: "test", title: { he: "לצלם שתי גרסאות", en: "Shoot two versions" }, copy: { he: "המצלמה תחליט אחר כך. התקציב בוכה עכשיו.", en: "The camera will decide later. The budget cries now." }, effects: { cash: -180, creativity: 4, reputation: 2 }, weeks: 1 },
+          { id: "defend", title: { he: "להגן על הסוף", en: "Defend the ending" }, copy: { he: "לא תמיד מקבלים את הקרב. תמיד זוכרים שנלחמת.", en: "You do not always win the fight. They remember that you fought." }, effects: { reputation: 4, creativity: 3, connections: -2 } },
+          { id: "accept", title: { he: "לקבל את ההערה", en: "Accept the note" }, copy: { he: "זה לא אותו סרט, אבל הוא זז קדימה.", en: "It is not the same film, but it moves forward." }, effects: { cash: 120, connections: 2, creativity: -3, soul: -1 } }
+        ]
+      },
+      {
+        id: "writing-room-test", when: ({ career }) => career && career.id === "writing",
+        title: { he: "חדר כותבים צריך בדיחה עד הבוקר", en: "A writers’ room needs a joke by morning" },
+        copy: { he: "זו לא הסדרה שלך, אבל מישהו בחדר ראה את הדף הקודם שלך וזכר את השם.", en: "It is not your show, but someone in the room saw your previous page and remembered your name." },
+        choices: [
+          { id: "write", title: { he: "לשבת כל הלילה", en: "Sit up all night" }, copy: { he: "הבדיחה עובדת. גם הקפה.", en: "The joke works. So does the coffee." }, effects: { cash: 180, experience: 4, connections: 3, soul: -4 }, weeks: 1 },
+          { id: "pair", title: { he: "לכתוב עם מישהו", en: "Write with someone" }, copy: { he: "פחות אגו, יותר סיכוי שהפאנץ׳ ישרוד.", en: "Less ego, more chance the punchline survives." }, effects: { creativity: 5, connections: 2, soul: -1 } },
+          { id: "pass", title: { he: "לא לקחת את הלילה", en: "Do not take the night" }, copy: { he: "את/ה שומר/ת על עצמך. החדר מתקדם בלעדיך.", en: "You protect yourself. The room moves on without you." }, effects: { soul: 4, reputation: -1 } }
+        ]
+      },
+      {
+        id: "writing-option", when: ({ career }) => career && career.id === "writing",
+        title: { he: "מישהו רוצה אופציה על התסריט", en: "Someone wants an option on your script" },
+        copy: { he: "הסכום קטן והחלום גדול. זה כמעט ההגדרה של אופציה.", en: "The amount is small and the dream is big. That is nearly the definition of an option." },
+        choices: [
+          { id: "sign", title: { he: "לחתום על האופציה", en: "Sign the option" }, copy: { he: "הדלת נסגרת קצת, אבל מישהו מחזיק את הידית מהצד השני.", en: "The door closes a little, but someone holds the handle on the other side." }, effects: { cash: 240, reputation: 4, connections: 2 } },
+          { id: "negotiate", title: { he: "לבקש תנאים טובים יותר", en: "Ask for better terms" }, copy: { he: "מסוכן, בוגר, ומאוד לא נוח במייל.", en: "Risky, grown-up, and very uncomfortable over email." }, effects: { cash: 100, reputation: 3, connections: -1 } },
+          { id: "self", title: { he: "לשמור את הזכויות", en: "Keep the rights" }, copy: { he: "הסיפור נשאר שלך. גם העבודה לשכנע מישהו.", en: "The story remains yours. So does the work of convincing someone." }, effects: { creativity: 6, soul: 2, cash: -90 } }
+        ]
+      },
+      {
+        id: "youtube-collab-drama", when: ({ career }) => career && career.id === "youtube",
+        title: { he: "שיתוף פעולה התפוצץ בתגובות", en: "A collaboration explodes in the comments" },
+        copy: { he: "הסרטון מביא צפיות, אבל הקהל של הצד השני החליט שאת/ה הבעיה של הפורמט.", en: "The video brings views, but the other creator's audience decides you are the format's problem." },
+        choices: [
+          { id: "moderate", title: { he: "למחוק ולמתן", en: "Moderate and remove" }, copy: { he: "פחות אש, יותר שקט, וקצת פחות חשיפה.", en: "Less fire, more quiet, and a little less exposure." }, effects: { followers: 45, soul: -1, reputation: 2 }, weeks: 1 },
+          { id: "respond", title: { he: "להגיב בסרטון", en: "Respond in a video" }, copy: { he: "האלגוריתם אוהב דרמה. העצבים לא תמיד.", en: "The algorithm loves drama. Nerves do not always." }, effects: { followers: 220, reputation: -2, soul: -3 } },
+          { id: "ignore", title: { he: "לא לתת לזה במה", en: "Give it no stage" }, copy: { he: "לא כל מה שצועק ראוי לפרק הבא.", en: "Not everything that shouts deserves the next episode." }, effects: { soul: 4, creativity: 2, followers: -40 } }
+        ]
+      },
+      {
+        id: "youtube-sponsor-backlash", when: ({ career, state }) => career && career.id === "youtube" && state.followers >= 300,
+        title: { he: "הספונסר עצבן את הקהל", en: "The sponsor annoyed the audience" },
+        copy: { he: "הכסף נכנס, התגובות שואלות אם מכרת את הקול שלך במבצע סוף עונה.", en: "The money arrived. Comments ask whether you sold your voice in an end-of-season sale." },
+        choices: [
+          { id: "disclose", title: { he: "להיות שקוף/ה", en: "Be transparent" }, copy: { he: "לא כולם משתכנעים. יותר מהם נשארים.", en: "Not everyone is convinced. More of them stay." }, effects: { reputation: 4, followers: 80, cash: -40 } },
+          { id: "double", title: { he: "לעשות עוד תוכן ממותג", en: "Make more branded content" }, copy: { he: "המספרים גדלים. גם המרחק מהסיבה שהתחלת.", en: "The numbers grow. So does the distance from why you started." }, effects: { cash: 420, followers: 140, creativity: -3, soul: -2 }, weeks: 1 },
+          { id: "leave", title: { he: "לסיים את ההתקשרות", en: "End the deal" }, copy: { he: "פחות כסף, יותר אוויר בקול שלך.", en: "Less money, more air in your voice." }, effects: { soul: 5, creativity: 4, cash: -130 } }
+        ]
+      },
+      {
+        id: "flight-window", when: ({ state }) => state.cash >= 450,
+        title: { he: "כרטיס טיסה זול נפתח ל־12 שעות", en: "A cheap flight opens for 12 hours" },
+        copy: { he: "עיר אחרת, סדנה אחרת, ואולי קשר שלא יכול היה לקרות מהספה שלך.", en: "Another city, another workshop, and maybe a connection that could not happen from your couch." },
+        choices: [
+          { id: "book", title: { he: "להזמין ולנסוע", en: "Book and go" }, copy: { he: "את/ה לא יודע/ת מה יחכה שם. זה חלק מהמחיר.", en: "You do not know what waits there. That is part of the price." }, effects: { cash: -280, connections: 4, experience: 3, soul: -1 }, weeks: 1 },
+          { id: "save", title: { he: "לשמור את הכסף", en: "Keep the cash" }, copy: { he: "לא כל חלון צריך להפוך להתחייבות.", en: "Not every window has to become a commitment." }, effects: { soul: 2, debt: -90 } },
+          { id: "ask", title: { he: "לבקש מחבר להצטרף", en: "Ask a friend to join" }, copy: { he: "הטיול נהיה אפשרי יותר, והלו״ז קצת פחות שלך.", en: "The trip becomes more possible, and the schedule a little less yours." }, effects: { love: 3, connections: 2, cash: -140 } }
+        ]
+      },
+      {
+        id: "age-thirty-question", when: ({ life }) => life.age >= 30,
+        title: { he: "שאלה של גיל 30", en: "A question at 30" },
+        copy: { he: "מישהו שואל מתי 'תעבור/י לדבר האמיתי'. הבעיה היא שאת/ה כבר באמצע הדבר האמיתי.", en: "Someone asks when you will move on to the real thing. The problem is you are already inside the real thing." },
+        choices: [
+          { id: "reframe", title: { he: "לנסח מחדש את המטרה", en: "Reframe the goal" }, copy: { he: "פחות מסלול של אחרים, יותר החלטה שלך.", en: "Less of someone else's path, more of your decision." }, effects: { soul: 5, creativity: 4, reputation: 1 }, weeks: 1 },
+          { id: "pivot", title: { he: "לבדוק מסלול סמוך", en: "Explore an adjacent path" }, copy: { he: "לפעמים שינוי קריירה מתחיל בשיחה, לא בהצהרה.", en: "Sometimes a career shift starts with a conversation, not an announcement." }, effects: { education: 1, connections: 3, cash: -70 }, pivotCareer: true },
+          { id: "prove", title: { he: "להמשיך ולהוכיח", en: "Keep going and prove it" }, copy: { he: "לפעמים נחישות היא כוח. לפעמים היא רק חוסר שינה עם ביטחון.", en: "Sometimes persistence is strength. Sometimes it is just sleep deprivation with confidence." }, effects: { experience: 4, reputation: 3, soul: -2 } }
+        ]
+      },
+      {
+        id: "edit-lock", title: { he: "העורך/ת רוצה לנעול גרסה", en: "The editor wants to lock the cut" },
+        copy: { he: "כולם עייפים, הדדליין מחר, ורק עוד שינוי אחד קטן מפריד בין 'נעול' ל'עוד חודש'.", en: "Everyone is tired, the deadline is tomorrow, and only one tiny change separates locked from another month." },
+        choices: [
+          { id: "lock", title: { he: "לנעול את הגרסה", en: "Lock the cut" }, copy: { he: "לא מושלם. גמור. לפעמים זו בדיוק ההצלחה.", en: "Not perfect. Finished. Sometimes that is exactly success." }, effects: { reputation: 4, experience: 3, soul: 2 } },
+          { id: "one-more", title: { he: "לבקש עוד סבב", en: "Ask for one more pass" }, copy: { he: "עוד שבוע, עוד כסף, ואולי סוף טוב יותר.", en: "One more week, more money, and maybe a better ending." }, effects: { cash: -130, creativity: 5, soul: -2 }, weeks: 1 },
+          { id: "screen", title: { he: "להראות למיקה ולקהל קטן", en: "Show Mika and a small audience" }, copy: { he: "שלושה אנשים, שבע הערות, ואחת ממיקה שקשה לשמוע אבל מצילה את הסרט.", en: "Three people, seven notes, and one from Mika that is hard to hear but saves the film." }, effects: { creativity: 4, connections: 2, soul: -1 }, weeks: 1, contact: "mika-editor", contactTrust: 2 }
+        ]
+      },
+      {
+        id: "bank-paperwork", when: ({ state }) => state.debt >= 4500,
+        title: { he: "הבנק רוצה מסמכים", en: "The bank wants documents" },
+        copy: { he: "מייל עם 14 קבצים נדרשים נחת בדיוק בזמן שבו ניסית להיות אדם יצירתי.", en: "An email with fourteen required documents arrived just as you tried to be a creative person." },
+        choices: [
+          { id: "organize", title: { he: "לסדר הכול", en: "Organize everything" }, copy: { he: "לא סקסי, אבל ריבית אוהבת סדר.", en: "Not sexy, but interest loves order." }, effects: { debt: -170, education: 1, soul: -1 }, weeks: 1 },
+          { id: "advisor", title: { he: "לבקש עזרה מיועץ", en: "Ask an adviser for help" }, copy: { he: "מישהו אחר יודע איפה מוצאים את טופס 7ב׳.", en: "Someone else knows where form 7B lives." }, effects: { cash: -100, debt: -260, soul: 2 } },
+          { id: "ignore", title: { he: "לדחות לשבוע הבא", en: "Push it to next week" }, copy: { he: "המסמכים לא נעלמים. הם רק לומדים לצעוק.", en: "The documents do not vanish. They only learn to shout." }, effects: { debt: 180, soul: -2 } }
+        ]
+      },
+      {
+        id: "talent-takes-other-job", title: { he: "הטאלנט קיבל עבודה אחרת", en: "The talent takes another job" },
+        copy: { he: "האדם שרצית לפרויקט שלך קיבל הצעה טובה יותר. בצדק, כמובן, וזה עדיין מעצבן.", en: "The person you wanted for your project got a better offer. Fair enough, and still annoying." },
+        choices: [
+          { id: "match", title: { he: "לשפר את ההצעה", en: "Improve the offer" }, copy: { he: "כסף פותר הרבה דברים, בעיקר כשהוא קיים.", en: "Money solves many things, especially when it exists." }, effects: { cash: -260, connections: 2, reputation: 2 } },
+          { id: "new", title: { he: "למצוא כישרון חדש", en: "Find new talent" }, copy: { he: "השם המוכר נעלם. התגלית הבאה אולי עדיין בחדר ההמתנה.", en: "The familiar name is gone. The next discovery may still be in the waiting room." }, effects: { creativity: 4, connections: 3, experience: 2 }, weeks: 1 },
+          { id: "rewrite", title: { he: "לשכתב סביב היעדרות", en: "Rewrite around the absence" }, copy: { he: "הפרויקט השתנה, והפך פתאום ליותר שלך.", en: "The project changes and suddenly becomes more yours." }, effects: { creativity: 6, soul: 1, reputation: -1 } }
         ]
       }
     ];
@@ -6999,7 +7520,8 @@
     function lifeDecisionDeck(routeId) {
       const career = activeLifeCareer();
       const careerDeck = career && lifeCareerDecisionDeck(career, routeId);
-      if (careerDeck) return careerDeck;
+      const contactOpportunity = lifeContactOpportunity(gameState.currentBuilding);
+      if (careerDeck) return contactOpportunity ? careerDeck.concat(withLifeWeeks([contactOpportunity])) : careerDeck;
       const job = getJob(gameState.jobId);
       const workCards = !job ? [
         {
@@ -7052,7 +7574,8 @@
           { id: "microfund", icon: "◈", title: { he: "לגייס מימון החודש", en: "Raise funding this month" }, copy: { he: "כסף לפרויקט עכשיו, עם אחריות ומחיר בשנה הבאה.", en: "Project money now, with responsibility and a cost next year." }, effects: { cash: 450, debt: 260, reputation: 4, soul: -2 }, months: 1 }
         ]
       };
-      return withLifeWeeks(decks[routeId] || decks.work);
+      const cards = withLifeWeeks(decks[routeId] || decks.work);
+      return contactOpportunity ? cards.concat(withLifeWeeks([contactOpportunity])) : cards;
     }
 
     function lifeWaitAction() {
@@ -7078,10 +7601,23 @@
       const life = ensureLifeState();
       if (life.monthlyEvent || gameState.winState) return null;
       // An interruption every other month keeps the rhythm lively without
-      // turning the game into a chain of popups. February is the first one.
+      // turning the game into a chain of popups. The situation is not fixed:
+      // the player sees a fresh problem, then decides how much life it costs.
       const serialMonth = life.yearIndex * 12 + life.month;
       if (serialMonth % 2 !== 0) return null;
-      const event = LIFE_MONTHLY_EVENTS[(life.yearIndex * 5 + life.month) % LIFE_MONTHLY_EVENTS.length];
+      const career = activeLifeCareer();
+      const context = { life, career, state: gameState };
+      const eligible = LIFE_MONTHLY_EVENTS.filter((event) => !event.when || event.when(context));
+      const unseen = eligible.filter((event) => !life.seenEventIds.includes(event.id));
+      const pool = unseen.length ? unseen : eligible;
+      if (!pool.length) return null;
+      const pivotEvent = life.age >= 30 && life.careerTrack && !life.careerPivotOffered && !life.careerPivotUsed
+        ? pool.find((event) => event.id === "age-thirty-question")
+        : null;
+      const event = pivotEvent || pool[Math.floor(rand() * pool.length)];
+      if (event.id === "age-thirty-question") life.careerPivotOffered = true;
+      life.seenEventIds.push(event.id);
+      life.seenEventIds = life.seenEventIds.slice(-18);
       life.monthlyEvent = {
         id: event.id,
         age: life.age,
@@ -7101,11 +7637,17 @@
       if (!event || event.id !== eventId) return false;
       const choice = (event.choices || []).find((item) => item.id === choiceId);
       if (!choice) return false;
+      const weeks = choice.weeks ? clamp(Math.round(Number(choice.weeks) || 1), 1, life.timeWeeks) : 0;
       applyLifeEffects(choice.effects);
+      if (choice.contact) changeLifeContact(choice.contact, choice.contactTrust || 1);
+      if (choice.pivotCareer && life.age >= 30 && life.careerTrack && !life.careerPivotUsed) {
+        life.careerPivotPending = true;
+      }
       const period = lifePeriod();
       const entry = {
         kind: "monthly-event", age: life.age, year: life.calendarYear, month: life.month, period: period.id,
-        title: localize(event.title), copy: localize(choice.copy), effects: choice.effects
+        title: localize(event.title), copy: localize(choice.copy), effects: choice.effects, weeks,
+        contact: choice.contact || null, contactTrust: choice.contact ? (choice.contactTrust || 1) : 0
       };
       life.history.unshift(entry);
       life.history = life.history.slice(0, 60);
@@ -7116,7 +7658,12 @@
         copy: entry.copy
       });
       life.monthlyEvent = null;
-      note(localize(choice.title) + " — " + localize(choice.copy), "good");
+      let billing = null;
+      if (weeks) {
+        life.timeWeeks = Math.max(0, life.timeWeeks - weeks);
+        if (life.timeWeeks === 0) billing = closeLifeMonth();
+      }
+      note(billing ? billing.billingCopy : localize(choice.title) + " — " + localize(choice.copy), "good");
       playSfx("success");
       saveGame();
       render();
@@ -7191,12 +7738,12 @@
       return { rent, interest, billingCopy };
     }
 
-    function finishLifeAction({ title, copy, effects, route, weeks, skipped = false, source = null }) {
+    function finishLifeAction({ title, copy, effects, route, weeks, skipped = false, source = null, contact = null, contactTrust = 0 }) {
       const life = ensureLifeState();
       const period = lifePeriod();
       const entry = {
         kind: "choice", age: life.age, year: life.calendarYear, month: life.month, period: period.id,
-        route, title, copy, effects, skipped, weeks, source
+        route, title, copy, effects, skipped, weeks, source, contact, contactTrust
       };
       life.completedThisYear.push(entry);
       life.yearActions.push(entry);
@@ -7233,6 +7780,7 @@
         return false;
       }
       applyLifeEffects(choice.effects);
+      if (choice.contact) changeLifeContact(choice.contact, choice.contactTrust || 1);
       if (choice.studyCredits && !life.programStartedAt) {
         life.programStartedAt = { year: life.calendarYear, month: life.month };
       }
@@ -7250,7 +7798,8 @@
       resolveLifeMissions();
       const result = finishLifeAction({
         title: localize(choice.title), copy: localize(choice.copy), effects: choice.effects,
-        route: routeId, weeks, skipped: !!choice.skip
+        route: routeId, weeks, skipped: !!choice.skip,
+        contact: choice.contact || null, contactTrust: choice.contact ? (choice.contactTrust || 1) : 0
       });
       if (result.billing) note(result.billing.billingCopy, "neutral");
       saveGame();
@@ -7262,23 +7811,43 @@
       if (!isLifeMode() || !gameState.started) return false;
       const life = ensureLifeState();
       const career = LIFE_CAREERS[careerId];
-      if (!career || life.careerTrack || !life.careerChoicePending) return false;
+      const previousCareer = activeLifeCareer();
+      const isPivot = life.careerPivotPending && !!life.careerTrack && !life.careerPivotUsed;
+      if (!career || (!life.careerChoicePending && !isPivot) || (isPivot && career.id === life.careerTrack)) return false;
       life.careerTrack = career.id;
       life.careerChoicePending = false;
+      if (isPivot) {
+        life.careerPivotPending = false;
+        life.careerPivotUsed = true;
+        // Study is tied to a particular route. A new professional direction
+        // starts its own training clock, while money, audience and people stay.
+        life.studyCredits = 0;
+        life.programStartedAt = null;
+      }
       gameState.currentBuilding = career.startingBuilding;
       gameState.connections = Math.max(1, gameState.connections || 0) + 1;
-      if (career.id === "youtube") gameState.followers = Math.max(0, gameState.followers || 0) + 25;
+      const starterContactId = LIFE_CAREER_STARTER_CONTACT[career.id];
+      const starterContact = starterContactId ? changeLifeContact(starterContactId, 1) : null;
+      if (career.id === "youtube" && !isPivot) gameState.followers = Math.max(0, gameState.followers || 0) + 25;
+      const previousName = previousCareer ? localize(previousCareer.name) : "";
+      const title = isPivot
+        ? localize({ he: "צומת גיל 30: " + previousName + " → " + localize(career.name), en: "Age 30 pivot: " + previousName + " → " + localize(career.name) })
+        : localize({ he: "הקריירה נפתחה: " + career.name.he, en: "Career opened: " + career.name.en });
       const entry = {
         kind: "career-choice", age: life.age, year: life.calendarYear, month: life.month,
-        title: localize({ he: "הקריירה נפתחה: " + career.name.he, en: "Career opened: " + career.name.en }),
-        copy: localize(career.intro), effects: career.id === "youtube" ? { followers: 25, connections: 1 } : { connections: 1 }
+        title,
+        copy: (isPivot
+          ? localize({ he: "הכסף, העוקבים והאנשים שסומכים עליך נשארים איתך. המסלול הראשי משתנה.", en: "Your money, audience and trusted people stay with you. The primary route changes." })
+          : localize(career.intro)) + (starterContact ? " " + localize({ he: "איש הקשר החדש: " + starterContact.contact.name.he + ".", en: "New contact: " + starterContact.contact.name.en + "." }) : ""),
+        effects: career.id === "youtube" && !isPivot ? { followers: 25, connections: 1 } : { connections: 1 },
+        contact: starterContactId, contactTrust: starterContact ? 1 : 0
       };
       life.history.unshift(entry);
       life.history = life.history.slice(0, 60);
       gameState.storyDiary.unshift({
         day: gameState.day,
         title: entry.title,
-        source: localize({ he: "צומת פתיחה", en: "Opening node" }),
+        source: localize(isPivot ? { he: "צומת שינוי קריירה", en: "Career pivot node" } : { he: "צומת פתיחה", en: "Opening node" }),
         copy: entry.copy
       });
       note(entry.title + " — " + entry.copy, "good");
@@ -7290,7 +7859,8 @@
     function renderCareerChoiceWindow() {
       if (!dom || !dom.careerWindow) return;
       const life = ensureLifeState();
-      if (!gameState.started || !isLifeMode() || !life.careerChoicePending || life.careerTrack) {
+      const isPivot = life.careerPivotPending && !!life.careerTrack && !life.careerPivotUsed;
+      if (!gameState.started || !isLifeMode() || (!life.careerChoicePending && !isPivot)) {
         dom.careerWindow.classList.add("hidden");
         dom.careerWindow.innerHTML = "";
         return;
@@ -7301,31 +7871,32 @@
         <div class="career-dialog" role="dialog" aria-modal="true" aria-labelledby="careerChoiceTitle">
           <header class="career-dialog-head">
             <div>
-              <div class="career-dialog-kicker">${localize({ he: "צומת פתיחה · גיל 21", en: "Opening node · age 21" })}</div>
-              <h2 id="careerChoiceTitle">${localize({ he: "איך מתחילה הקריירה שלך?", en: "How does your career begin?" })}</h2>
-              <p>${localize({ he: "הבחירה משנה את המפה, את סוג ההזדמנויות ואת הדרך שבה צוברים כסף, עוקבים, תהילה וקשרים.", en: "This choice changes the map, the opportunities, and how money, followers, fame, and connections are built." })}</p>
+              <div class="career-dialog-kicker">${localize(isPivot ? { he: "צומת גיל 30", en: "Age 30 node" } : { he: "צומת פתיחה · גיל 21", en: "Opening node · age 21" })}</div>
+              <h2 id="careerChoiceTitle">${localize(isPivot ? { he: "לאן ממשיכים מכאן?", en: "Where do you go from here?" } : { he: "איך מתחילה הקריירה שלך?", en: "How does your career begin?" })}</h2>
+              <p>${localize(isPivot ? { he: "הכסף, העוקבים והקשרים נשארים. בוחרים כעת מסלול מקצועי ראשי חדש — ואת המקומות וההזדמנויות שהוא פותח.", en: "Money, followers and relationships stay. Now choose a new primary professional route, along with its locations and opportunities." } : { he: "הבחירה משנה את המפה, את סוג ההזדמנויות ואת הדרך שבה צוברים כסף, עוקבים, תהילה וקשרים.", en: "This choice changes the map, the opportunities, and how money, followers, fame, and connections are built." })}</p>
             </div>
-            <span class="career-dialog-note">${localize({ he: "אפשר להחליף כיוון בגיל 30", en: "A second act opens at 30" })}</span>
+            <span class="career-dialog-note">${localize(isPivot ? { he: "בחירה אחת, בלי חזרה", en: "One choice, no rewind" } : { he: "אפשר להחליף כיוון בגיל 30", en: "A second act opens at 30" })}</span>
           </header>
           <div class="career-choice-grid">
             ${Object.values(LIFE_CAREERS).map((career, index) => {
+              const isCurrent = isPivot && career.id === life.careerTrack;
               const study = career.program
                 ? localize({ he: Math.round(career.minimumMonths / 12) + " שנים · " + career.credits + " נקודות לימוד", en: Math.round(career.minimumMonths / 12) + " years · " + career.credits + " study credits" })
                 : localize({ he: "סמארטפון עכשיו · מצלמה בהמשך", en: "Phone now · camera later" });
               const cost = career.program
                 ? localize({ he: formatMoney(career.monthlyCost) + " לחודש לימודים", en: formatMoney(career.monthlyCost) + " per study month" })
                 : localize({ he: "מתחילים בלי שכר לימוד", en: "No tuition to start" });
-              return `<button class="career-choice" style="--career-tone:${tones[career.id]}" data-action="chooseLifeCareer" data-value="${career.id}">
+              return `<button class="career-choice${isCurrent ? " current" : ""}" style="--career-tone:${tones[career.id]}" data-action="chooseLifeCareer" data-value="${career.id}"${isCurrent ? " disabled" : ""}>
                 <span class="career-choice-mark">${career.mark}</span>
                 <span class="career-choice-index">0${index + 1}</span>
                 <strong>${localize(career.name)}</strong>
                 <p>${localize(career.intro)}</p>
                 <span class="career-choice-meta"><span>${study}</span><span>${cost}</span></span>
-                <span class="career-choice-cta">${localize({ he: "לבחור במסלול הזה", en: "Choose this route" })}<b>←</b></span>
+                <span class="career-choice-cta">${localize(isCurrent ? { he: "המסלול הנוכחי", en: "Current route" } : { he: "לבחור במסלול הזה", en: "Choose this route" })}<b>${isCurrent ? "—" : "←"}</b></span>
               </button>`;
             }).join("")}
           </div>
-          <p class="career-dialog-footer">${localize({ he: "אין כאן תשובה נכונה: לכל מסלול יש מחיר, יתרון ודרך אחרת להגיע למטרות הסיום.", en: "There is no correct answer: each route has a price, an advantage, and a different way to reach the end goals." })}</p>
+          <p class="career-dialog-footer">${localize(isPivot ? { he: "זה שינוי כיוון אמיתי: מסלול הלימודים החדש מתחיל מחדש, אבל המוניטין, הכסף, הקהל והקשרים שבנית נשארים שלך.", en: "This is a real shift: the new course of study begins fresh, but the reputation, money, audience and connections you built remain yours." } : { he: "אין כאן תשובה נכונה: לכל מסלול יש מחיר, יתרון ודרך אחרת להגיע למטרות הסיום.", en: "There is no correct answer: each route has a price, an advantage, and a different way to reach the end goals." })}</p>
         </div>
       `;
     }
@@ -12207,6 +12778,12 @@
       return Object.entries(effects || {}).map(([key, value]) => lifeEffectLabel(key, value)).join(" · ");
     }
 
+    function lifeChoiceEffectsLine(choice) {
+      const parts = [lifeEffectsLine(choice.effects)];
+      if (choice.contact) parts.push(lifeContactEffectLabel(choice.contact, choice.contactTrust || 1));
+      return parts.filter(Boolean).join(" · ");
+    }
+
     function annualMapPosition(buildingId, index, total) {
       const positions = {
         airport: [88, 15], employment: [16, 21], wardrobe: [50, 15], cafe: [76, 28],
@@ -12271,6 +12848,7 @@
           <div class="topline"><span>${localize(card.title)}</span><span>${lifeWeeksLabel(weeks)}</span></div>
           <div class="subline">${localize(card.copy)}</div>
           ${lifeEffectsMarkup(card.effects)}
+          ${card.contact ? `<div class="life-effects"><span class="life-effect good">${lifeContactEffectLabel(card.contact, card.contactTrust || 1)}</span></div>` : ""}
           <div class="life-choice-cta"><span>${unavailable ? localize({ he: "אין מספיק שבועות החודש", en: "Not enough weeks this month" }) : localize({ he: "לבחור פעולה", en: "Choose action" })}</span><b>${unavailable ? "—" : "←"}</b></div>
         </button>
       `;
@@ -12405,6 +12983,10 @@
       const missionStatus = lifeMissionStatus(mission);
       const career = activeLifeCareer();
       const study = careerStudyProgress();
+      const contacts = LIFE_CONTACTS
+        .map((contact) => ({ ...contact, trust: lifeContactTrust(contact.id) }))
+        .filter((contact) => contact.trust > 0)
+        .sort((a, b) => b.trust - a.trust || a.name.he.localeCompare(b.name.he));
       return `
         <aside class="annual-life-side">
           <section class="annual-side-card annual-status-card">
@@ -12419,6 +13001,7 @@
             </div>
             <div class="annual-billing-note"><span>${localize({ he: "בסוף החודש", en: "At month end" })}</span><p>${localize({ he: "שכירות " + formatMoney(lifeMonthlyRent()) + " · ריבית חוב " + formatMoney(lifeMonthlyInterest()) + " (1%)", en: "Rent " + formatMoney(lifeMonthlyRent()) + " · debt interest " + formatMoney(lifeMonthlyInterest()) + " (1%)" })}</p></div>
             ${study ? `<div class="annual-career-progress"><span>${localize(study.career.program)}</span><p>${study.started ? localize({ he: study.credits + "/" + study.creditTarget + " נקודות לימוד · " + study.elapsed + "/" + study.minimumMonths + " חודשים במסלול", en: study.credits + "/" + study.creditTarget + " study credits · " + study.elapsed + "/" + study.minimumMonths + " program months" }) : localize({ he: "עוד לא נרשמת. הלימודים מתחילים כשתבחר/י בכך על המפה.", en: "Not enrolled yet. Study begins when you choose it on the map." })}</p></div>` : ""}
+            <div class="annual-contacts"><div class="annual-contacts-head"><span>${localize({ he: "אנשים שמכירים אותך", en: "People who know you" })}</span><b>${contacts.length}/8</b></div>${contacts.length ? `<div class="annual-contact-list">${contacts.slice(0, 3).map((contact) => `<div class="annual-contact" style="--contact-tone:${contact.tone}"><i>${contact.mark}</i><span><strong>${localize(contact.name)}</strong><small>${localize(contact.role)}</small></span><b>${contact.trust}/10</b></div>`).join("")}</div>` : `<p>${localize({ he: "אירועי דרך ופגישות יכניסו לכאן אנשים אמיתיים מהתעשייה.", en: "Road events and meetings will bring real industry people here." })}</p>`}</div>
             <div class="annual-next-goal"><span>${localize({ he: "המטרה הקרובה", en: "Nearest goal" })}</span><p>${hint.copy}</p></div>
             ${mission ? `<div class="annual-mission">
               <div class="annual-mission-head"><span>✦ ${localize({ he: "משימת מסלול", en: "Route mission" })}</span><span>${missionStatus.percentStyle ? Math.round(missionStatus.percent) + "%" : Math.round(missionStatus.value) + "/" + missionStatus.target}</span></div>
@@ -13195,11 +13778,11 @@
                   <button class="life-month-event-choice" data-action="resolveLifeMonthlyEvent" data-value="${event.id}:${choice.id}">
                     <strong>${localize(choice.title)}</strong>
                     <span>${localize(choice.copy)}</span>
-                    <small>${lifeEffectsLine(choice.effects)}</small>
+                    <small>${lifeChoiceEffectsLine(choice)}${choice.weeks ? " · " + lifeWeeksLabel(choice.weeks) : ""}</small>
                   </button>
                 `).join("")}
               </div>
-              <p class="life-month-event-note">${localize({ he: "הבחירה לא מקדמת את החודש — היא משנה את התנאים שבהם תבחר/י את המהלך הבא.", en: "This choice does not advance the month — it changes the conditions for your next move." })}</p>
+              <p class="life-month-event-note">${localize({ he: "בחלק מהאירועים מפורט גם מחיר זמן. הוא יורד מיד משבועות החודש לפני שתבחר/י את המהלך הבא.", en: "Some events also show a time cost. It is deducted from this month's weeks before your next move." })}</p>
             </div>
           </div>
         `;
@@ -14595,6 +15178,7 @@
     root.makeLifeDecision = makeLifeDecision;
     root.lifeDecisionDeck = lifeDecisionDeck;
     root.chooseLifeCareer = chooseLifeCareer;
+    root.LIFE_MONTHLY_EVENTS = LIFE_MONTHLY_EVENTS;
 
     if (canRender) {
       init();

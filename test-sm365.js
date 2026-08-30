@@ -68,6 +68,7 @@ function run(htmlPath) {
     "resolveLifeMonthlyEvent",
     "chooseLifeCareer"
   ].forEach((fnName) => assert.strictEqual(typeof game[fnName], "function", fnName + " should exist"));
+  assert.strictEqual(game.LIFE_MONTHLY_EVENTS.length, 50, "life mode has 50 road events");
 
   game.startGame({
     playerName: "Tester",
@@ -122,7 +123,8 @@ function run(htmlPath) {
   assert.strictEqual(state().debt, 8080, "end of month applies visible 1% debt interest");
   const surprise = state().life.monthlyEvent;
   assert.ok(surprise, "February opens a surprise task");
-  assert.strictEqual(game.resolveLifeMonthlyEvent(surprise.id, surprise.choices[0].id), true, "surprise task choice resolves");
+  const noTimeCostChoice = surprise.choices.find((choice) => !choice.weeks) || surprise.choices[0];
+  assert.strictEqual(game.resolveLifeMonthlyEvent(surprise.id, noTimeCostChoice.id), true, "surprise task choice resolves");
   assert.strictEqual(state().life.month, 2, "surprise task does not consume another month");
   assert.strictEqual(state().life.monthlyEvent, null, "resolved surprise task closes");
 
@@ -138,6 +140,7 @@ function run(htmlPath) {
   assert.strictEqual(state().life.careerChoicePending, true, "a new life run opens the career choice");
   assert.strictEqual(game.chooseLifeCareer("youtube"), true, "a career route can be chosen once");
   assert.strictEqual(state().life.careerTrack, "youtube", "career track persists on the life run");
+  assert.strictEqual(state().life.contacts["dana-creator"], 1, "a career starts with one named industry contact");
   assert.strictEqual(state().followers, 25, "YouTube begins with a small starter audience");
   assert.strictEqual(game.makeLifeDecision("create", "youtube-phone-series"), true, "career-specific monthly action resolves");
   assert.strictEqual(state().followers, 205, "career-specific action changes followers");
@@ -156,6 +159,49 @@ function run(htmlPath) {
   assert.strictEqual(game.makeLifeDecision("create", "career-study-acting"), true, "study month resolves");
   assert.strictEqual(state().life.studyCredits, 1, "study month records a program credit");
   assert.ok(state().life.programStartedAt, "study month records when the long program started");
+
+  game.startGame({
+    playerName: "Event Time Tester",
+    economyDifficulty: "modest",
+    goalLevels: { wealth: "modest", career: "modest", education: "modest", happiness: "modest" }
+  });
+  state().life.monthlyEvent = {
+    id: "test-time-cost",
+    title: { he: "בדיקת זמן", en: "Time test" },
+    copy: { he: "אירוע בדיקה", en: "Test event" },
+    choices: [{ id: "take-week", title: { he: "לקחת שבוע", en: "Take a week" }, copy: { he: "הזמן נצרך", en: "Time is spent" }, effects: { creativity: 1 }, weeks: 1, contact: "naama-producer", contactTrust: 2 }]
+  };
+  assert.strictEqual(game.resolveLifeMonthlyEvent("test-time-cost", "take-week"), true, "a time-cost surprise resolves");
+  assert.strictEqual(state().life.timeWeeks, 3, "a time-cost surprise consumes one visible week");
+  assert.strictEqual(state().life.contacts["naama-producer"], 2, "a road event can build trust with a named contact");
+
+  game.startGame({
+    playerName: "Pivot Tester",
+    economyDifficulty: "modest",
+    goalLevels: { wealth: "modest", career: "modest", education: "modest", happiness: "modest" }
+  });
+  assert.strictEqual(game.chooseLifeCareer("acting"), true, "a first career can be selected before a pivot");
+  state().life.age = 30;
+  state().life.careerPivotPending = true;
+  state().life.studyCredits = 7;
+  state().life.programStartedAt = { year: 2026, month: 1 };
+  assert.strictEqual(game.chooseLifeCareer("acting"), false, "a career pivot cannot select the current route");
+  assert.strictEqual(game.chooseLifeCareer("writing"), true, "age 30 can change the primary career route");
+  assert.strictEqual(state().life.careerTrack, "writing", "the pivot persists as the new career route");
+  assert.strictEqual(state().life.careerPivotUsed, true, "a career pivot is a one-time decision");
+  assert.strictEqual(state().life.careerPivotPending, false, "the pending pivot closes after choosing a new route");
+  assert.strictEqual(state().life.studyCredits, 0, "a changed career begins its own study programme");
+
+  game.startGame({
+    playerName: "Contact Tester",
+    economyDifficulty: "modest",
+    goalLevels: { wealth: "modest", career: "modest", education: "modest", happiness: "modest" }
+  });
+  assert.strictEqual(game.chooseLifeCareer("writing"), true, "writing route is available for contact actions");
+  state().life.contacts["ruth-writer"] = 2;
+  state().currentBuilding = "script";
+  assert.strictEqual(game.makeLifeDecision("create", "contact-ruth-page"), true, "two trust points unlock a location-specific contact action");
+  assert.strictEqual(state().life.contacts["ruth-writer"], 3, "taking a contact action strengthens the relationship");
 }
 
 if (require.main === module) {
