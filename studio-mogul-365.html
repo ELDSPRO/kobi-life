@@ -4644,6 +4644,502 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* ---- Studio 365: cinematic season shell ---------------------------------
+       The game has a deep economy; the old city dashboard put all of it in the
+       first viewport. This shell deliberately gives the player one clear move,
+       then keeps routes, world state and detailed systems one step away. */
+    :root {
+      --studio-night: #0a0d15;
+      --studio-panel: rgba(20, 25, 38, 0.88);
+      --studio-panel-solid: #151b29;
+      --studio-line: rgba(229, 238, 255, 0.12);
+      --studio-muted: rgba(232, 238, 251, 0.62);
+      --studio-cream: #f7f2e8;
+      --studio-gold: #f4b942;
+      --studio-coral: #f07b61;
+      --studio-blue: #78a7ff;
+      --studio-green: #63d2a5;
+    }
+
+    .layout {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: "board";
+      padding: 0;
+    }
+
+    .board-stage {
+      border: 0;
+      border-radius: 0;
+      background: var(--studio-night);
+    }
+
+    .cmd-bar {
+      max-width: 1240px;
+      width: 100%;
+      margin: 0 auto;
+      min-height: 46px;
+    }
+
+    .cmd-metric-label,
+    .cmd-goal {
+      color: var(--studio-muted);
+    }
+
+    .cmd-cta {
+      background: var(--studio-gold);
+      color: #17120a;
+    }
+
+    .cmd-sleep {
+      color: var(--studio-cream);
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.13);
+    }
+
+    .studio-shell {
+      min-height: 100%;
+      padding: 28px clamp(16px, 3.3vw, 54px) 56px;
+      color: var(--studio-cream);
+      background:
+        radial-gradient(900px 480px at 16% -12%, rgba(102, 75, 190, 0.33), transparent 60%),
+        radial-gradient(760px 420px at 92% 8%, rgba(17, 111, 132, 0.24), transparent 58%),
+        linear-gradient(180deg, #101626 0%, var(--studio-night) 52%, #0a0c13 100%);
+      overflow: auto;
+    }
+
+    .studio-grid {
+      width: min(1240px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+      gap: clamp(18px, 3vw, 38px);
+      align-items: start;
+    }
+
+    .studio-eyebrow,
+    .studio-section-label,
+    .studio-milestone-index {
+      color: var(--studio-gold);
+      font-size: 0.71rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .studio-eyebrow {
+      margin: 4px 0 10px;
+    }
+
+    .studio-title {
+      margin: 0;
+      max-width: 14ch;
+      color: var(--studio-cream);
+      font-size: clamp(2rem, 4vw, 4.2rem);
+      line-height: 0.98;
+      letter-spacing: -0.055em;
+    }
+
+    .studio-subtitle {
+      max-width: 52ch;
+      margin: 15px 0 0;
+      color: var(--studio-muted);
+      font-size: 0.98rem;
+      line-height: 1.65;
+    }
+
+    .studio-scene {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(180px, 0.62fr);
+      gap: 16px;
+      min-height: 342px;
+      margin-top: 26px;
+      padding: clamp(19px, 3vw, 34px);
+      overflow: hidden;
+      border: 1px solid var(--studio-line);
+      border-radius: 22px;
+      background:
+        linear-gradient(120deg, rgba(14, 19, 33, 0.95), rgba(30, 36, 57, 0.86)),
+        linear-gradient(160deg, var(--scene-a), var(--scene-b));
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
+    }
+
+    .studio-scene::before {
+      content: "";
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      inset: auto -88px -135px auto;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      box-shadow: 0 0 0 32px rgba(255, 255, 255, 0.025), 0 0 0 64px rgba(255, 255, 255, 0.018);
+      pointer-events: none;
+    }
+
+    .studio-scene-copy,
+    .studio-scene-mark {
+      position: relative;
+      z-index: 1;
+    }
+
+    .studio-place {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      color: var(--studio-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .studio-place::before {
+      content: "●";
+      color: var(--studio-gold);
+      font-size: 0.55rem;
+    }
+
+    .studio-place-title {
+      margin: 13px 0 0;
+      font-size: clamp(1.35rem, 2.6vw, 2rem);
+      line-height: 1.08;
+    }
+
+    .studio-place-copy {
+      max-width: 37ch;
+      min-height: 3.4em;
+      margin: 10px 0 0;
+      color: rgba(247, 242, 232, 0.76);
+      font-size: 0.89rem;
+      line-height: 1.55;
+    }
+
+    .studio-primary,
+    .studio-place-action {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      text-align: start;
+      border-radius: 13px;
+      transition: transform 0.16s ease, filter 0.16s ease;
+    }
+
+    .studio-primary {
+      margin-top: 25px;
+      gap: 12px;
+      padding: 15px 16px;
+      color: #1a1306;
+      background: var(--studio-gold);
+    }
+
+    .studio-primary:hover,
+    .studio-place-action:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.04);
+    }
+
+    .studio-primary-body,
+    .studio-place-action-body {
+      display: grid;
+      gap: 3px;
+    }
+
+    .studio-primary strong,
+    .studio-place-action strong {
+      font-size: 0.94rem;
+    }
+
+    .studio-primary small {
+      color: rgba(26, 19, 6, 0.7);
+      font-size: 0.75rem;
+    }
+
+    .studio-primary-arrow {
+      flex: 0 0 auto;
+      font-size: 1.45rem;
+    }
+
+    .studio-place-action {
+      margin-top: 9px;
+      padding: 12px 14px;
+      color: var(--studio-cream);
+      background: rgba(4, 8, 16, 0.31);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .studio-place-action small {
+      color: var(--studio-muted);
+      font-size: 0.74rem;
+    }
+
+    .studio-scene-mark {
+      align-self: end;
+      display: grid;
+      place-items: center;
+      min-height: 184px;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 18px;
+      color: var(--studio-cream);
+      background: rgba(3, 7, 15, 0.34);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .studio-scene-mark span {
+      width: 74px;
+      height: 74px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,0.24);
+      border-radius: 50%;
+      font-size: 1.9rem;
+      background: rgba(255,255,255,0.07);
+    }
+
+    .studio-scene-mark strong {
+      max-width: 14ch;
+      padding: 0 14px;
+      text-align: center;
+      font-size: 0.77rem;
+      line-height: 1.45;
+    }
+
+    .studio-world {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border: 1px solid var(--studio-line);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .studio-world-icon { font-size: 1.18rem; }
+    .studio-world strong { display: block; font-size: 0.82rem; }
+    .studio-world span { display: block; margin-top: 3px; color: var(--studio-muted); font-size: 0.75rem; line-height: 1.4; }
+
+    .studio-places {
+      margin-top: 18px;
+      border: 1px solid var(--studio-line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.025);
+      overflow: hidden;
+    }
+
+    .studio-places summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 15px;
+      color: var(--studio-cream);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .studio-places summary::-webkit-details-marker { display: none; }
+    .studio-places summary::after { content: "⌄"; color: var(--studio-gold); font-size: 1rem; }
+    .studio-places[open] summary { border-bottom: 1px solid var(--studio-line); }
+
+    .studio-location-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      padding: 12px;
+    }
+
+    .studio-location {
+      min-height: 65px;
+      padding: 10px;
+      text-align: start;
+      color: var(--studio-cream);
+      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+    }
+
+    .studio-location strong,
+    .studio-location small { display: block; }
+    .studio-location strong { font-size: 0.76rem; }
+    .studio-location small { margin-top: 4px; color: var(--studio-muted); font-size: 0.66rem; }
+    .studio-location.target { border-color: var(--studio-gold); color: var(--studio-gold); }
+    .studio-location.selected { background: rgba(120, 167, 255, 0.14); border-color: var(--studio-blue); }
+
+    .studio-rail { display: grid; gap: 13px; }
+    .studio-card {
+      padding: 17px;
+      border: 1px solid var(--studio-line);
+      border-radius: 16px;
+      background: var(--studio-panel);
+      box-shadow: 0 14px 38px rgba(0, 0, 0, 0.12);
+    }
+
+    .studio-card h2 {
+      margin: 5px 0 0;
+      color: var(--studio-cream);
+      font-size: 1.08rem;
+      line-height: 1.2;
+    }
+
+    .studio-goal-copy { margin: 9px 0 0; color: var(--studio-muted); font-size: 0.78rem; line-height: 1.5; }
+
+    .studio-goal-button {
+      width: 100%;
+      margin-top: 14px;
+      padding: 10px 12px;
+      color: #17120a;
+      font-size: 0.79rem;
+      font-weight: 800;
+      background: var(--studio-gold);
+      border-radius: 10px;
+    }
+
+    .studio-milestones { position: relative; display: grid; gap: 15px; margin-top: 17px; }
+    .studio-milestones::before {
+      content: "";
+      position: absolute;
+      top: 9px;
+      bottom: 9px;
+      right: 5px;
+      width: 1px;
+      background: var(--studio-line);
+    }
+
+    .studio-milestone {
+      position: relative;
+      display: grid;
+      grid-template-columns: 16px 1fr;
+      gap: 10px;
+    }
+
+    .studio-milestone-dot {
+      position: relative;
+      z-index: 1;
+      width: 11px;
+      height: 11px;
+      margin-top: 4px;
+      border: 2px solid var(--studio-muted);
+      border-radius: 50%;
+      background: var(--studio-panel-solid);
+    }
+
+    .studio-milestone.done .studio-milestone-dot { border-color: var(--studio-green); background: var(--studio-green); }
+    .studio-milestone.current .studio-milestone-dot { border-color: var(--studio-gold); background: var(--studio-gold); box-shadow: 0 0 0 5px rgba(244,185,66,0.11); }
+    .studio-milestone strong { display: block; color: var(--studio-cream); font-size: 0.79rem; }
+    .studio-milestone span { display: block; margin-top: 3px; color: var(--studio-muted); font-size: 0.7rem; line-height: 1.35; }
+
+    .studio-story { display: grid; gap: 7px; }
+    .studio-story p { margin: 0; color: var(--studio-muted); font-size: 0.77rem; line-height: 1.48; }
+    .studio-story button { justify-self: start; margin-top: 5px; color: var(--studio-blue); font-size: 0.75rem; background: transparent; }
+
+    /* Daily layers become deliberate moments in the season, not utility modals. */
+    .morning-brief-window,
+    .day-recap-window,
+    .pitch-window {
+      padding: clamp(16px, 4vw, 54px);
+      background:
+        radial-gradient(900px 500px at 15% 0%, rgba(82, 62, 153, 0.38), transparent 65%),
+        rgba(4, 6, 12, 0.92);
+      backdrop-filter: blur(16px);
+    }
+
+    .brief-dialog,
+    .recap-dialog,
+    .pitch-dialog {
+      width: min(780px, 100%);
+      max-height: min(86vh, 760px);
+      color: var(--studio-cream);
+      background: linear-gradient(145deg, rgba(28, 34, 50, 0.98), rgba(15, 18, 29, 0.98));
+      border: 1px solid rgba(255,255,255,0.13);
+      border-radius: 22px;
+      box-shadow: 0 30px 100px rgba(0,0,0,0.44);
+    }
+
+    .brief-head,
+    .pitch-head {
+      padding: 22px clamp(20px, 4vw, 34px) 16px;
+      background: transparent;
+      border-bottom: 1px solid var(--studio-line);
+    }
+
+    .brief-head strong,
+    .pitch-head strong,
+    .recap-head strong { color: var(--studio-cream); font-size: clamp(1.25rem, 2.5vw, 1.7rem); }
+    .brief-daytag,
+    .pitch-daytag,
+    .recap-subtitle { color: var(--studio-muted); }
+    .brief-body,
+    .pitch-body { gap: 15px; padding: clamp(20px, 4vw, 34px); color: var(--studio-cream); }
+    .recap-dialog { gap: 17px; padding: clamp(22px, 4vw, 36px); }
+    .brief-snapshot,
+    .brief-event,
+    .pitch-cost-line,
+    .recap-delta { background: rgba(255,255,255,0.055); border-color: var(--studio-line); border-radius: 12px; }
+    .brief-event-head,
+    .brief-result,
+    .pitch-result { color: var(--studio-cream); }
+    .brief-effect-summary {
+      margin: 0;
+      padding: 8px 10px;
+      color: var(--studio-gold);
+      font-size: 0.76rem;
+      font-weight: 700;
+      border-radius: 9px;
+      background: rgba(244,185,66,0.1);
+    }
+    .brief-event-body,
+    .pitch-context,
+    .recap-sown p { color: var(--studio-muted); }
+    .brief-choice-btn,
+    .pitch-card { background: rgba(255,255,255,0.045); color: var(--studio-cream); border-color: var(--studio-line); border-radius: 12px; }
+    .brief-choice-btn:hover:not(.disabled),
+    .pitch-card.selected { border-color: var(--studio-gold); color: var(--studio-cream); background: rgba(244,185,66,0.12); }
+    .brief-cta,
+    .recap-cta,
+    .pitch-cta { color: #17120a; background: var(--studio-gold); border-radius: 11px; }
+    .brief-cta-static { color: var(--studio-muted); }
+    .recap-actions,
+    .pitch-actions,
+    .recap-sown { border-color: var(--studio-line); }
+    .recap-sown-label,
+    .brief-event-source { color: var(--studio-gold); }
+    .recap-today {
+      display: grid;
+      gap: 8px;
+      padding: 13px 14px;
+      border: 1px solid var(--studio-line);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.045);
+    }
+    .recap-today-label { color: var(--studio-gold); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+    .recap-action-list { display: grid; gap: 6px; }
+    .recap-action { display: grid; grid-template-columns: auto 1fr; gap: 7px; color: var(--studio-muted); font-size: 0.79rem; line-height: 1.4; }
+    .recap-action.good > span:first-child { color: var(--studio-green); }
+    .recap-action.bad > span:first-child { color: var(--kc-bad); }
+
+    @media (max-width: 840px) {
+      .studio-grid { grid-template-columns: 1fr; }
+      .studio-rail { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+      .studio-rail .studio-card:first-child { grid-column: 1 / -1; }
+      .studio-scene { min-height: 0; }
+    }
+
+    @media (max-width: 600px) {
+      .studio-shell { padding: 20px 14px 36px; }
+      .studio-title { max-width: 100%; font-size: 2.25rem; }
+      .studio-scene { grid-template-columns: 1fr; border-radius: 17px; }
+      .studio-scene-mark { display: none; }
+      .studio-location-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .studio-rail { grid-template-columns: 1fr; }
+      .studio-rail .studio-card:first-child { grid-column: auto; }
+      .morning-brief-window,
+      .day-recap-window,
+      .pitch-window { padding: 10px; }
+      .brief-dialog,
+      .recap-dialog,
+      .pitch-dialog { max-height: calc(100vh - 20px); border-radius: 17px; }
+    }
   </style>
 </head>
 <body>
@@ -5587,7 +6083,9 @@
         playerName: prefs.playerName || "קובי",
         economyDifficulty: prefs.economyDifficulty || "modest",
         goalLevels: prefs.goalLevels || { wealth: "modest", career: "modest", education: "modest", happiness: "modest" },
-        seasonLength: [30, 90, 365].includes(prefs.seasonLength) ? prefs.seasonLength : 365,
+        // A compact season lets the player feel a complete arc before opting
+        // into the long-form simulation. Existing saved preferences still win.
+        seasonLength: [30, 90, 365].includes(prefs.seasonLength) ? prefs.seasonLength : 30,
         themeIndex: Number.isInteger(prefs.themeIndex) ? prefs.themeIndex : 0,
         muted: !!prefs.muted,
         focusMode: !!prefs.focusMode,
@@ -5656,7 +6154,8 @@
         pitchAttempts: 0,
         selectedPitchStyle: null,
         pitch: null,
-        dayRecap: null
+        dayRecap: null,
+        dayActions: []
       }, overrides);
     }
 
@@ -5740,6 +6239,32 @@
       ["reputation", "education", "soul", "creativity", "love", "artisticReputation", "commercialReputation", "relationshipReputation"].forEach((key) => {
         if (typeof effects[key] === "number") adjustStat(key, effects[key]);
       });
+    }
+
+    function briefEffectSummary(choice) {
+      const bits = [];
+      const cost = choice && choice.cost;
+      const effects = (choice && choice.effects) || {};
+      if (cost && cost.cash) bits.push(formatMoney(-cost.cash));
+      if (cost && cost.hours) bits.push("-" + formatDuration(cost.hours));
+      if (typeof effects.cash === "number") bits.push((effects.cash > 0 ? "+" : "") + formatMoney(effects.cash));
+      const labels = {
+        experience: { he: "ניסיון", en: "exp" },
+        reputation: { he: "מוניטין", en: "reputation" },
+        education: { he: "השכלה", en: "education" },
+        soul: { he: "נשמה", en: "soul" },
+        creativity: { he: "יצירתיות", en: "creativity" },
+        love: { he: "אהבה", en: "love" }
+      };
+      Object.keys(labels).forEach((key) => {
+        if (typeof effects[key] === "number") {
+          bits.push((effects[key] > 0 ? "+" : "") + effects[key] + " " + localize(labels[key]));
+        }
+      });
+      if (choice && choice.followUpEventId) {
+        bits.push(localize({ he: "המשך מחר", en: "Follow-up tomorrow" }));
+      }
+      return bits.length ? bits.join(" · ") : localize({ he: "הבחירה נרשמה", en: "Choice recorded" });
     }
 
     // logDiary — one line in "יומן העונה" (season diary): only significant,
@@ -5883,6 +6408,12 @@
       brief.resolved = true;
       brief.pickedChoiceId = choiceId;
       brief.resultCopy = choiceDef.result ? localize(choiceDef.result) : null;
+      brief.effectSummary = briefEffectSummary(choiceDef);
+      // Acknowledgement-only briefings should not make the player click a
+      // second time just to enter the game.
+      if (choiceDef.id === "ack") {
+        brief.dismissed = true;
+      }
       logDiary(brief.headline, brief.source, brief.resultCopy);
       saveGame();
       render();
@@ -6328,7 +6859,9 @@
       const studyCost = Math.round(courseBase * priceScale() * courseMod);
       const studyHot = courseMod < 1 || creditMod > 1;
 
-      if (gameState.education < 3 && studyBuilding && gameState.cash >= studyCost) {
+      // Do not recommend school while the explicit opening goal is to get a
+      // first job. It created a visible conflict between the goal and hint.
+      if (gameState.jobId && gameState.education < 3 && studyBuilding && gameState.cash >= studyCost) {
         moves.push({
           key: "study",
           score: studyHot ? 95 : (gameState.education < 1 ? 80 : 55),
@@ -9460,6 +9993,22 @@
       return rows.slice(0, 3);
     }
 
+    // The economy delta is only what changed during the nightly simulation.
+    // Keep a separate, human-readable record of what the player actually did
+    // during the day so a shift never disappears from the end-of-day screen.
+    function formatDayActions(day) {
+      const brief = gameState.dailyBriefing;
+      const briefHeadline = brief && brief.day === day ? brief.headline : "";
+      return (gameState.log || [])
+        .filter((entry) => entry.day === day && (!briefHeadline || !String(entry.copy || "").startsWith(briefHeadline)))
+        .slice(0, 3)
+        .map((entry) => ({
+          tone: entry.tone || "neutral",
+          copy: String(entry.copy || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
+        }))
+        .filter((entry) => entry.copy);
+    }
+
     // computeSownLine — "sown for tomorrow": the nearest real scheduled
     // follow-up (from a pitch or a briefing choice), or — if nothing is
     // pending — the current city's own mood line (real content already in
@@ -9523,6 +10072,7 @@
           headline: highlight.headline,
           subtitle: highlight.subtitle,
           deltas: formatDayDeltas(gameState.dayDelta),
+          actions: formatDayActions(before.day),
           sownLine: computeSownLine(),
           dismissed: false
         };
@@ -9817,6 +10367,12 @@
         return;
       }
       const nextGoal = computeNextGoal();
+      const nextTravelHours = nextGoal.ctaBuilding
+        ? distanceBetween(getCity(), gameState.currentBuilding, nextGoal.ctaBuilding)
+        : 0;
+      const nextTravelLabel = nextTravelHours
+        ? " · " + formatDuration(nextTravelHours)
+        : "";
       dom.hud.innerHTML = `
         <div class="cmd-bar">
           <div class="cmd-metric">
@@ -9829,7 +10385,7 @@
           </div>
           <div class="cmd-goal">🎯 <span>${nextGoal.short}</span></div>
           ${nextGoal.ctaBuilding
-            ? `<button class="cmd-cta" data-action="goAndShowActions" data-value="${nextGoal.ctaBuilding}">${nextGoal.ctaLabel}</button>`
+            ? `<button class="cmd-cta" data-action="goAndShowActions" data-value="${nextGoal.ctaBuilding}">${nextGoal.ctaLabel}${nextTravelLabel}</button>`
             : (nextGoal.ctaLabel ? `<span class="cmd-cta-static">${nextGoal.ctaLabel}</span>` : "")}
           <button class="cmd-sleep" data-action="endDay">${localize({ he: "לישון", en: "Sleep" })}</button>
           ${hudMenuMarkup()}
@@ -10206,52 +10762,134 @@
       `;
     }
 
+    function renderSeasonRoute() {
+      const hasJob = !!gameState.jobId;
+      const filmOpen = !!gameState.filmUnlocked;
+      const pitched = !!(gameState.pitch && gameState.pitch.resolved);
+      const madeFilm = (gameState.projects || []).some((project) => project.released || project.shoots > 0);
+      const current = !hasJob ? "job" : (!filmOpen ? "entry" : (!pitched ? "pitch" : (!madeFilm ? "film" : "film")));
+      const steps = [
+        { id: "job", index: "01", title: { he: "משרה ראשונה", en: "First job" }, copy: { he: "לבנות הכנסה, ניסיון וביטחון", en: "Build income, experience and confidence" }, done: hasJob },
+        { id: "entry", index: "02", title: { he: "דלת לתעשייה", en: "The industry door" }, copy: { he: "השכלה, מצלמה ורשת ראשונה", en: "Training, a camera and a first network" }, done: filmOpen },
+        { id: "pitch", index: "03", title: { he: "הפיץ׳ הראשון", en: "The first pitch" }, copy: { he: "לבחור איך קובי מציג את הסיפור", en: "Choose how Kobi presents the story" }, done: pitched },
+        { id: "film", index: "04", title: { he: "הסרט הראשון", en: "The first film" }, copy: { he: "להפוך החלטות לסרט שמגיע למסך", en: "Turn decisions into a film that reaches a screen" }, done: madeFilm }
+      ];
+      return `
+        <section class="studio-card">
+          <div class="studio-section-label">${localize({ he: "מסלול העונה", en: "Season route" })}</div>
+          <h2>${localize({ he: "הסיפור של קובי", en: "Kobi's story" })}</h2>
+          <div class="studio-milestones">
+            ${steps.map((step) => {
+              const state = step.done ? "done" : (step.id === current ? "current" : "");
+              return `<div class="studio-milestone ${state}">
+                <span class="studio-milestone-dot" aria-hidden="true"></span>
+                <div><span class="studio-milestone-index">${step.index}</span><strong>${localize(step.title)}</strong><span>${localize(step.copy)}</span></div>
+              </div>`;
+            }).join("")}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderStudioLocations(city, buildings, hintBuilding) {
+      return `
+        <details class="studio-places">
+          <summary>${localize({ he: "כל המקומות ב" + localize(city.name), en: "All places in " + localize(city.name) })} · ${buildings.length}</summary>
+          <div class="studio-location-grid">
+            ${buildings.map((buildingId) => {
+              const building = getBuilding(buildingId);
+              const selected = buildingId === gameState.currentBuilding;
+              const target = buildingId === hintBuilding;
+              return `<button class="studio-location ${selected ? "selected" : ""} ${target ? "target" : ""}" data-action="goAndShowActions" data-value="${buildingId}">
+                <strong>${localize(building.short)}</strong>
+                <small>${localize(building.sub || building.label)}${target ? " · " + localize({ he: "היעד", en: "Target" }) : ""}</small>
+              </button>`;
+            }).join("")}
+          </div>
+        </details>
+      `;
+    }
+
     function renderBoard() {
       const city = getCity();
       const hint = currentHint();
       const currentBuilding = getBuilding(gameState.currentBuilding);
       const buildings = visibleBuildings(city);
       const inCityHint = buildings.includes(hint.building) ? hint.building : null;
-      const suggestedMoves = computeSuggestedMoves();
-      const newsItems = computeNewsItems();
-      const nextTask = nextFilmTask();
-      const taskUrgent = nextTask && ((gameState.day > nextTask.day) || (nextTask.day - gameState.day) <= 3);
       const nextGoal = computeNextGoal();
+      const suggestedMoves = computeSuggestedMoves();
+      const topMove = suggestedMoves[0];
+      const primary = nextGoal.ctaBuilding
+        ? {
+            action: "goAndShowActions",
+            value: nextGoal.ctaBuilding,
+            title: nextGoal.ctaLabel,
+            reason: nextGoal.title,
+            icon: "✦"
+          }
+        : (topMove || {
+            action: "openHereActions",
+            value: "",
+            title: localize({ he: "לראות מה אפשר לעשות כאן", en: "See what you can do here" }),
+            reason: hint.copy || gameState.ticker || t("interiorPrompt"),
+            icon: "→"
+          });
+      const primaryBuilding = primary.value && buildings.includes(primary.value) ? primary.value : null;
+      const travelHours = primaryBuilding ? distanceBetween(city, gameState.currentBuilding, primaryBuilding) : 0;
+      const travelCopy = travelHours
+        ? localize({ he: formatDuration(travelHours) + " בדרך", en: formatDuration(travelHours) + " travel" })
+        : localize({ he: "זמין עכשיו", en: "Available now" });
+      const news = computeNewsItems()[0];
+      const headline = !gameState.jobId
+        ? localize({ he: "הסצנה הראשונה מתחילה היום.", en: "The first scene starts today." })
+        : (!gameState.filmUnlocked
+          ? localize({ he: "הקריירה כבר זזה. עכשיו פותחים דלתות.", en: "The career is moving. Now open doors." })
+          : localize({ he: "הסיפור כבר בתנועה.", en: "The story is already moving." }));
       dom.boardStage.innerHTML = `
-        <div class="win95-shell">
-          <section class="win95-main">
-            <div class="ctx-strip">
-              <span class="ctx-place">${localize(city.name)} · ${gameState.playerName} · ${t("daysLeft")}: ${daysLeft()}</span>
-              <button class="icon-btn ctx-info-btn" data-action="openClassicPanel" data-value="ledger" title="${localize({ he: "פרטים — חשבונות, מה שיש לי, אנשים, עלילה", en: "Details — ledger, inventory, people, story" })}">
-                ℹ️${taskUrgent ? `<span class="panel-open-badge"></span>` : ""}
-              </button>
-            </div>
-            <div class="board-route-row">
-              ${cityTravelMarkup(city, buildings, inCityHint)}
-            </div>
-            ${suggestedMoves.length ? `
-              <div class="suggested-header">${localize({ he: "💡 לאן ללכת עכשיו", en: "💡 Where to go now" })}</div>
-              <div class="suggested-strip">
-                ${suggestedMoves.map(suggestedMoveMarkup).join("")}
-              </div>
-            ` : ""}
-            <div class="scene-block" style="--scene-a:${currentBuilding.color[0]};--scene-b:${currentBuilding.color[1]};">
-              <div class="scene-title">${localize(currentBuilding.label)}</div>
-              <div class="scene-copy">${buildingSpeech(gameState.currentBuilding)}</div>
-              <button class="scene-here-trigger" data-action="openHereActions">
-                <span>🛠️</span> ${localize({ he: "אפשר לעשות כאן", en: "You can do here" })}
-              </button>
-              <div class="scene-hint">${hint.copy || gameState.ticker || t("interiorPrompt")}</div>
-              ${newsMarketMarkup(city, newsItems)}
-            </div>
-          </section>
-          <aside class="win95-aside">
-            ${renderAside(nextGoal)}
-          </aside>
-        </div>
-        ${renderClassicPanel()}
-        ${renderLocationDetail()}
-        ${renderHereActionsModal()}
+        <main class="studio-shell">
+          <div class="studio-grid">
+            <section>
+              <div class="studio-eyebrow">${localize({ he: "עונה " + gameState.day + " · " + localize(city.name), en: "Season day " + gameState.day + " · " + localize(city.name) })}</div>
+              <h1 class="studio-title">${headline}</h1>
+              <p class="studio-subtitle">${nextGoal.title}</p>
+              <section class="studio-scene" style="--scene-a:${currentBuilding.color[0]};--scene-b:${currentBuilding.color[1]};">
+                <div class="studio-scene-copy">
+                  <span class="studio-place">${localize(city.name)} · ${localize(currentBuilding.label)}</span>
+                  <h2 class="studio-place-title">${localize(currentBuilding.short)}</h2>
+                  <p class="studio-place-copy">${buildingSpeech(gameState.currentBuilding)}</p>
+                  <button class="studio-primary" data-action="${primary.action}" data-value="${primary.value || ""}">
+                    <span class="studio-primary-body"><strong>${localize(primary.title)}</strong><small>${localize(primary.reason)} · ${travelCopy}</small></span>
+                    <span class="studio-primary-arrow" aria-hidden="true">${primary.icon}</span>
+                  </button>
+                  <button class="studio-place-action" data-action="openHereActions">
+                    <span class="studio-place-action-body"><strong>${localize({ he: "מה אפשר לעשות כאן", en: "What can I do here" })}</strong><small>${localize({ he: "כל הפעולות ב" + localize(currentBuilding.label), en: "All actions at " + localize(currentBuilding.label) })}</small></span>
+                    <span aria-hidden="true">←</span>
+                  </button>
+                </div>
+                <div class="studio-scene-mark" aria-hidden="true"><span>🎬</span><strong>${nextGoal.short}</strong></div>
+              </section>
+              ${news ? `<div class="studio-world"><span class="studio-world-icon">${news.icon}</span><div><strong>${news.title}</strong><span>${news.subtitle}</span></div></div>` : ""}
+              ${renderStudioLocations(city, buildings, inCityHint)}
+            </section>
+            <aside class="studio-rail">
+              <section class="studio-card">
+                <div class="studio-section-label">${localize({ he: "המהלך הבא", en: "Next move" })}</div>
+                <h2>${nextGoal.short}</h2>
+                <p class="studio-goal-copy">${nextGoal.title}</p>
+                ${nextGoal.ctaBuilding ? `<button class="studio-goal-button" data-action="goAndShowActions" data-value="${nextGoal.ctaBuilding}">${nextGoal.ctaLabel} · ${primaryBuilding ? travelCopy : ""}</button>` : ""}
+              </section>
+              ${renderSeasonRoute()}
+              <section class="studio-card studio-story">
+                <div class="studio-section-label">${localize({ he: "יומן חי", en: "Live journal" })}</div>
+                <p>${(gameState.log && gameState.log[0] && gameState.log[0].copy) || localize({ he: "היום עוד מחכה להחלטה הראשונה שלך.", en: "The day is waiting for your first decision." })}</p>
+                <button data-action="openClassicPanel" data-value="story">${localize({ he: "פתח/י את יומן העונה ←", en: "Open season diary ←" })}</button>
+              </section>
+            </aside>
+          </div>
+          ${renderClassicPanel()}
+          ${renderLocationDetail()}
+          ${renderHereActionsModal()}
+        </main>
       `;
     }
 
@@ -11000,6 +11638,7 @@
               <p class="brief-event-body">${brief.body}</p>
               ${brief.resolved ? `
                 ${brief.resultCopy ? `<p class="brief-result">${brief.resultCopy}</p>` : ""}
+                ${brief.effectSummary ? `<p class="brief-effect-summary">${brief.effectSummary}</p>` : ""}
                 <button class="brief-choice-btn" data-action="dismissMorningBrief">${localize({ he: "המשך", en: "Continue" })}</button>
               ` : `
                 <div class="brief-choices">
@@ -11055,6 +11694,14 @@
             <span class="recap-subtitle">${recap.subtitle}</span>
           </div>
           <div class="recap-body">
+            ${recap.actions && recap.actions.length ? `
+              <section class="recap-today" aria-label="${localize({ he: "מה קרה היום", en: "What happened today" })}">
+                <span class="recap-today-label">${localize({ he: "מה עשית היום", en: "What you did today" })}</span>
+                <div class="recap-action-list">
+                  ${recap.actions.map((action) => `<div class="recap-action ${action.tone}"><span>•</span><span>${action.copy}</span></div>`).join("")}
+                </div>
+              </section>
+            ` : ""}
             ${recap.deltas.length ? `
               <div class="recap-deltas">
                 ${recap.deltas.map((d) => `<span class="recap-delta ${d.tone}">${d.label}</span>`).join("")}
@@ -11062,14 +11709,14 @@
             ` : ""}
             ${recap.sownLine ? `
               <div class="recap-sown">
-                <span class="recap-sown-label">${localize({ he: "נזרע למחר", en: "Sown for tomorrow" })}</span>
+                <span class="recap-sown-label">${localize({ he: "מחר מחכה", en: "Tomorrow holds" })}</span>
                 <p>${recap.sownLine}</p>
               </div>
             ` : ""}
           </div>
           <div class="recap-actions">
-            <button class="mini-btn secondary" data-action="openStoryFromRecap">${localize({ he: "פתח/י את יומן העונה", en: "Open the season diary" })}</button>
-            <button class="recap-cta" data-action="dismissDayRecap">${localize({ he: "לישון", en: "Sleep" })} · ${localize({ he: "יום", en: "Day" })} ${gameState.day}</button>
+            <button class="mini-btn secondary" data-action="openStoryFromRecap">${localize({ he: "יומן העונה", en: "Season diary" })}</button>
+            <button class="recap-cta" data-action="dismissDayRecap">${localize({ he: "התחל/י את יום", en: "Start day" })} ${gameState.day}</button>
           </div>
         </div>
       `;
@@ -12086,7 +12733,7 @@
         playerName: options.playerName || prefs.playerName || gameState.playerName,
         economyDifficulty: options.economyDifficulty || prefs.economyDifficulty || "modest",
         goalLevels: options.goalLevels || prefs.goalLevels || { wealth: "modest", career: "modest", education: "modest", happiness: "modest" },
-        seasonLength: [30, 90, 365].includes(options.seasonLength) ? options.seasonLength : (prefs.seasonLength || 90),
+        seasonLength: [30, 90, 365].includes(options.seasonLength) ? options.seasonLength : (prefs.seasonLength || 30),
         language: gameState.language,
         themeIndex: gameState.themeIndex,
         muted: gameState.muted,
