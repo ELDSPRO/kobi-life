@@ -5188,6 +5188,9 @@
     .life-intro-note p { margin: 0; color: rgba(247,242,232,.84); font-size: .79rem; line-height: 1.5; }
     .life-intro-note button { padding: 8px 10px; color: #1b160c; font-size: .72rem; font-weight: 800; background: var(--studio-gold); border-radius: 8px; }
 
+    .life-place-map { margin-top: 20px; }
+    .life-place-map-head { display:flex; align-items:baseline; justify-content:space-between; gap:16px; }
+    .life-place-map-head small { max-width:48ch; color:var(--studio-muted); font-size:.68rem; line-height:1.4; text-align:end; }
     .life-route-map { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 9px; margin-top: 20px; padding: 1px 0; }
     .life-route-map::before { content: ""; position: absolute; top: 27px; inset-inline: 12%; height: 1px; background: rgba(230,238,255,.16); }
     .life-route-node { position: relative; z-index: 1; min-height: 112px; display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto 1fr; gap: 4px 8px; padding: 11px; text-align: start; color: var(--studio-muted); background: rgba(19,24,36,.72); border: 1px solid var(--studio-line); border-radius: 15px; transition: .16s ease; }
@@ -5210,6 +5213,7 @@
     .life-choice-icon { grid-row: 2/4; width: 31px; height: 31px; display: grid; place-items: center; color: var(--studio-gold); border: 1px solid rgba(244,185,66,.55); border-radius: 50%; font-size: .88rem; }
     .life-choice strong { align-self: end; font-size: .89rem; line-height: 1.25; }
     .life-choice-copy { grid-column: 2; color: var(--studio-muted); font-size: .7rem; line-height: 1.45; }
+    .life-month-cost { grid-column:2; align-self:end; width:max-content; padding:3px 6px; color:var(--studio-gold); font-size:.61rem; font-weight:800; background:rgba(244,185,66,.1); border-radius:999px; }
     .life-effects { grid-column: 1/-1; display: flex; flex-wrap: wrap; gap: 5px; align-self: end; margin-top: 7px; }
     .life-effect { padding: 4px 6px; color: rgba(247,242,232,.75); font-size: .62rem; font-weight: 700; background: rgba(255,255,255,.055); border-radius: 999px; }
     .life-effect.good { color: var(--studio-green); background: rgba(99,210,165,.1); }
@@ -5220,8 +5224,14 @@
     .life-choice-skip .life-choice-index { grid-column: 1/-1; }
     .life-choice-skip .life-choice-icon { grid-row: 2; }
     .life-choice-skip .life-choice-copy { grid-column: 2; }
-    .life-choice-skip .life-effects { display: none; }
+    .life-choice-skip .life-effects { display: flex; }
     .life-choice-skip .life-choice-cta { grid-column: 3; grid-row: 2; align-self: center; padding: 0; border: 0; }
+    /* Waiting is a real one-month action, not a hidden escape hatch. */
+    .life-choice-skip { grid-template-columns:auto 1fr; grid-template-rows:auto auto 1fr auto auto; }
+    .life-choice-skip .life-choice-icon { grid-row:2/4; }
+    .life-choice-skip .life-choice-copy,
+    .life-choice-skip .life-month-cost { grid-column:2; }
+    .life-choice-skip .life-choice-cta { grid-column:1/-1; grid-row:auto; align-self:auto; padding-top:9px; border-top:1px solid rgba(229,238,255,.11); }
 
     .life-rail { position: sticky; top: 12px; display: grid; gap: 12px; }
     .life-rail-card { padding: 16px; border: 1px solid var(--studio-line); border-radius: 15px; background: rgba(19,24,36,.86); box-shadow: 0 13px 38px rgba(0,0,0,.12); }
@@ -5244,6 +5254,11 @@
     .life-season-event strong { display:block; color:var(--studio-cream); font-size:.73rem; }
     .life-season-stop small,
     .life-season-event small { display:block; margin-top:2px; color:var(--studio-muted); font-size:.62rem; line-height:1.3; }
+    .life-month-track { display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:7px; margin-top:14px; }
+    .life-month-dot { height:28px; display:grid; place-items:center; color:var(--studio-muted); font-size:.63rem; font-weight:800; border:1px solid var(--studio-line); border-radius:8px; background:rgba(255,255,255,.025); }
+    .life-month-dot.complete { color:#10261e; border-color:var(--studio-green); background:var(--studio-green); }
+    .life-month-dot.active { color:#342609; border-color:var(--studio-gold); background:var(--studio-gold); box-shadow:0 0 0 3px rgba(244,185,66,.12); }
+    .life-month-note { margin:10px 0 0; color:var(--studio-muted); font-size:.64rem; line-height:1.4; }
     .life-event-card { border-color:rgba(244,185,66,.32); background:linear-gradient(145deg,rgba(244,185,66,.11),rgba(19,24,36,.88)); }
     .life-event-card > strong { display:block; margin-top:7px; color:var(--studio-cream); font-size:.8rem; }
     .life-event-card > p { margin:5px 0 0; color:var(--studio-muted); font-size:.67rem; line-height:1.42; }
@@ -5278,6 +5293,8 @@
       .life-command-metric { min-width:auto; }
       .life-command-diary { display:none; }
       .life-route-map { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .life-place-map-head { align-items:flex-start; flex-direction:column; gap:5px; }
+      .life-place-map-head small { text-align:start; }
       .life-route-map::before { display:none; }
       .life-route-node { min-height:108px; }
       .life-deck-head { grid-template-columns:1fr; gap:9px; }
@@ -6334,9 +6351,14 @@
         calendarYear: 2026,
         horizon: years,
         yearIndex: 0,
+        // A year is played like a day: every action consumes real months.
+        // This turns the clock forward without reducing the experience to
+        // one compulsory "pick a card" turn per season.
+        month: 1,
         seasonIndex: 0,
         activeRoute: "work",
         completedThisYear: [],
+        yearActions: [],
         history: [],
         events: [],
         introSeen: false
@@ -6357,21 +6379,31 @@
       life.age = Number.isFinite(life.age) ? life.age : life.startAge;
       life.calendarYear = Number.isFinite(life.calendarYear) ? life.calendarYear : 2026;
       life.yearIndex = Number.isFinite(life.yearIndex) ? life.yearIndex : Math.max(0, life.age - life.startAge);
-      life.seasonIndex = clamp(Number(life.seasonIndex) || 0, 0, 2);
+      // Migrate the first life-route prototype (three season choices) into
+      // the monthly planner without invalidating the user's save.
+      if (!Number.isFinite(life.month)) life.month = clamp((Number(life.seasonIndex) || 0) * 4 + 1, 1, 12);
+      life.month = clamp(Math.round(life.month), 1, 12);
+      life.seasonIndex = Math.floor((life.month - 1) / 4);
       life.activeRoute = ["work", "create", "life", "finance"].includes(life.activeRoute) ? life.activeRoute : "work";
       life.completedThisYear = Array.isArray(life.completedThisYear) ? life.completedThisYear : [];
+      life.yearActions = Array.isArray(life.yearActions) ? life.yearActions : life.completedThisYear.slice();
       life.history = Array.isArray(life.history) ? life.history : [];
       life.events = Array.isArray(life.events) ? life.events : [];
       return life;
     }
 
     function lifePeriod() {
-      const periods = [
-        { id: "spring", he: "ינואר — אפריל", en: "January — April", titleHe: "פתיחת השנה", titleEn: "Opening act" },
-        { id: "summer", he: "מאי — אוגוסט", en: "May — August", titleHe: "אמצע השנה", titleEn: "Mid-year turn" },
-        { id: "autumn", he: "ספטמבר — דצמבר", en: "September — December", titleHe: "סגירת השנה", titleEn: "Year close" }
+      const months = [
+        ["january", "ינואר", "January"], ["february", "פברואר", "February"], ["march", "מרץ", "March"], ["april", "אפריל", "April"],
+        ["may", "מאי", "May"], ["june", "יוני", "June"], ["july", "יולי", "July"], ["august", "אוגוסט", "August"],
+        ["september", "ספטמבר", "September"], ["october", "אוקטובר", "October"], ["november", "נובמבר", "November"], ["december", "דצמבר", "December"]
       ];
-      return periods[ensureLifeState().seasonIndex] || periods[0];
+      const entry = months[ensureLifeState().month - 1] || months[0];
+      return { id: entry[0], he: entry[1], en: entry[2], titleHe: entry[1], titleEn: entry[2] };
+    }
+
+    function lifeMonthsLeft() {
+      return 13 - ensureLifeState().month;
     }
 
     function lifeRoutes() {
@@ -6401,55 +6433,64 @@
         {
           id: "first-job", icon: "▣", title: { he: "להיכנס לעבודה הראשונה", en: "Take the first job" },
           copy: { he: "משרה יציבה בקולנוע. פחות נוצץ, אבל מכניס אותך פנימה.", en: "A steady cinema role. Less glamorous, but it gets you inside." },
-          effects: { cash: 700, experience: 8, reputation: 2, soul: -3 }, jobId: "popcorn"
+          effects: { cash: 700, experience: 8, reputation: 2, soul: -3 }, months: 1, jobId: "popcorn"
         },
         {
-          id: "gig-year", icon: "↗", title: { he: "לבנות שנה מגיגים", en: "Build a gig year" },
-          copy: { he: "יותר חופש, יותר חוסר ודאות, וקצת יותר חומר לספר עליו.", en: "More freedom, more uncertainty, and better stories to tell." },
-          effects: { cash: 500, experience: 6, creativity: 4, soul: -2 }
+          id: "gig-run", icon: "↗", title: { he: "לצאת לרצף גיגים", en: "Run a string of gigs" },
+          copy: { he: "חודש של חופש, חוסר ודאות וחומר לספר עליו.", en: "A month of freedom, uncertainty, and material for stories." },
+          effects: { cash: 500, experience: 6, creativity: 4, soul: -2 }, months: 1
         },
         {
           id: "portfolio", icon: "✦", title: { he: "לבנות תיק עבודות", en: "Build a portfolio" },
           copy: { he: "להקריב הכנסה עכשיו כדי שהדלת הבאה תהיה מעניינת יותר.", en: "Trade income now for a more interesting next door." },
-          effects: { cash: -160, creativity: 11, reputation: 5, soul: 1 }
+          effects: { cash: -160, creativity: 11, reputation: 5, soul: 1 }, months: 1
         }
       ] : [
         {
-          id: "anchor-shift", icon: "▣", title: { he: "לתת שנה של משמרות", en: "Anchor the year with shifts" },
+          id: "anchor-shift", icon: "▣", title: { he: "לעבוד את החודש", en: "Work this month" },
           copy: { he: "המסלול היציב: כסף, ניסיון, ופחות מקום לספונטניות.", en: "The stable route: cash, experience, less room for spontaneity." },
-          effects: { cash: 900 + job.tier * 120, experience: 10, reputation: 3, soul: -5 }
+          effects: { cash: 300 + job.tier * 45, experience: 4, reputation: 2, soul: -2 }, months: 1
         },
         {
-          id: "promotion-push", icon: "↑", title: { he: "לרדוף קידום", en: "Chase a promotion" },
+          id: "promotion-push", icon: "↑", title: { he: "לרדוף קידום החודש", en: "Chase a promotion this month" },
           copy: { he: "לוקחים אחריות, נראים יותר, ומקבלים פחות אוויר.", en: "Take responsibility, get seen, and have less air." },
-          effects: { cash: 620 + job.tier * 90, experience: 15, reputation: 7, soul: -8 }
+          effects: { cash: 230 + job.tier * 35, experience: 6, reputation: 4, soul: -3 }, months: 1
         },
         {
-          id: "industry-side", icon: "↗", title: { he: "להחליף ודאות בהזדמנות", en: "Trade certainty for opportunity" },
+          id: "industry-side", icon: "↗", title: { he: "לתפוס הזדמנות החודש", en: "Take an opportunity this month" },
           copy: { he: "פחות משמרות, יותר היכרויות על סטים קטנים.", en: "Fewer shifts, more introductions on small sets." },
-          effects: { cash: 420, experience: 8, reputation: 10, creativity: 4, soul: -3 }
+          effects: { cash: 190, experience: 4, reputation: 5, creativity: 2, soul: -2 }, months: 1
         }
       ];
       const decks = {
         work: workCards,
         create: [
-          { id: "writing-room", icon: "✦", title: { he: "לכתוב את הפרויקט האישי", en: "Write the personal project" }, copy: { he: "הסיפור מתקדם, גם אם אף אחד עדיין לא ביקש אותו.", en: "The story moves forward, even if nobody asked for it yet." }, effects: { cash: -280, creativity: 13, reputation: 4, soul: 2 } },
-          { id: "short-film", icon: "◉", title: { he: "להוציא סרט קצר", en: "Make a short film" }, copy: { he: "עלות ברורה, סיכוי ברור יותר שמישהו ישים לב.", en: "A clear cost, and a better chance someone notices." }, effects: { cash: -720, creativity: 10, reputation: 13, soul: -2 }, unlockFilm: true },
-          { id: "commercial-brief", icon: "▤", title: { he: "לקחת בריף מסחרי", en: "Take a commercial brief" }, copy: { he: "פחות אישי, יותר קשרים, כסף שמחזיר לך זמן.", en: "Less personal, more connections, money that buys time." }, effects: { cash: 420, creativity: 5, reputation: 9, soul: -2 } }
+          { id: "writing-room", icon: "✦", title: { he: "לכתוב חודש", en: "Write for a month" }, copy: { he: "הסיפור מתקדם, גם אם אף אחד עדיין לא ביקש אותו.", en: "The story moves forward, even if nobody asked for it yet." }, effects: { cash: -280, creativity: 13, reputation: 4, soul: 2 }, months: 1 },
+          { id: "short-film", icon: "◉", title: { he: "להתקדם בסרט הקצר החודש", en: "Advance the short film this month" }, copy: { he: "עלות ברורה, סיכוי ברור יותר שמישהו ישים לב.", en: "A clear cost, and a better chance someone notices." }, effects: { cash: -260, creativity: 7, reputation: 7, soul: -2 }, months: 1, unlockFilm: true },
+          { id: "commercial-brief", icon: "▤", title: { he: "לקחת בריף החודש", en: "Take a commercial brief this month" }, copy: { he: "פחות אישי, יותר קשרים, כסף שמחזיר לך זמן.", en: "Less personal, more connections, money that buys time." }, effects: { cash: 210, creativity: 3, reputation: 5, soul: -1 }, months: 1 }
         ],
         life: [
-          { id: "relationship", icon: "♡", title: { he: "לפנות מקום לזוגיות", en: "Make room for a relationship" }, copy: { he: "החיים נהיים עשירים יותר — ולוח הזמנים פחות שלך.", en: "Life gets richer — and your calendar less yours." }, effects: { cash: -260, love: 15, soul: 8, creativity: -2 } },
-          { id: "home-base", icon: "⌂", title: { he: "לבנות בית יציב", en: "Build a stable home" }, copy: { he: "שקט עולה כסף, אבל הוא מגדיל את יכולת ההישרדות שלך.", en: "Calm costs money, but expands your ability to last." }, effects: { cash: -520, soul: 12, love: 5, creativity: 2 }, housing: "cheap" },
-          { id: "reset", icon: "☼", title: { he: "לצאת מהמירוץ לחודש", en: "Step out of the race" }, copy: { he: "אין קידום. יש אוויר, רעיונות, ומערכת עצבים עובדת.", en: "No promotion. Just air, ideas, and a functioning nervous system." }, effects: { cash: -180, soul: 16, creativity: 9, reputation: -1 } }
+          { id: "relationship", icon: "♡", title: { he: "לפנות מקום לזוגיות החודש", en: "Make room for a relationship this month" }, copy: { he: "החיים נהיים עשירים יותר — ולוח הזמנים פחות שלך.", en: "Life gets richer — and your calendar less yours." }, effects: { cash: -120, love: 8, soul: 5, creativity: -1 }, months: 1 },
+          { id: "home-base", icon: "⌂", title: { he: "להתמקם בבית לחודש", en: "Settle into a home for a month" }, copy: { he: "שקט עולה כסף, אבל הוא מגדיל את יכולת ההישרדות שלך.", en: "Calm costs money, but expands your ability to last." }, effects: { cash: -520, soul: 12, love: 5, creativity: 2 }, months: 1, housing: "cheap" },
+          { id: "reset", icon: "☼", title: { he: "לצאת מהמירוץ לחודש", en: "Step out of the race for a month" }, copy: { he: "אין קידום. יש אוויר, רעיונות, ומערכת עצבים עובדת.", en: "No promotion. Just air, ideas, and a functioning nervous system." }, effects: { cash: -180, soul: 16, creativity: 9, reputation: -1 }, months: 1 }
         ],
         finance: [
-          { id: "debt-plan", icon: "◒", title: { he: "להחזיר חלק מהחוב", en: "Pay down debt" }, copy: { he: "החלטה שקטה שמגדילה את החופש של קובי/ת העתידי/ת.", en: "A quiet decision that expands future freedom." }, effects: { cash: -550, debt: -950, soul: 2 } },
-          { id: "network", icon: "⌘", title: { he: "להשקיע בקשרים", en: "Invest in connections" }, copy: { he: "אנשים נכונים לא מבטיחים תוצאה — אבל משנים את מספר הדלתות.", en: "The right people promise nothing, but change the number of doors." }, effects: { cash: -400, reputation: 12, creativity: 3, love: -1 } },
-          { id: "microfund", icon: "◈", title: { he: "לגייס מימון קטן", en: "Raise a small fund" }, copy: { he: "כסף לפרויקט עכשיו, עם אחריות ומחיר בשנה הבאה.", en: "Project money now, with responsibility and a cost next year." }, effects: { cash: 900, debt: 520, reputation: 5, soul: -2 } }
+          { id: "debt-plan", icon: "◒", title: { he: "להקדיש חודש לסגירת חוב", en: "Spend a month paying debt" }, copy: { he: "החלטה שקטה שמגדילה את החופש של קובי/ת העתידי/ת.", en: "A quiet decision that expands future freedom." }, effects: { cash: -550, debt: -950, soul: 2 }, months: 1 },
+          { id: "network", icon: "⌘", title: { he: "להשקיע חודש בקשרים", en: "Invest a month in connections" }, copy: { he: "אנשים נכונים לא מבטיחים תוצאה — אבל משנים את מספר הדלתות.", en: "The right people promise nothing, but change the number of doors." }, effects: { cash: -400, reputation: 12, creativity: 3, love: -1 }, months: 1 },
+          { id: "microfund", icon: "◈", title: { he: "לגייס מימון החודש", en: "Raise funding this month" }, copy: { he: "כסף לפרויקט עכשיו, עם אחריות ומחיר בשנה הבאה.", en: "Project money now, with responsibility and a cost next year." }, effects: { cash: 450, debt: 260, reputation: 4, soul: -2 }, months: 1 }
         ]
       };
-      const skip = { id: "skip", icon: "→", title: { he: "לדלג על נקודת המסלול", en: "Skip this route point" }, copy: { he: "גם לא להחליט זו החלטה: שומרים מקום לדברים אחרים השנה.", en: "Not deciding is also a decision: make room for other things this year." }, effects: { soul: 4, creativity: 2, reputation: -1 }, skip: true };
-      return (decks[routeId] || decks.work).concat(skip);
+      return decks[routeId] || decks.work;
+    }
+
+    function lifeWaitAction() {
+      const months = 1;
+      return {
+        id: "let-year-pass", icon: "→", months,
+        title: { he: "לתת לחודש הזה לעבור", en: "Let this month pass" },
+        copy: { he: "גם פינוי מקום הוא החלטה. החודש הבא יגיע עם מה שהחיים הביאו.", en: "Making room is a decision too. Next month will arrive with whatever life brings." },
+        effects: { soul: 3, creativity: 2, reputation: -1 }, skip: true
+      };
     }
 
     function applyLifeEffects(effects) {
@@ -6498,8 +6539,11 @@
     function makeLifeDecision(routeId, decisionId) {
       if (!isLifeMode() || gameState.winState) return false;
       const life = ensureLifeState();
-      const choice = lifeDecisionDeck(routeId).find((item) => item.id === decisionId);
+      const choice = routeId === "wait"
+        ? lifeWaitAction()
+        : lifeDecisionDeck(routeId).find((item) => item.id === decisionId);
       if (!choice) return false;
+      if ((choice.months || 1) > lifeMonthsLeft()) return false;
       applyLifeEffects(choice.effects);
       if (choice.jobId) {
         gameState.jobId = choice.jobId;
@@ -6511,30 +6555,32 @@
       if (choice.housing) gameState.housing = choice.housing;
       const period = lifePeriod();
       const entry = {
-        kind: "choice", age: life.age, year: life.calendarYear, period: period.id,
+        kind: "choice", age: life.age, year: life.calendarYear, month: life.month, period: period.id,
         route: routeId, title: localize(choice.title), copy: localize(choice.copy), effects: choice.effects, skipped: !!choice.skip
       };
       life.completedThisYear.push(entry);
+      life.yearActions.push(entry);
       life.history.unshift(entry);
       life.history = life.history.slice(0, 60);
       gameState.storyDiary.unshift({ day: gameState.day, title: entry.title, source: localize({ he: "גיל " + life.age + " · " + period.he, en: "Age " + life.age + " · " + period.en }), copy: entry.copy });
       note(localize(choice.title) + " — " + localize(choice.copy), choice.skip ? "neutral" : "good");
       playSfx(choice.skip ? "cash" : "success");
 
-      if (life.seasonIndex === 2) {
+      life.month += choice.months || 1;
+      if (life.month > 12) {
         lifeYearEvent();
         life.yearIndex += 1;
         life.age += 1;
         life.calendarYear += 1;
+        life.month = 1;
         life.seasonIndex = 0;
         life.completedThisYear = [];
+        life.yearActions = [];
         // An annual carrying cost keeps debt meaningful without creating a
         // fail state. It is stated up-front in the finance route.
         gameState.debt = Math.round(gameState.debt * 1.035);
-      } else {
-        life.seasonIndex += 1;
       }
-      life.activeRoute = "work";
+      life.seasonIndex = Math.floor((life.month - 1) / 4);
       updateUnlocks();
       if (life.yearIndex >= life.horizon) finishLifeRun();
       saveGame();
@@ -11225,52 +11271,70 @@
     }
 
     function renderLifeRouteMap() {
-      const life = ensureLifeState();
-      const routes = lifeRoutes();
+      const city = getCity();
+      const places = [
+        { id: "home", route: "life", icon: "⌂" },
+        { id: "employment", route: "work", icon: "▣" },
+        { id: "cafe", route: "life", icon: "☕" },
+        { id: "script", route: "create", icon: "✦" },
+        { id: "filmSchool", route: "create", icon: "◌" },
+        { id: "bank", route: "finance", icon: "◒" }
+      ].filter((place) => city.buildings.includes(place.id));
       return `
-        <nav class="life-route-map" aria-label="${localize({ he: "מסלולי החיים", en: "Life routes" })}">
-          ${routes.map((route, index) => {
-            const selected = route.id === life.activeRoute;
-            const touched = life.history.some((entry) => entry.kind === "choice" && entry.route === route.id);
-            return `<button class="life-route-node ${selected ? "selected" : ""} ${touched ? "touched" : ""}" data-action="selectLifeRoute" data-value="${route.id}">
+        <section class="life-place-map" aria-label="${localize({ he: "מפת העיר", en: "City map" })}">
+          <div class="life-place-map-head"><span class="life-kicker">${localize({ he: "לאן הולכים החודש?", en: "Where do you go this month?" })}</span><small>${localize({ he: "תנועה בין מקומות לא מבזבזת חודש. הפעולה שבוחרים במקום היא ההחלטה.", en: "Moving between places costs no month. The action chosen there is the decision." })}</small></div>
+          <nav class="life-route-map">
+          ${places.map((place, index) => {
+            const building = getBuilding(place.id);
+            const selected = place.id === gameState.currentBuilding;
+            const touched = ensureLifeState().history.some((entry) => entry.kind === "choice" && entry.route === place.route);
+            return `<button class="life-route-node ${selected ? "selected" : ""} ${touched ? "touched" : ""}" data-action="lifeTravel" data-value="${place.id}">
               <span class="life-route-step">0${index + 1}</span>
-              <span class="life-route-icon">${route.icon}</span>
-              <span class="life-route-name">${localize({ he: route.he, en: route.en })}</span>
-              <small>${localize({ he: route.copyHe, en: route.copyEn })}</small>
+              <span class="life-route-icon">${place.icon}</span>
+              <span class="life-route-name">${localize(building.short)}</span>
+              <small>${localize(building.label)}</small>
             </button>`;
           }).join("")}
-        </nav>
+          </nav>
+        </section>
       `;
     }
 
     function renderLifeChoiceDeck() {
       const life = ensureLifeState();
-      const route = lifeRoutes().find((item) => item.id === life.activeRoute) || lifeRoutes()[0];
       const period = lifePeriod();
-      const cards = lifeDecisionDeck(route.id);
+      const building = getBuilding(gameState.currentBuilding);
+      const routeByPlace = { employment: "work", cafe: "life", home: "life", script: "create", filmSchool: "create", bank: "finance", fund: "finance" };
+      const route = routeByPlace[gameState.currentBuilding] || "life";
+      const cards = lifeDecisionDeck(route);
+      const wait = lifeWaitAction();
       return `
         <section class="life-deck">
           <div class="life-deck-head">
             <div>
-              <span class="life-kicker">${localize({ he: "בחירה " + (life.seasonIndex + 1) + " מתוך 3", en: "Choice " + (life.seasonIndex + 1) + " of 3" })}</span>
-              <h2>${localize({ he: route.he, en: route.en })} · ${localize({ he: period.titleHe, en: period.titleEn })}</h2>
+              <span class="life-kicker">${localize({ he: period.he + " " + life.calendarYear + " · " + lifeMonthsLeft() + " חודשים נותרו השנה", en: period.en + " " + life.calendarYear + " · " + lifeMonthsLeft() + " months left this year" })}</span>
+              <h2>${localize(building.label)} · ${localize({ he: "מה עושים החודש?", en: "What do you do this month?" })}</h2>
             </div>
             <p>${localize({
-              he: "בחר/י נקודת מסלול אחת. המחיר וההשפעה המיידית גלויים; מה שהיא תפתח בהמשך — הוא הסיפור.",
-              en: "Choose one route point. The immediate cost and effect are visible; what it opens later is the story."
+              he: "בחר/י פעולה אחת. היא סוגרת את החודש ומקדמת את שעון החיים; אפשר קודם לטייל בין המקומות ולבחון אפשרויות אחרות.",
+              en: "Choose one action. It closes this month and moves the life clock; you can first travel between places and inspect other options."
             })}</p>
           </div>
           <div class="life-choice-grid">
             ${cards.map((card, index) => `
-              <button class="life-choice ${card.skip ? "life-choice-skip" : ""}" data-action="makeLifeDecision" data-value="${route.id}:${card.id}">
+              <button class="life-choice" data-action="makeLifeDecision" data-value="${route}:${card.id}">
                 <span class="life-choice-index">0${index + 1}</span>
                 <span class="life-choice-icon">${card.icon}</span>
                 <strong>${localize(card.title)}</strong>
                 <span class="life-choice-copy">${localize(card.copy)}</span>
+                <span class="life-month-cost">${localize({ he: "חודש אחד", en: "One month" })}</span>
                 ${lifeEffectsMarkup(card.effects)}
-                <span class="life-choice-cta">${card.skip ? localize({ he: "לבחור בדילוג", en: "Choose the skip" }) : localize({ he: "לבחור במסלול הזה", en: "Choose this route" })} <b>←</b></span>
+                <span class="life-choice-cta">${localize({ he: "לבחור לחודש הזה", en: "Choose for this month" })} <b>←</b></span>
               </button>
             `).join("")}
+            <button class="life-choice life-choice-skip" data-action="makeLifeDecision" data-value="wait:${wait.id}">
+              <span class="life-choice-index">04</span><span class="life-choice-icon">${wait.icon}</span><strong>${localize(wait.title)}</strong><span class="life-choice-copy">${localize(wait.copy)}</span><span class="life-month-cost">${localize({ he: "חודש אחד", en: "One month" })}</span>${lifeEffectsMarkup(wait.effects)}<span class="life-choice-cta">${localize({ he: "לתת לחודש לעבור", en: "Let the month pass" })} <b>←</b></span>
+            </button>
           </div>
         </section>
       `;
@@ -11278,10 +11342,9 @@
 
     function renderLifeYearRail() {
       const life = ensureLifeState();
-      const routes = lifeRoutes();
       const period = lifePeriod();
       const currentJob = getJob(gameState.jobId);
-      const history = life.history.slice(0, 3);
+      const history = life.yearActions.slice().reverse().slice(0, 4);
       const latestEvent = life.events[0];
       const goalItems = [
         ["wealth", localize({ he: "כסף", en: "Money" })],
@@ -11294,23 +11357,21 @@
           <section class="life-rail-card life-now-card">
             <span class="life-kicker">${localize({ he: "כאן ועכשיו", en: "Here and now" })}</span>
             <strong>${localize({ he: "גיל " + life.age + " · " + life.calendarYear, en: "Age " + life.age + " · " + life.calendarYear })}</strong>
-            <p>${localize({ he: period.he + " · " + period.titleHe, en: period.en + " · " + period.titleEn })}</p>
+            <p>${localize({ he: period.he + " · חודש " + life.month + " מתוך 12", en: period.en + " · month " + life.month + " of 12" })}</p>
             <div class="life-current-job"><span>▣ ${t("job")}</span><b>${currentJob ? localize(currentJob.title) : localize({ he: "מחפש/ת נקודת פתיחה", en: "Finding a starting point" })}</b></div>
             <small class="life-debt-note">${localize({ he: "החוב צובר 3.5% בסוף כל שנה · " + formatMoney(gameState.debt), en: "Debt grows 3.5% at each year end · " + formatMoney(gameState.debt) })}</small>
           </section>
           <section class="life-rail-card">
-            <span class="life-kicker">${localize({ he: "העוגנים של השנה", en: "This year's anchors" })}</span>
-            <div class="life-season-track">
-              ${[0, 1, 2].map((index) => {
-                const complete = index < life.seasonIndex;
-                const active = index === life.seasonIndex;
-                const picked = life.completedThisYear[index];
-                return `<div class="life-season-stop ${complete ? "complete" : ""} ${active ? "active" : ""}">
-                  <span>${index + 1}</span><div><strong>${["פתיחה", "אמצע", "סגירה"][index]}</strong><small>${picked ? picked.title : (active ? localize({ he: "בחירה פתוחה", en: "Choice open" }) : localize({ he: "עוד לא נפתח", en: "Still ahead" }))}</small></div>
-                </div>`;
+            <span class="life-kicker">${localize({ he: "שעון השנה", en: "Year clock" })}</span>
+            <div class="life-month-track" aria-label="${localize({ he: "חודשי השנה", en: "Months of the year" })}">
+              ${Array.from({ length: 12 }, (_, index) => {
+                const month = index + 1;
+                const complete = month < life.month;
+                const active = month === life.month;
+                return `<span class="life-month-dot ${complete ? "complete" : ""} ${active ? "active" : ""}">${month}</span>`;
               }).join("")}
-              <div class="life-season-event"><span>✦</span><div><strong>${localize({ he: "אירוע שנתי", en: "Annual event" })}</strong><small>${localize({ he: "ייפתח לאחר הבחירה השלישית", en: "Opens after the third choice" })}</small></div></div>
             </div>
+            <p class="life-month-note">${localize({ he: "כל פעולה = חודש. בדצמבר קורה אירוע שנתי והשנה מתקדמת.", en: "Every action = one month. December ends with an annual event and the next year." })}</p>
           </section>
           ${latestEvent ? `
             <section class="life-rail-card life-event-card">
@@ -11327,8 +11388,8 @@
             </div>
           </section>
           <section class="life-rail-card life-diary-card">
-            <span class="life-kicker">${localize({ he: "מה המסלול זוכר", en: "What the route remembers" })}</span>
-            ${history.length ? `<ul>${history.map((entry) => `<li><b>${entry.title}</b><span>${entry.copy}</span></li>`).join("")}</ul>` : `<p>${localize({ he: "הבחירה הראשונה תיכנס לכאן ותתחיל להגדיר את המסלול.", en: "The first choice will appear here and start defining the route." })}</p>`}
+            <span class="life-kicker">${localize({ he: "מה עשית השנה", en: "What you did this year" })}</span>
+            ${history.length ? `<ul>${history.map((entry) => `<li><b>${localize({ he: "חודש " + entry.month + " · ", en: "Month " + entry.month + " · " })}${entry.title}</b><span>${entry.copy}</span></li>`).join("")}</ul>` : `<p>${localize({ he: "ההחלטה הראשונה של החודש תיכנס לכאן.", en: "This month's first decision will appear here." })}</p>`}
           </section>
         </aside>
       `;
@@ -11338,14 +11399,14 @@
       const life = ensureLifeState();
       const period = lifePeriod();
       const intro = !life.introSeen ? `
-        <div class="life-intro-note"><span>✦</span><p>${localize({ he: "זה לא לוח זמנים יומי. בכל שנה יש שלוש החלטות גדולות, וכל אחת מזיזה את ארבעת המסלולים. אין תשובה שגויה — יש מחיר, השלכה ודלת שנפתחת.", en: "This is not a daily schedule. Each year has three major choices, and each moves four life routes. There is no wrong answer — there is a cost, a consequence, and a door opening." })}</p><button data-action="dismissLifeIntro">${localize({ he: "הבנתי", en: "Got it" })}</button></div>` : "";
+        <div class="life-intro-note"><span>✦</span><p>${localize({ he: "שנה מתנהלת כמו יום: בכל חודש מטיילים בין המקומות בעיר ובוחרים פעולה אחת. הפעולה מקדמת את השעון; בדצמבר קורה אירוע שנתי. אין תשובה שגויה — יש מחיר, השלכה ודלת שנפתחת.", en: "A year plays like a day: each month you travel around town and choose one action. The action moves the clock; December brings an annual event. There is no wrong answer — only cost, consequence, and an opened door." })}</p><button data-action="dismissLifeIntro">${localize({ he: "הבנתי", en: "Got it" })}</button></div>` : "";
       dom.boardStage.innerHTML = `
         <main class="life-shell">
           <div class="life-layout">
             <section class="life-main">
               <div class="life-heading">
-                <span class="life-kicker">${localize({ he: "מסלול חיים · " + period.he, en: "Life route · " + period.en })}</span>
-                <h1>${life.age === life.startAge && life.seasonIndex === 0 ? localize({ he: "גיל 21. בוחרים כיוון.", en: "Age 21. Pick a direction." }) : localize({ he: "לאן השנה הולכת?", en: "Where does this year go?" })}</h1>
+                <span class="life-kicker">${localize({ he: "מסלול חיים · " + period.he + " " + life.calendarYear, en: "Life route · " + period.en + " " + life.calendarYear })}</span>
+                <h1>${life.age === life.startAge && life.month === 1 ? localize({ he: "גיל 21. החודש הראשון.", en: "Age 21. The first month." }) : localize({ he: "לאן הולכים ב" + period.he + "?", en: "Where do you go in " + period.en + "?" })}</h1>
                 <p>${localize({ he: "מטרה: לבנות כסף, שם וחופש יצירתי — בלי למחוק את החיים בדרך.", en: "Goal: build money, a name, and creative freedom — without erasing life along the way." })}</p>
               </div>
               ${intro}
@@ -12961,7 +13022,7 @@
             <div class="field">
               <label>${localize({ he: "קצב המשחק", en: "Game rhythm" })}</label>
               <select id="startMode">
-                <option value="life" ${startsLife ? "selected" : ""}>${localize({ he: "מסלול חיים · 3 החלטות בשנה", en: "Life route · 3 choices a year" })}</option>
+                <option value="life" ${startsLife ? "selected" : ""}>${localize({ he: "מסלול חיים · החלטה בכל חודש", en: "Life route · one decision a month" })}</option>
                 <option value="daily" ${!startsLife ? "selected" : ""}>${localize({ he: "סימולציה יומית · שעות ומשמרות", en: "Daily simulation · hours and shifts" })}</option>
               </select>
             </div>
@@ -13088,6 +13149,12 @@
         if (action === "selectLifeRoute") {
           if (isLifeMode() && ["work", "create", "life", "finance"].includes(value)) {
             ensureLifeState().activeRoute = value;
+            render();
+          }
+        } else if (action === "lifeTravel") {
+          if (isLifeMode() && getCity().buildings.includes(value)) {
+            gameState.currentBuilding = value;
+            saveGame();
             render();
           }
         } else if (action === "makeLifeDecision") {
