@@ -64,7 +64,8 @@ function run(htmlPath) {
     "bankDo",
     "buyEquip",
     "makeLifeDecision",
-    "resolveLifeMonthlyEvent"
+    "resolveLifeMonthlyEvent",
+    "chooseLifeCareer"
   ].forEach((fnName) => assert.strictEqual(typeof game[fnName], "function", fnName + " should exist"));
 
   game.startGame({
@@ -125,6 +126,28 @@ function run(htmlPath) {
   state().experience = 17;
   assert.strictEqual(game.makeLifeDecision("work", "anchor-shift"), true, "a later monthly choice resolves");
   assert.ok(state().life.completedMissionIds.includes("first-credit"), "reaching a route mission records it exactly once");
+
+  game.startGame({
+    playerName: "Career Tester",
+    economyDifficulty: "modest",
+    goalLevels: { wealth: "modest", career: "modest", education: "modest", happiness: "modest" }
+  });
+  assert.strictEqual(state().life.careerChoicePending, true, "a new life run opens the career choice");
+  assert.strictEqual(game.chooseLifeCareer("youtube"), true, "a career route can be chosen once");
+  assert.strictEqual(state().life.careerTrack, "youtube", "career track persists on the life run");
+  assert.strictEqual(state().followers, 25, "YouTube begins with a small starter audience");
+  assert.strictEqual(game.makeLifeDecision("create", "youtube-phone-series"), true, "career-specific monthly action resolves");
+  assert.strictEqual(state().followers, 205, "career-specific action changes followers");
+
+  game.startGame({
+    playerName: "Study Tester",
+    economyDifficulty: "modest",
+    goalLevels: { wealth: "modest", career: "modest", education: "modest", happiness: "modest" }
+  });
+  assert.strictEqual(game.chooseLifeCareer("acting"), true, "acting route can be selected");
+  assert.strictEqual(game.makeLifeDecision("create", "career-study-acting"), true, "study month resolves");
+  assert.strictEqual(state().life.studyCredits, 1, "study month records a program credit");
+  assert.ok(state().life.programStartedAt, "study month records when the long program started");
 }
 
 if (require.main === module) {

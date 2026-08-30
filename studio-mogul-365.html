@@ -5432,6 +5432,45 @@
     .life-month-event-choice small { color:var(--studio-green); font-size:.76rem; font-weight:800; }
     .life-month-event-note { color:var(--studio-blue); font-size:.78rem; }
 
+    /* Career choice is an opening moment, not another panel on the map. */
+    .career-window { position:fixed; z-index:46; inset:0; display:grid; place-items:center; padding:20px; background:rgba(4,7,12,.72); backdrop-filter:blur(5px); }
+    .career-window.hidden { display:none; }
+    .career-dialog { width:min(930px,100%); max-height:calc(100vh - 40px); overflow:auto; padding:clamp(20px,3vw,32px); color:var(--studio-cream); background:linear-gradient(145deg,#1a2336,#101723); border:1px solid rgba(244,185,66,.48); border-radius:18px; box-shadow:0 28px 84px rgba(0,0,0,.6); animation:modalPop .18s ease; }
+    .career-dialog-head { display:flex; align-items:start; justify-content:space-between; gap:18px; padding-bottom:16px; border-bottom:1px solid var(--studio-line); }
+    .career-dialog-kicker { color:var(--studio-gold); font-size:.74rem; font-weight:800; letter-spacing:.11em; }
+    .career-dialog h2 { margin:5px 0 0; color:var(--studio-cream); font-size:clamp(1.65rem,3.1vw,2.3rem); letter-spacing:-.04em; }
+    .career-dialog-head p { max-width:56ch; margin:8px 0 0; color:var(--studio-muted); font-size:.88rem; line-height:1.5; }
+    .career-dialog-note { padding-top:4px; color:var(--studio-blue); font-size:.73rem; font-weight:800; white-space:nowrap; }
+    .career-choice-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-top:17px; }
+    .career-choice { min-height:218px; display:grid; grid-template-rows:auto auto minmax(42px,1fr) auto auto; gap:7px; padding:14px; overflow:hidden; text-align:start; color:var(--studio-cream); background:rgba(255,255,255,.035); border:1px solid rgba(229,238,255,.15); border-radius:12px; transition:transform .16s ease,border-color .16s ease,background .16s ease; }
+    .career-choice:hover { transform:translateY(-3px); color:var(--studio-cream); background:rgba(244,185,66,.075); border-color:var(--studio-gold); }
+    .career-choice-mark { color:var(--career-tone); font:800 1.1rem/1 ui-monospace,SFMono-Regular,Menlo,monospace; text-shadow:0 0 14px color-mix(in srgb,var(--career-tone),transparent 45%); }
+    .career-choice-index { color:var(--studio-muted); font:.63rem/1 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.1em; }
+    .career-choice strong { font-size:1.07rem; }
+    .career-choice p { margin:0; color:var(--studio-muted); font-size:.74rem; line-height:1.42; }
+    .career-choice-meta { display:grid; gap:4px; padding-top:9px; color:rgba(247,242,232,.78); font-size:.68rem; border-top:1px solid rgba(229,238,255,.11); }
+    .career-choice-meta span:last-child { color:var(--career-tone); }
+    .career-choice-cta { display:flex; align-items:center; justify-content:space-between; color:var(--studio-gold); font-size:.72rem; font-weight:800; }
+    .career-choice-cta b { font-size:1rem; }
+    .career-dialog-footer { margin:14px 0 0; color:var(--studio-muted); font-size:.75rem; line-height:1.45; }
+    .annual-map-node.career-focus .annual-node-dot { box-shadow:0 0 0 4px color-mix(in srgb,var(--node),transparent 83%),0 0 16px color-mix(in srgb,var(--node),transparent 30%); }
+    .annual-career-context { display:flex; align-items:center; gap:7px; margin:0 0 8px; color:var(--studio-muted); font-size:.76rem; }
+    .annual-career-context b { color:var(--studio-cream); }
+    .annual-career-progress { display:grid; gap:5px; padding-top:11px; border-top:1px solid var(--studio-line); }
+    .annual-career-progress > span { color:var(--studio-gold); font-size:.68rem; font-weight:800; }
+    .annual-career-progress p { margin:0; color:var(--studio-muted); font-size:.72rem; line-height:1.4; }
+    @media (max-width:760px) {
+      .career-window { align-items:start; padding:10px; overflow:auto; }
+      .career-dialog { max-height:none; padding:20px 16px; }
+      .career-dialog-head { display:grid; gap:7px; }
+      .career-choice-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .career-choice { min-height:198px; padding:12px; }
+    }
+    @media (max-width:430px) {
+      .career-choice-grid { grid-template-columns:1fr; }
+      .career-choice { min-height:168px; }
+    }
+
     /* The monthly planner is deliberately a map and a decision desk, not a
        dashboard full of anonymous cards. These overrides make that hierarchy
        visually explicit on the main life screen. */
@@ -5522,6 +5561,7 @@
   </div>
   <section id="startScreen" class="start-screen hidden"></section>
   <section id="winLoss" class="win-loss hidden"></section>
+  <section id="careerWindow" class="career-window hidden"></section>
   <section id="statusWindow" class="status-window hidden"></section>
   <section id="incidentWindow" class="incident-window hidden"></section>
   <section id="collectionWindow" class="collection-window hidden"></section>
@@ -6471,6 +6511,8 @@
         education: 0,
         educationCredits: 0,
         reputation: 0,
+        followers: 0,
+        connections: 1,
         soul: 54,
         creativity: 58,
         love: 42,
@@ -6559,7 +6601,11 @@
         history: [],
         events: [],
         monthlyEvent: null,
-        introSeen: false
+        introSeen: false,
+        careerTrack: null,
+        careerChoicePending: true,
+        studyCredits: 0,
+        programStartedAt: null
       };
     }
 
@@ -6589,6 +6635,14 @@
       life.events = Array.isArray(life.events) ? life.events : [];
       life.completedMissionIds = Array.isArray(life.completedMissionIds) ? life.completedMissionIds : [];
       life.monthlyEvent = life.monthlyEvent && typeof life.monthlyEvent === "object" ? life.monthlyEvent : null;
+      life.careerTrack = ["acting", "directing", "writing", "youtube"].includes(life.careerTrack) ? life.careerTrack : null;
+      if (typeof life.careerChoicePending !== "boolean") {
+        // A pre-career-choice save belongs to the original generic film path.
+        life.careerTrack = life.careerTrack || "directing";
+        life.careerChoicePending = false;
+      }
+      life.studyCredits = Math.max(0, Math.round(Number(life.studyCredits) || 0));
+      life.programStartedAt = life.programStartedAt && typeof life.programStartedAt === "object" ? life.programStartedAt : null;
       return life;
     }
 
@@ -6613,6 +6667,56 @@
         { id: "life", icon: "♡", he: "חיים", en: "Life", copyHe: "קשרים, בית ואנרגיה", copyEn: "Relationships, home and energy" },
         { id: "finance", icon: "◒", he: "כסף וקשרים", en: "Money & people", copyHe: "חוב, מימון ודלתות", copyEn: "Debt, backing and doors" }
       ];
+    }
+
+    const LIFE_CAREERS = {
+      acting: {
+        id: "acting", mark: "◇", name: { he: "משחק", en: "Acting" },
+        intro: { he: "בית ספר למשחק, אודישנים ובניית שם מול מצלמה.", en: "Acting school, auditions, and a name built on camera." },
+        program: { he: "בית ספר למשחק", en: "Acting school" }, credits: 36, minimumMonths: 48, monthlyCost: 1400,
+        startingBuilding: "casting", mapFocus: ["casting", "cinematheque", "employment"]
+      },
+      directing: {
+        id: "directing", mark: "◆", name: { he: "בימוי", en: "Directing" },
+        intro: { he: "בית ספר לקולנוע, סטים, צוות ותיק עבודות.", en: "Film school, sets, crew, and a portfolio." },
+        program: { he: "בית ספר לקולנוע", en: "Film school" }, credits: 30, minimumMonths: 36, monthlyCost: 1650,
+        startingBuilding: "gear", mapFocus: ["gear", "script", "fund"]
+      },
+      writing: {
+        id: "writing", mark: "○", name: { he: "תסריטאות", en: "Screenwriting" },
+        intro: { he: "קורס, מעבדת כתיבה, הגשות וחדרי כותבים.", en: "Coursework, a writing lab, submissions, and writers’ rooms." },
+        program: { he: "קורס תסריטאות", en: "Screenwriting course" }, credits: 14, minimumMonths: 18, monthlyCost: 900,
+        startingBuilding: "script", mapFocus: ["script", "cinematheque", "fund"]
+      },
+      youtube: {
+        id: "youtube", mark: "△", name: { he: "יוטיוב", en: "YouTube" },
+        intro: { he: "סמארטפון, סדרת תוכן, ואז ציוד וקהל משלך.", en: "A phone, a content series, then gear and an audience of your own." },
+        program: null, credits: 0, minimumMonths: 0, monthlyCost: 0,
+        startingBuilding: "home", mapFocus: ["home", "gear", "cafe"]
+      }
+    };
+
+    function activeLifeCareer() {
+      const life = ensureLifeState();
+      return life.careerTrack ? LIFE_CAREERS[life.careerTrack] || null : null;
+    }
+
+    function careerStudyProgress() {
+      const life = ensureLifeState();
+      const career = activeLifeCareer();
+      if (!career || !career.program) return null;
+      const start = life.programStartedAt;
+      const elapsed = start
+        ? Math.max(0, (life.calendarYear - start.year) * 12 + (life.month - start.month))
+        : 0;
+      return {
+        career,
+        credits: life.studyCredits,
+        creditTarget: career.credits,
+        elapsed,
+        minimumMonths: career.minimumMonths,
+        started: !!start
+      };
     }
 
     const LIFE_MONTHLY_EVENTS = [
@@ -6659,7 +6763,9 @@
         cash: { he: "מזומן", en: "cash" }, debt: { he: "חוב", en: "debt" },
         experience: { he: "ניסיון", en: "experience" }, reputation: { he: "מוניטין", en: "reputation" },
         creativity: { he: "יצירתיות", en: "creativity" }, soul: { he: "נשמה", en: "אנרגיה" },
-        love: { he: "זוגיות", en: "relationships" }, education: { he: "השכלה", en: "education" }
+        love: { he: "זוגיות", en: "relationships" }, education: { he: "השכלה", en: "education" },
+        followers: { he: "עוקבים", en: "followers" }, connections: { he: "קשרים", en: "connections" },
+        studyCredits: { he: "נקודת לימוד", en: "study credit" }
       };
       const sign = value > 0 ? "+" : "";
       const unit = key === "cash" || key === "debt" ? "₪" : "";
@@ -6729,7 +6835,70 @@
       return entry;
     }
 
+    function lifeCareerStudyCard(career) {
+      const life = ensureLifeState();
+      const firstMonth = !life.programStartedAt;
+      const credits = life.studyCredits;
+      return {
+        id: "career-study-" + career.id,
+        icon: "◌",
+        title: firstMonth
+          ? { he: "להירשם ל" + career.program.he, en: "Enroll in " + career.program.en }
+          : { he: "להמשיך ב" + career.program.he, en: "Continue " + career.program.en },
+        copy: { he: "חודש לימודים: " + credits + "/" + career.credits + " נקודות. המסלול דורש לפחות " + Math.round(career.minimumMonths / 12) + " שנים בלוח השנה.", en: "A study month: " + credits + "/" + career.credits + " credits. The program needs at least " + Math.round(career.minimumMonths / 12) + " calendar years." },
+        effects: { cash: -career.monthlyCost, education: 1, connections: 1, studyCredits: 1 },
+        months: 1,
+        studyCredits: 1
+      };
+    }
+
+    function lifeCareerDecisionDeck(career, routeId) {
+      const study = career.program ? lifeCareerStudyCard(career) : null;
+      const decks = {
+        acting: {
+          work: [
+            { id: "acting-extra", icon: "◇", title: { he: "יום ניצבות על סט", en: "Take an extra day on set" }, copy: { he: "לא תפקיד חלומות, אבל מצלמה, צוות וקרדיט ראשון כן.", en: "Not the dream role, but it is camera, crew, and a first credit." }, effects: { cash: 420, experience: 5, connections: 2, soul: -2 }, months: 1 },
+            { id: "acting-audition", icon: "◉", title: { he: "ללכת לאודישנים", en: "Go to auditions" }, copy: { he: "חודש של דחיות, פגישה אחת טובה, ושם שמתחיל להסתובב.", en: "A month of rejections, one good meeting, and a name beginning to circulate." }, effects: { reputation: 4, connections: 3, soul: -3 }, months: 1 },
+            { id: "acting-selftape", icon: "▣", title: { he: "לצלם שואוריל", en: "Shoot a showreel" }, copy: { he: "להפוך יכולת לתיק שמישהו יכול להעביר הלאה.", en: "Turn ability into a reel someone can pass along." }, effects: { cash: -180, creativity: 5, reputation: 3, followers: 40 }, months: 1 }
+          ],
+          create: [study, { id: "acting-scene", icon: "✦", title: { he: "לבנות סצנה עם שותף", en: "Build a scene with a partner" }, copy: { he: "תרגול שפותח אמון, חומר ושתי דלתות קטנות.", en: "Practice that opens trust, material, and two small doors." }, effects: { creativity: 7, connections: 2, reputation: 2 }, months: 1 }, { id: "acting-stage", icon: "△", title: { he: "לעלות לערב במה", en: "Perform one stage night" }, copy: { he: "קהל קטן, אבל תגובה אמיתית שאפשר לקחת לאודישן הבא.", en: "A small audience, but real feedback to carry to the next audition." }, effects: { reputation: 5, followers: 65, soul: -1 }, months: 1 }]
+        },
+        directing: {
+          work: [
+            { id: "directing-runner", icon: "◆", title: { he: "להיות ראנר/ית על סט", en: "Run a set" }, copy: { he: "הכי קרוב שאפשר לבימוי בלי לקבל החלטות עדיין.", en: "As close to directing as possible without making the calls yet." }, effects: { cash: 460, experience: 6, connections: 3, soul: -3 }, months: 1 },
+            { id: "directing-shadow", icon: "◉", title: { he: "להיצמד לעוזר/ת במאי", en: "Shadow an assistant director" }, copy: { he: "לומדים איפה הלחץ באמת נמצא ואיך לא לצעוק בו.", en: "Learn where the pressure really lives and how not to shout into it." }, effects: { experience: 5, connections: 2, reputation: 3, cash: -70 }, months: 1 },
+            { id: "directing-crew", icon: "▣", title: { he: "לגייס צוות לסרטון קצר", en: "Gather a crew for a short" }, copy: { he: "הזדמנות קטנה לבחון אם אנשים חוזרים לעבוד איתך.", en: "A small chance to learn whether people come back to work with you." }, effects: { cash: -220, connections: 4, creativity: 5, followers: 45 }, months: 1 }
+          ],
+          create: [study, { id: "directing-one-minute", icon: "✦", title: { he: "לביים סרט של דקה", en: "Direct a one-minute film" }, copy: { he: "קטן מספיק לסיים, אמיתי מספיק כדי להיכנס לתיק.", en: "Small enough to finish, real enough for the portfolio." }, effects: { cash: -260, creativity: 8, reputation: 5, followers: 90 }, months: 1, unlockFilm: true }, { id: "directing-gear", icon: "△", title: { he: "ללמוד מצלמה ועריכה", en: "Learn camera and edit" }, copy: { he: "פחות תהילה עכשיו, יותר שליטה בסרט הבא.", en: "Less fame now, more control over the next film." }, effects: { cash: -110, education: 1, creativity: 5, experience: 3 }, months: 1 }]
+        },
+        writing: {
+          work: [
+            { id: "writing-coverage", icon: "○", title: { he: "לכתוב כיסוי לתסריטים", en: "Write script coverage" }, copy: { he: "קוראים, כותבים הערות, ומגלים מה תסריטאי/ת אחר/ת פספס/ה.", en: "Read, give notes, and see what another writer missed." }, effects: { cash: 360, education: 1, connections: 2, creativity: 2 }, months: 1 },
+            { id: "writing-rooms", icon: "◉", title: { he: "להתנדב בחדר כותבים", en: "Volunteer in a writers’ room" }, copy: { he: "פחות כסף, יותר אנשים שמזכירים אותך כשהם צריכים דף.", en: "Less money, more people who remember you when they need a page." }, effects: { experience: 4, connections: 4, reputation: 3, soul: -2 }, months: 1 },
+            { id: "writing-wedding", icon: "▣", title: { he: "לכתוב ולהפיק סרטון חתונה", en: "Write and produce a wedding film" }, copy: { he: "לא חלום הפסטיבל, אבל כסף, דדליין וחומר שהולך לאוויר.", en: "Not the festival dream, but cash, a deadline, and work that goes live." }, effects: { cash: 610, followers: 55, experience: 4, soul: -2 }, months: 1 }
+          ],
+          create: [study, { id: "writing-pages", icon: "✦", title: { he: "לכתוב 20 עמודים", en: "Write 20 pages" }, copy: { he: "הטיפול מפסיק להיות רעיון ומתחיל להיות תסריט.", en: "The treatment stops being an idea and begins to become a script." }, effects: { creativity: 10, reputation: 3, soul: 1 }, months: 1 }, { id: "writing-lab", icon: "△", title: { he: "להקריא במעבדת כתיבה", en: "Read at a writing lab" }, copy: { he: "הערות קשות עכשיו יכולות לחסוך שנה של כתיבה לבד.", en: "Hard notes now can save a year of writing alone." }, effects: { creativity: 6, connections: 3, reputation: 4, soul: -1 }, months: 1 }]
+        },
+        youtube: {
+          work: [
+            { id: "youtube-wedding", icon: "△", title: { he: "לצלם חתונה עם הסמארטפון", en: "Film a wedding on a phone" }, copy: { he: "כסף מהיר, אסתטיקה מאולתרת, והמלצה שאולי תגיע.", en: "Quick money, improvised aesthetics, and a referral that might come." }, effects: { cash: 520, followers: 90, connections: 2, soul: -2 }, months: 1 },
+            { id: "youtube-edit-gig", icon: "▣", title: { he: "לערוך לרשת של מישהו אחר", en: "Edit for someone else’s channel" }, copy: { he: "פחות פרצוף שלך, יותר הבנה איך קהל נשאר.", en: "Less of your face, more understanding of why an audience stays." }, effects: { cash: 430, experience: 4, followers: 35, connections: 2 }, months: 1 },
+            { id: "youtube-brand", icon: "◉", title: { he: "להציע תוכן למותג קטן", en: "Pitch a small brand" }, copy: { he: "יש סיכון לדחייה, אבל הכנסה אחת יכולה לקנות מצלמה.", en: "There is a risk of rejection, but one job can buy a camera." }, effects: { cash: 260, followers: 65, reputation: 2, soul: -1 }, months: 1 }
+          ],
+          create: [
+            { id: "youtube-phone-series", icon: "△", title: { he: "להעלות סדרה מהסמארטפון", en: "Post a phone-shot series" }, copy: { he: "המצלמה לא מושלמת, אבל קצב וקול מגיעים לפני ציוד.", en: "The camera is not perfect, but cadence and voice arrive before gear." }, effects: { followers: 180, creativity: 6, reputation: 1, soul: -1 }, months: 1 },
+            { id: "youtube-collab", icon: "✦", title: { he: "לעשות שיתוף פעולה", en: "Make a collaboration" }, copy: { he: "ללוות יוצר/ת אחר/ת תמורת חשיפה, קשרים וסיכון לאגו.", en: "Join another creator for exposure, connections, and a risk to the ego." }, effects: { followers: 240, connections: 3, creativity: 4, cash: -70 }, months: 1 },
+            { id: "youtube-camera-plan", icon: "◉", title: { he: "לחסוך למצלמה", en: "Save toward a camera" }, copy: { he: "חודש שקט שמחליף שדרוג מיידי בבסיס מקצועי.", en: "A quiet month that trades an instant upgrade for professional ground." }, effects: { cash: 120, experience: 2, soul: 2 }, months: 1 }
+          ]
+        }
+      };
+      return (decks[career.id] && decks[career.id][routeId]) || null;
+    }
+
     function lifeDecisionDeck(routeId) {
+      const career = activeLifeCareer();
+      const careerDeck = career && lifeCareerDecisionDeck(career, routeId);
+      if (careerDeck) return careerDeck.filter(Boolean);
       const job = getJob(gameState.jobId);
       const workCards = !job ? [
         {
@@ -6799,7 +6968,8 @@
       Object.entries(effects || {}).forEach(([key, value]) => {
         if (key === "cash") changeCash(value);
         else if (key === "debt") gameState.debt = Math.max(0, Math.round(gameState.debt + value));
-        else if (["experience", "education"].includes(key)) gameState[key] = Math.max(0, Math.round(gameState[key] + value));
+        else if (["experience", "education", "followers", "connections"].includes(key)) gameState[key] = Math.max(0, Math.round(gameState[key] + value));
+        else if (key === "studyCredits") ensureLifeState().studyCredits = Math.max(0, Math.round(ensureLifeState().studyCredits + value));
         else if (["reputation", "creativity", "soul", "love"].includes(key)) adjustStat(key, value);
       });
     }
@@ -6896,6 +7066,9 @@
       if (!choice) return false;
       if ((choice.months || 1) > lifeMonthsLeft()) return false;
       applyLifeEffects(choice.effects);
+      if (choice.studyCredits && !life.programStartedAt) {
+        life.programStartedAt = { year: life.calendarYear, month: life.month };
+      }
       if (choice.jobId) {
         gameState.jobId = choice.jobId;
         gameState.jobTier = (getJob(choice.jobId) || {}).tier || 1;
@@ -6940,6 +7113,78 @@
       saveGame();
       render();
       return true;
+    }
+
+    function chooseLifeCareer(careerId) {
+      if (!isLifeMode() || !gameState.started) return false;
+      const life = ensureLifeState();
+      const career = LIFE_CAREERS[careerId];
+      if (!career || life.careerTrack || !life.careerChoicePending) return false;
+      life.careerTrack = career.id;
+      life.careerChoicePending = false;
+      gameState.currentBuilding = career.startingBuilding;
+      gameState.connections = Math.max(1, gameState.connections || 0) + 1;
+      if (career.id === "youtube") gameState.followers = Math.max(0, gameState.followers || 0) + 25;
+      const entry = {
+        kind: "career-choice", age: life.age, year: life.calendarYear, month: life.month,
+        title: localize({ he: "הקריירה נפתחה: " + career.name.he, en: "Career opened: " + career.name.en }),
+        copy: localize(career.intro), effects: career.id === "youtube" ? { followers: 25, connections: 1 } : { connections: 1 }
+      };
+      life.history.unshift(entry);
+      life.history = life.history.slice(0, 60);
+      gameState.storyDiary.unshift({
+        day: gameState.day,
+        title: entry.title,
+        source: localize({ he: "צומת פתיחה", en: "Opening node" }),
+        copy: entry.copy
+      });
+      note(entry.title + " — " + entry.copy, "good");
+      saveGame();
+      render();
+      return true;
+    }
+
+    function renderCareerChoiceWindow() {
+      if (!dom || !dom.careerWindow) return;
+      const life = ensureLifeState();
+      if (!gameState.started || !isLifeMode() || !life.careerChoicePending || life.careerTrack) {
+        dom.careerWindow.classList.add("hidden");
+        dom.careerWindow.innerHTML = "";
+        return;
+      }
+      const tones = { acting: "#f19a8f", directing: "#f4bd4b", writing: "#b79aea", youtube: "#67cfc4" };
+      dom.careerWindow.classList.remove("hidden");
+      dom.careerWindow.innerHTML = `
+        <div class="career-dialog" role="dialog" aria-modal="true" aria-labelledby="careerChoiceTitle">
+          <header class="career-dialog-head">
+            <div>
+              <div class="career-dialog-kicker">${localize({ he: "צומת פתיחה · גיל 21", en: "Opening node · age 21" })}</div>
+              <h2 id="careerChoiceTitle">${localize({ he: "איך מתחילה הקריירה שלך?", en: "How does your career begin?" })}</h2>
+              <p>${localize({ he: "הבחירה משנה את המפה, את סוג ההזדמנויות ואת הדרך שבה צוברים כסף, עוקבים, תהילה וקשרים.", en: "This choice changes the map, the opportunities, and how money, followers, fame, and connections are built." })}</p>
+            </div>
+            <span class="career-dialog-note">${localize({ he: "אפשר להחליף כיוון בגיל 30", en: "A second act opens at 30" })}</span>
+          </header>
+          <div class="career-choice-grid">
+            ${Object.values(LIFE_CAREERS).map((career, index) => {
+              const study = career.program
+                ? localize({ he: Math.round(career.minimumMonths / 12) + " שנים · " + career.credits + " נקודות לימוד", en: Math.round(career.minimumMonths / 12) + " years · " + career.credits + " study credits" })
+                : localize({ he: "סמארטפון עכשיו · מצלמה בהמשך", en: "Phone now · camera later" });
+              const cost = career.program
+                ? localize({ he: formatMoney(career.monthlyCost) + " לחודש לימודים", en: formatMoney(career.monthlyCost) + " per study month" })
+                : localize({ he: "מתחילים בלי שכר לימוד", en: "No tuition to start" });
+              return `<button class="career-choice" style="--career-tone:${tones[career.id]}" data-action="chooseLifeCareer" data-value="${career.id}">
+                <span class="career-choice-mark">${career.mark}</span>
+                <span class="career-choice-index">0${index + 1}</span>
+                <strong>${localize(career.name)}</strong>
+                <p>${localize(career.intro)}</p>
+                <span class="career-choice-meta"><span>${study}</span><span>${cost}</span></span>
+                <span class="career-choice-cta">${localize({ he: "לבחור במסלול הזה", en: "Choose this route" })}<b>←</b></span>
+              </button>`;
+            }).join("")}
+          </div>
+          <p class="career-dialog-footer">${localize({ he: "אין כאן תשובה נכונה: לכל מסלול יש מחיר, יתרון ודרך אחרת להגיע למטרות הסיום.", en: "There is no correct answer: each route has a price, an advantage, and a different way to reach the end goals." })}</p>
+        </div>
+      `;
     }
 
     function adaptUiText(str) {
@@ -11111,6 +11356,17 @@
     }
 
     function currentHint() {
+      if (isLifeMode()) {
+        const life = ensureLifeState();
+        const career = activeLifeCareer();
+        const hasMonthlyChoice = life.history.some((entry) => entry.kind === "choice");
+        if (career && !hasMonthlyChoice) {
+          return {
+            building: career.startingBuilding,
+            copy: localize({ he: "הצעד הראשון במסלול " + career.name.he + ": " + career.intro.he, en: "First step in " + career.name.en + ": " + career.intro.en })
+          };
+        }
+      }
       const project = getFocusedProject();
       if (!gameState.jobId) return { building: "employment", copy: t("boardHintJob") };
       if (gameState.wardrobeTier < 1) return { building: "wardrobe", copy: t("boardHintWardrobe") };
@@ -11158,6 +11414,7 @@
             <div class="life-command-metric life-command-date"><span>${life.calendarYear}</span><strong>${localize({ he: period.he, en: period.en })}</strong></div>
             <div class="life-command-metric"><span>${t("cash")}</span><strong>${formatMoney(gameState.cash)}</strong></div>
             <div class="life-command-metric life-command-debt"><span>${localize({ he: "חוב", en: "Debt" })}</span><strong>${formatMoney(gameState.debt)}</strong></div>
+            <div class="life-command-metric"><span>${localize({ he: "עוקבים", en: "Followers" })}</span><strong>${gameState.followers.toLocaleString()}</strong></div>
             <div class="life-command-job"><span>${t("job")}</span><strong>${activeJob ? localize(activeJob.title) : localize({ he: "עדיין בלי עבודה", en: "No job yet" })}</strong></div>
             <button class="life-command-diary" data-action="openClassicPanel" data-value="story">${localize({ he: "היומן שלי", en: "My diary" })}</button>
             ${hudMenuMarkup()}
@@ -11774,10 +12031,15 @@
     }
 
     function lifeRouteForBuilding(buildingId) {
+      const career = activeLifeCareer();
+      if (career && career.id === "youtube" && buildingId === "home") {
+        return "create";
+      }
       const routes = {
         employment: "work", wardrobe: "work", cafe: "life", home: "life",
         script: "create", cinematheque: "create", filmSchool: "create", post: "create", gear: "create",
-        bank: "finance", fund: "finance", investor: "finance", loan: "finance"
+        casting: "create", crew: "create", set: "create", tv: "create", festival: "create", cinema: "create",
+        bank: "finance", fund: "finance", investor: "finance", loan: "finance", casino: "finance"
       };
       return routes[buildingId] || "life";
     }
@@ -11824,14 +12086,16 @@
 
     function annualMapNodeMarkup(buildingId, hintBuilding, index, total) {
       const building = getBuilding(buildingId);
+      const career = activeLifeCareer();
       const selected = buildingId === gameState.currentBuilding;
       const target = buildingId === hintBuilding;
+      const careerFocus = !!(career && career.mapFocus.includes(buildingId));
       const position = annualMapPosition(buildingId, index, total);
       const visitKey = getCity().id + ":" + buildingId;
       const fresh = sceneCardButtons(buildingId).length > 0 && !(gameState.buildingVisits && gameState.buildingVisits[visitKey]);
       const lock = annualLocationLock(buildingId);
       return `
-        <button class="annual-map-node ${selected ? "selected" : ""} ${target ? "target" : ""} ${fresh ? "fresh" : ""} ${lock ? "locked" : ""}" style="--node:${annualCategoryColor(building.category)};left:${position.left}%;top:${position.top}%;" data-action="goToBuilding" data-value="${buildingId}" title="${lock || localize({ he: "לעבור אל " + building.label.he, en: "Go to " + building.label.en })}">
+        <button class="annual-map-node ${selected ? "selected" : ""} ${target ? "target" : ""} ${careerFocus ? "career-focus" : ""} ${fresh ? "fresh" : ""} ${lock ? "locked" : ""}" style="--node:${annualCategoryColor(building.category)};left:${position.left}%;top:${position.top}%;" data-action="goToBuilding" data-value="${buildingId}" title="${lock || localize({ he: "לעבור אל " + building.label.he, en: "Go to " + building.label.en })}">
           <span class="annual-node-dot" aria-hidden="true"></span>
           <span class="annual-node-label">${localize(building.label)}</span>
           ${lock ? `<span class="annual-node-lock" aria-label="${lock}">🔒</span>` : ""}
@@ -11879,11 +12143,13 @@
       const cards = lifeDecisionDeck(route);
       const wait = lifeWaitAction();
       const building = getBuilding(buildingId);
+      const career = activeLifeCareer();
       return `
         <div class="annual-action-place">
           <strong>${localize(building.label)}</strong>
           <p>${buildingSpeech(buildingId)}</p>
         </div>
+        ${career ? `<p class="annual-career-context"><span>${career.mark}</span><b>${localize(career.name)}</b><span>· ${localize(career.intro)}</span></p>` : ""}
         <div class="action-groups annual-action-groups">
           <div class="action-group">
             <h3>${localize(building.label)} · ${localize({ he: "הפעולה של החודש", en: "This month's action" })}</h3>
@@ -11938,17 +12204,21 @@
       const hint = currentHint();
       const mission = lifeActiveMission();
       const missionStatus = lifeMissionStatus(mission);
+      const career = activeLifeCareer();
+      const study = careerStudyProgress();
       return `
         <aside class="annual-life-side">
           <section class="annual-side-card annual-status-card">
             <span class="annual-label">${localize({ he: "מצב המסלול", en: "Life status" })}</span>
-            <strong>${activeJob ? localize(activeJob.title) : localize({ he: "מחפש/ת עבודה", en: "Looking for work" })}</strong>
+            <strong>${career ? localize(career.name) : (activeJob ? localize(activeJob.title) : localize({ he: "מחפש/ת עבודה", en: "Looking for work" }))}</strong>
             <div class="annual-status-metrics">
               <div><span>${t("cash")}</span><b>${formatMoney(gameState.cash)}</b></div>
               <div><span>${localize({ he: "חוב", en: "Debt" })}</span><b>${formatMoney(-gameState.debt)}</b></div>
-              <div><span>${t("reputation")}</span><b>${gameState.reputation}</b></div>
-              <div><span>${t("creativity")}</span><b>${gameState.creativity}</b></div>
+              <div><span>${localize({ he: "עוקבים", en: "Followers" })}</span><b>${gameState.followers.toLocaleString()}</b></div>
+              <div><span>${localize({ he: "תהילה", en: "Fame" })}</span><b>${gameState.reputation}</b></div>
+              <div><span>${localize({ he: "קשרים", en: "Connections" })}</span><b>${gameState.connections}</b></div>
             </div>
+            ${study ? `<div class="annual-career-progress"><span>${localize(study.career.program)}</span><p>${study.started ? localize({ he: study.credits + "/" + study.creditTarget + " נקודות לימוד · " + study.elapsed + "/" + study.minimumMonths + " חודשים במסלול", en: study.credits + "/" + study.creditTarget + " study credits · " + study.elapsed + "/" + study.minimumMonths + " program months" }) : localize({ he: "עוד לא נרשמת. הלימודים מתחילים כשתבחר/י בכך על המפה.", en: "Not enrolled yet. Study begins when you choose it on the map." })}</p></div>` : ""}
             <div class="annual-next-goal"><span>${localize({ he: "המטרה הקרובה", en: "Nearest goal" })}</span><p>${hint.copy}</p></div>
             ${mission ? `<div class="annual-mission">
               <div class="annual-mission-head"><span>✦ ${localize({ he: "משימת מסלול", en: "Route mission" })}</span><span>${missionStatus.percentStyle ? Math.round(missionStatus.percent) + "%" : Math.round(missionStatus.value) + "/" + missionStatus.target}</span></div>
@@ -11970,6 +12240,7 @@
       const currentBuilding = getBuilding(gameState.currentBuilding);
       const hint = currentHint();
       const hintBuilding = buildings.includes(hint.building) ? hint.building : null;
+      const career = activeLifeCareer();
       const intro = !life.introSeen ? `<div class="annual-life-intro"><span>✦</span><p>${localize({ he: "מטיילים חופשי בין נקודות העיר; רק פעולה אחת מקדמת חודש.", en: "Travel freely between city points; only one action advances the month." })}</p><button data-action="dismissLifeIntro">${localize({ he: "הבנתי", en: "Got it" })}</button></div>` : "";
       dom.boardStage.innerHTML = `
         <main class="annual-life-shell">
@@ -11983,7 +12254,7 @@
               <div class="annual-play-area">
                 ${renderLifeMonthClock()}
                 <section class="annual-city-board" style="--scene-a:${currentBuilding.color[0]};--scene-b:${currentBuilding.color[1]};">
-                  <div class="annual-map-head"><span>${localize({ he: "המפה של " + localize(city.name), en: localize(city.name) + " map" })}</span><small>${localize({ he: "נקודה פותחת פעולה · פעולה מקדמת חודש", en: "A point opens an action · an action advances a month" })}</small></div>
+                  <div class="annual-map-head"><span>${localize({ he: "המפה של " + localize(city.name), en: localize(city.name) + " map" })}</span><small>${career ? localize({ he: localize(career.name) + " · הנקודות הזוהרות בונות את המסלול", en: localize(career.name) + " · glowing points build the route" }) : localize({ he: "נקודה פותחת פעולה · פעולה מקדמת חודש", en: "A point opens an action · an action advances a month" })}</small></div>
                   <div class="annual-map-tools">
                     <div class="annual-map-legend">
                       ${[
@@ -13712,6 +13983,7 @@
       renderHud();
       dom.sidePanel.innerHTML = "";
       renderLifeBoard();
+      renderCareerChoiceWindow();
       renderStatusWindow();
       renderNoticeWindow();
       renderCollectionWindow();
@@ -13746,6 +14018,8 @@
             ensureLifeState().activeRoute = value;
             render();
           }
+        } else if (action === "chooseLifeCareer") {
+          chooseLifeCareer(value);
         } else if (action === "lifeTravel") {
           if (isLifeMode() && getCity().buildings.includes(value)) {
             gameState.currentBuilding = value;
@@ -14013,6 +14287,7 @@
         sidePanel: document.getElementById("sidePanel"),
         startScreen: document.getElementById("startScreen"),
         winLoss: document.getElementById("winLoss"),
+        careerWindow: document.getElementById("careerWindow"),
         statusWindow: document.getElementById("statusWindow"),
         incidentWindow: document.getElementById("incidentWindow"),
         collectionWindow: document.getElementById("collectionWindow"),
@@ -14103,6 +14378,7 @@
     root.computeSownLine = computeSownLine;
     root.makeLifeDecision = makeLifeDecision;
     root.lifeDecisionDeck = lifeDecisionDeck;
+    root.chooseLifeCareer = chooseLifeCareer;
 
     if (canRender) {
       init();
