@@ -60,6 +60,7 @@ function run(htmlPath) {
     "haggle",
     "goToBuilding",
     "flyTo",
+    "lifeFlyTo",
     "endDay",
     "bankDo",
     "buyEquip",
@@ -117,6 +118,8 @@ function run(htmlPath) {
   assert.strictEqual(state().life.month, 1, "life mode starts in January");
   assert.strictEqual(game.makeLifeDecision("work", "first-job"), true, "monthly choice resolves");
   assert.strictEqual(state().life.month, 2, "monthly choice advances the calendar by one month");
+  assert.strictEqual(state().life.timeWeeks, 4, "a completed month refreshes four weeks");
+  assert.strictEqual(state().debt, 8080, "end of month applies visible 1% debt interest");
   const surprise = state().life.monthlyEvent;
   assert.ok(surprise, "February opens a surprise task");
   assert.strictEqual(game.resolveLifeMonthlyEvent(surprise.id, surprise.choices[0].id), true, "surprise task choice resolves");
@@ -138,6 +141,11 @@ function run(htmlPath) {
   assert.strictEqual(state().followers, 25, "YouTube begins with a small starter audience");
   assert.strictEqual(game.makeLifeDecision("create", "youtube-phone-series"), true, "career-specific monthly action resolves");
   assert.strictEqual(state().followers, 205, "career-specific action changes followers");
+  assert.strictEqual(state().life.month, 1, "a one-week action keeps the current month open");
+  assert.strictEqual(state().life.timeWeeks, 3, "a one-week action leaves three weeks for more choices");
+  assert.strictEqual(game.lifeFlyTo("athens"), true, "a flight can consume one visible week in life mode");
+  assert.strictEqual(state().city, "athens", "flight moves the player to the destination city");
+  assert.strictEqual(state().life.timeWeeks, 2, "flight consumes one week without ending the month");
 
   game.startGame({
     playerName: "Study Tester",

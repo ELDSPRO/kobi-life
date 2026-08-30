@@ -5520,6 +5520,44 @@
     .annual-status-card > strong { font-size:1.14rem; }
     .annual-status-metrics div { padding:9px 3px; border:0; border-bottom:1px solid rgba(229,238,255,.1); border-radius:0; background:transparent; }
     .annual-status-metrics b { font-size:.92rem; }
+    .annual-billing-note { padding-top:10px; border-top:1px solid rgba(229,238,255,.1); }
+    .annual-billing-note span { display:block; color:var(--studio-gold); font-size:.68rem; font-weight:800; }
+    .annual-billing-note p { margin:4px 0 0; color:var(--studio-muted); font-size:.72rem; line-height:1.4; }
+    .life-week-clock { display:grid; grid-template-columns:minmax(190px,auto) minmax(180px,.75fr) minmax(220px,1fr); align-items:center; gap:18px; padding:10px 0 13px; border-bottom:1px solid rgba(229,238,255,.13); }
+    .life-week-clock strong { display:block; margin-top:3px; color:var(--studio-cream); font-size:1.05rem; }
+    .life-week-clock p { margin:0; color:var(--studio-muted); font-size:.76rem; line-height:1.45; text-align:end; }
+    .life-week-dots { display:grid; grid-template-columns:repeat(4,1fr); gap:5px; }
+    .life-week-dots i { height:30px; display:grid; place-items:center; color:var(--studio-muted); font-style:normal; font-size:.72rem; font-weight:800; border:1px solid rgba(229,238,255,.14); border-radius:5px; }
+    .life-week-dots i.available { color:#231a08; border-color:var(--studio-gold); background:var(--studio-gold); box-shadow:0 0 0 3px rgba(244,185,66,.08); }
+    .life-week-dots i.used { opacity:.56; background:rgba(255,255,255,.025); }
+    .life-action-window { position:fixed; z-index:70; inset:0; display:grid; place-items:center; padding:20px; }
+    .life-action-window.hidden { display:none; }
+    .life-action-backdrop { position:absolute; inset:0; background:rgba(3,5,9,.72); backdrop-filter:blur(5px); }
+    .life-action-dialog { position:relative; z-index:1; width:min(920px,100%); max-height:min(760px,calc(100vh - 40px)); overflow:auto; padding:20px; color:var(--studio-cream); border:1px solid rgba(229,238,255,.2); border-radius:15px; background:linear-gradient(145deg,rgba(29,36,55,.98),rgba(11,14,22,.98)); box-shadow:0 30px 80px rgba(0,0,0,.52); }
+    .life-action-dialog-head { display:flex; align-items:start; justify-content:space-between; gap:14px; padding-bottom:14px; border-bottom:1px solid rgba(229,238,255,.12); }
+    .life-action-dialog-head h2 { margin:5px 0 0; color:var(--studio-cream); font-size:1.7rem; }
+    .life-action-close { width:34px; height:34px; display:grid; place-items:center; flex:0 0 auto; color:var(--studio-cream); font-size:1.55rem; line-height:1; border:1px solid rgba(229,238,255,.16); border-radius:50%; background:rgba(255,255,255,.04); }
+    .life-action-close:hover { color:#1b160c; border-color:var(--studio-gold); background:var(--studio-gold); }
+    .life-action-dialog .annual-action-place { display:flex; align-items:baseline; justify-content:space-between; gap:18px; margin:15px 0 12px; padding:0 0 12px; border-bottom:1px solid rgba(229,238,255,.1); }
+    .life-action-dialog .annual-action-place strong { color:var(--studio-cream); font-size:1.2rem; }
+    .life-action-dialog .annual-action-place p { max-width:530px; margin:0; color:var(--studio-muted); font-size:.83rem; line-height:1.45; text-align:end; }
+    .life-action-dialog .action-group { padding:0; background:transparent; border:0; }
+    .life-action-dialog .action-group h3 { margin:0 0 9px; color:var(--studio-muted); font-size:.8rem; font-weight:800; letter-spacing:.06em; }
+    .life-action-dialog .action-buttons { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+    .life-action-dialog .annual-life-choice { min-height:170px; display:grid; gap:8px; align-content:start; padding:13px; color:var(--studio-cream); text-align:start; border:1px solid rgba(229,238,255,.13); border-radius:10px; background:rgba(255,255,255,.035); }
+    .life-action-dialog .annual-life-choice:hover { transform:translateY(-2px); border-color:var(--studio-gold); background:rgba(244,185,66,.08); }
+    .life-action-dialog .annual-life-choice.unavailable { cursor:not-allowed; opacity:.42; filter:saturate(.55); }
+    .life-action-dialog .annual-life-choice.unavailable:hover { transform:none; border-color:rgba(229,238,255,.13); background:rgba(255,255,255,.035); }
+    .life-action-dialog .annual-life-choice .topline { display:flex; justify-content:space-between; gap:8px; color:var(--studio-cream); font-size:.93rem; font-weight:800; }
+    .life-action-dialog .annual-life-choice .topline span:last-child { flex:0 0 auto; padding:3px 6px; color:var(--studio-gold); font-size:.68rem; background:rgba(244,185,66,.1); border-radius:999px; white-space:nowrap; }
+    .life-action-dialog .annual-life-choice .subline { color:var(--studio-muted); font-size:.76rem; line-height:1.42; }
+    .life-action-dialog .annual-more-actions { margin-top:12px; }
+    .life-action-dialog .annual-more-actions summary { padding:8px 0; color:var(--studio-blue); font-size:.82rem; font-weight:800; cursor:pointer; }
+    .life-action-dialog .annual-wait-group { margin-top:4px; padding-top:10px; border-top:1px solid rgba(229,238,255,.1); }
+    .life-action-dialog .annual-wait-group .action-buttons { grid-template-columns:1fr; }
+    .life-action-dialog .annual-career-context { display:flex; gap:6px; margin:0 0 11px; color:var(--studio-muted); font-size:.75rem; }
+    .life-action-dialog .annual-career-context b { color:var(--studio-cream); }
+    .life-action-lock { margin-top:16px; padding:13px; color:#f1b0a6; font-size:.87rem; border:1px solid rgba(207,104,91,.36); border-radius:10px; background:rgba(207,104,91,.08); }
     @media (max-width: 1060px) {
       .annual-life-layout { grid-template-columns:1fr; }
       .annual-life-side { position:static; grid-template-columns:1fr; }
@@ -5547,6 +5585,14 @@
       .annual-life-side { grid-template-columns:1fr; }
       .annual-life-intro { grid-template-columns:auto 1fr; }
       .annual-life-intro button { grid-column:2; justify-self:start; }
+      .life-week-clock { grid-template-columns:1fr; gap:8px; }
+      .life-week-clock p { text-align:start; }
+      .life-action-window { align-items:start; padding:12px; overflow:auto; }
+      .life-action-dialog { max-height:none; padding:16px; }
+      .life-action-dialog .action-buttons { grid-template-columns:1fr; }
+      .life-action-dialog .annual-life-choice { min-height:0; }
+      .life-action-dialog .annual-action-place { display:grid; gap:5px; }
+      .life-action-dialog .annual-action-place p { text-align:start; }
       .life-month-event-body { padding:16px; }
     }
   </style>
@@ -5562,6 +5608,7 @@
   <section id="startScreen" class="start-screen hidden"></section>
   <section id="winLoss" class="win-loss hidden"></section>
   <section id="careerWindow" class="career-window hidden"></section>
+  <section id="lifeActionWindow" class="life-action-window hidden"></section>
   <section id="statusWindow" class="status-window hidden"></section>
   <section id="incidentWindow" class="incident-window hidden"></section>
   <section id="collectionWindow" class="collection-window hidden"></section>
@@ -6594,6 +6641,9 @@
         // This turns the clock forward without reducing the experience to
         // one compulsory "pick a card" turn per season.
         month: 1,
+        // Every calendar month is four clear weeks. Unlike the old
+        // one-choice-per-month model, several small actions can now coexist.
+        timeWeeks: 4,
         seasonIndex: 0,
         activeRoute: "work",
         completedThisYear: [],
@@ -6627,6 +6677,7 @@
       // the monthly planner without invalidating the user's save.
       if (!Number.isFinite(life.month)) life.month = clamp((Number(life.seasonIndex) || 0) * 4 + 1, 1, 12);
       life.month = clamp(Math.round(life.month), 1, 12);
+      life.timeWeeks = clamp(Math.round(Number(life.timeWeeks) || 4), 1, 4);
       life.seasonIndex = Math.floor((life.month - 1) / 4);
       life.activeRoute = ["work", "create", "life", "finance"].includes(life.activeRoute) ? life.activeRoute : "work";
       life.completedThisYear = Array.isArray(life.completedThisYear) ? life.completedThisYear : [];
@@ -6658,6 +6709,29 @@
 
     function lifeMonthsLeft() {
       return 13 - ensureLifeState().month;
+    }
+
+    const LIFE_MONTHLY_INTEREST_RATE = 0.01;
+
+    function lifeActionWeeks(choice) {
+      return clamp(Math.round(Number(choice && choice.weeks) || 1), 1, 4);
+    }
+
+    function lifeWeeksLabel(weeks) {
+      const count = clamp(Math.round(Number(weeks) || 1), 1, 4);
+      return localize({
+        he: count === 4 ? "חודש מלא · 4 שבועות" : count + (count === 1 ? " שבוע" : " שבועות"),
+        en: count === 4 ? "Full month · 4 weeks" : count + (count === 1 ? " week" : " weeks")
+      });
+    }
+
+    function lifeMonthlyRent() {
+      const home = HOUSING[gameState.housing] || HOUSING.couch;
+      return Math.max(0, Math.round(home.rent * (Number(gameState.rentMultiplier) || 1)));
+    }
+
+    function lifeMonthlyInterest() {
+      return Math.max(0, Math.round(gameState.debt * LIFE_MONTHLY_INTEREST_RATE));
     }
 
     function lifeRoutes() {
@@ -6847,9 +6921,35 @@
           : { he: "להמשיך ב" + career.program.he, en: "Continue " + career.program.en },
         copy: { he: "חודש לימודים: " + credits + "/" + career.credits + " נקודות. המסלול דורש לפחות " + Math.round(career.minimumMonths / 12) + " שנים בלוח השנה.", en: "A study month: " + credits + "/" + career.credits + " credits. The program needs at least " + Math.round(career.minimumMonths / 12) + " calendar years." },
         effects: { cash: -career.monthlyCost, education: 1, connections: 1, studyCredits: 1 },
-        months: 1,
+        weeks: 4,
         studyCredits: 1
       };
+    }
+
+    // The menu stays compact, but the calendar does not pretend every choice
+    // takes exactly the same amount of life. Unlisted choices are quick,
+    // one-week moves; these are the commitments that deliberately take longer.
+    const LIFE_CHOICE_WEEKS = {
+      "first-job": 4, "anchor-shift": 4, "promotion-push": 4,
+      "gig-run": 2, portfolio: 2, "industry-side": 2,
+      "acting-extra": 2, "acting-audition": 1, "acting-selftape": 1,
+      "acting-scene": 1, "acting-stage": 1,
+      "directing-runner": 2, "directing-shadow": 1, "directing-crew": 2,
+      "directing-one-minute": 2, "directing-gear": 1,
+      "writing-coverage": 1, "writing-rooms": 2, "writing-wedding": 2,
+      "writing-pages": 2, "writing-lab": 1,
+      "youtube-wedding": 2, "youtube-edit-gig": 1, "youtube-brand": 1,
+      "youtube-phone-series": 1, "youtube-collab": 1, "youtube-camera-plan": 1,
+      "writing-room": 2, "short-film": 2, "commercial-brief": 1,
+      relationship: 2, "home-base": 2, reset: 4,
+      "debt-plan": 2, network: 1, microfund: 2
+    };
+
+    function withLifeWeeks(cards) {
+      return (cards || []).filter(Boolean).map((card) => ({
+        ...card,
+        weeks: lifeActionWeeks({ weeks: card.weeks || LIFE_CHOICE_WEEKS[card.id] || 1 })
+      }));
     }
 
     function lifeCareerDecisionDeck(career, routeId) {
@@ -6892,13 +6992,14 @@
           ]
         }
       };
-      return (decks[career.id] && decks[career.id][routeId]) || null;
+      const cards = (decks[career.id] && decks[career.id][routeId]) || null;
+      return cards ? withLifeWeeks(cards) : null;
     }
 
     function lifeDecisionDeck(routeId) {
       const career = activeLifeCareer();
       const careerDeck = career && lifeCareerDecisionDeck(career, routeId);
-      if (careerDeck) return careerDeck.filter(Boolean);
+      if (careerDeck) return careerDeck;
       const job = getJob(gameState.jobId);
       const workCards = !job ? [
         {
@@ -6951,15 +7052,14 @@
           { id: "microfund", icon: "◈", title: { he: "לגייס מימון החודש", en: "Raise funding this month" }, copy: { he: "כסף לפרויקט עכשיו, עם אחריות ומחיר בשנה הבאה.", en: "Project money now, with responsibility and a cost next year." }, effects: { cash: 450, debt: 260, reputation: 4, soul: -2 }, months: 1 }
         ]
       };
-      return decks[routeId] || decks.work;
+      return withLifeWeeks(decks[routeId] || decks.work);
     }
 
     function lifeWaitAction() {
-      const months = 1;
       return {
-        id: "let-year-pass", icon: "→", months,
-        title: { he: "לתת לחודש הזה לעבור", en: "Let this month pass" },
-        copy: { he: "גם פינוי מקום הוא החלטה. החודש הבא יגיע עם מה שהחיים הביאו.", en: "Making room is a decision too. Next month will arrive with whatever life brings." },
+        id: "let-year-pass", icon: "→", weeks: 1,
+        title: { he: "לקחת שבוע מנוחה", en: "Take a week to rest" },
+        copy: { he: "גם פינוי מקום הוא החלטה. חוזרים עם קצת אוויר ורעיון אחד חדש.", en: "Making room is a decision too. Return with a little air and one new idea." },
         effects: { soul: 3, creativity: 2, reputation: -1 }, skip: true
       };
     }
@@ -7057,14 +7157,81 @@
       }
     }
 
+    function closeLifeMonth() {
+      const life = ensureLifeState();
+      const rent = lifeMonthlyRent();
+      const interest = lifeMonthlyInterest();
+      if (rent) changeCash(-rent);
+      if (interest) gameState.debt = Math.max(0, Math.round(gameState.debt + interest));
+
+      const billingCopy = localize({
+        he: "סוף חודש: " + (rent ? "שכירות " + formatMoney(rent) : "ללא שכירות") + (interest ? " · ריבית חוב " + formatMoney(interest) : "") + ".",
+        en: "Month closed: " + (rent ? "rent " + formatMoney(rent) : "no rent") + (interest ? " · debt interest " + formatMoney(interest) : "") + "."
+      });
+      life.history.unshift({
+        kind: "monthly-close", age: life.age, year: life.calendarYear, month: life.month,
+        title: localize({ he: "חיוב חודשי", en: "Monthly costs" }), copy: billingCopy,
+        effects: { ...(rent ? { cash: -rent } : {}), ...(interest ? { debt: interest } : {}) }
+      });
+      life.history = life.history.slice(0, 60);
+
+      life.month += 1;
+      life.timeWeeks = 4;
+      if (life.month > 12) {
+        lifeYearEvent();
+        life.yearIndex += 1;
+        life.age += 1;
+        life.calendarYear += 1;
+        life.month = 1;
+        life.seasonIndex = 0;
+        life.completedThisYear = [];
+        life.yearActions = [];
+      }
+      life.seasonIndex = Math.floor((life.month - 1) / 4);
+      return { rent, interest, billingCopy };
+    }
+
+    function finishLifeAction({ title, copy, effects, route, weeks, skipped = false, source = null }) {
+      const life = ensureLifeState();
+      const period = lifePeriod();
+      const entry = {
+        kind: "choice", age: life.age, year: life.calendarYear, month: life.month, period: period.id,
+        route, title, copy, effects, skipped, weeks, source
+      };
+      life.completedThisYear.push(entry);
+      life.yearActions.push(entry);
+      life.history.unshift(entry);
+      life.history = life.history.slice(0, 60);
+      gameState.storyDiary.unshift({
+        day: gameState.day, title: entry.title,
+        source: localize({ he: "גיל " + life.age + " · " + period.he + " · " + lifeWeeksLabel(weeks), en: "Age " + life.age + " · " + period.en + " · " + lifeWeeksLabel(weeks) }),
+        copy: entry.copy
+      });
+      life.timeWeeks = Math.max(0, life.timeWeeks - weeks);
+      let billing = null;
+      if (life.timeWeeks === 0) billing = closeLifeMonth();
+      updateUnlocks();
+      if (life.yearIndex >= life.horizon) finishLifeRun();
+      if (!gameState.winState && life.timeWeeks === 4) queueLifeMonthlyEvent();
+      return { entry, billing };
+    }
+
     function makeLifeDecision(routeId, decisionId) {
       if (!isLifeMode() || gameState.winState) return false;
       const life = ensureLifeState();
+      if (life.monthlyEvent) return false;
       const choice = routeId === "wait"
         ? lifeWaitAction()
         : lifeDecisionDeck(routeId).find((item) => item.id === decisionId);
       if (!choice) return false;
-      if ((choice.months || 1) > lifeMonthsLeft()) return false;
+      const weeks = lifeActionWeeks(choice);
+      if (weeks > life.timeWeeks) {
+        flashMessage(localize({
+          he: "נשארו החודש רק " + life.timeWeeks + " שבועות. בחר/י פעולה קצרה יותר או תן/י לזמן לעבור.",
+          en: "Only " + life.timeWeeks + " weeks remain this month. Choose a shorter action or let time pass."
+        }), "bad");
+        return false;
+      }
       applyLifeEffects(choice.effects);
       if (choice.studyCredits && !life.programStartedAt) {
         life.programStartedAt = { year: life.calendarYear, month: life.month };
@@ -7077,39 +7244,15 @@
       }
       if (choice.unlockFilm) gameState.filmUnlocked = true;
       if (choice.housing) gameState.housing = choice.housing;
-      const period = lifePeriod();
-      const entry = {
-        kind: "choice", age: life.age, year: life.calendarYear, month: life.month, period: period.id,
-        route: routeId, title: localize(choice.title), copy: localize(choice.copy), effects: choice.effects, skipped: !!choice.skip
-      };
-      life.completedThisYear.push(entry);
-      life.yearActions.push(entry);
-      life.history.unshift(entry);
-      life.history = life.history.slice(0, 60);
-      gameState.storyDiary.unshift({ day: gameState.day, title: entry.title, source: localize({ he: "גיל " + life.age + " · " + period.he, en: "Age " + life.age + " · " + period.en }), copy: entry.copy });
       note(localize(choice.title) + " — " + localize(choice.copy), choice.skip ? "neutral" : "good");
       playSfx(choice.skip ? "cash" : "success");
 
       resolveLifeMissions();
-
-      life.month += choice.months || 1;
-      if (life.month > 12) {
-        lifeYearEvent();
-        life.yearIndex += 1;
-        life.age += 1;
-        life.calendarYear += 1;
-        life.month = 1;
-        life.seasonIndex = 0;
-        life.completedThisYear = [];
-        life.yearActions = [];
-        // An annual carrying cost keeps debt meaningful without creating a
-        // fail state. It is stated up-front in the finance route.
-        gameState.debt = Math.round(gameState.debt * 1.035);
-      }
-      life.seasonIndex = Math.floor((life.month - 1) / 4);
-      updateUnlocks();
-      if (life.yearIndex >= life.horizon) finishLifeRun();
-      queueLifeMonthlyEvent();
+      const result = finishLifeAction({
+        title: localize(choice.title), copy: localize(choice.copy), effects: choice.effects,
+        route: routeId, weeks, skipped: !!choice.skip
+      });
+      if (result.billing) note(result.billing.billingCopy, "neutral");
       saveGame();
       render();
       return true;
@@ -8535,22 +8678,9 @@
         }), "bad");
         return false;
       }
-      // Flights are city navigation in the monthly game: they cost money,
-      // but do not consume the player's one meaningful action for the month.
-      if (isLifeMode()) {
-        changeCash(-cost);
-        gameState.city = cityId;
-        gameState.currentBuilding = visibleBuildings(target)[0] || "home";
-        dom.openCategoryGroup = null;
-        flashMessage(localize({
-          he: "נחתת ב" + localize(target.name) + ". החודש עדיין פתוח לבחירה.",
-          en: "You landed in " + localize(target.name) + ". Your monthly action is still open."
-        }), "good");
-        playSfx("travel");
-        saveGame();
-        render();
-        return true;
-      }
+      // In the life route, a flight is handled by lifeFlyTo so its week is
+      // visible and it can trigger end-of-month costs like any other action.
+      if (isLifeMode()) return lifeFlyTo(cityId);
       if (!spendHours(3, t("flyCost", { hours: 3, cost }))) {
         return false;
       }
@@ -8564,6 +8694,34 @@
       }), "good");
       playSfx("travel");
       updateDailySystems();
+      render();
+      return true;
+    }
+
+    function lifeFlyTo(cityId) {
+      if (!isLifeMode() || gameState.winState || cityId === gameState.city) return false;
+      const life = ensureLifeState();
+      const target = getCity(cityId);
+      const cost = flightCost(cityId);
+      if (!target || life.monthlyEvent) return false;
+      if (life.timeWeeks < 1) return false;
+      if (gameState.cash < cost) {
+        flashMessage(localize({
+          he: "אין מספיק כסף לכרטיס. השמיים שמורים לעשירים ולמלווים בריבית.",
+          en: "Not enough cash for a ticket. The skies belong to the rich and the predatory."
+        }), "bad");
+        return false;
+      }
+      changeCash(-cost);
+      gameState.city = cityId;
+      gameState.currentBuilding = visibleBuildings(target)[0] || "home";
+      if (dom) dom.lifeActionBuilding = null;
+      const title = localize({ he: "טיסה ל" + localize(target.name), en: "Flight to " + localize(target.name) });
+      const copy = localize({ he: "כרטיס טיסה עולה כסף ושבוע אחד — אבל פותח עיר, אנשים וצמתים חדשים.", en: "The ticket costs cash and one week, but opens a new city, people, and crossroads." });
+      const result = finishLifeAction({ title, copy, effects: { cash: -cost }, route: "travel", weeks: 1, source: "flight" });
+      note(result.billing ? result.billing.billingCopy : title + " — " + copy, result.billing ? "neutral" : "good");
+      playSfx("travel");
+      saveGame();
       render();
       return true;
     }
@@ -11412,6 +11570,7 @@
             <div class="life-command-brand">KOBI / LIFE</div>
             <div class="life-command-metric"><span>${localize({ he: "גיל", en: "Age" })}</span><strong>${life.age}</strong></div>
             <div class="life-command-metric life-command-date"><span>${life.calendarYear}</span><strong>${localize({ he: period.he, en: period.en })}</strong></div>
+            <div class="life-command-metric"><span>${localize({ he: "זמן", en: "Time" })}</span><strong>${life.timeWeeks}/4 ${localize({ he: "שבועות", en: "weeks" })}</strong></div>
             <div class="life-command-metric"><span>${t("cash")}</span><strong>${formatMoney(gameState.cash)}</strong></div>
             <div class="life-command-metric life-command-debt"><span>${localize({ he: "חוב", en: "Debt" })}</span><strong>${formatMoney(gameState.debt)}</strong></div>
             <div class="life-command-metric"><span>${localize({ he: "עוקבים", en: "Followers" })}</span><strong>${gameState.followers.toLocaleString()}</strong></div>
@@ -11951,8 +12110,8 @@
               <h2>${localize(building.label)} · ${localize({ he: "מה עושים החודש?", en: "What do you do this month?" })}</h2>
             </div>
             <p>${localize({
-              he: "בחר/י פעולה אחת. היא סוגרת את החודש ומקדמת את שעון החיים; אפשר קודם לטייל בין המקומות ולבחון אפשרויות אחרות.",
-              en: "Choose one action. It closes this month and moves the life clock; you can first travel between places and inspect other options."
+              he: "אפשר לשלב כמה פעולות באותו חודש; כל אחת מציגה מראש כמה שבועות היא לוקחת.",
+              en: "You can combine several actions each month; every one shows its week cost up front."
             })}</p>
           </div>
           <div class="life-choice-grid">
@@ -11962,13 +12121,13 @@
                 <span class="life-choice-icon">${card.icon}</span>
                 <strong>${localize(card.title)}</strong>
                 <span class="life-choice-copy">${localize(card.copy)}</span>
-                <span class="life-month-cost">${localize({ he: "חודש אחד", en: "One month" })}</span>
+                <span class="life-month-cost">${lifeWeeksLabel(lifeActionWeeks(card))}</span>
                 ${lifeEffectsMarkup(card.effects)}
                 <span class="life-choice-cta">${localize({ he: "לבחור לחודש הזה", en: "Choose for this month" })} <b>←</b></span>
               </button>
             `).join("")}
             <button class="life-choice life-choice-skip" data-action="makeLifeDecision" data-value="wait:${wait.id}">
-              <span class="life-choice-index">04</span><span class="life-choice-icon">${wait.icon}</span><strong>${localize(wait.title)}</strong><span class="life-choice-copy">${localize(wait.copy)}</span><span class="life-month-cost">${localize({ he: "חודש אחד", en: "One month" })}</span>${lifeEffectsMarkup(wait.effects)}<span class="life-choice-cta">${localize({ he: "לתת לחודש לעבור", en: "Let the month pass" })} <b>←</b></span>
+              <span class="life-choice-index">04</span><span class="life-choice-icon">${wait.icon}</span><strong>${localize(wait.title)}</strong><span class="life-choice-copy">${localize(wait.copy)}</span><span class="life-month-cost">${lifeWeeksLabel(lifeActionWeeks(wait))}</span>${lifeEffectsMarkup(wait.effects)}<span class="life-choice-cta">${localize({ he: "לתת לשבוע לעבור", en: "Let a week pass" })} <b>←</b></span>
             </button>
           </div>
         </section>
@@ -12095,7 +12254,7 @@
       const fresh = sceneCardButtons(buildingId).length > 0 && !(gameState.buildingVisits && gameState.buildingVisits[visitKey]);
       const lock = annualLocationLock(buildingId);
       return `
-        <button class="annual-map-node ${selected ? "selected" : ""} ${target ? "target" : ""} ${careerFocus ? "career-focus" : ""} ${fresh ? "fresh" : ""} ${lock ? "locked" : ""}" style="--node:${annualCategoryColor(building.category)};left:${position.left}%;top:${position.top}%;" data-action="goToBuilding" data-value="${buildingId}" title="${lock || localize({ he: "לעבור אל " + building.label.he, en: "Go to " + building.label.en })}">
+        <button class="annual-map-node ${selected ? "selected" : ""} ${target ? "target" : ""} ${careerFocus ? "career-focus" : ""} ${fresh ? "fresh" : ""} ${lock ? "locked" : ""}" style="--node:${annualCategoryColor(building.category)};left:${position.left}%;top:${position.top}%;" data-action="openLifeActions" data-value="${buildingId}" title="${lock || localize({ he: "לפתוח את " + building.label.he, en: "Open " + building.label.en })}">
           <span class="annual-node-dot" aria-hidden="true"></span>
           <span class="annual-node-label">${localize(building.label)}</span>
           ${lock ? `<span class="annual-node-lock" aria-label="${lock}">🔒</span>` : ""}
@@ -12105,12 +12264,14 @@
     }
 
     function annualLifeChoiceButton(route, card) {
+      const weeks = lifeActionWeeks(card);
+      const unavailable = weeks > ensureLifeState().timeWeeks;
       return `
-        <button class="action-btn annual-life-choice" data-action="makeLifeDecision" data-value="${route}:${card.id}">
-          <div class="topline"><span>${localize(card.title)}</span><span>${localize({ he: "חודש אחד", en: "One month" })}</span></div>
+        <button class="action-btn annual-life-choice ${unavailable ? "unavailable" : ""}" data-action="makeLifeDecision" data-value="${route}:${card.id}" ${unavailable ? "disabled" : ""}>
+          <div class="topline"><span>${localize(card.title)}</span><span>${lifeWeeksLabel(weeks)}</span></div>
           <div class="subline">${localize(card.copy)}</div>
           ${lifeEffectsMarkup(card.effects)}
-          <div class="life-choice-cta"><span>${localize({ he: "לבחור לחודש הזה", en: "Choose for this month" })}</span><b>←</b></div>
+          <div class="life-choice-cta"><span>${unavailable ? localize({ he: "אין מספיק שבועות החודש", en: "Not enough weeks this month" }) : localize({ he: "לבחור פעולה", en: "Choose action" })}</span><b>${unavailable ? "—" : "←"}</b></div>
         </button>
       `;
     }
@@ -12121,14 +12282,14 @@
         return `
           <div class="annual-action-place">
             <strong>${localize({ he: "טיסות בין ערים", en: "Flights between cities" })}</strong>
-            <p>${localize({ he: "טיסה עולה כסף אך לא סוגרת את החודש: אחרי הנחיתה בוחרים פעולה במקום החדש.", en: "A flight costs money but does not close the month: after landing, choose an action in the new city." })}</p>
+            <p>${localize({ he: "כל טיסה עולה כסף ושבוע אחד. אחרי הנחיתה אפשר להמשיך לפעול אם נשאר זמן החודש.", en: "Each flight costs cash and one week. After landing, keep acting if the month still has time." })}</p>
           </div>
           <div class="action-groups annual-action-groups">
             <div class="action-group">
               <h3>${localize({ he: "בחר/י יעד", en: "Choose a destination" })}</h3>
               <div class="action-buttons">
                 ${targets.map((city) => buttonMarkup(
-                  "flyTo",
+                  "lifeFlyTo",
                   city.id,
                   localize(city.name),
                   localize(city.mood),
@@ -12152,19 +12313,46 @@
         ${career ? `<p class="annual-career-context"><span>${career.mark}</span><b>${localize(career.name)}</b><span>· ${localize(career.intro)}</span></p>` : ""}
         <div class="action-groups annual-action-groups">
           <div class="action-group">
-            <h3>${localize(building.label)} · ${localize({ he: "הפעולה של החודש", en: "This month's action" })}</h3>
+            <h3>${localize(building.label)} · ${localize({ he: "הפעולות הזמינות", en: "Available actions" })}</h3>
             <div class="action-buttons">
               ${cards.map((card) => annualLifeChoiceButton(route, card)).join("")}
             </div>
           </div>
           <details class="annual-more-actions">
-            <summary>${localize({ he: "עוד אפשרויות לחודש", en: "More options this month" })}</summary>
+            <summary>${localize({ he: "אפשרות שקטה", en: "A quiet option" })}</summary>
             <div class="action-group annual-wait-group">
               <h3>${localize({ he: "אין חובה להספיק הכול", en: "You do not have to do it all" })}</h3>
               <div class="action-buttons">${annualLifeChoiceButton("wait", wait)}</div>
             </div>
           </details>
         </div>
+      `;
+    }
+
+    function renderLifeActionWindow() {
+      if (!dom || !dom.lifeActionWindow) return;
+      const life = ensureLifeState();
+      const buildingId = dom.lifeActionBuilding;
+      if (!gameState.started || !isLifeMode() || !buildingId || life.monthlyEvent || !getCity().buildings.includes(buildingId)) {
+        dom.lifeActionWindow.classList.add("hidden");
+        dom.lifeActionWindow.innerHTML = "";
+        return;
+      }
+      const building = getBuilding(buildingId);
+      const lock = annualLocationLock(buildingId);
+      dom.lifeActionWindow.classList.remove("hidden");
+      dom.lifeActionWindow.innerHTML = `
+        <div class="life-action-backdrop" data-action="closeLifeActions"></div>
+        <section class="life-action-dialog" role="dialog" aria-modal="true" aria-label="${localize(building.label)}">
+          <header class="life-action-dialog-head">
+            <div>
+              <span class="annual-label">${localize({ he: "חודש " + life.month + " · נשארו " + life.timeWeeks + " מתוך 4 שבועות", en: "Month " + life.month + " · " + life.timeWeeks + " of 4 weeks remain" })}</span>
+              <h2>${localize(building.label)}</h2>
+            </div>
+            <button class="life-action-close" data-action="closeLifeActions" aria-label="${localize({ he: "סגור", en: "Close" })}">×</button>
+          </header>
+          ${lock ? `<div class="life-action-lock">${lock}</div>` : renderLifeMonthlyActions(buildingId)}
+        </section>
       `;
     }
 
@@ -12198,6 +12386,17 @@
       `;
     }
 
+    function renderLifeWeekClock() {
+      const life = ensureLifeState();
+      return `
+        <section class="life-week-clock" aria-label="${localize({ he: "זמן החודש", en: "Monthly time" })}">
+          <div><span class="annual-label">${localize({ he: "זמן החודש", en: "Monthly time" })}</span><strong>${localize({ he: "נשארו " + life.timeWeeks + " מתוך 4 שבועות", en: life.timeWeeks + " of 4 weeks remaining" })}</strong></div>
+          <div class="life-week-dots">${Array.from({ length: 4 }, (_, index) => `<i class="${index < life.timeWeeks ? "available" : "used"}" aria-label="${localize({ he: index < life.timeWeeks ? "שבוע פנוי" : "שבוע שנוצל", en: index < life.timeWeeks ? "Available week" : "Used week" })}">${index + 1}</i>`).join("")}</div>
+          <p>${localize({ he: "לוחצים על נקודה במפה, בוחרים פעולה, והזמן מתקדם לפי משך הפעולה.", en: "Click a map point, choose an action, and time advances by its duration." })}</p>
+        </section>
+      `;
+    }
+
     function renderLifeSide() {
       const life = ensureLifeState();
       const activeJob = getJob(gameState.jobId);
@@ -12218,6 +12417,7 @@
               <div><span>${localize({ he: "תהילה", en: "Fame" })}</span><b>${gameState.reputation}</b></div>
               <div><span>${localize({ he: "קשרים", en: "Connections" })}</span><b>${gameState.connections}</b></div>
             </div>
+            <div class="annual-billing-note"><span>${localize({ he: "בסוף החודש", en: "At month end" })}</span><p>${localize({ he: "שכירות " + formatMoney(lifeMonthlyRent()) + " · ריבית חוב " + formatMoney(lifeMonthlyInterest()) + " (1%)", en: "Rent " + formatMoney(lifeMonthlyRent()) + " · debt interest " + formatMoney(lifeMonthlyInterest()) + " (1%)" })}</p></div>
             ${study ? `<div class="annual-career-progress"><span>${localize(study.career.program)}</span><p>${study.started ? localize({ he: study.credits + "/" + study.creditTarget + " נקודות לימוד · " + study.elapsed + "/" + study.minimumMonths + " חודשים במסלול", en: study.credits + "/" + study.creditTarget + " study credits · " + study.elapsed + "/" + study.minimumMonths + " program months" }) : localize({ he: "עוד לא נרשמת. הלימודים מתחילים כשתבחר/י בכך על המפה.", en: "Not enrolled yet. Study begins when you choose it on the map." })}</p></div>` : ""}
             <div class="annual-next-goal"><span>${localize({ he: "המטרה הקרובה", en: "Nearest goal" })}</span><p>${hint.copy}</p></div>
             ${mission ? `<div class="annual-mission">
@@ -12241,7 +12441,7 @@
       const hint = currentHint();
       const hintBuilding = buildings.includes(hint.building) ? hint.building : null;
       const career = activeLifeCareer();
-      const intro = !life.introSeen ? `<div class="annual-life-intro"><span>✦</span><p>${localize({ he: "מטיילים חופשי בין נקודות העיר; רק פעולה אחת מקדמת חודש.", en: "Travel freely between city points; only one action advances the month." })}</p><button data-action="dismissLifeIntro">${localize({ he: "הבנתי", en: "Got it" })}</button></div>` : "";
+      const intro = !life.introSeen ? `<div class="annual-life-intro"><span>✦</span><p>${localize({ he: "מטיילים חופשי בין נקודות העיר. לחיצה על נקודה פותחת פעולות; לכל חודש יש ארבעה שבועות, ופעולה מראה מראש כמה זמן היא לוקחת.", en: "Travel freely between city points. Clicking a point opens actions; each month has four weeks, and every action states its time cost up front." })}</p><button data-action="dismissLifeIntro">${localize({ he: "הבנתי", en: "Got it" })}</button></div>` : "";
       dom.boardStage.innerHTML = `
         <main class="annual-life-shell">
           <div class="annual-life-layout">
@@ -12252,9 +12452,9 @@
               </header>
               ${intro}
               <div class="annual-play-area">
-                ${renderLifeMonthClock()}
+                ${renderLifeWeekClock()}
                 <section class="annual-city-board" style="--scene-a:${currentBuilding.color[0]};--scene-b:${currentBuilding.color[1]};">
-                  <div class="annual-map-head"><span>${localize({ he: "המפה של " + localize(city.name), en: localize(city.name) + " map" })}</span><small>${career ? localize({ he: localize(career.name) + " · הנקודות הזוהרות בונות את המסלול", en: localize(career.name) + " · glowing points build the route" }) : localize({ he: "נקודה פותחת פעולה · פעולה מקדמת חודש", en: "A point opens an action · an action advances a month" })}</small></div>
+                  <div class="annual-map-head"><span>${localize({ he: "המפה של " + localize(city.name), en: localize(city.name) + " map" })}</span><small>${career ? localize({ he: localize(career.name) + " · הנקודות הזוהרות בונות את המסלול", en: localize(career.name) + " · glowing points build the route" }) : localize({ he: "לחצו על נקודה כדי לראות את האפשרויות שלה", en: "Click a point to see its options" })}</small></div>
                   <div class="annual-map-tools">
                     <div class="annual-map-legend">
                       ${[
@@ -12270,9 +12470,6 @@
                   <div class="annual-plaza">
                     ${buildings.map((buildingId, index) => annualMapNodeMarkup(buildingId, hintBuilding, index, buildings.length)).join("")}
                   </div>
-                </section>
-                <section class="annual-actions-panel">
-                  ${renderLifeMonthlyActions(gameState.currentBuilding)}
                 </section>
               </div>
             </section>
@@ -13984,6 +14181,7 @@
       dom.sidePanel.innerHTML = "";
       renderLifeBoard();
       renderCareerChoiceWindow();
+      renderLifeActionWindow();
       renderStatusWindow();
       renderNoticeWindow();
       renderCollectionWindow();
@@ -14026,6 +14224,19 @@
             saveGame();
             render();
           }
+        } else if (action === "openLifeActions") {
+          const lock = annualLocationLock(value);
+          if (isLifeMode() && getCity().buildings.includes(value) && !lock && !ensureLifeState().monthlyEvent) {
+            gameState.currentBuilding = value;
+            dom.lifeActionBuilding = value;
+            saveGame();
+            render();
+          } else if (lock) {
+            flashMessage(lock, "bad");
+          }
+        } else if (action === "closeLifeActions") {
+          dom.lifeActionBuilding = null;
+          render();
         } else if (action === "makeLifeDecision") {
           const [routeId, decisionId] = String(value || "").split(":");
           makeLifeDecision(routeId, decisionId);
@@ -14052,6 +14263,8 @@
           doSoftAction(value);
         } else if (action === "flyTo") {
           flyTo(value);
+        } else if (action === "lifeFlyTo") {
+          lifeFlyTo(value);
         } else if (action === "openOfferDeck") {
           openOfferDeck(value);
         } else if (action === "buyScript") {
@@ -14288,6 +14501,7 @@
         startScreen: document.getElementById("startScreen"),
         winLoss: document.getElementById("winLoss"),
         careerWindow: document.getElementById("careerWindow"),
+        lifeActionWindow: document.getElementById("lifeActionWindow"),
         statusWindow: document.getElementById("statusWindow"),
         incidentWindow: document.getElementById("incidentWindow"),
         collectionWindow: document.getElementById("collectionWindow"),
@@ -14306,6 +14520,7 @@
         hereActionsOpen: false,
         hudMenuOpen: false,
         openCategoryGroup: null,
+        lifeActionBuilding: null,
         forceStart: false
       };
       bindEvents();
@@ -14322,6 +14537,7 @@
     root.toggleMute = toggleMute;
     root.goToBuilding = goToBuilding;
     root.flyTo = flyTo;
+    root.lifeFlyTo = lifeFlyTo;
     root.endDay = endDay;
     root.applyJob = applyJob;
     root.workShift = workShift;
