@@ -888,6 +888,11 @@
       opacity: 0.92;
     }
 
+    .start-howto {
+      font-size: 0.8rem;
+      opacity: 0.68;
+    }
+
     .start-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1083,8 +1088,8 @@
       --street: #9a9a9a;
       --street-edge: #6f6f6f;
       --marquee: #000000;
-      --font-title: "Tahoma", "MS Sans Serif", "Verdana", sans-serif;
-      --font-body: "Tahoma", "MS Sans Serif", "Verdana", sans-serif;
+      --font-title: -apple-system, "SF Pro Display", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      --font-body: -apple-system, "SF Pro Text", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
       --hud-height: 92px;
       --win-bg: #008080;
       --win-face: #c0c0c0;
@@ -1093,11 +1098,31 @@
       --win-dark: #808080;
       --win-black: #000000;
       --win-blue: #000080;
+      --kc-bg: #0a0a0c;
+      --kc-card: #17171a;
+      --kc-card-2: #1f1f24;
+      --kc-track: rgba(255, 255, 255, 0.08);
+      --kc-line: rgba(255, 255, 255, 0.09);
+      --kc-line-strong: rgba(255, 255, 255, 0.18);
+      --kc-text: #f4f4f5;
+      --kc-text-dim: rgba(244, 244, 245, 0.62);
+      --kc-text-faint: rgba(244, 244, 245, 0.4);
+      --kc-accent: #5b8def;
+      --kc-accent-soft: rgba(91, 141, 239, 0.16);
+      --kc-good: #34d399;
+      --kc-good-soft: rgba(52, 211, 153, 0.14);
+      --kc-bad: #f87171;
+      --kc-bad-soft: rgba(248, 113, 113, 0.14);
+      --kc-warn: #fbbf24;
+      --kc-warn-soft: rgba(251, 191, 36, 0.14);
+      --kc-danger: #c084fc;
+      --kc-radius: 12px;
+      --kc-radius-sm: 8px;
     }
 
     html, body {
-      background: var(--win-face);
-      color: var(--win-black);
+      background: var(--kc-bg);
+      color: var(--kc-text);
       font-size: 14px;
     }
 
@@ -1105,7 +1130,7 @@
       max-width: none;
       margin: 0;
       height: 100vh;
-      background: var(--win-face);
+      background: var(--kc-bg);
       box-shadow: none;
     }
 
@@ -1119,8 +1144,8 @@
     .win-loss,
     .status-window,
     .incident-window {
-      background: var(--win-face);
-      color: var(--win-black);
+      background: var(--kc-bg);
+      color: var(--kc-text);
       font-family: var(--font-body);
     }
     .start-screen .panel,
@@ -1131,57 +1156,41 @@
     .win-loss .card,
     .status-window .card,
     .incident-window .card {
-      background: var(--win-face);
-      border: 0;
-      box-shadow:
-        inset -1px -1px var(--win-black),
-        inset 1px 1px var(--win-light),
-        inset -2px -2px var(--win-dark),
-        inset 2px 2px var(--win-mid);
-      border-radius: 0;
+      background: var(--kc-card);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius);
     }
     /* Win95 scrollbar */
     *::-webkit-scrollbar { width: 16px; height: 16px; }
     *::-webkit-scrollbar-track {
-      background: var(--win-face);
-      box-shadow:
-        inset 1px 1px var(--win-dark),
-        inset -1px -1px var(--win-light);
+      background: var(--kc-bg);
+      box-shadow: none;
     }
     *::-webkit-scrollbar-thumb {
-      background: var(--win-face);
-      box-shadow:
-        inset -1px -1px var(--win-black),
-        inset 1px 1px var(--win-light),
-        inset -2px -2px var(--win-dark),
-        inset 2px 2px var(--win-mid);
+      background: var(--kc-line-strong);
+      box-shadow: none;
+      border-radius: var(--kc-radius-sm);
     }
     /* Fullscreen toggle button — sits in the HUD */
     .fs-btn {
-      background: var(--win-face);
-      color: var(--win-black);
+      background: var(--kc-card);
+      color: var(--kc-text);
       padding: 4px 10px;
       font-family: var(--font-body);
       font-size: 12px;
-      box-shadow:
-        inset -1px -1px var(--win-black),
-        inset 1px 1px var(--win-light),
-        inset -2px -2px var(--win-dark),
-        inset 2px 2px var(--win-mid);
-      border: 0;
-      border-radius: 0;
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
     }
     .fs-btn:active {
-      box-shadow:
-        inset 1px 1px var(--win-black),
-        inset -1px -1px var(--win-light),
-        inset 2px 2px var(--win-dark),
-        inset -2px -2px var(--win-mid);
+      box-shadow: none;
+      background: var(--kc-card-2);
     }
 
     .hud {
-      background: var(--win-face);
-      border-bottom: 0;
+      background: var(--kc-bg);
+      border-bottom: 1px solid var(--kc-line);
       padding: 28px 6px 6px;
       gap: 6px;
     }
@@ -1194,10 +1203,10 @@
       display: flex;
       align-items: center;
       padding: 0 8px;
-      color: #ffffff;
-      font-weight: 700;
+      color: var(--kc-text-faint);
+      font-weight: 600;
       font-size: 12px;
-      background: linear-gradient(90deg, #000080, #1084d0);
+      background: transparent;
     }
 
     .clock-box,
@@ -1216,20 +1225,16 @@
     .start-card button {
       border-radius: 0;
       border: 0;
-      background: var(--win-face);
-      color: var(--win-black);
-      box-shadow:
-        inset -1px -1px var(--win-black),
-        inset 1px 1px var(--win-light),
-        inset -2px -2px var(--win-dark),
-        inset 2px 2px var(--win-mid);
+      background: var(--kc-card);
+      color: var(--kc-text);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
     }
 
     .action-btn,
     .start-card button {
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.56), rgba(255,255,255,0.18)),
-        linear-gradient(180deg, #dfe7d8, #c8d4bf);
+      background: var(--kc-card-2);
     }
 
     .metric,
@@ -1245,16 +1250,15 @@
     .board-stage {
       border-radius: 0;
       border: 0;
-      background: #ffffff;
-      box-shadow:
-        inset -1px -1px var(--win-light),
-        inset 1px 1px var(--win-dark),
-        inset -2px -2px var(--win-mid),
-        inset 2px 2px var(--win-black);
+      background: var(--kc-card);
+      color: var(--kc-text);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
     }
 
     .board-stage {
-      background: #bdbdbd;
+      background: var(--kc-bg);
     }
 
     .board-caption {
@@ -1275,7 +1279,7 @@
     .metric-label,
     .section-label {
       opacity: 1;
-      color: #222;
+      color: var(--kc-text-dim);
     }
 
     .clock-time,
@@ -1319,8 +1323,10 @@
     }
 
     .lead-btn {
-      color: #008c2a;
+      background: linear-gradient(90deg, var(--kc-accent), var(--kc-good)) !important;
+      color: #0a0a0c !important;
       font-weight: 700;
+      border: none !important;
     }
 
     .goal-row,
@@ -1341,7 +1347,8 @@
     }
 
     .hint-box {
-      background: #ffffe1;
+      background: var(--kc-warn-soft);
+      color: var(--kc-text);
     }
 
     .board-ring {
@@ -1353,9 +1360,9 @@
       border-color: #7f7f7f;
       background:
         linear-gradient(180deg, #d4d4d4, #bdbdbd);
-      box-shadow:
-        inset -1px -1px var(--win-light),
-        inset 1px 1px var(--win-dark);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
     }
 
     .street-loop::after {
@@ -1372,11 +1379,9 @@
       border: 0;
       background:
         linear-gradient(180deg, var(--b1) 0 9px, var(--win-face) 9px 100%);
-      box-shadow:
-        inset -1px -1px var(--win-black),
-        inset 1px 1px var(--win-light),
-        inset -2px -2px var(--win-dark),
-        inset 2px 2px var(--win-mid);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
     }
 
     .sign {
@@ -1411,24 +1416,22 @@
     }
 
     .project-card.focused {
-      box-shadow:
-        inset -1px -1px var(--win-light),
-        inset 1px 1px var(--win-dark),
-        inset -2px -2px var(--win-mid),
-        inset 2px 2px var(--win-black);
-      background: #dfefff;
+      box-shadow: none;
+      border: 1px solid var(--kc-accent);
+      border-radius: var(--kc-radius-sm);
+      background: var(--kc-card-2);
     }
 
     .pill {
-      border-radius: 0;
-      background: #000080;
-      color: #ffffff;
-      padding: 2px 6px;
+      border-radius: 999px;
+      background: var(--kc-accent-soft);
+      color: var(--kc-accent);
+      padding: 2px 8px;
     }
 
     .marquee {
-      background: #ffffff;
-      color: #000000;
+      background: var(--kc-card);
+      color: var(--kc-text);
       min-height: 68px;
     }
 
@@ -1438,31 +1441,36 @@
     }
 
     .mini-btn.secondary {
-      background: var(--win-face);
+      background: var(--kc-card);
+      color: var(--kc-text);
+      border-color: var(--kc-line);
     }
 
     .start-screen,
     .win-loss {
-      background: rgba(0, 0, 0, 0.28);
+      background: rgba(0, 0, 0, 0.6);
       backdrop-filter: none;
     }
 
     .start-card,
     .win-card {
-      border-radius: 0;
-      border: 0;
-      background: var(--win-face);
-      color: #000000;
-      box-shadow:
-        inset -1px -1px var(--win-black),
-        inset 1px 1px var(--win-light),
-        inset -2px -2px var(--win-dark),
-        inset 2px 2px var(--win-mid);
+      border-radius: var(--kc-radius);
+      border: 1px solid var(--kc-line);
+      background: var(--kc-card);
+      color: var(--kc-text);
+      box-shadow: none;
     }
 
     .start-card h1,
     .win-card h2 {
-      font-size: 22px;
+      font-size: 24px;
+    }
+
+    .start-card h1 {
+      background: linear-gradient(90deg, var(--kc-accent), #b06ee0, var(--kc-warn));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
 
     @media (max-width: 1060px) {
@@ -1478,6 +1486,7 @@
         height: auto;
         min-height: 100vh;
         grid-template-rows: auto auto;
+        overflow: visible;
       }
 
       .hud {
@@ -1540,14 +1549,33 @@
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 4px;
       padding: 24px 6px 6px;
+      position: sticky;
+      top: 0;
+      z-index: 15;
     }
 
     .status-box.hud-summary {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 4px;
       padding: 0;
       background: transparent;
       box-shadow: none;
+    }
+
+    .status-box.hud-summary .metric.hud-clock {
+      background: var(--kc-accent-soft);
+      border-color: var(--kc-accent);
+    }
+
+    .status-box.hud-summary .metric.hud-clock .metric-label {
+      color: var(--kc-text);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .status-box.hud-summary .metric.hud-clock .metric-value {
+      color: var(--kc-accent);
+      font-weight: 600;
     }
 
     .status-box.hud-summary .metric {
@@ -1557,18 +1585,16 @@
       row-gap: 2px;
       padding: 6px 8px;
       min-height: 38px;
-      background: #ffffff;
-      box-shadow:
-        inset -1px -1px var(--win-light),
-        inset 1px 1px var(--win-dark),
-        inset -2px -2px var(--win-mid),
-        inset 2px 2px var(--win-black);
+      background: var(--kc-card);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
     }
 
     .status-box.hud-summary .metric-label {
       font-size: 10px;
       letter-spacing: 0.3px;
-      color: #4a4a4a;
+      color: var(--kc-text-dim);
       text-transform: none;
       opacity: 1;
       line-height: 1.1;
@@ -1578,16 +1604,20 @@
       font-size: 13px;
       font-weight: 700;
       line-height: 1.15;
-      color: #111;
+      color: var(--kc-text);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     .layout {
-      grid-template-columns: 300px minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr);
       gap: 4px;
       padding: 4px;
+    }
+
+    .side-panel {
+      display: none;
     }
 
     .board-stage {
@@ -1597,13 +1627,13 @@
 
     .win95-shell {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 248px;
+      grid-template-columns: minmax(0, 1fr);
       grid-template-rows: minmax(0, 1fr);
       gap: 4px;
       min-height: 100%;
       height: 100%;
       padding: 4px;
-      background: var(--win-face);
+      background: var(--kc-bg);
       align-items: stretch;
       align-content: stretch;
     }
@@ -1615,12 +1645,11 @@
       display: grid;
       gap: 4px;
       padding: 5px;
-      background: var(--win-face);
-      box-shadow:
-        inset -1px -1px var(--win-black),
-        inset 1px 1px var(--win-light),
-        inset -2px -2px var(--win-dark),
-        inset 2px 2px var(--win-mid);
+      background: var(--kc-card);
+      color: var(--kc-text);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius);
     }
 
     .win95-status,
@@ -1653,6 +1682,23 @@
       grid-row: 1;
     }
 
+    .win95-aside {
+      display: none;
+    }
+
+    @media (min-width: 1100px) {
+      .win95-shell {
+        grid-template-columns: minmax(0, 1fr) 260px;
+      }
+      .win95-aside {
+        display: grid;
+        grid-column: 2;
+        grid-row: 1;
+        align-content: start;
+        gap: 8px;
+      }
+    }
+
     .board-route-row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 190px;
@@ -1665,15 +1711,14 @@
     .scene-title {
       font-size: 12px;
       font-weight: 700;
-      color: #ffffff;
+      color: var(--kc-text);
       padding: 4px 6px;
-      box-shadow:
-        inset -1px -1px rgba(0, 0, 0, 0.25),
-        inset 1px 1px rgba(255, 255, 255, 0.25);
+      box-shadow: none;
+      border-radius: var(--kc-radius-sm);
     }
 
     .win95-panel-title {
-      background: linear-gradient(90deg, #0b7d7d, #23b9a6);
+      background: var(--kc-card-2);
     }
 
     .ledger-stack {
@@ -1687,9 +1732,10 @@
       gap: 8px;
       align-items: center;
       padding: 6px 7px;
-      background: #101010;
-      color: #24f224;
-      border: 2px solid #2a2a2a;
+      background: var(--kc-card);
+      color: var(--kc-good);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
       font-weight: 700;
       line-height: 1.15;
     }
@@ -1700,15 +1746,15 @@
     }
 
     .ledger-row.debt {
-      color: #ff5c48;
+      color: var(--kc-bad);
     }
 
     .ledger-row.plain {
-      color: #ffe55b;
+      color: var(--kc-text);
     }
 
     .ledger-row.bank {
-      color: #7bffed;
+      color: var(--kc-accent);
     }
 
     .win95-note,
@@ -1717,12 +1763,11 @@
     .scene-copy,
     .scene-hint,
     .scene-chip {
-      background: #ffffff;
-      box-shadow:
-        inset -1px -1px var(--win-light),
-        inset 1px 1px var(--win-dark),
-        inset -2px -2px var(--win-mid),
-        inset 2px 2px var(--win-black);
+      background: var(--kc-card);
+      color: var(--kc-text);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
     }
 
     .win95-note,
@@ -1756,12 +1801,11 @@
       padding: 7px;
       font-size: 11px;
       line-height: 1.35;
-      background: #ffffff;
-      box-shadow:
-        inset -1px -1px var(--win-light),
-        inset 1px 1px var(--win-dark),
-        inset -2px -2px var(--win-mid),
-        inset 2px 2px var(--win-black);
+      background: var(--kc-card);
+      color: var(--kc-text);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
     }
 
     .inv-line strong {
@@ -1771,13 +1815,15 @@
     .inv-wear {
       height: 7px;
       margin-top: 2px;
-      background: #c0c0c0;
-      box-shadow: inset 1px 1px var(--win-black), inset -1px -1px var(--win-light);
+      background: var(--kc-track);
+      box-shadow: none;
+      border-radius: 4px;
+      overflow: hidden;
     }
 
     .inv-wear-fill {
       height: 100%;
-      background: linear-gradient(90deg, #0b7d7d, #23b9a6);
+      background: var(--kc-accent);
     }
 
     .inv-chips {
@@ -1787,31 +1833,29 @@
     }
 
     .inv-chip {
-      padding: 2px 6px;
+      padding: 2px 8px;
       font-size: 10px;
       font-weight: 700;
-      color: #08311f;
-      background: #6cf0b0;
-      box-shadow:
-        inset -1px -1px rgba(0, 0, 0, 0.3),
-        inset 1px 1px rgba(255, 255, 255, 0.6);
+      color: var(--kc-good);
+      background: var(--kc-good-soft);
+      border-radius: 999px;
+      box-shadow: none;
     }
 
     .inv-empty {
       font-size: 10px;
-      color: #707070;
+      color: var(--kc-text-faint);
     }
 
     .unlock-list {
       display: grid;
       gap: 5px;
       padding: 7px;
-      background: #ffffff;
-      box-shadow:
-        inset -1px -1px var(--win-light),
-        inset 1px 1px var(--win-dark),
-        inset -2px -2px var(--win-mid),
-        inset 2px 2px var(--win-black);
+      background: var(--kc-card);
+      color: var(--kc-text);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
     }
 
     .unlock-row {
@@ -1821,8 +1865,8 @@
       line-height: 1.3;
     }
 
-    .unlock-row.done .unlock-row-head { color: #0b7d3a; }
-    .unlock-row.done .unlock-fill { background: linear-gradient(90deg, #0b7d3a, #6cf0b0); }
+    .unlock-row.done .unlock-row-head { color: var(--kc-good); }
+    .unlock-row.done .unlock-fill { background: var(--kc-good); }
 
     .unlock-row-head {
       display: flex;
@@ -1833,13 +1877,15 @@
 
     .unlock-bar {
       height: 7px;
-      background: #c0c0c0;
-      box-shadow: inset 1px 1px var(--win-black), inset -1px -1px var(--win-light);
+      background: var(--kc-track);
+      box-shadow: none;
+      border-radius: 4px;
+      overflow: hidden;
     }
 
     .unlock-fill {
       height: 100%;
-      background: linear-gradient(90deg, #2a4ba0, #5f95c8);
+      background: var(--kc-accent);
       transition: width 0.25s ease;
     }
 
@@ -1852,17 +1898,16 @@
       gap: 4px;
       padding: 7px;
       text-align: start;
-      background: #ffffff;
+      background: var(--kc-card);
       cursor: pointer;
-      color: inherit;
-      box-shadow:
-        inset -1px -1px var(--win-light),
-        inset 1px 1px var(--win-dark),
-        inset -2px -2px var(--win-mid),
-        inset 2px 2px var(--win-black);
+      color: var(--kc-text);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
     }
     .project-tile.focused {
-      background: #fff8d6;
+      background: var(--kc-card-2);
+      border-color: var(--kc-accent);
     }
     .project-tile-head {
       display: flex;
@@ -1876,12 +1921,12 @@
       flex-wrap: wrap;
       gap: 4px 8px;
       font-size: 10px;
-      color: #444;
+      color: var(--kc-text-dim);
     }
     .project-tile-roster summary {
       cursor: pointer;
       font-size: 10px;
-      color: #2a4ba0;
+      color: var(--kc-accent);
       padding: 2px 0;
     }
     .roster-group {
@@ -1911,14 +1956,15 @@
       display: grid;
       gap: 3px;
       padding: 6px 7px;
-      background: #ffffff;
-      border-inline-start: 3px solid #999;
-      box-shadow:
-        inset -1px -1px var(--win-light),
-        inset 1px 1px var(--win-dark);
+      background: var(--kc-card);
+      color: var(--kc-text);
+      border-inline-start: 3px solid var(--kc-line-strong);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
     }
-    .npc-row.good { border-inline-start-color: #2e8b3d; }
-    .npc-row.bad  { border-inline-start-color: #b13c3c; }
+    .npc-row.good { border-inline-start-color: var(--kc-good); }
+    .npc-row.bad  { border-inline-start-color: var(--kc-bad); }
     .npc-row-head {
       display: flex;
       align-items: center;
@@ -1933,30 +1979,30 @@
       font-size: 11px;
       font-variant-numeric: tabular-nums;
     }
-    .npc-row.good .npc-rel { color: #2e8b3d; }
-    .npc-row.bad  .npc-rel { color: #b13c3c; }
-    .npc-row-role { font-size: 10px; color: #444; }
-    .npc-row-status { font-size: 10px; color: #2a4ba0; }
-    .npc-row-links { font-size: 10px; color: #555; opacity: 0.85; font-style: italic; }
+    .npc-row.good .npc-rel { color: var(--kc-good); }
+    .npc-row.bad  .npc-rel { color: var(--kc-bad); }
+    .npc-row-role { font-size: 10px; color: var(--kc-text-dim); }
+    .npc-row-status { font-size: 10px; color: var(--kc-accent); }
+    .npc-row-links { font-size: 10px; color: var(--kc-text-faint); opacity: 0.85; font-style: italic; }
     .story-beat-block {
       display: grid;
       gap: 6px;
       padding: 8px 9px;
-      background: #fff7d6;
-      border: 2px solid #b59400;
-      box-shadow:
-        inset -1px -1px var(--win-light),
-        inset 1px 1px var(--win-dark);
+      background: var(--kc-card);
+      border: 1px solid var(--kc-line);
+      border-inline-start: 3px solid var(--kc-accent);
+      box-shadow: none;
+      border-radius: var(--kc-radius-sm);
     }
     .story-beat-title {
       font-size: 12px;
       font-weight: 700;
-      color: #5b4500;
+      color: var(--kc-text);
     }
     .story-beat-copy {
       font-size: 11px;
       line-height: 1.4;
-      color: #333;
+      color: var(--kc-text-dim);
     }
     .story-choice-stack {
       display: grid;
@@ -1967,13 +2013,12 @@
       gap: 2px;
       padding: 6px 8px;
       text-align: start;
-      background: #ffffff;
+      background: var(--kc-card-2);
+      color: var(--kc-text);
       cursor: pointer;
-      box-shadow:
-        inset -1px -1px var(--win-light),
-        inset 1px 1px var(--win-dark),
-        inset -2px -2px var(--win-mid),
-        inset 2px 2px var(--win-black);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
     }
     .story-choice.locked {
       cursor: not-allowed;
@@ -1985,26 +2030,24 @@
     }
     .story-choice-copy {
       font-size: 10px;
-      color: #444;
+      color: var(--kc-text-dim);
     }
     .story-lock { font-size: 10px; }
     .film-clock-block {
       display: grid;
       gap: 4px;
       padding: 8px 9px 9px;
-      background: #1a1a1d;
-      color: #f0f0e8;
+      background: var(--kc-card);
+      color: var(--kc-text);
       margin-bottom: 8px;
-      box-shadow:
-        inset -1px -1px var(--win-light),
-        inset 1px 1px #000,
-        inset -2px -2px var(--win-mid),
-        inset 2px 2px #000;
-      border-inline-start: 4px solid #d04444;
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
+      border-inline-start: 3px solid var(--kc-bad);
     }
-    .film-clock-block.urgent { border-inline-start-color: #f0c93a; }
-    .film-clock-block.overdue { border-inline-start-color: #ff3333; background: #2a1414; }
-    .film-clock-block.done { border-inline-start-color: #4caf50; background: #14241a; }
+    .film-clock-block.urgent { border-inline-start-color: var(--kc-warn); }
+    .film-clock-block.overdue { border-inline-start-color: var(--kc-bad); background: color-mix(in srgb, var(--kc-bad) 12%, var(--kc-card) 88%); }
+    .film-clock-block.done { border-inline-start-color: var(--kc-good); background: color-mix(in srgb, var(--kc-good) 12%, var(--kc-card) 88%); }
     .film-clock-row {
       display: flex;
       justify-content: space-between;
@@ -2012,42 +2055,43 @@
       font-size: 11px;
       font-weight: 700;
     }
-    .film-clock-day { color: #cce6ff; font-variant-numeric: tabular-nums; }
-    .film-clock-debt.owes { color: #ff9a9a; font-variant-numeric: tabular-nums; }
-    .film-clock-debt.clear { color: #9aff9a; }
+    .film-clock-day { color: var(--kc-text-dim); font-variant-numeric: tabular-nums; }
+    .film-clock-debt.owes { color: var(--kc-bad); font-variant-numeric: tabular-nums; }
+    .film-clock-debt.clear { color: var(--kc-good); }
     .film-task-title { font-size: 12px; font-weight: 700; margin-top: 2px; }
     .film-task-deadline {
       font-size: 11px;
-      color: #f0c93a;
+      color: var(--kc-warn);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
     }
-    .film-clock-block.overdue .film-task-deadline { color: #ff6666; }
-    .film-task-copy { font-size: 10px; color: #cccccc; line-height: 1.35; }
+    .film-clock-block.overdue .film-task-deadline { color: var(--kc-bad); }
+    .film-task-copy { font-size: 10px; color: var(--kc-text-dim); line-height: 1.35; }
     .npc-priority-stack { display: grid; gap: 6px; }
     .npc-priority-row {
       display: grid;
       gap: 2px;
       padding: 6px 8px;
-      background: #fff;
-      border-inline-start: 3px solid #888;
-      box-shadow:
-        inset -1px -1px var(--win-light),
-        inset 1px 1px var(--win-dark);
+      background: var(--kc-card);
+      color: var(--kc-text);
+      border-inline-start: 3px solid var(--kc-line-strong);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
     }
-    .npc-priority-row.npc-need   { border-inline-start-color: #2a4ba0; }
-    .npc-priority-row.npc-angry  { border-inline-start-color: #b13c3c; background: #fff4f4; }
-    .npc-priority-row.npc-danger { border-inline-start-color: #7a5577; background: #f6f0f5; }
+    .npc-priority-row.npc-need   { border-inline-start-color: var(--kc-accent); }
+    .npc-priority-row.npc-angry  { border-inline-start-color: var(--kc-bad); background: color-mix(in srgb, var(--kc-bad) 10%, var(--kc-card) 90%); }
+    .npc-priority-row.npc-danger { border-inline-start-color: var(--kc-danger); background: color-mix(in srgb, var(--kc-danger) 10%, var(--kc-card) 90%); }
     .npc-priority-label {
       font-size: 9px;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: #666;
+      color: var(--kc-text-faint);
       font-weight: 700;
     }
-    .npc-priority-row.npc-need   .npc-priority-label { color: #2a4ba0; }
-    .npc-priority-row.npc-angry  .npc-priority-label { color: #b13c3c; }
-    .npc-priority-row.npc-danger .npc-priority-label { color: #7a5577; }
+    .npc-priority-row.npc-need   .npc-priority-label { color: var(--kc-accent); }
+    .npc-priority-row.npc-angry  .npc-priority-label { color: var(--kc-bad); }
+    .npc-priority-row.npc-danger .npc-priority-label { color: var(--kc-danger); }
     .npc-priority-head {
       display: flex;
       align-items: center;
@@ -2059,17 +2103,17 @@
       margin-inline-start: auto;
       font-style: normal;
       font-size: 10px;
-      color: #444;
-      background: #eee;
-      padding: 1px 5px;
-      border-radius: 3px;
+      color: var(--kc-text-dim);
+      background: var(--kc-card-2);
+      padding: 1px 6px;
+      border-radius: 999px;
     }
-    .npc-priority-role { font-size: 10px; color: #444; }
-    .npc-priority-status { font-size: 10px; color: #2a4ba0; font-variant-numeric: tabular-nums; }
+    .npc-priority-role { font-size: 10px; color: var(--kc-text-dim); }
+    .npc-priority-status { font-size: 10px; color: var(--kc-accent); font-variant-numeric: tabular-nums; }
     .npc-empty-block .npc-empty-copy {
       font-size: 10px;
       line-height: 1.5;
-      color: #555;
+      color: var(--kc-text-dim);
       padding: 4px 0 2px;
     }
     .dest-btn { position: relative; }
@@ -2090,23 +2134,25 @@
       50% { opacity: 1; transform: scale(1.15); }
     }
     .roster-group li.muted {
-      color: #888;
+      color: var(--kc-text-faint);
       font-style: italic;
     }
     .roster-group em {
       font-style: normal;
-      color: #0b7d3a;
+      color: var(--kc-good);
       font-weight: 600;
     }
 
     .mod-chip-good {
-      color: #08311f;
-      background: #6cf0b0;
+      color: var(--kc-good);
+      background: var(--kc-good-soft);
+      border-radius: 999px;
     }
 
     .mod-chip-bad {
-      color: #4a1010;
-      background: #ffb38a;
+      color: var(--kc-bad);
+      background: var(--kc-bad-soft);
+      border-radius: 999px;
     }
 
     .suggested-strip {
@@ -2127,18 +2173,17 @@
       font-size: 11px;
       text-align: start;
       cursor: pointer;
-      color: inherit;
-      background: linear-gradient(180deg, #ffffff, #efece2);
+      color: var(--kc-text);
+      background: var(--kc-card);
       border: none;
-      box-shadow:
-        inset -1px -1px var(--win-black),
-        inset 1px 1px var(--win-light),
-        inset -2px -2px var(--win-dark),
-        inset 2px 2px var(--win-mid);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
     }
 
     .suggested-move:hover {
-      background: linear-gradient(180deg, #ffffff, #dbeaff);
+      background: var(--kc-card-2);
+      border-color: var(--kc-accent);
     }
 
     .suggested-move .move-icon {
@@ -2154,7 +2199,7 @@
     .suggested-move .move-reason {
       font-size: 10px;
       line-height: 1.35;
-      color: #4a4a4a;
+      color: var(--kc-text-dim);
       text-wrap: pretty;
     }
 
@@ -2168,8 +2213,8 @@
       padding: 4px 2px 0;
     }
 
-    .travel-btn.cheap span { color: #0a6b2a; font-weight: 700; }
-    .travel-btn.spicy span { color: #a01010; font-weight: 700; }
+    .travel-btn.cheap span { color: var(--kc-good); font-weight: 700; }
+    .travel-btn.spicy span { color: var(--kc-bad); font-weight: 700; }
 
     .newsletter {
       display: grid;
@@ -2184,13 +2229,12 @@
 
     .news-pane,
     .market-pane {
-      background: #ffffff;
+      background: var(--kc-card);
+      color: var(--kc-text);
       padding: 8px 9px;
-      box-shadow:
-        inset -1px -1px var(--win-light),
-        inset 1px 1px var(--win-dark),
-        inset -2px -2px var(--win-mid),
-        inset 2px 2px var(--win-black);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius);
     }
 
     .news-head,
@@ -2199,12 +2243,13 @@
       justify-content: space-between;
       align-items: center;
       gap: 8px;
-      padding: 3px 6px;
+      padding: 6px 9px;
       margin: -8px -9px 6px;
-      color: #ffffff;
+      color: var(--kc-text);
       font-size: 11px;
       font-weight: 700;
-      background: linear-gradient(90deg, #000080, #1084d0);
+      background: var(--kc-card-2);
+      border-radius: var(--kc-radius) var(--kc-radius) 0 0;
     }
 
     .news-list {
@@ -2225,17 +2270,17 @@
       gap: 6px;
       align-items: start;
       padding: 3px 0;
-      border-bottom: 1px dashed #d6d2c5;
+      border-bottom: 1px dashed var(--kc-line);
     }
 
     .news-item:last-child { border-bottom: none; }
 
     .news-item .news-icon { font-size: 13px; line-height: 1; }
     .news-item .news-body strong { display: block; font-size: 11px; }
-    .news-item .news-body span { display: block; color: #555; font-size: 10px; line-height: 1.3; }
+    .news-item .news-body span { display: block; color: var(--kc-text-dim); font-size: 10px; line-height: 1.3; }
 
-    .news-up { color: #0a6b2a; font-weight: 700; }
-    .news-down { color: #a01010; font-weight: 700; }
+    .news-up { color: var(--kc-good); font-weight: 700; }
+    .news-down { color: var(--kc-bad); font-weight: 700; }
 
     .market-table {
       width: 100%;
@@ -2248,13 +2293,13 @@
       padding: 2px 4px 4px;
       font-size: 10px;
       letter-spacing: 0.3px;
-      color: #555;
-      border-bottom: 1px solid #d6d2c5;
+      color: var(--kc-text-faint);
+      border-bottom: 1px solid var(--kc-line);
     }
 
     .market-table td {
       padding: 4px 4px;
-      border-bottom: 1px dashed #ebe6d6;
+      border-bottom: 1px dashed var(--kc-line);
       vertical-align: middle;
     }
 
@@ -2270,15 +2315,15 @@
     .market-table .ticker .ticker-code {
       font-weight: 500;
       font-size: 9px;
-      color: #666;
+      color: var(--kc-text-faint);
       letter-spacing: 0.6px;
     }
 
     .market-table .price { font-variant-numeric: tabular-nums; }
 
-    .market-table .delta-up { color: #0a6b2a; font-weight: 700; }
-    .market-table .delta-down { color: #a01010; font-weight: 700; }
-    .market-table .delta-flat { color: #888; }
+    .market-table .delta-up { color: var(--kc-good); font-weight: 700; }
+    .market-table .delta-down { color: var(--kc-bad); font-weight: 700; }
+    .market-table .delta-flat { color: var(--kc-text-faint); }
 
     .market-table .qty { font-variant-numeric: tabular-nums; }
 
@@ -2288,17 +2333,16 @@
       font-size: 10px;
       font-weight: 700;
       cursor: pointer;
-      background: var(--win-face);
+      background: var(--kc-card-2);
+      color: var(--kc-text);
       border: none;
-      box-shadow:
-        inset -1px -1px var(--win-black),
-        inset 1px 1px var(--win-light),
-        inset -2px -2px var(--win-dark),
-        inset 2px 2px var(--win-mid);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
     }
 
-    .market-btn:hover { background: #dbeaff; }
-    .market-btn[disabled] { color: #aaa; cursor: not-allowed; opacity: 0.6; }
+    .market-btn:hover { background: var(--kc-accent-soft); }
+    .market-btn[disabled] { color: var(--kc-text-faint); cursor: not-allowed; opacity: 0.6; }
 
     .win95-strip {
       display: flex;
@@ -2349,15 +2393,12 @@
       display: grid;
       gap: 4px;
       padding: 5px;
-      background: var(--win-face);
+      background: transparent;
     }
 
-    .city-block .dest-header {
-      background: linear-gradient(90deg, #375b9b, #72a7f5);
-    }
-
+    .city-block .dest-header,
     .travel-block .dest-header {
-      background: linear-gradient(90deg, #8640a8, #d06ce0);
+      background: var(--kc-card-2);
     }
 
     .dest-grid,
@@ -2381,14 +2422,11 @@
       min-height: 48px;
       padding: 6px 5px;
       text-align: center;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.58), rgba(255,255,255,0.2)),
-        linear-gradient(180deg, var(--tone-a, #d8ddd8), var(--tone-b, #b5c0b0));
-      box-shadow:
-        inset -1px -1px var(--win-black),
-        inset 1px 1px var(--win-light),
-        inset -2px -2px var(--win-dark),
-        inset 2px 2px var(--win-mid);
+      background: var(--kc-card);
+      color: var(--kc-text);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
     }
 
     .dest-btn strong,
@@ -2405,18 +2443,17 @@
       margin-top: 3px;
       font-size: 10px;
       line-height: 1.25;
-      color: #303030;
+      color: var(--kc-text-dim);
     }
 
     .dest-btn.selected {
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0.12)),
-        linear-gradient(180deg, #dfe9f7, #c7d5ea);
-      color: #000080;
+      background: var(--kc-accent-soft);
+      border-color: var(--kc-accent);
+      color: var(--kc-accent);
     }
 
     .dest-btn.target span {
-      color: #8f2a00;
+      color: var(--kc-warn);
       font-weight: 700;
     }
 
@@ -2434,11 +2471,12 @@
     }
 
     .scene-title {
-      background: linear-gradient(90deg, var(--scene-b, #566d92), var(--scene-a, #a4bedf));
+      background: var(--kc-card-2);
     }
 
     .scene-hint {
-      background: #fffbd0;
+      background: var(--kc-warn-soft);
+      color: var(--kc-text);
     }
 
     .scene-footer {
@@ -2495,12 +2533,11 @@
 
     .status-dialog {
       width: min(520px, calc(100vw - 36px));
-      background: var(--win-face);
-      box-shadow:
-        inset -1px -1px var(--win-black),
-        inset 1px 1px var(--win-light),
-        inset -2px -2px var(--win-dark),
-        inset 2px 2px var(--win-mid);
+      background: var(--kc-card);
+      color: var(--kc-text);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius);
       padding: 4px;
     }
 
@@ -2510,8 +2547,8 @@
       align-items: center;
       gap: 8px;
       padding: 4px 6px;
-      background: linear-gradient(90deg, #000080, #1084d0);
-      color: #ffffff;
+      background: var(--kc-card-2);
+      color: var(--kc-text);
       font-size: 12px;
       font-weight: 700;
     }
@@ -2520,7 +2557,7 @@
       display: grid;
       gap: 8px;
       padding: 8px;
-      background: var(--win-face);
+      background: transparent;
     }
 
     .incident-window {
@@ -2530,17 +2567,15 @@
       display: grid;
       place-items: center;
       padding: 18px;
-      background: rgba(17, 15, 12, 0.18);
+      background: rgba(0, 0, 0, 0.6);
     }
 
     .notice-dialog {
       width: min(420px, calc(100vw - 36px));
-      background: var(--win-face);
-      box-shadow:
-        inset -1px -1px var(--win-black),
-        inset 1px 1px var(--win-light),
-        inset -2px -2px var(--win-dark),
-        inset 2px 2px var(--win-mid);
+      background: var(--kc-card);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius);
       padding: 4px;
     }
 
@@ -2550,39 +2585,36 @@
       align-items: center;
       gap: 8px;
       padding: 4px 6px;
-      color: #ffffff;
+      color: var(--kc-text);
       font-size: 12px;
       font-weight: 700;
     }
 
     .notice-dialog.good .notice-dialog-head {
-      background: linear-gradient(90deg, #1c6a2d, #40aa56);
+      background: color-mix(in srgb, var(--kc-good) 20%, var(--kc-card-2) 80%);
     }
 
     .notice-dialog.bad .notice-dialog-head {
-      background: linear-gradient(90deg, #8a4f00, #d38b19);
+      background: color-mix(in srgb, var(--kc-bad) 20%, var(--kc-card-2) 80%);
     }
 
     .notice-dialog.neutral .notice-dialog-head {
-      background: linear-gradient(90deg, #2b5f86, #5f95c8);
+      background: var(--kc-card-2);
     }
 
     .notice-dialog-body {
       padding: 10px 10px 9px;
       font-size: 12px;
       line-height: 1.65;
-      background: #ffffff;
+      background: transparent;
+      color: var(--kc-text);
       text-wrap: pretty;
       text-align: start;
       hyphens: none;
       word-break: normal;
       overflow-wrap: anywhere;
       unicode-bidi: plaintext;
-      box-shadow:
-        inset -1px -1px var(--win-light),
-        inset 1px 1px var(--win-dark),
-        inset -2px -2px var(--win-mid),
-        inset 2px 2px var(--win-black);
+      box-shadow: none;
     }
 
     .notice-dialog-body p {
@@ -2593,6 +2625,1171 @@
       margin-top: 6px;
     }
 
+    /* ---- classic mode: "you can do here" as a trigger + modal, grouped thematic locations, tabbed panel + location detail modal ---- */
+    .scene-here-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--kc-accent);
+      background: var(--kc-accent-soft);
+      border: 1px solid var(--kc-accent);
+      border-radius: var(--kc-radius-sm);
+      cursor: pointer;
+    }
+
+    .here-modal .panel-body {
+      max-height: min(70vh, 560px);
+    }
+
+    .dest-group {
+      display: grid;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .dest-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .dest-group-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      color: var(--cat-color, var(--kc-text-faint));
+      padding: 7px 8px;
+      background: color-mix(in srgb, var(--cat-color, var(--kc-line-strong)) 12%, var(--kc-card) 88%);
+      border: 1px solid color-mix(in srgb, var(--cat-color, var(--kc-line)) 34%, var(--kc-line) 66%);
+      border-radius: var(--kc-radius-sm);
+      cursor: pointer;
+    }
+
+    .dest-group-name {
+      flex: 1 1 auto;
+      text-align: start;
+    }
+
+    .dest-group-count {
+      font-weight: 400;
+      color: var(--kc-text-faint);
+    }
+
+    .dest-group-chevron {
+      display: inline-block;
+      transition: transform 0.15s ease;
+    }
+
+    .dest-group.open .dest-group-chevron {
+      transform: rotate(90deg);
+    }
+
+    .dest-group.open .dest-group-label {
+      background: color-mix(in srgb, var(--cat-color, var(--kc-line-strong)) 22%, var(--kc-card) 78%);
+    }
+
+    .dest-group .dest-grid {
+      animation: fadeInUp 0.2s ease;
+    }
+
+    .dest-group .dest-btn:not(.selected):not(.target) {
+      background: color-mix(in srgb, var(--cat-color, var(--kc-line-strong)) 20%, var(--kc-card) 80%);
+      border-color: color-mix(in srgb, var(--cat-color, var(--kc-line)) 42%, var(--kc-line) 58%);
+    }
+
+    .next-goal {
+      display: grid;
+      gap: 3px;
+      padding: 9px 10px;
+      background: var(--kc-accent-soft);
+      border: 1px solid var(--kc-accent);
+      border-radius: var(--kc-radius-sm);
+    }
+
+    .next-goal-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      color: var(--kc-accent);
+      text-transform: uppercase;
+    }
+
+    .next-goal-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--kc-text);
+      line-height: 1.3;
+    }
+
+    .next-goal-sub {
+      font-size: 11px;
+      color: var(--kc-text-dim);
+    }
+
+    .hud-more-btn {
+      display: none;
+    }
+
+    .hud-secondary-group {
+      display: contents;
+    }
+
+    @media (max-width: 760px) {
+      .controls-box {
+        position: relative;
+      }
+
+      .hud-more-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .hud-secondary-group {
+        display: none;
+      }
+
+      .hud-secondary-group.open {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        position: absolute;
+        top: calc(100% + 4px);
+        inset-inline-end: 0;
+        min-width: 140px;
+        padding: 6px;
+        background: var(--kc-card);
+        border: 1px solid var(--kc-line);
+        border-radius: var(--kc-radius-sm);
+        z-index: 50;
+      }
+
+      .hud-secondary-group.open .icon-btn {
+        width: 100%;
+      }
+    }
+
+    .dest-lock-hint {
+      display: block;
+      margin-top: 3px;
+      font-size: 9px;
+      color: var(--kc-text-faint);
+    }
+
+    .outcome-delta {
+      margin-top: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--kc-accent);
+    }
+
+    .job-cards {
+      display: grid;
+      gap: 6px;
+    }
+
+    .job-card {
+      display: grid;
+      gap: 5px;
+      padding: 8px;
+      background: var(--kc-card);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
+    }
+
+    .job-card.qualifies {
+      border-color: var(--kc-good);
+    }
+
+    .job-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--kc-text);
+    }
+
+    .job-reqs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .req-chip {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+    }
+
+    .req-chip.ok {
+      color: var(--kc-good);
+      background: var(--kc-good-soft);
+    }
+
+    .req-chip.bad {
+      color: var(--kc-bad);
+      background: var(--kc-bad-soft);
+    }
+
+    .job-blocker {
+      display: grid;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--kc-text-dim);
+    }
+
+    .job-blocker-cta {
+      justify-self: start;
+      padding: 4px 10px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--kc-warn);
+      background: var(--kc-warn-soft);
+      border: 1px solid var(--kc-warn);
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .job-apply-btn {
+      justify-self: start;
+      min-height: 0;
+      padding: 5px 12px;
+      font-size: 11px;
+    }
+
+    .next-goal-cta {
+      justify-self: start;
+      margin-top: 2px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--kc-accent);
+      color: #0a0a0c;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .travel-tag {
+      display: block;
+      font-size: 11px;
+      opacity: 0.8;
+    }
+
+    .dest-btn.target {
+      border-color: var(--kc-accent);
+      background: var(--kc-accent-soft);
+    }
+
+    .panel-open-btn {
+      position: relative;
+      min-width: 34px;
+      max-width: 34px;
+      padding: 0;
+      font-size: 15px;
+    }
+
+    .panel-open-badge {
+      position: absolute;
+      top: -3px;
+      inset-inline-end: -3px;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--kc-bad);
+      box-shadow: 0 0 0 2px var(--kc-bg);
+    }
+
+    .panel-backdrop,
+    .detail-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 92;
+    }
+
+    .panel-modal {
+      position: fixed;
+      inset-inline-end: 12px;
+      inset-block: 12px;
+      width: min(360px, calc(100vw - 24px));
+      z-index: 93;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      background: var(--kc-card);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--kc-card-2);
+      color: var(--kc-text);
+      font-size: 13px;
+    }
+
+    .panel-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      padding: 8px;
+      border-bottom: 1px solid var(--kc-line);
+    }
+
+    .panel-tab {
+      padding: 5px 8px;
+      font-size: 11px;
+      background: var(--kc-card-2);
+      color: var(--kc-text-dim);
+      border: 1px solid var(--kc-line);
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .panel-tab.active {
+      background: var(--kc-accent-soft);
+      color: var(--kc-accent);
+      border-color: var(--kc-accent);
+    }
+
+    .panel-body {
+      padding: 10px;
+      overflow: auto;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .detail-modal {
+      position: fixed;
+      inset-inline: 12px;
+      bottom: 12px;
+      max-width: 420px;
+      margin-inline: auto;
+      z-index: 93;
+      display: grid;
+      gap: 8px;
+      padding: 4px;
+      background: var(--kc-card);
+      border: 1px solid color-mix(in srgb, var(--tone-a, var(--kc-line)) 45%, var(--kc-line) 55%);
+      border-radius: var(--kc-radius);
+    }
+
+    .detail-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: color-mix(in srgb, var(--tone-a, var(--kc-card-2)) 22%, var(--kc-card-2) 78%);
+      color: var(--kc-text);
+      border-radius: calc(var(--kc-radius) - 3px) calc(var(--kc-radius) - 3px) 0 0;
+    }
+
+    .detail-body {
+      padding: 0 10px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .detail-copy {
+      margin: 0;
+      font-size: 12px;
+      color: var(--kc-text-dim);
+      line-height: 1.4;
+    }
+
+    .detail-fresh {
+      margin: 0;
+      font-size: 11px;
+      color: var(--kc-warn);
+    }
+
+    .detail-actions {
+      display: flex;
+      justify-content: flex-end;
+      padding: 6px 10px 10px;
+    }
+
+    .detail-here-tag {
+      font-size: 11px;
+      color: var(--kc-text-faint);
+    }
+
+    .detail-go {
+      background: var(--kc-accent) !important;
+      color: #0a0a0c !important;
+      font-weight: 700;
+    }
+
+    /* ---- classic mode: typography hierarchy + micro-motion polish ---- */
+    html, body {
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .win95-shell, .win95-shell * {
+      font-family: var(--font-body);
+    }
+
+    .next-goal-label, .dest-group-label, .scene-here-title, .win95-panel-title,
+    .req-chip, .panel-tab {
+      letter-spacing: 0.4px;
+    }
+
+    .next-goal-title {
+      font-size: 15px;
+      letter-spacing: -0.1px;
+    }
+
+    .scene-title {
+      font-size: 13px;
+      letter-spacing: 0.2px;
+    }
+
+    .job-card-head strong, .panel-head strong, .detail-head strong {
+      font-size: 13px;
+      letter-spacing: -0.1px;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes modalPop {
+      from { opacity: 0; transform: scale(0.97) translateY(4px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .next-goal {
+      animation: fadeInUp 0.28s ease;
+    }
+
+    .panel-backdrop, .detail-backdrop {
+      animation: fadeIn 0.15s ease;
+    }
+
+    .panel-modal, .detail-modal, .start-card, .win-card, .notice-dialog, .status-dialog {
+      animation: modalPop 0.18s ease;
+    }
+
+    .dest-btn, .job-card, .action-btn, .panel-tab, .icon-btn, .mini-btn,
+    .next-goal-cta, .job-blocker-cta, .scene-here-trigger, .suggested-move {
+      transition: transform 0.12s ease, border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .dest-btn:hover, .job-card:hover, .action-btn:hover, .suggested-move:hover {
+      transform: translateY(-1px);
+    }
+
+    .dest-btn:active, .job-card:active, .action-btn:active, .icon-btn:active,
+    .mini-btn:active, .next-goal-cta:active, .panel-tab:active {
+      transform: scale(0.97);
+    }
+
+    .panel-open-badge {
+      animation: freshPulse 2.2s ease-in-out infinite;
+    }
+
+    /* ---- classic mode: compact sticky command bar ---- */
+    .cmd-bar {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+    }
+
+    .cmd-metric {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      flex: 0 0 auto;
+    }
+
+    .cmd-metric-label {
+      font-size: 10px;
+      color: var(--kc-text-faint);
+    }
+
+    .cmd-metric-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--kc-text);
+      white-space: nowrap;
+    }
+
+    .cmd-time .cmd-metric-value {
+      font-size: 14px;
+    }
+
+    .cmd-goal {
+      flex: 1 1 140px;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--kc-text-dim);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .cmd-cta, .cmd-cta-static {
+      flex: 0 0 auto;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .cmd-cta {
+      background: var(--kc-accent);
+      color: #0a0a0c;
+      border: none;
+      cursor: pointer;
+    }
+
+    .cmd-cta-static {
+      background: var(--kc-card-2);
+      color: var(--kc-text-dim);
+      border: 1px solid var(--kc-line);
+    }
+
+    .cmd-sleep {
+      flex: 0 0 auto;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--kc-card-2);
+      color: var(--kc-text);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
+      cursor: pointer;
+    }
+
+    .cmd-bar .hud-more-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+
+    .cmd-bar .hud-secondary-group {
+      display: none;
+    }
+
+    .cmd-bar .hud-secondary-group.open {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: absolute;
+      top: calc(100% + 4px);
+      inset-inline-end: 8px;
+      min-width: 140px;
+      padding: 6px;
+      background: var(--kc-card);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
+      z-index: 50;
+    }
+
+    .cmd-bar .hud-secondary-group.open .icon-btn {
+      width: 100%;
+    }
+
+    @media (max-width: 760px) {
+      .cmd-bar {
+        padding: 6px 8px;
+      }
+      .cmd-goal {
+        order: 3;
+        flex-basis: 100%;
+      }
+    }
+
+    .ctx-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 4px 2px;
+    }
+
+    .ctx-place {
+      font-size: 11px;
+      color: var(--kc-text-faint);
+    }
+
+    .ctx-info-btn {
+      position: relative;
+      min-width: 30px;
+      max-width: 30px;
+      padding: 0;
+      font-size: 13px;
+    }
+
+    .aside-block {
+      padding: 9px 10px;
+      background: var(--kc-card);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
+    }
+
+    .aside-block-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      color: var(--kc-text-faint);
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .aside-goal-text {
+      font-size: 12px;
+      color: var(--kc-text);
+      line-height: 1.35;
+    }
+
+    .aside-log {
+      display: grid;
+      gap: 5px;
+    }
+
+    .aside-log-row {
+      font-size: 11px;
+      color: var(--kc-text-dim);
+      line-height: 1.3;
+      padding-bottom: 5px;
+      border-bottom: 1px solid var(--kc-line);
+    }
+
+    .aside-log-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .aside-log-good { color: var(--kc-good); }
+    .aside-log-bad { color: var(--kc-bad); }
+
+    /* ---- focus mode: Apple HIG-style parallel flow (one decision per screen) ---- */
+    :root.focus-active {
+      --paper: var(--kc-text);
+      --paper-2: var(--kc-card-2);
+      --accent: var(--kc-accent);
+      --accent-2: var(--kc-accent);
+      --fm-deep: var(--kc-bg);
+      --fm-card: var(--kc-card);
+      --fm-card-2: var(--kc-card-2);
+      --fm-line: var(--kc-line);
+      --fm-tint: var(--kc-accent-soft);
+    }
+
+    .icon-btn.active {
+      background: var(--kc-accent);
+      color: #ffffff;
+    }
+
+    .focus-active .board-stage {
+      border-color: var(--fm-line);
+    }
+
+    .focus-active #hud {
+      background: var(--fm-deep);
+      border-bottom: 1px solid var(--fm-line);
+    }
+
+    .focus-active .status-box.hud-summary .metric {
+      background: var(--fm-card);
+      box-shadow: none;
+      border: 1px solid var(--fm-line);
+      border-radius: 10px;
+    }
+
+    .focus-active .status-box.hud-summary .metric-label {
+      color: var(--paper);
+      opacity: 0.6;
+    }
+
+    .focus-active .status-box.hud-summary .metric-value {
+      color: var(--paper);
+    }
+
+    .focus-active .hud .icon-btn {
+      background: var(--fm-card);
+      color: var(--paper);
+      border: 1px solid var(--fm-line);
+    }
+
+    .focus-active .hud .icon-btn.active {
+      background: var(--fm-tint);
+      color: var(--accent);
+    }
+
+    .focus-shell {
+      --paper: var(--kc-text);
+      --paper-2: var(--kc-card-2);
+      --accent: var(--kc-accent);
+      --accent-2: var(--kc-accent);
+      --fm-deep: var(--kc-bg);
+      --fm-card: var(--kc-card);
+      --fm-card-2: var(--kc-card-2);
+      --fm-line: var(--kc-line);
+      --fm-tint: var(--kc-accent-soft);
+      height: 100%;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 22px 16px 26px;
+      box-sizing: border-box;
+      color: var(--paper);
+      background: var(--fm-deep);
+    }
+
+    .focus-today {
+      width: min(560px, 100%);
+      background: var(--fm-card);
+      border-radius: 14px;
+      border: 1px solid var(--fm-line);
+      padding: 22px 22px 20px;
+      box-sizing: border-box;
+    }
+
+    .focus-place {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      opacity: 0.7;
+      text-transform: uppercase;
+    }
+
+    .focus-plaza {
+      position: relative;
+      margin-top: 12px;
+      aspect-ratio: 16 / 9;
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--fm-deep);
+      border: 1px solid var(--fm-line);
+    }
+
+    .focus-plaza .building-card,
+    .focus-plaza .building.selected .building-card {
+      background: var(--fm-card-2);
+      border: 1px solid var(--fm-line);
+      box-shadow: none;
+    }
+
+    .focus-plaza .building.selected .building-card {
+      background: var(--fm-tint);
+      border-color: var(--accent);
+    }
+
+    .focus-plaza .sign,
+    .focus-plaza .building.selected .sign {
+      background: transparent;
+      border: none;
+      color: var(--paper);
+    }
+
+    .focus-plaza .building.target .sign {
+      animation: none;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .focus-plaza .avatar .torso {
+      background: var(--accent);
+      border-color: var(--fm-line);
+    }
+
+    .focus-copy {
+      margin-top: 12px;
+      font-size: 15px;
+      line-height: 1.55;
+      opacity: 0.88;
+    }
+
+    .focus-cta {
+      width: 100%;
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 16px 18px;
+      cursor: pointer;
+      text-align: start;
+      transition: filter 0.12s ease;
+    }
+
+    .focus-cta:hover {
+      filter: brightness(1.08);
+    }
+
+    .focus-cta-icon {
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .focus-cta-body {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .focus-cta-body strong {
+      font-size: 15px;
+    }
+
+    .focus-cta-body span {
+      font-size: 12px;
+      opacity: 0.85;
+    }
+
+    .focus-here {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .focus-here-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      opacity: 0.7;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .focus-here .action-groups {
+      gap: 16px;
+    }
+
+    .focus-here .action-group {
+      background: var(--fm-card-2);
+      border: 1px solid var(--fm-line);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    .focus-here .action-group h3 {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      margin-bottom: 10px;
+    }
+
+    .focus-here .action-buttons {
+      gap: 10px;
+    }
+
+    .focus-here .action-btn {
+      background: var(--fm-card);
+      border: 1px solid var(--fm-line);
+      border-radius: 10px;
+      padding: 13px 16px;
+      color: var(--paper);
+    }
+
+    .focus-here .action-btn:hover {
+      border-color: color-mix(in srgb, var(--accent) 45%, var(--fm-line));
+    }
+
+    .focus-here .action-btn .subline {
+      opacity: 0.75;
+    }
+
+    /* sheet content — the shared Win95-era components (npc rows, project tiles,
+       story beats, market table, travel grid, wardrobe rows) render white/light
+       by default; override them here so nothing inside a dark sheet reverts. */
+    .focus-sheet-body .destination-block,
+    .focus-sheet-body .win95-note,
+    .focus-sheet-body .inv-line,
+    .focus-sheet-body .unlock-list,
+    .focus-sheet-body .project-tile,
+    .focus-sheet-body .npc-row,
+    .focus-sheet-body .npc-priority-row,
+    .focus-sheet-body .story-choice {
+      background: var(--fm-card);
+      box-shadow: none;
+      border: 1px solid var(--fm-line);
+      border-inline-start-width: 3px;
+      color: var(--paper);
+    }
+
+    .focus-sheet-body .project-tile.focused {
+      background: color-mix(in srgb, var(--accent) 22%, var(--fm-card));
+      border-color: var(--accent);
+    }
+
+    .focus-sheet-body .npc-row.good,
+    .focus-sheet-body .npc-priority-row.npc-need { border-inline-start-color: color-mix(in srgb, #2e8b3d 65%, var(--paper)); }
+    .focus-sheet-body .npc-row.bad,
+    .focus-sheet-body .npc-priority-row.npc-angry,
+    .focus-sheet-body .npc-priority-row.npc-danger { border-inline-start-color: color-mix(in srgb, #d9534f 65%, var(--paper)); }
+    .focus-sheet-body .npc-row.good .npc-rel { color: color-mix(in srgb, #2e8b3d 45%, var(--paper)); }
+    .focus-sheet-body .npc-row.bad .npc-rel { color: color-mix(in srgb, #d9534f 45%, var(--paper)); }
+    .focus-sheet-body .npc-row-role,
+    .focus-sheet-body .npc-priority-role,
+    .focus-sheet-body .project-tile-meta,
+    .focus-sheet-body .story-choice-copy,
+    .focus-sheet-body .npc-row-links,
+    .focus-sheet-body .npc-empty-copy {
+      color: var(--paper);
+      opacity: 0.7;
+    }
+    .focus-sheet-body .npc-priority-row .npc-priority-label {
+      color: color-mix(in srgb, var(--accent) 55%, var(--paper));
+      opacity: 1;
+    }
+    .focus-sheet-body .npc-row-status,
+    .focus-sheet-body .npc-priority-status,
+    .focus-sheet-body .project-tile-roster summary {
+      color: color-mix(in srgb, var(--accent) 55%, var(--paper));
+    }
+    .focus-sheet-body .npc-city-tag {
+      background: var(--fm-deep);
+      color: var(--paper);
+      opacity: 0.85;
+    }
+
+    .focus-sheet-body .inv-wear,
+    .focus-sheet-body .unlock-bar {
+      background: var(--fm-deep);
+      box-shadow: none;
+    }
+
+    .focus-sheet-body .inv-chip {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: none;
+    }
+
+    .focus-sheet-body .inv-empty {
+      color: var(--paper);
+      opacity: 0.55;
+    }
+
+    .focus-sheet-body .unlock-row.done .unlock-row-head {
+      color: color-mix(in srgb, #2e8b3d 45%, var(--paper));
+    }
+
+    .focus-sheet-body .story-beat-block {
+      background: color-mix(in srgb, var(--accent) 20%, var(--fm-card));
+      border: 1px solid var(--fm-line);
+      box-shadow: none;
+    }
+
+    .focus-sheet-body .story-beat-title,
+    .focus-sheet-body .story-beat-copy,
+    .focus-sheet-body .story-choice-label {
+      color: var(--paper);
+    }
+
+    .focus-sheet-body .story-beat-copy {
+      opacity: 0.85;
+    }
+
+    .focus-sheet-body .destination-block {
+      padding: 10px;
+      border-radius: 14px;
+    }
+
+    .focus-sheet-body .dest-btn,
+    .focus-sheet-body .travel-btn {
+      background: var(--fm-card);
+      box-shadow: none;
+      border: 1px solid var(--fm-line);
+      border-radius: 12px;
+      color: var(--paper);
+    }
+
+    .focus-sheet-body .dest-btn span {
+      color: var(--paper);
+      opacity: 0.7;
+    }
+
+    .focus-sheet-body .dest-btn.selected {
+      background: color-mix(in srgb, var(--accent) 25%, var(--fm-card));
+      color: var(--paper);
+      border-color: var(--accent);
+    }
+
+    .focus-sheet-body .dest-btn.target span {
+      color: var(--accent);
+      opacity: 1;
+    }
+
+    .focus-sheet-body .news-pane,
+    .focus-sheet-body .market-pane {
+      background: var(--fm-card);
+      box-shadow: none;
+      border: 1px solid var(--fm-line);
+      border-radius: 14px;
+    }
+
+    .focus-sheet-body .news-item {
+      border-bottom-color: var(--fm-line);
+    }
+
+    .focus-sheet-body .news-item .news-body span {
+      color: var(--paper);
+      opacity: 0.65;
+    }
+
+    .focus-sheet-body .market-table th {
+      color: var(--paper);
+      opacity: 0.65;
+      border-bottom-color: var(--fm-line);
+    }
+
+    .focus-sheet-body .market-table td {
+      border-bottom-color: var(--fm-line);
+      color: var(--paper);
+    }
+
+    .focus-sheet-body .market-table .ticker .ticker-code {
+      color: var(--paper);
+      opacity: 0.6;
+    }
+
+    .focus-sheet-body .news-up,
+    .focus-sheet-body .market-table .delta-up {
+      color: color-mix(in srgb, #2e8b3d 55%, var(--paper));
+    }
+
+    .focus-sheet-body .news-down,
+    .focus-sheet-body .market-table .delta-down {
+      color: color-mix(in srgb, #d9534f 55%, var(--paper));
+    }
+
+    .focus-sheet-body .market-table .delta-flat {
+      color: var(--paper);
+      opacity: 0.6;
+    }
+
+    .focus-triggers {
+      width: min(560px, 100%);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .focus-trigger {
+      background: var(--fm-card, var(--paper-2));
+      border: 1px solid var(--fm-line, rgba(0, 0, 0, 0.08));
+      border-radius: 999px;
+      padding: 9px 15px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--paper);
+    }
+
+    .focus-trigger.active {
+      background: var(--fm-tint, var(--accent));
+      color: var(--accent);
+      border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+    }
+
+    .focus-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 140;
+      cursor: pointer;
+    }
+
+    .focus-sheet {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: min(560px, calc(100% - 24px));
+      max-height: 78%;
+      z-index: 141;
+      display: flex;
+      flex-direction: column;
+      background: var(--fm-card, var(--paper-2));
+      border: 1px solid var(--fm-line, transparent);
+      border-bottom: none;
+      border-radius: 14px 14px 0 0;
+      animation: focusSheetIn 0.18s ease-out;
+      overflow: hidden;
+    }
+
+    .focus-sheet-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 18px;
+      background: var(--fm-deep, var(--paper));
+      border-bottom: 1px solid var(--fm-line, rgba(0, 0, 0, 0.08));
+      font-size: 14px;
+    }
+
+    .focus-sheet-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .focus-sheet-icon {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--fm-card-2, var(--paper-2));
+      font-size: 15px;
+    }
+
+    .focus-sheet-body {
+      padding: 16px 18px 20px;
+      overflow-y: auto;
+      display: grid;
+      gap: 14px;
+    }
+
+    @keyframes focusSheetIn {
+      from { transform: translateX(-50%) translateY(24px); opacity: 0; }
+      to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+
     /* ---- cross-career collection screen ---- */
     .collection-window {
       position: fixed;
@@ -2601,7 +3798,7 @@
       display: grid;
       place-items: center;
       padding: 18px;
-      background: rgba(17, 15, 12, 0.28);
+      background: rgba(0, 0, 0, 0.6);
     }
 
     .collection-dialog {
@@ -2609,13 +3806,12 @@
       max-height: min(82vh, 720px);
       display: flex;
       flex-direction: column;
-      background: var(--win-face);
-      box-shadow:
-        inset -1px -1px var(--win-black),
-        inset 1px 1px var(--win-light),
-        inset -2px -2px var(--win-dark),
-        inset 2px 2px var(--win-mid);
-      padding: 4px;
+      background: var(--kc-card);
+      box-shadow: none;
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius);
+      overflow: hidden;
+      padding: 0;
     }
 
     .collection-dialog-head {
@@ -2623,9 +3819,9 @@
       justify-content: space-between;
       align-items: center;
       gap: 8px;
-      padding: 4px 6px;
-      background: linear-gradient(90deg, #000080, #1084d0);
-      color: #ffffff;
+      padding: 8px 10px;
+      background: var(--kc-card-2);
+      color: var(--kc-text);
       font-size: 12px;
       font-weight: 700;
       flex: none;
@@ -2635,7 +3831,8 @@
       display: grid;
       gap: 16px;
       padding: 10px;
-      background: var(--win-face);
+      background: transparent;
+      color: var(--kc-text);
       overflow-y: auto;
     }
 
@@ -2650,12 +3847,14 @@
     .collection-section-head h3 {
       margin: 0;
       font-size: 0.92rem;
+      color: var(--kc-text);
     }
 
     .collection-progress {
       font-variant-numeric: tabular-nums;
       font-size: 0.72rem;
-      background: rgba(39, 24, 15, 0.1);
+      background: var(--kc-card-2);
+      color: var(--kc-text-dim);
       border-radius: 999px;
       padding: 2px 8px;
     }
@@ -2674,18 +3873,19 @@
       gap: 3px;
       padding: 10px 8px;
       border-radius: 12px;
-      background: rgba(255,255,255,0.5);
-      border: 1px solid rgba(39,24,15,0.1);
+      background: var(--kc-card-2);
+      border: 1px solid var(--kc-line);
+      color: var(--kc-text);
     }
 
     .achv-tile.locked {
-      opacity: 0.5;
+      opacity: 0.55;
       filter: grayscale(0.6);
     }
 
     .achv-tile.unlocked {
-      background: rgba(235, 173, 83, 0.22);
-      border-color: rgba(180, 79, 42, 0.32);
+      background: color-mix(in srgb, var(--kc-warn) 16%, var(--kc-card-2) 84%);
+      border-color: color-mix(in srgb, var(--kc-warn) 40%, var(--kc-line) 60%);
     }
 
     .achv-icon {
@@ -2712,15 +3912,16 @@
     }
 
     .career-log-row {
-      background: rgba(255,255,255,0.42);
-      border: 1px solid rgba(39, 24, 15, 0.08);
+      background: var(--kc-card-2);
+      border: 1px solid var(--kc-line);
       border-radius: 12px;
       padding: 8px 10px;
-      border-inline-start: 3px solid rgba(39,24,15,0.18);
+      border-inline-start: 3px solid var(--kc-line-strong);
+      color: var(--kc-text);
     }
 
     .career-log-row.won {
-      border-inline-start-color: #b45f1a;
+      border-inline-start-color: var(--kc-warn);
     }
 
     .career-log-top {
@@ -2744,6 +3945,188 @@
       font-size: 0.82rem;
       opacity: 0.72;
       padding: 6px 2px;
+    }
+
+    /* ---- morning brief: daily causal briefing screen ---- */
+    .morning-brief-window {
+      position: fixed;
+      inset: 0;
+      z-index: 98;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .brief-dialog {
+      width: min(460px, calc(100vw - 36px));
+      max-height: min(88vh, 720px);
+      display: flex;
+      flex-direction: column;
+      background: var(--kc-card);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius);
+      overflow: hidden;
+    }
+
+    .brief-head {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 12px 14px;
+      background: var(--kc-card-2);
+      color: var(--kc-text);
+    }
+
+    .brief-head strong {
+      font-size: 15px;
+    }
+
+    .brief-daytag {
+      font-size: 11px;
+      color: var(--kc-text-faint);
+    }
+
+    .brief-body {
+      display: grid;
+      gap: 10px;
+      padding: 12px 14px;
+      overflow-y: auto;
+      color: var(--kc-text);
+    }
+
+    .brief-snapshot {
+      display: grid;
+      gap: 4px;
+      padding: 8px 10px;
+      background: var(--kc-card-2);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
+    }
+
+    .brief-snap-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+
+    .brief-snap-goal {
+      font-size: 12px;
+      color: var(--kc-text-dim);
+    }
+
+    .brief-snap-delta {
+      font-size: 11px;
+      color: var(--kc-text-faint);
+    }
+
+    .brief-event {
+      display: grid;
+      gap: 5px;
+      padding: 10px 12px;
+      border-radius: var(--kc-radius-sm);
+      background: var(--kc-card-2);
+      border: 1px solid var(--kc-line);
+      border-inline-start: 3px solid var(--kc-line-strong);
+    }
+
+    .brief-event.good { border-inline-start-color: var(--kc-good); }
+    .brief-event.bad { border-inline-start-color: var(--kc-bad); }
+    .brief-event.neutral { border-inline-start-color: var(--kc-accent); }
+
+    .brief-event-source {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      color: var(--kc-text-faint);
+    }
+
+    .brief-event-head {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .brief-event-body {
+      margin: 0;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: var(--kc-text-dim);
+    }
+
+    .brief-result {
+      margin: 2px 0 0;
+      font-size: 12.5px;
+      font-style: italic;
+      color: var(--kc-text);
+    }
+
+    .brief-choices {
+      display: grid;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .brief-choice-btn {
+      padding: 8px 10px;
+      font-size: 12.5px;
+      font-weight: 600;
+      text-align: start;
+      background: var(--kc-card);
+      color: var(--kc-text);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
+      cursor: pointer;
+    }
+
+    .brief-choice-btn:hover:not(.disabled) {
+      border-color: var(--kc-accent);
+      color: var(--kc-accent);
+    }
+
+    .brief-choice-btn.disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .brief-plan {
+      display: grid;
+      gap: 6px;
+      padding-top: 4px;
+      border-top: 1px solid var(--kc-line);
+    }
+
+    .brief-plan-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      color: var(--kc-text-faint);
+    }
+
+    .brief-plan-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .brief-cta {
+      flex: 1 1 auto;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--kc-accent);
+      color: #ffffff;
+      border: 0;
+      border-radius: var(--kc-radius-sm);
+      cursor: pointer;
+    }
+
+    .brief-cta-static {
+      flex: 1 1 auto;
+      font-size: 12.5px;
+      color: var(--kc-text-dim);
     }
 
     .win-card-actions {
@@ -2986,10 +4369,11 @@
   <section id="statusWindow" class="status-window hidden"></section>
   <section id="incidentWindow" class="incident-window hidden"></section>
   <section id="collectionWindow" class="collection-window hidden"></section>
+  <section id="morningBriefWindow" class="morning-brief-window hidden"></section>
   <div id="floatLayer" class="float-layer"></div>
   <div id="nightVeil" class="night-veil"></div>
 
-  <script src="data.js?v=20260608"></script>
+  <script src="data.js?v=20260830"></script>
   <script>
   (() => {
     "use strict";
@@ -3029,6 +4413,7 @@
         daysLeft: "ימים נותרו",
         nextMove: "מה עכשיו",
         startIntro: "מתחילים עם 300$, ספה של חבר, בלי עבודה, בלי דירה ובלי קריירה. תתלבש כמו בן אדם, תשיג משמרות, תשלם שכירות, תקנה מצלמה ורק אז תנסה להיות אגדה.",
+        startHowTo: "כל יום מתחלק לשעות שאת/ה מחלק/ת בין עבודה, לימודים וחיי היומיום; המיקומים בעיר מקובצים לפי נושא כדי שיהיה קל למצוא לאן ללכת. המטרה: לעמוד ביעדים שתבחר/י למטה — עושר, קריירה, השכלה ואושר — לפני שהעונה נגמרת.",
         playerName: "שם הדמות",
         economyDiff: "קושי כלכלי",
         language: "שפה",
@@ -3173,6 +4558,7 @@
         daysLeft: "Days left",
         nextMove: "What now",
         startIntro: "You begin with $300, a borrowed couch, no job, no apartment, and no film career. Dress like a professional, land shifts, pay rent, buy a camera, then try to become a legend.",
+        startHowTo: "Each day splits into hours you spend on work, training, and daily life; locations in the city are grouped by topic so it's easy to find where to go. The goal: hit the targets you pick below — wealth, career, education, happiness — before the season runs out.",
         playerName: "Character name",
         economyDiff: "Economy difficulty",
         language: "Language",
@@ -3590,7 +4976,7 @@
       home: {
         id: "home",
         label: { he: "בית", en: "Home" },
-        short: { he: "שינה", en: "Sleep" },
+        short: { he: "דיור", en: "Housing" },
         color: ["#d88362", "#7f4a39"],
         category: "lifestyle",
         clerk: { he: "דוד מהספה", en: "Couch Cousin" }
@@ -3768,7 +5154,7 @@
         },
         palette: { a: "#fee8c9", b: "#f0a563", c: "#8c5570" },
         skyline: [40, 58, 32, 72, 46, 64, 38, 78, 52, 68, 48],
-        buildings: ["home", "employment", "wardrobe", "cafe", "script", "casting", "fund", "gear", "bank", "investor"]
+        buildings: ["home", "employment", "wardrobe", "cafe", "script", "casting", "fund", "gear", "bank", "investor", "cinematheque"]
       },
       {
         id: "athens",
@@ -3912,6 +5298,7 @@
         seasonLength: [30, 90, 365].includes(prefs.seasonLength) ? prefs.seasonLength : 365,
         themeIndex: Number.isInteger(prefs.themeIndex) ? prefs.themeIndex : 0,
         muted: !!prefs.muted,
+        focusMode: !!prefs.focusMode,
         started: false,
         cash: 300,
         bank: 0,
@@ -3951,6 +5338,11 @@
         briefSeed: 99991,
         dailyBriefing: null,
         lastBriefId: null,
+        briefCooldowns: {},
+        briefBadStreak: 0,
+        pendingFollowUps: [],
+        dayDelta: null,
+        storyDiary: [],
         monthCounter: 1,
         lastFundDevDay: -30,
         incidentBase: 0.4,
@@ -4021,30 +5413,102 @@
       return gameState.briefSeed / 4294967296;
     }
 
-    function triggerDailyBriefing() {
-      const events = (root.GAME_DATA && root.GAME_DATA.dailyEvents) || [];
-      if (!events.length) {
+    // defaultBriefSource — the small attribution tag shown on a briefing card
+    // when the event data itself doesn't declare a specific `source`. Keeps
+    // every briefing traceable to something ("why did this show up today").
+    function defaultBriefSource(isFollowUp) {
+      if (isFollowUp) {
+        return localize({ he: "תוצאה מבחירה קודמת", en: "Result of an earlier choice" });
+      }
+      return localize({ he: "{city} היום", en: "{city} today" }).replace("{city}", localize(getCity().name));
+    }
+
+    function applyBriefEffects(effects) {
+      if (!effects) {
         return;
       }
-      // A calendar-pinned event (minDay === maxDay === today) always wins its day.
-      let chosen = events.find((e) => e.minDay === gameState.day && e.maxDay === gameState.day);
+      if (typeof effects.cash === "number") changeCash(effects.cash);
+      if (typeof effects.debt === "number") gameState.debt = Math.max(0, gameState.debt + effects.debt);
+      if (typeof effects.experience === "number") gameState.experience = Math.max(0, gameState.experience + effects.experience);
+      if (typeof effects.wardrobeTier === "number") {
+        gameState.wardrobeTier = Math.max(0, Math.min(3, gameState.wardrobeTier + effects.wardrobeTier));
+      }
+      if (effects.equipment && gameState.equipment) {
+        gameState.equipment[effects.equipment] = true;
+      }
+      ["reputation", "education", "soul", "creativity", "love"].forEach((key) => {
+        if (typeof effects[key] === "number") adjustStat(key, effects[key]);
+      });
+    }
+
+    // logDiary — one line in "יומן העונה" (season diary): only significant,
+    // player-facing beats (a resolved briefing choice, a calendar/follow-up
+    // event), not every minor tick. Read by renderStoryDiaryBlock().
+    function logDiary(title, source, result) {
+      if (!Array.isArray(gameState.storyDiary)) {
+        gameState.storyDiary = [];
+      }
+      gameState.storyDiary.unshift({ day: gameState.day, title, source, result: result || null });
+      gameState.storyDiary = gameState.storyDiary.slice(0, 200);
+    }
+
+    function triggerDailyBriefing() {
+      if (gameState.winState) {
+        gameState.dailyBriefing = null;
+        return;
+      }
+      const events = (root.GAME_DATA && root.GAME_DATA.dailyEvents) || [];
+      if (!events.length) {
+        gameState.dailyBriefing = null;
+        return;
+      }
+      if (!Array.isArray(gameState.pendingFollowUps)) gameState.pendingFollowUps = [];
+      if (!gameState.briefCooldowns) gameState.briefCooldowns = {};
+      const byId = {};
+      events.forEach((e) => { byId[e.id] = e; });
+
+      // 1) A due follow-up (the consequence of an earlier choice) always wins —
+      // this is what makes yesterday's decision feel remembered, not random.
+      let chosen = null;
+      let followUpIndex = -1;
+      for (let i = 0; i < gameState.pendingFollowUps.length; i += 1) {
+        const f = gameState.pendingFollowUps[i];
+        if (f.day <= gameState.day && byId[f.id]) {
+          chosen = byId[f.id];
+          followUpIndex = i;
+          break;
+        }
+      }
+      const isFollowUp = chosen !== null;
+      if (followUpIndex >= 0) {
+        gameState.pendingFollowUps.splice(followUpIndex, 1);
+      }
+
+      // 2) A calendar-pinned event (minDay === maxDay === today) wins next.
       if (!chosen) {
-        // Events may declare requires(state) — used for NPC memory-callbacks
-        // that only surface when relationship thresholds have been crossed.
+        chosen = events.find((e) => e.minDay === gameState.day && e.maxDay === gameState.day);
+      }
+
+      if (!chosen) {
+        const onCooldown = (e) => {
+          const until = gameState.briefCooldowns[e.id];
+          return typeof until === "number" && gameState.day < until;
+        };
         const meetsRequires = (e) => !e.requires || (function () {
           try { return !!e.requires(gameState); } catch (_err) { return false; }
         })();
-        const eligible = events.filter((e) =>
-          (e.weight || 0) > 0 &&
-          gameState.day >= (e.minDay || 1) &&
-          (!e.maxDay || gameState.day <= e.maxDay) &&
-          e.id !== gameState.lastBriefId &&
-          meetsRequires(e)
-        );
-        const pool = eligible.length
-          ? eligible
-          : events.filter((e) => (e.weight || 0) > 0 && gameState.day >= (e.minDay || 1) && (!e.maxDay || gameState.day <= e.maxDay) && meetsRequires(e));
+        const inWindow = (e) => gameState.day >= (e.minDay || 1) && (!e.maxDay || gameState.day <= e.maxDay);
+        const baseFilter = (e) => (e.weight || 0) > 0 && inWindow(e) && e.id !== gameState.lastBriefId && meetsRequires(e) && !onCooldown(e);
+        // Pity: two "bad" mornings in a row exhausts the streak — the third
+        // morning excludes bad-tone events so a hard run always gets a breath.
+        const pityActive = (gameState.briefBadStreak || 0) >= 2;
+        let eligible = events.filter((e) => baseFilter(e) && (!pityActive || e.tone !== "bad"));
+        if (!eligible.length) {
+          eligible = events.filter(baseFilter);
+        }
+        const pool = eligible.length ? eligible : events.filter((e) => inWindow(e) && meetsRequires(e) && !onCooldown(e));
         if (!pool.length) {
+          gameState.dailyBriefing = null;
           return;
         }
         const total = pool.reduce((sum, e) => sum + (e.weight || 1), 0);
@@ -4058,15 +5522,76 @@
           }
         }
       }
+
       const headline = localize(chosen.headline);
       const body = localize(chosen.body);
       const tone = chosen.tone || "neutral";
+      const source = chosen.source ? localize(chosen.source) : defaultBriefSource(isFollowUp);
       gameState.lastBriefId = chosen.id;
-      gameState.dailyBriefing = { id: chosen.id, headline, body, tone, day: gameState.day };
-      gameState.activeNotice = { id: "brief-" + gameState.day, title: headline, copy: body, tone };
+      gameState.briefBadStreak = tone === "bad" ? (gameState.briefBadStreak || 0) + 1 : 0;
+      if (chosen.cooldownDays) {
+        gameState.briefCooldowns[chosen.id] = gameState.day + chosen.cooldownDays;
+      }
+      const rawChoices = Array.isArray(chosen.choices) && chosen.choices.length
+        ? chosen.choices
+        : [{ id: "ack", label: { he: "הבנתי, בוא/י נתחיל את היום", en: "Got it, let's start the day" } }];
+      gameState.dailyBriefing = {
+        id: chosen.id,
+        headline,
+        body,
+        tone,
+        source,
+        day: gameState.day,
+        resolved: false,
+        dismissed: false,
+        pickedChoiceId: null,
+        resultCopy: null,
+        choices: rawChoices.map((c) => ({
+          id: c.id,
+          label: localize(c.label),
+          cost: c.cost || null,
+          afford: !c.cost || !c.cost.cash || c.cost.cash <= gameState.cash
+        }))
+      };
       applyBriefingModifier(chosen);
       note(headline + " — " + body, tone);
       maybeTriggerStoryBeat();
+    }
+
+    function resolveBriefChoice(choiceId) {
+      const brief = gameState.dailyBriefing;
+      if (!brief || brief.resolved) {
+        return;
+      }
+      const events = (root.GAME_DATA && root.GAME_DATA.dailyEvents) || [];
+      const eventDef = events.find((e) => e.id === brief.id);
+      const choiceDef = (eventDef && Array.isArray(eventDef.choices) && eventDef.choices.find((c) => c.id === choiceId)) || { id: "ack" };
+      if (choiceDef.cost && choiceDef.cost.cash && choiceDef.cost.cash > gameState.cash) {
+        flashMessage(localize({ he: "אין מספיק מזומן.", en: "Not enough cash." }), "bad");
+        return;
+      }
+      if (choiceDef.cost) {
+        if (choiceDef.cost.cash) changeCash(-choiceDef.cost.cash);
+        if (choiceDef.cost.hours) gameState.hour += choiceDef.cost.hours;
+      }
+      applyBriefEffects(choiceDef.effects);
+      if (choiceDef.followUpEventId) {
+        if (!Array.isArray(gameState.pendingFollowUps)) gameState.pendingFollowUps = [];
+        gameState.pendingFollowUps.push({ id: choiceDef.followUpEventId, day: gameState.day + (choiceDef.followUpInDays || 1) });
+      }
+      brief.resolved = true;
+      brief.pickedChoiceId = choiceId;
+      brief.resultCopy = choiceDef.result ? localize(choiceDef.result) : null;
+      logDiary(brief.headline, brief.source, brief.resultCopy);
+      saveGame();
+      render();
+    }
+
+    function dismissMorningBrief() {
+      if (gameState.dailyBriefing) {
+        gameState.dailyBriefing.dismissed = true;
+      }
+      render();
     }
 
     function loadPrefs() {
@@ -4092,7 +5617,8 @@
           goalLevels: gameState.goalLevels,
           seasonLength: gameState.seasonLength,
           themeIndex: gameState.themeIndex,
-          muted: gameState.muted
+          muted: gameState.muted,
+          focusMode: gameState.focusMode
         }));
       } catch (_err) {
       }
@@ -4209,6 +5735,7 @@
       }
       document.documentElement.lang = gameState.language;
       document.documentElement.dir = gameState.language === "he" ? "rtl" : "ltr";
+      document.documentElement.classList.toggle("focus-active", !!gameState.focusMode);
       document.title = t("title");
       document.documentElement.style.setProperty("--window-title", JSON.stringify(t("title")));
     }
@@ -4313,6 +5840,78 @@
 
     // Suggested moves panel — three soft hints the player can ignore. Each
     // move scores higher when an active modifier makes its action timely.
+    function computeNextGoal() {
+      const reqLabels = {
+        wardrobe: { he: "מלתחה", en: "Wardrobe" },
+        education: { he: "השכלה", en: "Education" },
+        experience: { he: "ניסיון", en: "Experience" },
+        reputation: { he: "מוניטין", en: "Reputation" }
+      };
+      if (!gameState.jobId) {
+        if (gameState.wardrobeTier < 1) {
+          const suitCost = formatMoney(Math.round(WARDROBES[0].price * priceScale()));
+          return {
+            short: localize({ he: "צריך/ה מלתחה 1", en: "Need wardrobe tier 1" }),
+            title: localize({ he: "השג/י מלתחה 1 כדי להתקבל לעבודה הראשונה", en: "Get wardrobe tier 1 to land your first job" }),
+            ctaLabel: localize({ he: "לכו לחנות · " + suitCost, en: "Go to the shop · " + suitCost }),
+            ctaBuilding: "wardrobe"
+          };
+        }
+        return {
+          short: localize({ he: "התקבל/י לעבודה הראשונה", en: "Get your first job" }),
+          title: localize({ he: "התקבל/י לעבודה ראשונה", en: "Get hired for your first job" }),
+          ctaLabel: localize({ he: "הגישו מועמדות", en: "Apply for a job" }),
+          ctaBuilding: "employment"
+        };
+      }
+      if (gameState.experience === 0) {
+        const job = getJob(gameState.jobId);
+        const previewPay = formatMoney(Math.round(job.wage * 4 * economyProfile().wages * paceScale()));
+        return {
+          short: localize({ he: "בחר/י משמרת", en: "Pick a shift" }),
+          title: localize({ he: "בחר/י משמרת כדי להרוויח כסף וניסיון", en: "Pick a shift to earn cash and experience" }),
+          ctaLabel: localize({ he: "משמרת 4ש׳ · +" + previewPay, en: "4h shift · +" + previewPay }),
+          ctaBuilding: "employment"
+        };
+      }
+      const current = getJob(gameState.jobId);
+      const nextJob = JOBS.find((j) => j.tier === current.tier + 1);
+      if (!nextJob) {
+        return {
+          short: localize({ he: "הגעת לפסגת מסלול העבודה", en: "You've topped the job ladder" }),
+          title: localize({ he: "הגעת לפסגת מסלול העבודה — הזמן להתמקד בקולנוע", en: "You've topped the job ladder — time to focus on the film itself" })
+        };
+      }
+      const gaps = ["wardrobe", "education", "experience", "reputation"]
+        .map((key) => ({ key, have: key === "wardrobe" ? gameState.wardrobeTier : gameState[key], need: nextJob.req[key] }))
+        .filter((r) => r.need > 0 && r.have < r.need);
+      if (!gaps.length) {
+        return {
+          short: localize({ he: "עומד/ת בדרישות ל" + localize(nextJob.title), en: "Qualified for " + localize(nextJob.title) }),
+          title: localize({ he: "את/ה עומד/ת בדרישות ל" + localize(nextJob.title) + " — לך/י להירשם", en: "You qualify for " + localize(nextJob.title) + " — go apply" }),
+          ctaLabel: localize({ he: "הגישו מועמדות", en: "Apply for a job" }),
+          ctaBuilding: "employment"
+        };
+      }
+      gaps.sort((a, b) => (b.need - b.have) / b.need - (a.need - a.have) / a.need);
+      const top = gaps[0];
+      const label = localize(reqLabels[top.key]);
+      const gapShort = localize({
+        he: `חסר/ה ${top.need - top.have} ${label} לתפקיד הבא`,
+        en: `Missing ${top.need - top.have} ${label} for the next role`
+      });
+      const suitCost = formatMoney(Math.round(WARDROBES[0].price * priceScale()));
+      return {
+        short: gapShort,
+        title: localize({
+          he: `השג/י ${label} ${top.have}/${top.need} כדי להתקדם ל${localize(nextJob.title)}`,
+          en: `Reach ${label} ${top.have}/${top.need} to advance to ${localize(nextJob.title)}`
+        }),
+        ctaLabel: top.key === "wardrobe" ? localize({ he: "לכו לחנות · " + suitCost, en: "Go to the shop · " + suitCost }) : null,
+        ctaBuilding: top.key === "wardrobe" ? "wardrobe" : null
+      };
+    }
+
     function computeSuggestedMoves() {
       const moves = [];
       const studyBuilding = cityHasBuilding("filmSchool")
@@ -4832,6 +6431,10 @@
       }
     }
 
+    function outcomeDelta(parts) {
+      return `<div class="outcome-delta">${parts.join(" · ")}</div>`;
+    }
+
     function flashMessage(copy, tone = "neutral") {
       note(copy, tone);
       openNotice(copy, tone);
@@ -4921,6 +6524,7 @@
       }
       gameState.currentBuilding = id;
       gameState.travelFlash = true;
+      dom.openCategoryGroup = null;
       if (!gameState.buildingVisits) gameState.buildingVisits = {};
       gameState.buildingVisits[city.id + ":" + id] = true;
       playSfx(distance > 0 ? "travel" : "cash");
@@ -4954,6 +6558,7 @@
       changeCash(-cost);
       gameState.city = cityId;
       gameState.currentBuilding = visibleBuildings(target)[0] || "home";
+      dom.openCategoryGroup = null;
       flashMessage(localize({
         he: "נחתת ב" + localize(target.name) + ".",
         en: "You landed in " + localize(target.name) + "."
@@ -4979,12 +6584,8 @@
         gameState.experience < job.req.experience ||
         gameState.reputation < job.req.reputation;
       if (missing) {
-        flashMessage(localize(job.reject), "bad");
+        note(localize(job.reject), "bad");
         playSfx("fail");
-        spendHours(1, localize({
-          he: "בזבזת שעה על טופס ודחייה מנומסת.",
-          en: "You burned an hour on paperwork and polite rejection."
-        }));
         render();
         return false;
       }
@@ -4997,9 +6598,10 @@
       gameState.jobId = job.id;
       gameState.jobTier = job.tier;
       adjustStat("reputation", 1);
+      const hiredDelta = outcomeDelta(["+1 " + localize({ he: "מוניטין", en: "reputation" })]);
       flashMessage(localize({
-        he: "התקבלת: " + localize(job.title),
-        en: "Hired: " + localize(job.title)
+        he: "התקבלת: " + localize(job.title) + hiredDelta,
+        en: "Hired: " + localize(job.title) + hiredDelta
       }), "good");
       playSfx("success");
       updateUnlocks();
@@ -5035,15 +6637,21 @@
         return false;
       }
       const pay = Math.round(job.wage * hours * economyProfile().wages * paceScale());
+      const xpGain = Math.round(job.exp * (hours / 4));
       changeCash(pay);
-      gameState.experience += Math.round(job.exp * (hours / 4));
+      gameState.experience += xpGain;
       adjustStat("reputation", job.rep);
       adjustStat("soul", hours >= 8 ? -3 : -1);
       adjustStat("creativity", -1);
       degradeWardrobe(hours * 6 + job.tier * 2);
+      const shiftDelta = outcomeDelta([
+        "+" + formatMoney(pay),
+        "+" + xpGain + " " + localize({ he: "ניסיון", en: "exp" }),
+        hours + " " + localize({ he: "שעות", en: "h" })
+      ]);
       flashMessage(localize({
-        he: "משמרת הסתיימה: +" + formatMoney(pay),
-        en: "Shift complete: +" + formatMoney(pay)
+        he: "משמרת הסתיימה" + shiftDelta,
+        en: "Shift complete" + shiftDelta
       }), "good");
       playSfx("cash");
       updateUnlocks();
@@ -5110,9 +6718,10 @@
       changeCash(-cost);
       gameState.wardrobeTier = item.tier;
       gameState.wardrobeWear = 100;
+      const wardrobeDelta = outcomeDelta([formatMoney(-cost), "+1 " + localize({ he: "מלתחה", en: "wardrobe" })]);
       flashMessage(localize({
-        he: "המלתחה עלתה לדרגה " + item.tier + ".",
-        en: "Wardrobe upgraded to tier " + item.tier + "."
+        he: "המלתחה עלתה לדרגה " + item.tier + "." + wardrobeDelta,
+        en: "Wardrobe upgraded to tier " + item.tier + "." + wardrobeDelta
       }), "good");
       playSfx("cash");
       saveGame();
@@ -7410,6 +9019,7 @@
         dom.nightVeil.classList.add("active");
       }
       playSfx("sleep");
+      const before = { cash: gameState.cash, experience: gameState.experience, reputation: gameState.reputation, happiness: scoreHappiness() };
       root.setTimeout(() => {
         gameState.day += 1;
         gameState.hour = 7;
@@ -7422,6 +9032,12 @@
         maybeTriggerEvents();
         updateUnlocks();
         checkEndings();
+        gameState.dayDelta = {
+          cash: gameState.cash - before.cash,
+          experience: gameState.experience - before.experience,
+          reputation: gameState.reputation - before.reputation,
+          happiness: scoreHappiness() - before.happiness
+        };
         saveGame();
         triggerDailyBriefing();
         if (canRender && dom && dom.nightVeil) {
@@ -7664,34 +9280,71 @@
       return getCity().buildings.includes(buildingId);
     }
 
-    function renderHud() {
-      const activeJob = getJob(gameState.jobId);
-      dom.hud.innerHTML = `
-        <div class="status-box hud-summary">
-          <div class="metric">
-            <div class="metric-label">${t("cash")}</div>
-            <div class="metric-value">${formatMoney(gameState.cash)}</div>
-          </div>
-          <div class="metric">
-            <div class="metric-label">${t("job")}</div>
-            <div class="metric-value">${activeJob ? localize(activeJob.title) : t("noJob")}</div>
-          </div>
-          <div class="metric">
-            <div class="metric-label">${t("housing")}</div>
-            <div class="metric-value">${localize(HOUSING[gameState.housing].name)}</div>
-          </div>
-          <div class="metric">
-            <div class="metric-label">${t("city")}</div>
-            <div class="metric-value">${localize(getCity().name)}</div>
-          </div>
-        </div>
-        <div class="controls-box">
-          <button class="icon-btn status-open-btn" data-action="toggleStatusWindow" data-value="" title="${localize({ he: "סטטוס יומי", en: "Daily status" })}">${localize({ he: "סטטוס", en: "Status" })}</button>
+    function hudMenuMarkup() {
+      return `
+        <button class="icon-btn hud-more-btn ${dom.hudMenuOpen ? "active" : ""}" data-action="toggleHudMenu" title="${localize({ he: "עוד אפשרויות", en: "More options" })}">⋯</button>
+        <div class="hud-secondary-group ${dom.hudMenuOpen ? "open" : ""}">
+          <button class="icon-btn" data-action="toggleStatusWindow" title="${localize({ he: "סטטוס יומי", en: "Daily status" })}">${localize({ he: "סטטוס", en: "Status" })}</button>
+          <button class="icon-btn ${gameState.focusMode ? "active" : ""}" data-action="toggleFocusMode" title="${localize({ he: "מסך ממוקד", en: "Focus mode" })}">${gameState.focusMode ? localize({ he: "ממוקד", en: "Focus" }) : localize({ he: "קלאסי", en: "Classic" })}</button>
           <button class="icon-btn" data-action="setLanguage" data-value="${gameState.language === "he" ? "en" : "he"}">${gameState.language === "he" ? "EN" : "עב"}</button>
           <button class="icon-btn" data-action="saveGame" title="${localize({ he: "שמור", en: "Save" })}">${localize({ he: "שמור", en: "Save" })}</button>
           <button class="icon-btn" data-action="toggleMute" title="${t("mute")}">${gameState.muted ? localize({ he: "שקט", en: "Muted" }) : localize({ he: "צליל", en: "Sound" })}</button>
           <button class="icon-btn" data-action="showStart" title="${t("newYear")}">${localize({ he: "חדש", en: "New" })}</button>
           <button class="icon-btn fs-btn" data-action="toggleFullscreen" title="${localize({ he: "מסך מלא", en: "Fullscreen" })}">⛶</button>
+        </div>
+      `;
+    }
+
+    function renderHud() {
+      if (gameState.focusMode) {
+        const activeJob = getJob(gameState.jobId);
+        const month = currentMonth();
+        dom.hud.innerHTML = `
+          <div class="status-box hud-summary">
+            <div class="metric hud-clock">
+              <div class="metric-label">${formatHour(gameState.hour)}</div>
+              <div class="metric-value">${t("timeStrip", { day: gameState.day, month })}</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">${t("cash")}</div>
+              <div class="metric-value">${formatMoney(gameState.cash)}</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">${t("job")}</div>
+              <div class="metric-value">${activeJob ? localize(activeJob.title) : t("noJob")}</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">${t("housing")}</div>
+              <div class="metric-value">${localize(HOUSING[gameState.housing].name)}</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">${t("city")}</div>
+              <div class="metric-value">${localize(getCity().name)}</div>
+            </div>
+          </div>
+          <div class="controls-box">
+            ${hudMenuMarkup()}
+          </div>
+        `;
+        return;
+      }
+      const nextGoal = computeNextGoal();
+      dom.hud.innerHTML = `
+        <div class="cmd-bar">
+          <div class="cmd-metric">
+            <span class="cmd-metric-label">${t("cash")}</span>
+            <strong class="cmd-metric-value">${formatMoney(gameState.cash)}</strong>
+          </div>
+          <div class="cmd-metric cmd-time">
+            <strong class="cmd-metric-value">${formatHour(gameState.hour)}</strong>
+            <span class="cmd-metric-label">${t("timeStrip", { day: gameState.day, month: currentMonth() })}</span>
+          </div>
+          <div class="cmd-goal">🎯 <span>${nextGoal.short}</span></div>
+          ${nextGoal.ctaBuilding
+            ? `<button class="cmd-cta" data-action="goAndShowActions" data-value="${nextGoal.ctaBuilding}">${nextGoal.ctaLabel}</button>`
+            : (nextGoal.ctaLabel ? `<span class="cmd-cta-static">${nextGoal.ctaLabel}</span>` : "")}
+          <button class="cmd-sleep" data-action="endDay">${localize({ he: "לישון", en: "Sleep" })}</button>
+          ${hudMenuMarkup()}
         </div>
       `;
     }
@@ -7723,8 +9376,14 @@
       const pos = buildingPos(index, total);
       const selected = buildingId === gameState.currentBuilding;
       const active = buildingId === hintBuilding;
+      const city = getCity();
+      const visitKey = city.id + ":" + buildingId;
+      const visited = gameState.buildingVisits && gameState.buildingVisits[visitKey];
+      const hasScene = sceneCardButtons(buildingId).length > 0;
+      const fresh = hasScene && !visited;
       return `
         <button class="building ${selected ? "selected" : ""} ${active ? "target" : ""}" style="left:${pos.left}%;top:${pos.top}%;" data-action="goToBuilding" data-value="${buildingId}">
+          ${fresh ? `<span class="fresh-badge" title="${localize({ he: "אנשי מקום חדשים", en: "New locals here" })}">✨</span>` : ""}
           <div class="building-card" style="--b1:${building.color[0]};--b2:${building.color[1]}">
             <div class="roof"></div>
             <div class="sign">${localize(building.label)}</div>
@@ -7959,6 +9618,36 @@
       `;
     }
 
+    // renderStoryDiaryBlock — "יומן העונה": a chronological, player-facing
+    // record of resolved morning-brief choices (see logDiary()). Distinct
+    // from the scripted STORY_BEATS below and from careerLog (cross-career,
+    // survives resetGame) — this one is season-scoped, in gameState directly.
+    function renderStoryDiaryBlock() {
+      const diary = gameState.storyDiary || [];
+      if (!diary.length) {
+        return "";
+      }
+      return `
+        <div class="collection-section diary-section">
+          <div class="collection-section-head">
+            <h3>${localize({ he: "יומן העונה", en: "Season diary" })}</h3>
+            <span class="collection-progress">${diary.length}</span>
+          </div>
+          <div class="career-log-list">
+            ${diary.slice(0, 12).map((entry) => `
+              <div class="career-log-row">
+                <div class="career-log-top">
+                  <strong>${entry.title}</strong>
+                  <span class="career-log-mark">${localize({ he: "יום", en: "Day" })} ${entry.day}</span>
+                </div>
+                <div class="career-log-ending">${entry.source}${entry.result ? " · " + entry.result : ""}</div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
+
     function renderStoryBeatBlock() {
       if (!gameState.activeStoryBeat) return "";
       const beat = STORY_BEATS.find((b) => b.id === gameState.activeStoryBeat);
@@ -8032,125 +9721,25 @@
     function renderBoard() {
       const city = getCity();
       const hint = currentHint();
-      const month = currentMonth();
       const currentBuilding = getBuilding(gameState.currentBuilding);
-      const activeJob = getJob(gameState.jobId);
-      const focusedProject = getFocusedProject();
       const buildings = visibleBuildings(city);
       const inCityHint = buildings.includes(hint.building) ? hint.building : null;
-      const wornWardrobe = gameState.wardrobeTier ? WARDROBES.find((w) => w.tier === gameState.wardrobeTier) : null;
-      const ownedGear = [
-        gameState.equipment.camera && localize({ he: "מצלמת כתף", en: "Shoulder camera" }),
-        gameState.equipment.studio && localize({ he: "עמדת עריכה", en: "Edit station" }),
-        gameState.equipment.insurance && localize({ he: "סאונד ותאורה", en: "Sound & light" })
-      ].filter(Boolean);
-      const activeModifiers = Array.isArray(gameState.activeModifiers) ? gameState.activeModifiers : [];
       const suggestedMoves = computeSuggestedMoves();
       const newsItems = computeNewsItems();
+      const nextTask = nextFilmTask();
+      const taskUrgent = nextTask && ((gameState.day > nextTask.day) || (nextTask.day - gameState.day) <= 3);
+      const nextGoal = computeNextGoal();
       dom.boardStage.innerHTML = `
         <div class="win95-shell">
-          <section class="win95-status">
-            ${renderFilmTaskBlock()}
-            <div class="win95-panel-title">${localize({ he: "חשבונות", en: "Ledger" })}</div>
-            <div class="ledger-stack">
-              ${statusRowMarkup(t("cash"), formatMoney(gameState.cash), "cash")}
-              ${statusRowMarkup(t("bank"), formatMoney(gameState.bank), "bank")}
-              ${statusRowMarkup(localize({ he: "חוב", en: "Debt" }), formatMoney(-gameState.debt), gameState.debt ? "debt" : "")}
-              ${statusRowMarkup(t("reputation"), String(gameState.reputation), "plain")}
-              ${statusRowMarkup(t("education"), String(gameState.education), "plain")}
-              ${statusRowMarkup(localize({ he: "ניסיון", en: "Experience" }), String(gameState.experience | 0), "plain")}
-              ${statusRowMarkup(t("creativity"), String(gameState.creativity), "plain")}
-            </div>
-            <div class="win95-note">
-              <strong>${t("job")}</strong>
-              <span>${activeJob ? localize(activeJob.title) : t("noJob")}</span>
-            </div>
-            <div class="win95-note">
-              <strong>${t("housing")}</strong>
-              <span>${localize(HOUSING[gameState.housing].name)}</span>
-            </div>
-            <div class="inventory-block">
-              <div class="win95-panel-title">${localize({ he: "מה שיש לי", en: "What I own" })}</div>
-              <div class="inv-line">
-                <strong>${localize({ he: "לבוש", en: "Wearing" })}</strong>
-                <span>${wornWardrobe ? localize(wornWardrobe.name) : localize({ he: "הבגדים שלי, בלי שדרוג", en: "My own clothes, no upgrade" })}</span>
-                ${wornWardrobe ? `<div class="inv-wear"><div class="inv-wear-fill" style="width:${Math.max(0, Math.min(100, gameState.wardrobeWear))}%;"></div></div>` : ""}
-              </div>
-              <div class="inv-line">
-                <strong>${localize({ he: "ציוד שקניתי", en: "Gear I bought" })}</strong>
-                <div class="inv-chips">
-                  ${ownedGear.length ? ownedGear.map((g) => `<span class="inv-chip">${g}</span>`).join("") : `<span class="inv-empty">${localize({ he: "עוד אין ציוד", en: "No gear yet" })}</span>`}
-                </div>
-              </div>
-            </div>
-            ${activeModifiers.length ? `
-              <div class="inventory-block">
-                <div class="win95-panel-title">${localize({ he: "אפקטים פעילים היום", en: "Active effects today" })}</div>
-                <div class="inv-line">
-                  <div class="inv-chips">
-                    ${activeModifiers.map(modifierChipMarkup).join("")}
-                  </div>
-                </div>
-              </div>
-            ` : ""}
-            ${gameState.filmUnlocked ? "" : renderUnlockProgress()}
-            ${renderStoryBeatBlock()}
-            ${gameState.projects && gameState.projects.length ? renderProjectsBlock() : ""}
-            ${renderNpcsBlock()}
-          </section>
           <section class="win95-main">
-            <div class="win95-strip">
-              <div class="strip-place">
-                <strong>${localize(city.name)}</strong>
-                <span>${gameState.playerName} • ${t("daysLeft")}: ${daysLeft()}</span>
-              </div>
-              <div class="strip-clock">
-                <strong>${formatHour(gameState.hour)}</strong>
-                <span>${t("timeStrip", { day: gameState.day, month })}</span>
-              </div>
-              <div class="strip-actions">
-                <button class="icon-btn strip-btn" data-action="endDay">${localize({ he: "לישון / מעבר יום", en: "Sleep / End day" })}</button>
-              </div>
+            <div class="ctx-strip">
+              <span class="ctx-place">${localize(city.name)} · ${gameState.playerName} · ${t("daysLeft")}: ${daysLeft()}</span>
+              <button class="icon-btn ctx-info-btn" data-action="openClassicPanel" data-value="ledger" title="${localize({ he: "פרטים — חשבונות, מה שיש לי, אנשים, עלילה", en: "Details — ledger, inventory, people, story" })}">
+                ℹ️${taskUrgent ? `<span class="panel-open-badge"></span>` : ""}
+              </button>
             </div>
             <div class="board-route-row">
-              <div class="destination-block city-block">
-                <div class="dest-header">${localize({ he: "מיקומים בעיר", en: "City locations" })}</div>
-                <div class="dest-grid">
-                  ${buildings.map((buildingId) => {
-                    const building = getBuilding(buildingId);
-                    const selected = buildingId === gameState.currentBuilding;
-                    const target = buildingId === inCityHint;
-                    const visitKey = city.id + ":" + buildingId;
-                    const visited = gameState.buildingVisits && gameState.buildingVisits[visitKey];
-                    const hasScene = sceneCardButtons(buildingId).length > 0;
-                    const fresh = hasScene && !visited;
-                    return `
-                      <button class="dest-btn ${selected ? "selected" : ""} ${target ? "target" : ""} ${fresh ? "fresh-locals" : ""}" style="--tone-a:${building.color[0]};--tone-b:${building.color[1]};" data-action="goToBuilding" data-value="${buildingId}">
-                        ${fresh ? `<span class="fresh-badge" title="${localize({ he: "אנשי מקום חדשים", en: "New locals here" })}">✨</span>` : ""}
-                        <strong>${localize(building.short)}</strong>
-                        <span>${localize(building.sub || building.label)}</span>
-                      </button>
-                    `;
-                  }).join("")}
-                </div>
-              </div>
-              <div class="destination-block travel-block">
-                <div class="dest-header">${localize({ he: "מעבר בין ערים", en: "City travel" })}</div>
-                <div class="travel-grid">
-                  ${CITIES.filter((entry) => entry.id !== gameState.city).map((entry) => {
-                    const cost = flightCost(entry.id);
-                    const idx = (gameState.flightIndex && gameState.flightIndex[entry.id]) || 1;
-                    const trendClass = idx < 0.9 ? "cheap" : (idx > 1.15 ? "spicy" : "");
-                    const trendIcon = idx < 0.9 ? "▼" : (idx > 1.15 ? "▲" : "·");
-                    return `
-                      <button class="dest-btn travel-btn ${trendClass}" style="--tone-a:${entry.palette.a};--tone-b:${entry.palette.b};" data-action="flyTo" data-value="${entry.id}">
-                        <strong>${localize(entry.name)}</strong>
-                        <span>${t("flyCost", { hours: 3, cost: formatMoney(cost) })} ${trendIcon}</span>
-                      </button>
-                    `;
-                  }).join("")}
-                </div>
-              </div>
+              ${cityTravelMarkup(city, buildings, inCityHint)}
             </div>
             ${suggestedMoves.length ? `
               <div class="suggested-header">${localize({ he: "💡 לאן ללכת עכשיו", en: "💡 Where to go now" })}</div>
@@ -8161,40 +9750,468 @@
             <div class="scene-block" style="--scene-a:${currentBuilding.color[0]};--scene-b:${currentBuilding.color[1]};">
               <div class="scene-title">${localize(currentBuilding.label)}</div>
               <div class="scene-copy">${buildingSpeech(gameState.currentBuilding)}</div>
+              <button class="scene-here-trigger" data-action="openHereActions">
+                <span>🛠️</span> ${localize({ he: "אפשר לעשות כאן", en: "You can do here" })}
+              </button>
               <div class="scene-hint">${hint.copy || gameState.ticker || t("interiorPrompt")}</div>
-              <div class="newsletter">
-                <div class="news-pane">
-                  <div class="news-head">
-                    <span>📰 ${localize({ he: "ניוזלטר היום", en: "Today's newsletter" })}</span>
-                    <span>${localize(city.name)}</span>
-                  </div>
-                  <div class="news-list">
-                    ${newsItems.length ? newsItems.map(newsItemMarkup).join("") : `<div class="news-item"><span class="news-icon">·</span><div class="news-body"><strong>${localize({ he: "יום שקט", en: "Quiet day" })}</strong><span>${localize({ he: "אין כותרות חדשות. אולי תייצר אחת.", en: "No headlines. Make one." })}</span></div></div>`}
-                  </div>
-                </div>
-                <div class="market-pane">
-                  <div class="market-head">
-                    <span>📈 ${localize({ he: "שוק קולנוע + קריפטו", en: "Cinema + crypto market" })}</span>
-                    <span>${localize({ he: "מזומן: " + formatMoney(gameState.cash), en: "Cash: " + formatMoney(gameState.cash) })}</span>
-                  </div>
-                  <table class="market-table">
-                    <thead>
-                      <tr>
-                        <th>${localize({ he: "סימול", en: "Ticker" })}</th>
-                        <th>${localize({ he: "מחיר", en: "Price" })}</th>
-                        <th>${localize({ he: "שינוי", en: "Δ" })}</th>
-                        <th>${localize({ he: "שלי", en: "Mine" })}</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${STOCK_DEFS.map(stockRowMarkup).join("")}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+              ${newsMarketMarkup(city, newsItems)}
             </div>
           </section>
+          <aside class="win95-aside">
+            ${renderAside(nextGoal)}
+          </aside>
+        </div>
+        ${renderClassicPanel()}
+        ${renderLocationDetail()}
+        ${renderHereActionsModal()}
+      `;
+    }
+
+    function renderAside(nextGoal) {
+      const recent = (gameState.log || []).slice(0, 6);
+      return `
+        <div class="aside-block">
+          <div class="aside-block-title">🎯 ${localize({ he: "היעד הבא", en: "Next goal" })}</div>
+          <div class="aside-goal-text">${nextGoal.title}</div>
+        </div>
+        <div class="aside-block">
+          <div class="aside-block-title">${localize({ he: "הפעולה האחרונה", en: "Recent activity" })}</div>
+          <div class="aside-log">
+            ${recent.length ? recent.map((entry) => `<div class="aside-log-row aside-log-${entry.tone}">${entry.copy}</div>`).join("") : `<div class="aside-log-row">${localize({ he: "עדיין לא קרה כלום", en: "Nothing yet" })}</div>`}
+          </div>
+        </div>
+      `;
+    }
+
+    function cityTravelMarkup(city, buildings, inCityHint) {
+      const otherCities = CITIES.filter((entry) => entry.id !== gameState.city);
+      const categoryLabels = {
+        salary: { he: "עבודה ופרנסה", en: "Work & income" },
+        lifestyle: { he: "חיי היומיום", en: "Daily life" },
+        production: { he: "תעשיית הקולנוע", en: "Film industry" },
+        finance: { he: "כספים והשקעות", en: "Money & investing" },
+        training: { he: "לימודים והכשרה", en: "Training" },
+        release: { he: "הפצה ושיווק", en: "Release" }
+      };
+      const categoryOrder = ["salary", "lifestyle", "production", "finance", "training", "release"];
+      const categoryColors = {
+        salary: "#a8875a",
+        lifestyle: "#e0975b",
+        production: "#b06ee0",
+        finance: "#3f8f68",
+        training: "#4fbfbf",
+        release: "#e05b8f",
+        travel: "#8f9bb3"
+      };
+      const groups = {};
+      buildings.forEach((buildingId) => {
+        const building = getBuilding(buildingId);
+        const cat = building.category || "lifestyle";
+        (groups[cat] = groups[cat] || []).push(buildingId);
+      });
+      function buildingLockHint(buildingId) {
+        if (["fund", "investor", "casino"].includes(buildingId) && !gameState.jobId) {
+          return localize({ he: "ייפתח אחרי עבודה ראשונה", en: "Unlocks after your first job" });
+        }
+        if (buildingId === "bank" && gameState.cash < 500 && gameState.bank <= 0) {
+          return localize({ he: "דורש 500 ₪ נזילים", en: "Needs 500 ₪ liquid" });
+        }
+        return null;
+      }
+      function buildingButton(buildingId) {
+        const building = getBuilding(buildingId);
+        const selected = buildingId === gameState.currentBuilding;
+        const target = buildingId === inCityHint;
+        const visitKey = city.id + ":" + buildingId;
+        const visited = gameState.buildingVisits && gameState.buildingVisits[visitKey];
+        const hasScene = sceneCardButtons(buildingId).length > 0;
+        const fresh = hasScene && !visited;
+        const lockHint = buildingLockHint(buildingId);
+        return `
+          <button class="dest-btn ${selected ? "selected" : ""} ${target ? "target" : ""} ${fresh ? "fresh-locals" : ""}" style="--tone-a:${building.color[0]};--tone-b:${building.color[1]};" data-action="goAndShowActions" data-value="${buildingId}">
+            ${fresh ? `<span class="fresh-badge" title="${localize({ he: "אנשי מקום חדשים", en: "New locals here" })}">✨</span>` : ""}
+            <strong>${localize(building.short)}</strong>
+            <span>${localize(building.sub || building.label)}</span>
+            ${lockHint ? `<span class="dest-lock-hint">🔒 ${lockHint}</span>` : ""}
+          </button>
+        `;
+      }
+      function travelButton(entry) {
+        const cost = flightCost(entry.id);
+        const idx = (gameState.flightIndex && gameState.flightIndex[entry.id]) || 1;
+        const trendClass = idx < 0.9 ? "cheap" : (idx > 1.15 ? "spicy" : "");
+        const trendIcon = idx < 0.9 ? "▼" : (idx > 1.15 ? "▲" : "·");
+        return `
+          <button class="dest-btn travel-btn ${trendClass}" style="--tone-a:${entry.palette.a};--tone-b:${entry.palette.b};" data-action="openLocationDetail" data-value="city:${entry.id}">
+            <span class="travel-tag">✈️</span>
+            <strong>${localize(entry.name)}</strong>
+            <span>${t("flyCost", { hours: 3, cost: formatMoney(cost) })} ${trendIcon}</span>
+          </button>
+        `;
+      }
+      const availableCats = categoryOrder.filter((cat) => groups[cat] && groups[cat].length);
+      const currentCat = (getBuilding(gameState.currentBuilding) || {}).category || "lifestyle";
+      const hasTravel = otherCities.length > 0;
+      const requestedOpen = dom.openCategoryGroup;
+      const requestedValid = requestedOpen === "travel" ? hasTravel : availableCats.includes(requestedOpen);
+      const openKey = requestedValid
+        ? requestedOpen
+        : (availableCats.includes(currentCat) ? currentCat : (availableCats[0] || (hasTravel ? "travel" : null)));
+      function groupHeader(key, label, count) {
+        return `
+          <button class="dest-group-label" data-action="toggleCategoryGroup" data-value="${key}">
+            <span class="dest-group-name">${localize(label)}</span>
+            <span class="dest-group-count">${count}</span>
+            <span class="dest-group-chevron">›</span>
+          </button>
+        `;
+      }
+      const sections = categoryOrder
+        .filter((cat) => groups[cat] && groups[cat].length)
+        .map((cat) => {
+          const open = cat === openKey;
+          return `
+            <div class="dest-group ${open ? "open" : ""}" style="--cat-color:${categoryColors[cat]};">
+              ${groupHeader(cat, categoryLabels[cat], groups[cat].length)}
+              ${open ? `<div class="dest-grid">${groups[cat].map(buildingButton).join("")}</div>` : ""}
+            </div>
+          `;
+        }).join("");
+      const travelOpen = openKey === "travel";
+      const travelSection = hasTravel ? `
+        <div class="dest-group ${travelOpen ? "open" : ""}" style="--cat-color:${categoryColors.travel};">
+          ${groupHeader("travel", { he: "טיסות בין ערים", en: "City travel" }, otherCities.length)}
+          ${travelOpen ? `<div class="dest-grid">${otherCities.map(travelButton).join("")}</div>` : ""}
+        </div>
+      ` : "";
+      return `
+        <div class="destination-block city-block">
+          <div class="dest-header">${localize({ he: "מיקומים", en: "Places" })}</div>
+          ${sections}
+          ${travelSection}
+        </div>
+      `;
+    }
+
+    function renderHereActionsModal() {
+      if (!dom.hereActionsOpen) {
+        return "";
+      }
+      const building = getBuilding(gameState.currentBuilding);
+      return `
+        <div class="panel-backdrop" data-action="closeHereActions"></div>
+        <div class="panel-modal here-modal">
+          <div class="panel-head">
+            <strong>${localize(building.label)} — ${localize({ he: "אפשר לעשות כאן", en: "You can do here" })}</strong>
+            <button class="mini-btn" data-action="closeHereActions">${t("close")}</button>
+          </div>
+          <div class="panel-body">
+            <div class="action-groups">
+              ${renderInteriorActions(gameState.currentBuilding, { includeSleep: false })}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function travelMarkup(city) {
+      return `
+        <div class="destination-block travel-block">
+          <div class="dest-header">${localize({ he: "מעבר בין ערים", en: "City travel" })}</div>
+          <div class="travel-grid">
+            ${CITIES.filter((entry) => entry.id !== gameState.city).map((entry) => {
+              const cost = flightCost(entry.id);
+              const idx = (gameState.flightIndex && gameState.flightIndex[entry.id]) || 1;
+              const trendClass = idx < 0.9 ? "cheap" : (idx > 1.15 ? "spicy" : "");
+              const trendIcon = idx < 0.9 ? "▼" : (idx > 1.15 ? "▲" : "·");
+              return `
+                <button class="dest-btn travel-btn ${trendClass}" style="--tone-a:${entry.palette.a};--tone-b:${entry.palette.b};" data-action="flyTo" data-value="${entry.id}">
+                  <strong>${localize(entry.name)}</strong>
+                  <span>${t("flyCost", { hours: 3, cost: formatMoney(cost) })} ${trendIcon}</span>
+                </button>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderClassicPanel() {
+      const tab = dom.classicPanelTab;
+      if (!tab) {
+        return "";
+      }
+      const wornWardrobe = gameState.wardrobeTier ? WARDROBES.find((w) => w.tier === gameState.wardrobeTier) : null;
+      const ownedGear = [
+        gameState.equipment.camera && localize({ he: "מצלמת כתף", en: "Shoulder camera" }),
+        gameState.equipment.studio && localize({ he: "עמדת עריכה", en: "Edit station" }),
+        gameState.equipment.insurance && localize({ he: "סאונד ותאורה", en: "Sound & light" })
+      ].filter(Boolean);
+      const activeModifiers = Array.isArray(gameState.activeModifiers) ? gameState.activeModifiers : [];
+      const activeJob = getJob(gameState.jobId);
+      const tabs = [
+        { id: "ledger", icon: "💰", label: { he: "חשבונות", en: "Ledger" } },
+        { id: "own", icon: "🎒", label: { he: "מה שיש לי", en: "What I own" } },
+        { id: "job", icon: "🏠", label: { he: "עבודה ודיור", en: "Job & housing" } },
+        ...(gameState.filmUnlocked ? [] : [{ id: "progress", icon: "🎬", label: { he: "התקדמות", en: "Progress" } }]),
+        { id: "people", icon: "👥", label: { he: "אנשים", en: "People" } },
+        { id: "story", icon: "📖", label: { he: "עלילה", en: "Story" } },
+        { id: "tasks", icon: "📋", label: { he: "משימות הסרט", en: "Film tasks" } }
+      ];
+      let body = "";
+      if (tab === "ledger") {
+        body = `
+          <div class="ledger-stack">
+            ${statusRowMarkup(t("cash"), formatMoney(gameState.cash), "cash")}
+            ${statusRowMarkup(t("bank"), formatMoney(gameState.bank), "bank")}
+            ${statusRowMarkup(localize({ he: "חוב", en: "Debt" }), formatMoney(-gameState.debt), gameState.debt ? "debt" : "")}
+            ${statusRowMarkup(t("reputation"), String(gameState.reputation), "plain")}
+            ${statusRowMarkup(t("education"), String(gameState.education), "plain")}
+            ${statusRowMarkup(localize({ he: "ניסיון", en: "Experience" }), String(gameState.experience | 0), "plain")}
+            ${statusRowMarkup(t("creativity"), String(gameState.creativity), "plain")}
+          </div>
+        `;
+      } else if (tab === "own") {
+        body = `
+          <div class="inventory-block">
+            <div class="inv-line">
+              <strong>${localize({ he: "לבוש", en: "Wearing" })}</strong>
+              <span>${wornWardrobe ? localize(wornWardrobe.name) : localize({ he: "הבגדים שלי, בלי שדרוג", en: "My own clothes, no upgrade" })}</span>
+              ${wornWardrobe ? `<div class="inv-wear"><div class="inv-wear-fill" style="width:${Math.max(0, Math.min(100, gameState.wardrobeWear))}%;"></div></div>` : ""}
+            </div>
+            <div class="inv-line">
+              <strong>${localize({ he: "ציוד שקניתי", en: "Gear I bought" })}</strong>
+              <div class="inv-chips">
+                ${ownedGear.length ? ownedGear.map((g) => `<span class="inv-chip">${g}</span>`).join("") : `<span class="inv-empty">${localize({ he: "עוד אין ציוד", en: "No gear yet" })}</span>`}
+              </div>
+            </div>
+          </div>
+          ${activeModifiers.length ? `
+            <div class="inventory-block">
+              <div class="win95-panel-title">${localize({ he: "אפקטים פעילים היום", en: "Active effects today" })}</div>
+              <div class="inv-line"><div class="inv-chips">${activeModifiers.map(modifierChipMarkup).join("")}</div></div>
+            </div>
+          ` : ""}
+        `;
+      } else if (tab === "job") {
+        body = `
+          <div class="win95-note">
+            <strong>${t("job")}</strong>
+            <span>${activeJob ? localize(activeJob.title) : t("noJob")}</span>
+          </div>
+          <div class="win95-note">
+            <strong>${t("housing")}</strong>
+            <span>${localize(HOUSING[gameState.housing].name)}</span>
+          </div>
+        `;
+      } else if (tab === "progress") {
+        body = renderUnlockProgress();
+      } else if (tab === "people") {
+        body = renderNpcsBlock();
+      } else if (tab === "story") {
+        body = `
+          ${renderStoryDiaryBlock()}
+          ${renderStoryBeatBlock()}
+          ${gameState.projects && gameState.projects.length ? renderProjectsBlock() : ""}
+        `;
+      } else if (tab === "tasks") {
+        body = renderFilmTaskBlock();
+      }
+      return `
+        <div class="panel-backdrop" data-action="closeClassicPanel"></div>
+        <div class="panel-modal">
+          <div class="panel-head">
+            <strong>${localize({ he: "פרטים", en: "Details" })}</strong>
+            <button class="mini-btn" data-action="closeClassicPanel">${t("close")}</button>
+          </div>
+          <div class="panel-tabs">
+            ${tabs.map((tb) => `
+              <button class="panel-tab ${tab === tb.id ? "active" : ""}" data-action="setClassicPanelTab" data-value="${tb.id}">${tb.icon} ${localize(tb.label)}</button>
+            `).join("")}
+          </div>
+          <div class="panel-body">${body}</div>
+        </div>
+      `;
+    }
+
+    function renderLocationDetail() {
+      const d = dom.locationDetail;
+      if (!d) {
+        return "";
+      }
+      if (d.type === "city") {
+        const entry = CITIES.find((c) => c.id === d.id);
+        if (!entry) return "";
+        const cost = flightCost(d.id);
+        return `
+          <div class="detail-backdrop" data-action="closeLocationDetail"></div>
+          <div class="detail-modal" style="--tone-a:${entry.palette.a};--tone-b:${entry.palette.b};">
+            <div class="detail-head">
+              <strong>${localize(entry.name)}</strong>
+              <button class="mini-btn" data-action="closeLocationDetail">${t("close")}</button>
+            </div>
+            <div class="detail-body">
+              <p class="detail-copy">${t("flyCost", { hours: 3, cost: formatMoney(cost) })}</p>
+            </div>
+            <div class="detail-actions">
+              <button class="action-btn detail-go" data-action="confirmFlyTo" data-value="${d.id}">${localize({ he: "טוס לשם", en: "Fly there" })}</button>
+            </div>
+          </div>
+        `;
+      }
+      return "";
+    }
+
+    function newsMarketMarkup(city, newsItems) {
+      return `
+        <div class="newsletter">
+          <div class="news-pane">
+            <div class="news-head">
+              <span>📰 ${localize({ he: "ניוזלטר היום", en: "Today's newsletter" })}</span>
+              <span>${localize(city.name)}</span>
+            </div>
+            <div class="news-list">
+              ${newsItems.length ? newsItems.map(newsItemMarkup).join("") : `<div class="news-item"><span class="news-icon">·</span><div class="news-body"><strong>${localize({ he: "יום שקט", en: "Quiet day" })}</strong><span>${localize({ he: "אין כותרות חדשות. אולי תייצר אחת.", en: "No headlines. Make one." })}</span></div></div>`}
+            </div>
+          </div>
+          <div class="market-pane">
+            <div class="market-head">
+              <span>📈 ${localize({ he: "שוק קולנוע + קריפטו", en: "Cinema + crypto market" })}</span>
+              <span>${localize({ he: "מזומן: " + formatMoney(gameState.cash), en: "Cash: " + formatMoney(gameState.cash) })}</span>
+            </div>
+            <table class="market-table">
+              <thead>
+                <tr>
+                  <th>${localize({ he: "סימול", en: "Ticker" })}</th>
+                  <th>${localize({ he: "מחיר", en: "Price" })}</th>
+                  <th>${localize({ he: "שינוי", en: "Δ" })}</th>
+                  <th>${localize({ he: "שלי", en: "Mine" })}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                ${STOCK_DEFS.map(stockRowMarkup).join("")}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderBoardFocus() {
+      const city = getCity();
+      const hint = currentHint();
+      const currentBuilding = getBuilding(gameState.currentBuilding);
+      const buildings = visibleBuildings(city);
+      const inCityHint = buildings.includes(hint.building) ? hint.building : null;
+      const suggestedMoves = computeSuggestedMoves();
+      const topMove = suggestedMoves[0];
+      const hasStory = (gameState.projects && gameState.projects.length) || !gameState.filmUnlocked;
+      dom.boardStage.innerHTML = `
+        <div class="focus-shell">
+          <div class="focus-today" style="--scene-a:${currentBuilding.color[0]};--scene-b:${currentBuilding.color[1]};">
+            <div class="focus-place">${localize(city.name)} · ${localize(currentBuilding.label)}</div>
+            <div class="focus-plaza">
+              ${buildings.map((buildingId, i) => buildingMarkup(buildingId, i, buildings.length, inCityHint)).join("")}
+              ${avatarMarkup()}
+            </div>
+            <div class="focus-copy">${buildingSpeech(gameState.currentBuilding)}</div>
+            ${topMove ? `
+              <button class="focus-cta" data-action="${topMove.action}" data-value="${topMove.value}">
+                <span class="focus-cta-icon">${topMove.icon}</span>
+                <span class="focus-cta-body">
+                  <strong>${localize(topMove.title)}</strong>
+                  <span>${localize(topMove.reason)}</span>
+                </span>
+              </button>
+            ` : ""}
+            <div class="focus-here">
+              <div class="focus-here-title">${localize({ he: "אפשר לעשות כאן", en: "You can do here" })}</div>
+              <div class="action-groups">
+                ${renderInteriorActions(gameState.currentBuilding, { includeSleep: true })}
+              </div>
+            </div>
+          </div>
+          <div class="focus-triggers">
+            <button class="focus-trigger" data-action="toggleStatusWindow" title="${localize({ he: "סטטוס", en: "Status" })}">📊 ${localize({ he: "סטטוס", en: "Status" })}</button>
+            <button class="focus-trigger ${dom.openSheet === "wardrobe" ? "active" : ""}" data-action="openSheet" data-value="wardrobe" title="${localize({ he: "מלתחה וציוד", en: "Wardrobe & gear" })}">👕 ${localize({ he: "מלתחה", en: "Wardrobe" })}</button>
+            <button class="focus-trigger ${dom.openSheet === "travel" ? "active" : ""}" data-action="openSheet" data-value="travel" title="${localize({ he: "טיסות בין ערים", en: "Travel between cities" })}">✈️ ${localize({ he: "טיסות", en: "Travel" })}</button>
+            <button class="focus-trigger ${dom.openSheet === "people" ? "active" : ""}" data-action="openSheet" data-value="people" title="${localize({ he: "אנשים", en: "People" })}">👥 ${localize({ he: "אנשים", en: "People" })}</button>
+            <button class="focus-trigger ${dom.openSheet === "market" ? "active" : ""}" data-action="openSheet" data-value="market" title="${localize({ he: "חדשות ושוק", en: "News & market" })}">📰 ${localize({ he: "שוק", en: "Market" })}</button>
+            ${hasStory ? `<button class="focus-trigger ${dom.openSheet === "story" ? "active" : ""}" data-action="openSheet" data-value="story" title="${localize({ he: "עלילה", en: "Story" })}">🎬 ${localize({ he: "עלילה", en: "Story" })}</button>` : ""}
+          </div>
+          ${renderFocusSheet(city)}
+        </div>
+      `;
+    }
+
+    function renderFocusSheet(city) {
+      const sheet = dom.openSheet;
+      if (!sheet) {
+        return "";
+      }
+      const titles = {
+        wardrobe: { he: "מלתחה וציוד", en: "Wardrobe & gear" },
+        travel: { he: "טיסות", en: "Travel" },
+        people: { he: "אנשים", en: "People" },
+        market: { he: "חדשות ושוק", en: "News & market" },
+        story: { he: "עלילה", en: "Story" }
+      };
+      const icons = { wardrobe: "👕", travel: "✈️", people: "👥", market: "📰", story: "🎬" };
+      let body = "";
+      if (sheet === "wardrobe") {
+        const wornWardrobe = gameState.wardrobeTier ? WARDROBES.find((w) => w.tier === gameState.wardrobeTier) : null;
+        const ownedGear = [
+          gameState.equipment.camera && localize({ he: "מצלמת כתף", en: "Shoulder camera" }),
+          gameState.equipment.studio && localize({ he: "עמדת עריכה", en: "Edit station" }),
+          gameState.equipment.insurance && localize({ he: "סאונד ותאורה", en: "Sound & light" })
+        ].filter(Boolean);
+        const activeModifiers = Array.isArray(gameState.activeModifiers) ? gameState.activeModifiers : [];
+        body = `
+          <div class="inventory-block">
+            <div class="inv-line">
+              <strong>${localize({ he: "לבוש", en: "Wearing" })}</strong>
+              <span>${wornWardrobe ? localize(wornWardrobe.name) : localize({ he: "הבגדים שלי, בלי שדרוג", en: "My own clothes, no upgrade" })}</span>
+              ${wornWardrobe ? `<div class="inv-wear"><div class="inv-wear-fill" style="width:${Math.max(0, Math.min(100, gameState.wardrobeWear))}%;"></div></div>` : ""}
+            </div>
+            <div class="inv-line">
+              <strong>${localize({ he: "ציוד שקניתי", en: "Gear I bought" })}</strong>
+              <div class="inv-chips">
+                ${ownedGear.length ? ownedGear.map((g) => `<span class="inv-chip">${g}</span>`).join("") : `<span class="inv-empty">${localize({ he: "עוד אין ציוד", en: "No gear yet" })}</span>`}
+              </div>
+            </div>
+          </div>
+          ${activeModifiers.length ? `
+            <div class="inventory-block">
+              <div class="win95-panel-title">${localize({ he: "אפקטים פעילים היום", en: "Active effects today" })}</div>
+              <div class="inv-line"><div class="inv-chips">${activeModifiers.map(modifierChipMarkup).join("")}</div></div>
+            </div>
+          ` : ""}
+        `;
+      } else if (sheet === "travel") {
+        body = travelMarkup(city);
+      } else if (sheet === "people") {
+        body = renderNpcsBlock();
+      } else if (sheet === "market") {
+        body = newsMarketMarkup(city, computeNewsItems());
+      } else if (sheet === "story") {
+        body = `
+          ${gameState.filmUnlocked ? "" : renderUnlockProgress()}
+          ${renderStoryBeatBlock()}
+          ${gameState.projects && gameState.projects.length ? renderProjectsBlock() : ""}
+        `;
+      }
+      return `
+        <div class="focus-backdrop" data-action="closeSheet"></div>
+        <div class="focus-sheet">
+          <div class="focus-sheet-head">
+            <span class="focus-sheet-title">
+              <span class="focus-sheet-icon">${icons[sheet] || ""}</span>
+              <strong>${localize(titles[sheet] || { he: "", en: "" })}</strong>
+            </span>
+            <button class="mini-btn" data-action="closeSheet">${t("close")}</button>
+          </div>
+          <div class="focus-sheet-body">${body}</div>
         </div>
       `;
     }
@@ -8314,22 +10331,6 @@
       `;
     }
 
-    function renderSidePanel() {
-      dom.sidePanel.innerHTML = `
-        <section class="panel">
-          <h2>${localize({ he: "משימות", en: "Tasks" })}</h2>
-          <div class="action-groups">
-            <div class="action-group">
-              <h3>${localize({ he: "יום", en: "Day" })}</h3>
-              <div class="action-buttons">
-                ${buttonMarkup("endDay", "", t("sleep"), t("sleepCopy"), formatHour(23))}
-              </div>
-            </div>
-            ${renderInteriorActions(gameState.currentBuilding, { includeSleep: false })}
-          </div>
-        </section>
-      `;
-    }
 
     function renderStatusWindow() {
       if (!dom || !dom.statusWindow) {
@@ -8464,6 +10465,77 @@
       `;
     }
 
+    // renderMorningBrief — the daily-briefing screen. Shows once per day,
+    // gated purely on gameState.dailyBriefing existing and not yet
+    // resolved/dismissed (survives reload: a resolved/dismissed brief just
+    // stays that way in the save, so refreshing never re-shows it).
+    function renderMorningBrief() {
+      if (!dom || !dom.morningBriefWindow) {
+        return;
+      }
+      const brief = gameState.dailyBriefing;
+      const open = brief && !brief.dismissed;
+      if (!open) {
+        dom.morningBriefWindow.classList.add("hidden");
+        dom.morningBriefWindow.innerHTML = "";
+        return;
+      }
+      const delta = gameState.dayDelta;
+      const deltaParts = [];
+      if (delta) {
+        if (delta.cash) deltaParts.push((delta.cash > 0 ? "+" : "") + formatMoney(delta.cash));
+        if (delta.experience) deltaParts.push((delta.experience > 0 ? "+" : "") + Math.round(delta.experience) + " " + localize({ he: "ניסיון", en: "exp" }));
+        if (delta.reputation) deltaParts.push((delta.reputation > 0 ? "+" : "") + delta.reputation + " " + localize({ he: "מוניטין", en: "rep" }));
+        if (delta.happiness) deltaParts.push((delta.happiness > 0 ? "+" : "") + delta.happiness + " " + localize({ he: "אושר", en: "happiness" }));
+      }
+      const nextGoal = computeNextGoal();
+      dom.morningBriefWindow.classList.remove("hidden");
+      dom.morningBriefWindow.innerHTML = `
+        <div class="brief-dialog">
+          <div class="brief-head">
+            <strong>☀️ ${localize({ he: "בוקר טוב", en: "Good morning" })}, ${escapeAttr(gameState.playerName)}</strong>
+            <span class="brief-daytag">${t("timeStrip", { day: gameState.day, month: currentMonth() })} · ${localize(getCity().name)}</span>
+          </div>
+          <div class="brief-body">
+            <div class="brief-snapshot">
+              <div class="brief-snap-row">
+                <span>${formatHour(gameState.hour)}</span>
+                <strong>${formatMoney(gameState.cash)}</strong>
+              </div>
+              <div class="brief-snap-goal">🎯 ${nextGoal.short}</div>
+              ${deltaParts.length ? `<div class="brief-snap-delta">${localize({ he: "מאתמול", en: "Since yesterday" })}: ${deltaParts.join(" · ")}</div>` : ""}
+            </div>
+            <div class="brief-event ${brief.tone}">
+              <div class="brief-event-source">${brief.source}</div>
+              <div class="brief-event-head">${brief.headline}</div>
+              <p class="brief-event-body">${brief.body}</p>
+              ${brief.resolved ? `
+                ${brief.resultCopy ? `<p class="brief-result">${brief.resultCopy}</p>` : ""}
+                <button class="brief-choice-btn" data-action="dismissMorningBrief">${localize({ he: "המשך", en: "Continue" })}</button>
+              ` : `
+                <div class="brief-choices">
+                  ${brief.choices.map((c) => `
+                    <button class="brief-choice-btn ${c.afford ? "" : "disabled"}" data-action="pickBriefChoice" data-value="${c.id}" ${c.afford ? "" : "disabled"}>
+                      ${c.label}
+                    </button>
+                  `).join("")}
+                </div>
+              `}
+            </div>
+            <div class="brief-plan">
+              <div class="brief-plan-label">${localize({ he: "תוכנית היום", en: "Today's plan" })}</div>
+              <div class="brief-plan-actions">
+                ${nextGoal.ctaBuilding
+                  ? `<button class="brief-cta" data-action="briefCtaGo" data-value="${nextGoal.ctaBuilding}">${nextGoal.ctaLabel}</button>`
+                  : (nextGoal.ctaLabel ? `<span class="brief-cta-static">${nextGoal.ctaLabel}</span>` : "")}
+                <button class="mini-btn secondary" data-action="dismissMorningBrief">${localize({ he: "להיכנס לעיר", en: "Enter the city" })}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     /*
      * sceneCardButtons — renders all SCENE_CARDS matching the building,
      * filtered by current city. Each card's button gets the npcInfluence
@@ -8493,6 +10565,38 @@
           <div class="topline"><span>${adaptUiText(title || "")}</span><span>${adaptUiText(meta || "")}</span></div>
           <div class="subline">${adaptUiText(copy || "")}</div>
         </button>
+      `;
+    }
+
+    function jobCardMarkup(job) {
+      const wage = "$" + Math.round(job.wage * economyProfile().wages) + "/h";
+      const reqDefs = [
+        { key: "education", have: gameState.education, need: job.req.education, label: t("education") },
+        { key: "wardrobe", have: gameState.wardrobeTier, need: job.req.wardrobe, label: localize({ he: "מלתחה", en: "Wardrobe" }) },
+        { key: "experience", have: gameState.experience, need: job.req.experience, label: localize({ he: "ניסיון", en: "Experience" }) },
+        { key: "reputation", have: gameState.reputation, need: job.req.reputation, label: t("reputation") }
+      ].filter((r) => r.need > 0);
+      const missing = reqDefs.filter((r) => r.have < r.need);
+      const qualifies = missing.length === 0;
+      const chips = reqDefs.map((r) => `<span class="req-chip ${r.have >= r.need ? "ok" : "bad"}">${r.label}: ${r.have}/${r.need}</span>`).join("");
+      const onlyWardrobeMissing = missing.length === 1 && missing[0].key === "wardrobe";
+      const suitCost = formatMoney(Math.round(WARDROBES[0].price * priceScale()));
+      const blockerLine = !qualifies ? `
+        <div class="job-blocker">
+          <span>${localize({ he: "חסר: " + missing.map((r) => r.label).join(", "), en: "Missing: " + missing.map((r) => r.label).join(", ") })}</span>
+          ${onlyWardrobeMissing ? `<button class="job-blocker-cta" data-action="goAndShowActions" data-value="wardrobe">${localize({ he: "צריך חליפה — עבור/י לחנות (" + suitCost + ")", en: "Need a suit — go to the shop (" + suitCost + ")" })}</button>` : ""}
+        </div>
+      ` : "";
+      return `
+        <div class="job-card ${qualifies ? "qualifies" : "blocked"}">
+          <div class="job-card-head">
+            <strong>${localize(job.title)}</strong>
+            <span>${wage}</span>
+          </div>
+          <div class="job-reqs">${chips}</div>
+          ${blockerLine}
+          <button class="action-btn job-apply-btn" data-action="applyJob" data-value="${job.id}">${localize({ he: "הגש/י מועמדות", en: "Apply" })}</button>
+        </div>
       `;
     }
 
@@ -8544,11 +10648,8 @@
           return `
             <div class="action-group">
               <h3>${t("salaryPath")}</h3>
-              <div class="action-buttons">
-                ${JOBS.map((job) => buttonMarkup("applyJob", job.id, localize(job.title), localize({
-                  he: "דרישות: השכלה " + job.req.education + ", מלתחה " + job.req.wardrobe + ", ניסיון " + job.req.experience + ", מוניטין " + job.req.reputation,
-                  en: "Requires edu " + job.req.education + ", wardrobe " + job.req.wardrobe + ", exp " + job.req.experience + ", rep " + job.req.reputation
-                }), "$" + Math.round(job.wage * economyProfile().wages) + "/h")).join("")}
+              <div class="job-cards">
+                ${JOBS.map(jobCardMarkup).join("")}
               </div>
             </div>
             ${activeJob ? (() => {
@@ -9030,6 +11131,7 @@
           <h1>${t("title")}</h1>
           <p class="subtitle">${t("subtitle")}</p>
           <p>${t("startIntro")}</p>
+          <p class="start-howto">${t("startHowTo")}</p>
           <div class="start-grid">
             <div class="field">
               <label>${t("playerName")}</label>
@@ -9108,11 +11210,16 @@
       syncDocument();
       applyTheme();
       renderHud();
-      renderBoard();
-      renderSidePanel();
+      dom.sidePanel.innerHTML = "";
+      if (gameState.focusMode) {
+        renderBoardFocus();
+      } else {
+        renderBoard();
+      }
       renderStatusWindow();
       renderNoticeWindow();
       renderCollectionWindow();
+      renderMorningBrief();
       renderStartScreen();
       renderWinLoss();
     }
@@ -9186,6 +11293,60 @@
         } else if (action === "toggleCollectionWindow") {
           dom.collectionWindowOpen = !dom.collectionWindowOpen;
           render();
+        } else if (action === "toggleFocusMode") {
+          gameState.focusMode = !gameState.focusMode;
+          dom.openSheet = null;
+          savePrefs();
+          render();
+        } else if (action === "openSheet") {
+          dom.openSheet = dom.openSheet === value ? null : value;
+          render();
+        } else if (action === "closeSheet") {
+          dom.openSheet = null;
+          render();
+        } else if (action === "openClassicPanel") {
+          dom.classicPanelTab = dom.classicPanelTab ? null : (value || "ledger");
+          render();
+        } else if (action === "setClassicPanelTab") {
+          dom.classicPanelTab = value;
+          render();
+        } else if (action === "closeClassicPanel") {
+          dom.classicPanelTab = null;
+          render();
+        } else if (action === "openLocationDetail") {
+          const parts = String(value).split(":");
+          dom.locationDetail = { type: parts[0], id: parts[1] };
+          render();
+        } else if (action === "closeLocationDetail") {
+          dom.locationDetail = null;
+          render();
+        } else if (action === "goAndShowActions") {
+          dom.hereActionsOpen = true;
+          goToBuilding(value);
+        } else if (action === "confirmFlyTo") {
+          dom.locationDetail = null;
+          dom.hereActionsOpen = false;
+          flyTo(value);
+        } else if (action === "openHereActions") {
+          dom.hereActionsOpen = true;
+          render();
+        } else if (action === "closeHereActions") {
+          dom.hereActionsOpen = false;
+          render();
+        } else if (action === "pickBriefChoice") {
+          resolveBriefChoice(value);
+        } else if (action === "dismissMorningBrief") {
+          dismissMorningBrief();
+        } else if (action === "briefCtaGo") {
+          dismissMorningBrief();
+          dom.hereActionsOpen = true;
+          goToBuilding(value);
+        } else if (action === "toggleCategoryGroup") {
+          dom.openCategoryGroup = dom.openCategoryGroup === value ? null : value;
+          render();
+        } else if (action === "toggleHudMenu") {
+          dom.hudMenuOpen = !dom.hudMenuOpen;
+          render();
         } else if (action === "closeNotice") {
           if (dom.noticeTimer) {
             root.clearTimeout(dom.noticeTimer);
@@ -9252,6 +11413,7 @@
         language: prefs.language || gameState.language,
         themeIndex: Number.isInteger(prefs.themeIndex) ? prefs.themeIndex : gameState.themeIndex,
         muted: !!prefs.muted,
+        focusMode: !!prefs.focusMode,
         highscores: loadScores(),
         careerLog: loadCareerLog()
       });
@@ -9275,10 +11437,11 @@
         playerName: options.playerName || prefs.playerName || gameState.playerName,
         economyDifficulty: options.economyDifficulty || prefs.economyDifficulty || "modest",
         goalLevels: options.goalLevels || prefs.goalLevels || { wealth: "modest", career: "modest", education: "modest", happiness: "modest" },
-        seasonLength: 90,
+        seasonLength: [30, 90, 365].includes(options.seasonLength) ? options.seasonLength : (prefs.seasonLength || 90),
         language: gameState.language,
         themeIndex: gameState.themeIndex,
         muted: gameState.muted,
+        focusMode: gameState.focusMode,
         highscores,
         careerLog
       });
@@ -9303,11 +11466,18 @@
         statusWindow: document.getElementById("statusWindow"),
         incidentWindow: document.getElementById("incidentWindow"),
         collectionWindow: document.getElementById("collectionWindow"),
+        morningBriefWindow: document.getElementById("morningBriefWindow"),
         floatLayer: document.getElementById("floatLayer"),
         nightVeil: document.getElementById("nightVeil"),
         noticeTimer: null,
         statusWindowOpen: false,
         collectionWindowOpen: false,
+        openSheet: null,
+        classicPanelTab: null,
+        locationDetail: null,
+        hereActionsOpen: false,
+        hudMenuOpen: false,
+        openCategoryGroup: null,
         forceStart: false
       };
       bindEvents();
@@ -9365,6 +11535,9 @@
     root.FILM_TASKS = FILM_TASKS;
     root.nextFilmTask = nextFilmTask;
     root.filmTasksComplete = filmTasksComplete;
+    root.resolveBriefChoice = resolveBriefChoice;
+    root.dismissMorningBrief = dismissMorningBrief;
+    root.triggerDailyBriefing = triggerDailyBriefing;
 
     if (canRender) {
       init();
