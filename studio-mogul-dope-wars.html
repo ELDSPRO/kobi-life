@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#090c0a">
+  <title>KOBI // NIGHT MARKET</title>
+  <style>
+    :root {
+      --ink:#090c0a; --panel:#101711; --panel-2:#151d14; --line:#40513b;
+      --cream:#e8eadc; --muted:#94a08e; --green:#b6df68; --amber:#f0bd58;
+      --rose:#e47675; --cyan:#78cfc5; --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+    }
+    * { box-sizing:border-box; }
+    body { min-width:320px; min-height:100vh; margin:0; color:var(--cream); background:radial-gradient(900px 530px at 80% -10%,#243528 0%,transparent 66%),var(--ink); font-family:var(--mono); }
+    button { font:inherit; }
+    button:focus-visible { outline:2px solid var(--amber); outline-offset:3px; }
+    .shell { width:min(1160px,calc(100% - 32px)); margin:0 auto; padding:24px 0 38px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:0 0 15px; border-bottom:1px solid var(--line); }
+    .brand { color:var(--green); font-weight:900; font-size:clamp(1rem,2.3vw,1.3rem); letter-spacing:.12em; }
+    .brand b { color:var(--amber); }
+    .turn { display:flex; align-items:baseline; gap:10px; text-align:left; }
+    .turn span { color:var(--muted); font-size:.72rem; letter-spacing:.08em; }
+    .turn strong { color:var(--amber); font-size:1.28rem; }
+    .headline { display:flex; align-items:end; justify-content:space-between; gap:16px; padding:24px 0 18px; }
+    .eyebrow { margin:0 0 7px; color:var(--green); font-size:.72rem; font-weight:900; letter-spacing:.1em; }
+    h1 { margin:0; font-size:clamp(1.75rem,4vw,3.1rem); letter-spacing:-.075em; line-height:.95; }
+    .headline p { max-width:37ch; margin:0; color:var(--muted); font-size:.8rem; line-height:1.55; text-align:left; }
+    .command { display:grid; grid-template-columns:1.15fr .85fr; gap:12px; margin-bottom:12px; }
+    .panel { position:relative; overflow:hidden; border:1px solid var(--line); background:linear-gradient(145deg,rgba(21,29,20,.96),rgba(9,12,10,.96)); box-shadow:0 14px 35px rgba(0,0,0,.2); }
+    .panel::before { content:""; position:absolute; inset:0; pointer-events:none; opacity:.18; background:repeating-linear-gradient(0deg,transparent 0,transparent 3px,rgba(182,223,104,.08) 4px); }
+    .mission { display:flex; align-items:center; gap:13px; min-height:96px; padding:16px; }
+    .mission-mark { display:grid; place-items:center; flex:0 0 34px; width:34px; height:34px; color:var(--ink); background:var(--amber); font-weight:900; transform:rotate(45deg); }
+    .mission-mark b { transform:rotate(-45deg); }
+    .mission span,.finance label,.market-kicker { color:var(--muted); font-size:.67rem; font-weight:800; letter-spacing:.09em; }
+    .mission strong { display:block; margin-top:3px; color:var(--cream); font-size:1rem; }
+    .mission p { margin:3px 0 0; color:var(--muted); font-size:.76rem; line-height:1.4; }
+    .finance { display:grid; grid-template-columns:repeat(3,1fr); min-height:96px; }
+    .finance div { display:grid; align-content:center; gap:5px; padding:12px 14px; border-inline-start:1px solid var(--line); }
+    .finance div:first-child { border:0; }
+    .finance b { direction:ltr; color:var(--cream); font-size:1rem; }
+    .finance .debt b { color:var(--rose); }
+    .finance .slots b { color:var(--cyan); }
+    .grid { display:grid; grid-template-columns:minmax(0,1fr) 278px; gap:12px; }
+    .market { min-height:470px; padding:18px; }
+    .market-head { display:flex; align-items:end; justify-content:space-between; gap:16px; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid var(--line); }
+    .market-head h2 { margin:4px 0 0; color:var(--cream); font-size:1.35rem; }
+    .market-head p { margin:0; color:var(--muted); font-size:.72rem; text-align:left; }
+    .goods { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+    .good { display:grid; grid-template-columns:1fr auto; gap:9px; padding:12px; border:1px solid rgba(148,160,142,.26); background:rgba(255,255,255,.018); }
+    .good:hover { border-color:var(--green); }
+    .good-top { display:flex; align-items:start; justify-content:space-between; gap:8px; }
+    .good-title { color:var(--cream); font-weight:900; font-size:.89rem; }
+    .good-owned { color:var(--cyan); font-size:.68rem; white-space:nowrap; }
+    .good-note { margin:5px 0 0; color:var(--muted); font-size:.68rem; line-height:1.35; }
+    .price { direction:ltr; align-self:center; color:var(--amber); font-weight:900; font-size:1.08rem; }
+    .deal-actions { display:flex; gap:5px; grid-column:1/-1; }
+    .deal-actions button,.travel button,.debt-control button,.footer-actions button,.event button { min-height:31px; padding:6px 9px; cursor:pointer; color:var(--cream); background:#192119; border:1px solid var(--line); font-size:.72rem; font-weight:800; }
+    .deal-actions button:hover,.travel button:hover,.debt-control button:hover,.footer-actions button:hover,.event button:hover { color:var(--ink); background:var(--green); border-color:var(--green); }
+    .deal-actions button:disabled { cursor:not-allowed; opacity:.36; }
+    .deal-actions .sell { color:var(--amber); }
+    .deal-actions .sell:hover { background:var(--amber); border-color:var(--amber); }
+    .rail { display:grid; align-content:start; gap:12px; }
+    .rail .panel { padding:15px; }
+    .rail h2 { margin:0 0 12px; color:var(--cream); font-size:.95rem; }
+    .travel { display:grid; gap:6px; }
+    .travel button { display:flex; align-items:center; justify-content:space-between; width:100%; text-align:right; }
+    .travel button.current { cursor:default; color:var(--green); border-color:var(--green); background:rgba(182,223,104,.08); }
+    .travel button.current:hover { color:var(--green); background:rgba(182,223,104,.08); }
+    .travel small { color:var(--muted); font-size:.63rem; }
+    .bag { display:grid; gap:7px; }
+    .bag-row { display:flex; justify-content:space-between; gap:9px; padding-bottom:7px; color:var(--muted); font-size:.73rem; border-bottom:1px dashed rgba(148,160,142,.25); }
+    .bag-row b { color:var(--cream); }
+    .bag-empty { margin:0; color:var(--muted); font-size:.74rem; line-height:1.5; }
+    .debt-control { display:grid; gap:8px; }
+    .debt-control p { margin:0; color:var(--muted); font-size:.7rem; line-height:1.45; }
+    .debt-control button { color:var(--rose); }
+    .debt-control button:hover { background:var(--rose); border-color:var(--rose); }
+    .log { display:grid; gap:6px; max-height:160px; overflow:auto; }
+    .log p { margin:0; color:var(--muted); font-size:.68rem; line-height:1.42; }
+    .log p:first-child { color:var(--cream); }
+    .footer-actions { display:flex; justify-content:space-between; gap:10px; margin-top:12px; }
+    .footer-actions button:last-child { color:var(--muted); }
+    .modal { position:fixed; z-index:5; inset:0; display:grid; place-items:center; padding:20px; background:rgba(0,0,0,.68); }
+    .modal.hidden { display:none; }
+    .event { width:min(470px,100%); padding:20px; border:1px solid var(--amber); background:linear-gradient(145deg,#1d261d,#0a0e0b); box-shadow:0 30px 80px rgba(0,0,0,.65); }
+    .event span { color:var(--amber); font-size:.69rem; font-weight:900; letter-spacing:.1em; }
+    .event h2 { margin:8px 0 0; font-size:1.55rem; }
+    .event p { margin:8px 0 18px; color:var(--muted); font-size:.83rem; line-height:1.55; }
+    .event b { color:var(--green); }
+    .end-score { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:16px 0; }
+    .end-score div { padding:9px; background:rgba(255,255,255,.04); }
+    .end-score span { display:block; color:var(--muted); font-size:.64rem; }
+    .end-score b { display:block; margin-top:4px; color:var(--cream); font-size:.9rem; }
+    @media (max-width:780px) { .command,.grid { grid-template-columns:1fr; } .headline { align-items:start; display:grid; } .headline p { text-align:right; } .rail { grid-template-columns:repeat(2,minmax(0,1fr)); } .rail .log-panel { grid-column:1/-1; } }
+    @media (max-width:520px) { .shell { width:min(100% - 20px,1160px); padding-top:14px; } .goods,.rail { grid-template-columns:1fr; } .rail .log-panel { grid-column:auto; } .finance { min-height:72px; } .finance div { padding:9px; } .mission { min-height:76px; } .market { padding:12px; } .topbar { align-items:start; } }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div class="modal hidden" id="modal"></div>
+  <script>
+    (() => {
+      const GOODS = [
+        { id:"script", name:"אופציית תסריט", note:"זולה ברחובות הנכונים", base:115, fame:1 },
+        { id:"edit", name:"שעות עריכה", note:"כולם צריכים אותן אחרי הצילומים", base:165, fame:1 },
+        { id:"set", name:"יום סט", note:"זמן צוות שמתאדה מהר", base:245, fame:2 },
+        { id:"camera", name:"קיט מצלמה", note:"יקר, אבל עיר אחרת תשלם", base:390, fame:3 },
+        { id:"brand", name:"בריף למותג", note:"פחות אישי, יותר מזומן", base:290, fame:2 },
+        { id:"festival", name:"ספוט פסטיבל", note:"מסוכן, עם סיכוי לתהילה", base:520, fame:5 }
+      ];
+      const CITIES = [
+        { id:"tlv", name:"תל אביב", zone:"שוק חם", fare:0, mods:{ script:.82, edit:1.12, set:1.15, camera:1.06, brand:1.22, festival:1.08 } },
+        { id:"jerusalem", name:"ירושלים", zone:"מסלולים ומוסדות", fare:90, mods:{ script:1.1, edit:.88, set:1.08, camera:1.16, brand:.82, festival:1.28 } },
+        { id:"haifa", name:"חיפה", zone:"ציוד ועורכים", fare:110, mods:{ script:1.08, edit:.76, set:.86, camera:.79, brand:1.12, festival:1.1 } },
+        { id:"athens", name:"אתונה", zone:"פסטיבלים זולים", fare:260, mods:{ script:1.22, edit:1.02, set:1.18, camera:.92, brand:1.18, festival:.68 } }
+      ];
+      const STORAGE_KEY = "kobi-night-market-v1";
+      const app = typeof document !== "undefined" ? document.getElementById("app") : null;
+      const modal = typeof document !== "undefined" ? document.getElementById("modal") : null;
+      const money = (n) => new Intl.NumberFormat("he-IL", { style:"currency", currency:"ILS", maximumFractionDigits:0 }).format(Math.round(n));
+      const clone = (value) => JSON.parse(JSON.stringify(value));
+      const totalBag = () => Object.values(state.bag).reduce((sum, qty) => sum + qty, 0);
+      const city = () => CITIES.find((entry) => entry.id === state.city) || CITIES[0];
+      const item = (id) => GOODS.find((entry) => entry.id === id);
+      const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+      function createState() {
+        const next = { day:1, maxDays:30, city:"tlv", cash:620, debt:8000, fame:0, followers:0, capacity:10, bag:{}, prices:{}, log:[], event:null, ended:false };
+        next.prices = generatePrices(next.city);
+        next.log = ["יום 1: יש לך חודש להפוך עבודה קטנה למסלול גדול."];
+        return next;
+      }
+      let state = createState();
+      function load() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (saved && saved.prices && !saved.ended) state = { ...createState(), ...saved, event:null };
+        } catch (_) {}
+      }
+      function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {} }
+      function generatePrices(cityId) {
+        const destination = CITIES.find((entry) => entry.id === cityId) || CITIES[0];
+        const result = {};
+        GOODS.forEach((good) => {
+          const wave = .7 + Math.random() * .72;
+          result[good.id] = Math.max(25, Math.round(good.base * destination.mods[good.id] * wave / 5) * 5);
+        });
+        return result;
+      }
+      function addLog(message) { state.log.unshift(message); state.log = state.log.slice(0, 7); }
+      function effectText(event) { return event.effect ? `<br><b>${event.effect}</b>` : ""; }
+      function setEvent(title, copy, effect) { state.event = { title, copy, effect }; }
+      function marketSignal(good) {
+        const ratio = state.prices[good.id] / good.base;
+        if (ratio < .82) return "זול היום";
+        if (ratio > 1.2) return "חם היום";
+        return "מחיר רגיל";
+      }
+      function buy(id) {
+        if (state.ended || state.event) return false;
+        const price = state.prices[id];
+        if (totalBag() >= state.capacity) return notify("אין מקום בתיק", "מכור משהו או חכה להזדמנות להגדיל אותו.", "התיק מלא");
+        if (state.cash < price) return notify("אין מספיק מזומן", "המחיר גבוה מהכסף הזמין כרגע.", "חסר " + money(price - state.cash));
+        state.cash -= price; state.bag[id] = (state.bag[id] || 0) + 1;
+        addLog("קנית " + item(id).name + " ב־" + money(price) + "."); save(); render(); return true;
+      }
+      function sell(id) {
+        if (state.ended || state.event || !(state.bag[id] || 0)) return false;
+        const good = item(id), price = state.prices[id];
+        state.bag[id] -= 1; if (!state.bag[id]) delete state.bag[id];
+        state.cash += price; state.fame += good.fame; state.followers += good.fame * randomInt(9, 25);
+        addLog("מכרת " + good.name + " ב־" + money(price) + "."); save(); render(); return true;
+      }
+      function payDebt() {
+        if (state.ended || state.event) return false;
+        const amount = Math.min(state.cash, state.debt, 500);
+        if (!amount) return notify("אין מה לשלם", "צריך מזומן כדי להקטין את החוב.", "");
+        state.cash -= amount; state.debt -= amount; addLog("הורדת " + money(amount) + " מהחוב."); save(); render(); return true;
+      }
+      function triggerTravelEvent() {
+        const roll = Math.random();
+        if (roll < .19) {
+          const target = GOODS[randomInt(0, GOODS.length - 1)]; state.prices[target.id] = Math.round(state.prices[target.id] * .55 / 5) * 5;
+          setEvent("היצע מטורף", "מישהו זרק לשוק " + target.name + ". המחיר התרסק רק בעיר הזאת.", "המחיר של " + target.name + " ירד ב־45%.");
+        } else if (roll < .35) {
+          const target = GOODS[randomInt(0, GOODS.length - 1)]; state.prices[target.id] = Math.round(state.prices[target.id] * 1.75 / 5) * 5;
+          setEvent("כולם צריכים את זה עכשיו", "הפקה גדולה נתקעה ומחפשת " + target.name + " בלי להתמקח.", "המחיר קפץ ב־75%.");
+        } else if (roll < .47) {
+          state.capacity += 3; setEvent("תיק ציוד נוסף", "צלם שעזב סט נתן לך תיק קשיח. הוא לא יפה, אבל הוא מכיל יותר.", "+3 מקומות בתיק.");
+        } else if (roll < .58) {
+          const loss = Math.min(state.cash, randomInt(70, 160)); state.cash -= loss;
+          setEvent("חשבונית דחופה", "הודעה ישנה חזרה בדיוק כשנחתת. אין סיכוי להתעלם ממנה.", "-" + money(loss) + " מזומן.");
+        }
+      }
+      function travel(id) {
+        if (state.ended || state.event || id === state.city) return false;
+        const destination = CITIES.find((entry) => entry.id === id); if (!destination) return false;
+        if (state.cash < destination.fare) return notify("אין כסף לטיסה", "צריך " + money(destination.fare) + " כדי להגיע ל" + destination.name + ".", "");
+        state.cash -= destination.fare; state.city = id; state.day += 1; state.debt = Math.ceil(state.debt * 1.008); state.prices = generatePrices(id);
+        addLog("יום " + state.day + ": הגעת ל" + destination.name + ". החוב צמח ב־0.8%.");
+        if (state.day > state.maxDays) return finish();
+        triggerTravelEvent(); save(); render(); return true;
+      }
+      function notify(title, copy, effect) { setEvent(title, copy, effect); render(); return false; }
+      function dismissEvent() { state.event = null; save(); render(); }
+      function finish() { state.ended = true; state.event = null; const inventory = Object.entries(state.bag).reduce((sum, [id, qty]) => sum + state.prices[id] * qty, 0); const score = state.cash + inventory - state.debt + state.fame * 100; state.final = { inventory, score }; addLog("המסלול נסגר עם ציון " + money(score) + "."); save(); render(); }
+      function newGame() { state = createState(); save(); render(); }
+      function renderModal() {
+        if (!modal) return;
+        if (state.ended) {
+          const final = state.final || { inventory:0, score:0 };
+          modal.classList.remove("hidden"); modal.innerHTML = `<section class="event"><span>סוף המסלול · 30 ימים</span><h2>${final.score >= 0 ? "נשארת במשחק." : "החוב ניצח הפעם."}</h2><p>הניקוד שלך הוא מזומן + שווי תיק − חוב + תהילה.</p><div class="end-score"><div><span>מזומן</span><b>${money(state.cash)}</b></div><div><span>שווי תיק</span><b>${money(final.inventory)}</b></div><div><span>חוב</span><b>${money(state.debt)}</b></div></div><button data-action="new">משחק חדש ←</button></section>`; return;
+        }
+        if (!state.event) { modal.classList.add("hidden"); modal.innerHTML = ""; return; }
+        modal.classList.remove("hidden"); modal.innerHTML = `<section class="event"><span>אירוע בדרך</span><h2>${state.event.title}</h2><p>${state.event.copy}${effectText(state.event)}</p><button data-action="dismiss">להמשיך לשוק ←</button></section>`;
+      }
+      function render() {
+        if (!app) return;
+        const here = city(), used = totalBag(), focus = state.debt > 0 ? "קנה בזול, טוס, מכור ביוקר. כל מעבר מגדיל את החוב." : "החוב נסגר. עכשיו כל עסקה בונה שם וקהל.";
+        const bagRows = Object.entries(state.bag).map(([id, qty]) => `<div class="bag-row"><span>${item(id).name}</span><b>×${qty}</b></div>`).join("");
+        app.innerHTML = `<div class="shell">
+          <header class="topbar"><div class="brand">KOBI <b>//</b> NIGHT MARKET</div><div class="turn"><span>ימים נשארו</span><strong>${Math.max(0, state.maxDays - state.day + 1)}</strong></div></header>
+          <section class="headline"><div><p class="eyebrow">${here.name.toUpperCase ? here.name : here.name} · ${here.zone}</p><h1>לקנות. לטוס. למכור.</h1></div><p>30 ימים לסגור חוב ולהפוך עסקאות קטנות לקריירה קולנועית.</p></section>
+          <section class="command"><div class="panel mission"><i class="mission-mark"><b>→</b></i><div><span>המהלך</span><strong>${state.debt > 0 ? "החוב רודף. השוק פתוח." : "החוב נסגר. עכשיו בונים שם."}</strong><p>${focus}</p></div></div><div class="panel finance"><div><label>מזומן</label><b>${money(state.cash)}</b></div><div class="debt"><label>חוב</label><b>${money(state.debt)}</b></div><div class="slots"><label>תיק</label><b>${used}/${state.capacity}</b></div></div></section>
+          <section class="grid"><main class="panel market"><header class="market-head"><div><span class="market-kicker">שוק מקומי · יום ${state.day}/30</span><h2>מה קונים ב${here.name}?</h2></div><p>קנה מתחת למחיר הרגיל.<br>מכור כשהשוק חם.</p></header><div class="goods">${GOODS.map((good) => { const owned=state.bag[good.id]||0, price=state.prices[good.id]; return `<article class="good"><div><div class="good-top"><span class="good-title">${good.name}</span><span class="good-owned">בתיק: ${owned}</span></div><p class="good-note">${good.note} · ${marketSignal(good)}</p></div><b class="price">${money(price)}</b><div class="deal-actions"><button data-action="buy" data-id="${good.id}" ${state.cash<price||used>=state.capacity?"disabled":""}>קנה 1</button><button class="sell" data-action="sell" data-id="${good.id}" ${owned?"":"disabled"}>מכור 1</button></div></article>`; }).join("")}</div></main>
+          <aside class="rail"><section class="panel"><h2>טוס לעיר אחרת</h2><div class="travel">${CITIES.map((place) => `<button class="${place.id===state.city?"current":""}" data-action="travel" data-id="${place.id}"><span>${place.name}<small> · ${place.zone}</small></span><b>${place.id===state.city?"כאן":""+(place.fare?money(place.fare):"חינם")}</b></button>`).join("")}</div></section><section class="panel"><h2>מה בתיק</h2><div class="bag">${bagRows||'<p class="bag-empty">התיק ריק. עסקה טובה מתחילה בפריט אחד זול.</p>'}</div></section><section class="panel"><h2>חוב</h2><div class="debt-control"><p>בכל טיסה החוב גדל ב־0.8%. אפשר לשלם 500 ₪ בכל פעם.</p><button data-action="pay">לשלם 500 ₪ לחוב</button></div></section><section class="panel log-panel"><h2>שידור מסלול</h2><div class="log">${state.log.map((line)=>`<p>› ${line}</p>`).join("")}</div></section></aside></section>
+          <div class="footer-actions"><button data-action="finish">לסיים מסלול עכשיו</button><button data-action="new">איפוס משחק</button></div>
+        </div>`;
+        renderModal();
+      }
+      if (app) {
+        load(); render();
+        document.addEventListener("click", (event) => { const button = event.target.closest("[data-action]"); if (!button) return; const action=button.dataset.action, id=button.dataset.id; if (action==="buy") buy(id); if (action==="sell") sell(id); if (action==="travel") travel(id); if (action==="pay") payDebt(); if (action==="dismiss") dismissEvent(); if (action==="finish") finish(); if (action==="new") newGame(); });
+      }
+      globalThis.kobiNightMarket = { getState:()=>clone(state), newGame, buy, sell, travel, payDebt, finish, dismissEvent, GOODS, CITIES };
+    })();
+  </script>
+</body>
+</html>
