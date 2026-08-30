@@ -5431,14 +5431,80 @@
     .life-month-event-choice span { color:var(--studio-muted); font-size:.84rem; line-height:1.4; }
     .life-month-event-choice small { color:var(--studio-green); font-size:.76rem; font-weight:800; }
     .life-month-event-note { color:var(--studio-blue); font-size:.78rem; }
+
+    /* The monthly planner is deliberately a map and a decision desk, not a
+       dashboard full of anonymous cards. These overrides make that hierarchy
+       visually explicit on the main life screen. */
+    .annual-life-shell { padding:clamp(16px,2vw,28px); background:
+      radial-gradient(680px 340px at 12% 4%,rgba(67,57,150,.22),transparent 66%),
+      radial-gradient(580px 310px at 92% 12%,rgba(23,128,130,.14),transparent 64%); }
+    .annual-life-layout { width:min(1500px,100%); grid-template-columns:minmax(0,1fr) 244px; gap:28px; }
+    .annual-life-header { display:flex; align-items:end; justify-content:space-between; gap:20px; padding-bottom:13px; margin-bottom:10px; border-bottom:1px solid rgba(229,238,255,.13); }
+    .annual-life-header h1 { margin:0; font-size:clamp(2rem,3vw,3.15rem); line-height:.94; }
+    .annual-life-header .annual-label { max-width:220px; line-height:1.55; text-align:end; }
+    .annual-play-area { gap:12px; }
+    .annual-year-timeline { display:grid; grid-template-columns:188px minmax(0,1fr); align-items:center; gap:18px; padding:11px 0 13px; border:0; border-radius:0; background:transparent; box-shadow:none; }
+    .annual-year-timeline .annual-label { grid-column:1; align-self:end; }
+    .annual-year-timeline > strong { grid-column:1; grid-row:2; margin:0; color:var(--studio-cream); font-size:1.12rem; }
+    .annual-year-timeline .annual-months { grid-column:2; grid-row:1 / span 2; grid-template-columns:repeat(12,minmax(0,1fr)); gap:4px; margin:0; }
+    .annual-year-timeline .annual-months span { height:38px; border-radius:3px; font-size:.82rem; }
+    .annual-year-timeline > p { grid-column:1 / -1; margin:0; padding-top:8px; color:var(--studio-muted); font-size:.72rem; border-top:1px solid rgba(229,238,255,.1); }
+    .annual-city-board { padding:13px 0 0; }
+    .annual-map-head { font-size:1.08rem; }
+    .annual-map-head small { font-size:.78rem; }
+    .annual-map-tools { margin-top:8px; padding-bottom:8px; border-bottom:1px solid rgba(229,238,255,.1); }
+    .annual-map-legend { gap:10px; font-size:.72rem; }
+    .annual-map-legend i { width:8px; height:8px; }
+    .annual-map-advice { font-size:.76rem; }
+    .annual-plaza { min-height:230px; margin-top:0; border-block:0; background:
+      radial-gradient(520px 220px at 50% 48%,rgba(70,100,142,.18),transparent 70%),
+      linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+      background-size:auto,calc(100% / 6) 100%; }
+    .annual-plaza::before { inset:18% 10%; border-color:rgba(229,238,255,.16); }
+    .annual-map-node { max-width:180px; gap:9px; padding:8px 5px; }
+    .annual-node-dot { width:14px; height:14px; flex-basis:14px; }
+    .annual-node-label { font-size:clamp(.86rem,1.08vw,1.08rem); }
+    .annual-actions-panel { padding:16px 0 0; border:0; border-top:1px solid rgba(229,238,255,.14); border-radius:0; background:transparent; box-shadow:none; }
+    .annual-action-place { display:flex; align-items:baseline; justify-content:space-between; gap:18px; margin-bottom:10px; padding:0 0 10px; }
+    .annual-action-place strong { font-size:1.34rem; }
+    .annual-action-place p { max-width:520px; font-size:.88rem; text-align:end; }
+    .annual-actions-panel .action-buttons { gap:0; border-block:1px solid rgba(229,238,255,.11); }
+    .annual-actions-panel .annual-life-choice { min-height:156px; padding:15px 18px; border:0; border-radius:0; border-inline-start:1px solid rgba(229,238,255,.12); background:transparent; }
+    .annual-actions-panel .annual-life-choice:first-child { border-inline-start:0; }
+    .annual-actions-panel .annual-life-choice:hover { transform:none; background:rgba(244,185,66,.075); box-shadow:inset 0 -2px 0 var(--studio-gold); }
+    .annual-actions-panel .annual-life-choice .topline { font-size:1.06rem; }
+    .annual-actions-panel .annual-life-choice .subline { min-height:42px; font-size:.84rem; }
+    .annual-more-actions { margin-top:12px; }
+    .annual-more-actions summary { padding:8px 0; font-size:.86rem; }
+    .annual-life-side { top:20px; }
+    .annual-status-card { padding:0 0 15px; border:0; border-radius:0; border-bottom:1px solid rgba(229,238,255,.14); background:transparent; box-shadow:none; }
+    .annual-status-card > strong { font-size:1.14rem; }
+    .annual-status-metrics div { padding:9px 3px; border:0; border-bottom:1px solid rgba(229,238,255,.1); border-radius:0; background:transparent; }
+    .annual-status-metrics b { font-size:.92rem; }
     @media (max-width: 1060px) {
       .annual-life-layout { grid-template-columns:1fr; }
-      .annual-life-side { position:static; grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .annual-life-side { position:static; grid-template-columns:1fr; }
+      .annual-status-card { max-width:none; }
     }
     @media (max-width: 760px) {
       .annual-life-shell { padding:17px 12px 34px; }
+      .annual-life-header { display:grid; align-items:start; }
+      .annual-life-header .annual-label { max-width:none; text-align:start; }
+      .annual-life-header h1 { font-size:2rem; }
+      .annual-year-timeline { grid-template-columns:1fr; gap:7px; }
+      .annual-year-timeline .annual-label,
+      .annual-year-timeline > strong,
+      .annual-year-timeline .annual-months,
+      .annual-year-timeline > p { grid-column:1; grid-row:auto; }
+      .annual-year-timeline .annual-months { grid-template-columns:repeat(6,minmax(0,1fr)); margin-top:4px; }
+      .annual-map-tools { display:grid; align-items:start; }
+      .annual-map-advice { text-align:start; }
       .annual-plaza { aspect-ratio:1.15 / 1; min-height:390px; }
       .annual-actions-panel .action-buttons { grid-template-columns:1fr; }
+      .annual-actions-panel .annual-life-choice { min-height:0; border-inline-start:0; border-top:1px solid rgba(229,238,255,.12); }
+      .annual-actions-panel .annual-life-choice:first-child { border-top:0; }
+      .annual-action-place { display:grid; gap:5px; }
+      .annual-action-place p { text-align:start; }
       .annual-life-side { grid-template-columns:1fr; }
       .annual-life-intro { grid-template-columns:auto 1fr; }
       .annual-life-intro button { grid-column:2; justify-self:start; }
