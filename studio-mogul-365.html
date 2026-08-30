@@ -5336,37 +5336,43 @@
     .annual-life-intro > span { color:var(--studio-gold); font-size:1rem; }
     .annual-life-intro p { margin:0; color:rgba(247,242,232,.84); font-size:.9rem; line-height:1.48; }
     .annual-life-intro button { padding:8px 11px; color:#1b160c; font-size:.8rem; font-weight:800; background:var(--studio-gold); border-radius:7px; }
-    .annual-play-area { display:grid; grid-template-columns:minmax(340px,.94fr) minmax(330px,1.06fr); gap:15px; align-items:stretch; }
+    .annual-play-area { display:grid; grid-template-columns:1fr; gap:20px; }
     .annual-city-board,
     .annual-actions-panel,
     .annual-side-card { border:1px solid var(--studio-line); border-radius:15px; background:rgba(19,24,36,.86); box-shadow:0 13px 38px rgba(0,0,0,.12); }
     .annual-city-board { padding:10px 4px 0; border:0; background:transparent; box-shadow:none; }
     .annual-map-head { display:flex; justify-content:space-between; gap:10px; align-items:center; color:var(--studio-cream); font-size:.95rem; font-weight:800; }
     .annual-map-head small { color:var(--studio-muted); font-size:.78rem; font-weight:600; }
-    .annual-plaza { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px 7px; min-height:294px; margin-top:11px; padding:18px 5px 8px; }
-    .annual-map-node { min-width:0; display:flex; align-items:center; justify-content:center; gap:7px; padding:5px 3px; color:var(--node); background:transparent; border:0; border-radius:0; cursor:pointer; transition:transform .18s ease,opacity .18s ease; }
-    .annual-map-node:hover { transform:translateY(-2px); opacity:.88; }
+    .annual-plaza { position:relative; aspect-ratio:1.9 / 1; min-height:350px; margin-top:14px; overflow:hidden; border-block:1px solid rgba(229,238,255,.1); background:
+      radial-gradient(420px 170px at 50% 45%, rgba(72,104,142,.14), transparent 69%),
+      linear-gradient(148deg, transparent 0 48%, rgba(229,238,255,.055) 48.1% 48.35%, transparent 48.45% 100%),
+      linear-gradient(28deg, transparent 0 44%, rgba(229,238,255,.05) 44.1% 44.3%, transparent 44.4% 100%); }
+    .annual-plaza::before { content:""; position:absolute; inset:13% 8%; border:1px dashed rgba(229,238,255,.13); border-radius:48% 52% 47% 53%; transform:rotate(-7deg); }
+    .annual-plaza::after { content:""; position:absolute; inset:0; pointer-events:none; background:repeating-linear-gradient(90deg,transparent 0 11%,rgba(229,238,255,.035) 11.1% 11.28%,transparent 11.4% 22%); opacity:.55; }
+    .annual-map-node { position:absolute; z-index:1; min-width:0; width:max-content; max-width:150px; display:flex; align-items:center; justify-content:center; gap:8px; padding:6px 4px; color:var(--node); background:transparent; border:0; border-radius:0; cursor:pointer; transform:translate(-50%,-50%); transition:transform .18s ease,opacity .18s ease; }
+    .annual-map-node:hover { transform:translate(-50%,calc(-50% - 3px)); opacity:.88; }
     .annual-node-dot { width:12px; height:12px; flex:0 0 12px; border-radius:50%; background:var(--node); box-shadow:0 0 0 3px color-mix(in srgb,var(--node) 16%,transparent),0 0 13px color-mix(in srgb,var(--node) 52%,transparent); }
-    .annual-node-label { color:inherit; font-size:clamp(.8rem,.96vw,.95rem); font-weight:800; line-height:1.2; text-align:center; text-shadow:0 1px 12px rgba(0,0,0,.75); }
+    .annual-node-label { color:inherit; font-size:clamp(.78rem,.98vw,.96rem); font-weight:800; line-height:1.2; text-align:center; text-shadow:0 1px 12px rgba(0,0,0,.75); }
     .annual-map-node.selected { color:var(--studio-cream); }
     .annual-map-node.selected .annual-node-dot { background:var(--studio-cream); box-shadow:0 0 0 2px var(--studio-gold),0 0 18px rgba(244,185,66,.44); }
     .annual-map-node.target .annual-node-dot { animation:annualNodePulse 1s ease-in-out infinite alternate; }
     .annual-player-marker { width:0; height:0; flex:0 0 auto; border-right:5px solid transparent; border-left:5px solid transparent; border-bottom:9px solid var(--studio-gold); filter:drop-shadow(0 0 5px rgba(244,185,66,.5)); }
     @keyframes annualNodePulse { from { transform:scale(1); } to { transform:scale(1.35); } }
-    .annual-current-place { display:grid; gap:4px; margin-top:11px; }
-    .annual-current-place span { color:var(--studio-gold); font-size:.92rem; font-weight:800; }
-    .annual-current-place p { margin:0; color:var(--studio-muted); font-size:.88rem; line-height:1.5; }
-    .annual-actions-panel { padding:16px; }
+    .annual-actions-panel { padding:18px; }
+    .annual-action-place { display:grid; gap:5px; margin-bottom:15px; padding-bottom:14px; border-bottom:1px solid var(--studio-line); }
+    .annual-action-place strong { color:var(--studio-cream); font-size:1.18rem; }
+    .annual-action-place p { margin:0; color:var(--studio-muted); font-size:.88rem; line-height:1.5; }
     .annual-action-groups { gap:10px; }
     .annual-actions-panel .action-group { padding:0; overflow:hidden; background:transparent; border:0; border-radius:0; }
     .annual-actions-panel .action-group h3 { margin:0 0 9px; color:var(--studio-muted); font-size:.86rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
-    .annual-actions-panel .action-buttons { gap:7px; }
+    .annual-actions-panel .action-buttons { grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
     .annual-actions-panel .action-btn { padding:13px 14px; color:var(--studio-cream); background:rgba(255,255,255,.035); border:1px solid rgba(229,238,255,.12); border-radius:10px; }
     .annual-actions-panel .action-btn:hover { transform:translateX(-2px); border-color:var(--studio-gold); background:rgba(244,185,66,.08); }
     .annual-actions-panel .action-btn .topline { color:var(--studio-cream); font-family:inherit; font-size:1rem; font-weight:800; }
     .annual-actions-panel .action-btn .topline span:last-child { padding:4px 7px; color:var(--studio-gold); font-size:.74rem; background:rgba(244,185,66,.1); border-radius:999px; }
     .annual-actions-panel .action-btn .subline { color:var(--studio-muted); font-size:.82rem; line-height:1.48; }
     .annual-wait-group { margin-top:5px; padding-top:11px !important; border-top:1px solid var(--studio-line) !important; }
+    .annual-wait-group .action-buttons { grid-template-columns:1fr; }
     .annual-wait-group .action-btn { opacity:.78; }
     .annual-life-side { position:sticky; top:12px; display:grid; gap:10px; }
     .annual-side-card { padding:14px; }
@@ -5387,8 +5393,8 @@
     }
     @media (max-width: 760px) {
       .annual-life-shell { padding:17px 12px 34px; }
-      .annual-play-area { grid-template-columns:1fr; }
-      .annual-plaza { grid-template-columns:repeat(2,minmax(0,1fr)); min-height:0; gap:15px 7px; }
+      .annual-plaza { aspect-ratio:1.15 / 1; min-height:390px; }
+      .annual-actions-panel .action-buttons { grid-template-columns:1fr; }
       .annual-life-side { grid-template-columns:1fr; }
       .annual-life-intro { grid-template-columns:auto 1fr; }
       .annual-life-intro button { grid-column:2; justify-self:start; }
@@ -6195,7 +6201,7 @@
         },
         palette: { a: "#fee8c9", b: "#f0a563", c: "#8c5570" },
         skyline: [40, 58, 32, 72, 46, 64, 38, 78, 52, 68, 48],
-        buildings: ["home", "employment", "wardrobe", "cafe", "script", "casting", "fund", "gear", "bank", "investor", "cinematheque"]
+        buildings: ["home", "employment", "wardrobe", "cafe", "script", "casting", "fund", "gear", "bank", "investor", "cinematheque", "airport"]
       },
       {
         id: "athens",
@@ -6206,7 +6212,7 @@
         },
         palette: { a: "#f7e4c8", b: "#d7aa7a", c: "#78677a" },
         skyline: [36, 48, 35, 57, 43, 64, 34, 52, 40, 60, 38],
-        buildings: ["home", "employment", "cinematheque", "cafe", "crew", "filmSchool", "bank", "post"]
+        buildings: ["home", "employment", "cinematheque", "cafe", "crew", "filmSchool", "bank", "post", "airport"]
       },
       {
         id: "berlin",
@@ -6217,7 +6223,7 @@
         },
         palette: { a: "#d8e3ea", b: "#9fb7c5", c: "#5a5f74" },
         skyline: [62, 78, 48, 68, 58, 84, 46, 58, 76, 40, 66],
-        buildings: ["home", "employment", "post", "gear", "cafe", "cinematheque", "investor", "script"]
+        buildings: ["home", "employment", "post", "gear", "cafe", "cinematheque", "investor", "script", "airport"]
       },
       {
         id: "london",
@@ -6228,7 +6234,7 @@
         },
         palette: { a: "#e3dddb", b: "#b09f90", c: "#5f5465" },
         skyline: [68, 52, 74, 42, 66, 88, 48, 60, 55, 71, 44],
-        buildings: ["home", "employment", "festival", "cinema", "cafe", "bank", "casting", "gear"]
+        buildings: ["home", "employment", "festival", "cinema", "cafe", "bank", "casting", "gear", "airport"]
       },
       {
         id: "nyc",
@@ -6239,7 +6245,7 @@
         },
         palette: { a: "#e3edf5", b: "#8ba6c5", c: "#4c5678" },
         skyline: [88, 62, 98, 50, 76, 92, 48, 84, 61, 103, 56],
-        buildings: ["home", "employment", "set", "tv", "loan", "casino", "cafe", "investor", "post"]
+        buildings: ["home", "employment", "set", "tv", "loan", "casino", "cafe", "investor", "post", "airport"]
       },
       {
         id: "paris",
@@ -6250,7 +6256,7 @@
         },
         palette: { a: "#f3dbc4", b: "#d68863", c: "#70546f" },
         skyline: [34, 44, 37, 54, 42, 64, 36, 58, 40, 70, 44],
-        buildings: ["home", "employment", "cinematheque", "script", "post", "crew", "wardrobe", "fund"]
+        buildings: ["home", "employment", "cinematheque", "script", "post", "crew", "wardrobe", "fund", "airport"]
       }
     ];
 
@@ -7732,7 +7738,7 @@
     }
 
     function visibleBuildings(city = getCity()) {
-      return (city.buildings || []).filter((buildingId) => buildingId !== "airport");
+      return (city.buildings || []).filter((buildingId) => isLifeMode() || buildingId !== "airport");
     }
 
     function normalizeCurrentBuilding() {
@@ -8015,6 +8021,22 @@
           en: "Not enough cash for a ticket. The skies belong to the rich and the predatory."
         }), "bad");
         return false;
+      }
+      // Flights are city navigation in the monthly game: they cost money,
+      // but do not consume the player's one meaningful action for the month.
+      if (isLifeMode()) {
+        changeCash(-cost);
+        gameState.city = cityId;
+        gameState.currentBuilding = visibleBuildings(target)[0] || "home";
+        dom.openCategoryGroup = null;
+        flashMessage(localize({
+          he: "נחתת ב" + localize(target.name) + ". החודש עדיין פתוח לבחירה.",
+          en: "You landed in " + localize(target.name) + ". Your monthly action is still open."
+        }), "good");
+        playSfx("travel");
+        saveGame();
+        render();
+        return true;
       }
       if (!spendHours(3, t("flyCost", { hours: 3, cost }))) {
         return false;
@@ -11496,12 +11518,26 @@
       return Object.entries(effects || {}).map(([key, value]) => lifeEffectLabel(key, value)).join(" · ");
     }
 
-    function annualMapNodeMarkup(buildingId, hintBuilding) {
+    function annualMapPosition(buildingId, index, total) {
+      const positions = {
+        airport: [88, 15], employment: [16, 21], wardrobe: [50, 15], cafe: [76, 28],
+        bank: [32, 39], home: [52, 48], gear: [16, 61], script: [82, 61],
+        cinematheque: [39, 70], fund: [61, 81], casting: [86, 82], investor: [19, 84],
+        post: [66, 68], crew: [32, 78], filmSchool: [53, 86], festival: [82, 48],
+        cinema: [50, 28], set: [26, 57], tv: [76, 74], loan: [26, 82], casino: [70, 85]
+      };
+      const fallback = buildingPos(index, total);
+      const point = positions[buildingId] || [fallback.left, fallback.top];
+      return { left: point[0], top: point[1] };
+    }
+
+    function annualMapNodeMarkup(buildingId, hintBuilding, index, total) {
       const building = getBuilding(buildingId);
       const selected = buildingId === gameState.currentBuilding;
       const target = buildingId === hintBuilding;
+      const position = annualMapPosition(buildingId, index, total);
       return `
-        <button class="annual-map-node ${selected ? "selected" : ""} ${target ? "target" : ""}" style="--node:${building.color[0]};" data-action="goToBuilding" data-value="${buildingId}" title="${localize({ he: "לעבור אל " + building.label.he, en: "Go to " + building.label.en })}">
+        <button class="annual-map-node ${selected ? "selected" : ""} ${target ? "target" : ""}" style="--node:${building.color[0]};left:${position.left}%;top:${position.top}%;" data-action="goToBuilding" data-value="${buildingId}" title="${localize({ he: "לעבור אל " + building.label.he, en: "Go to " + building.label.en })}">
           <span class="annual-node-dot" aria-hidden="true"></span>
           <span class="annual-node-label">${localize(building.label)}</span>
           ${selected ? `<span class="annual-player-marker" aria-label="${localize({ he: "את/ה כאן", en: "You are here" })}"></span>` : ""}
@@ -11510,11 +11546,38 @@
     }
 
     function renderLifeMonthlyActions(buildingId) {
+      if (buildingId === "airport") {
+        const targets = CITIES.filter((city) => city.id !== gameState.city);
+        return `
+          <div class="annual-action-place">
+            <strong>${localize({ he: "טיסות בין ערים", en: "Flights between cities" })}</strong>
+            <p>${localize({ he: "טיסה עולה כסף אך לא סוגרת את החודש: אחרי הנחיתה בוחרים פעולה במקום החדש.", en: "A flight costs money but does not close the month: after landing, choose an action in the new city." })}</p>
+          </div>
+          <div class="action-groups annual-action-groups">
+            <div class="action-group">
+              <h3>${localize({ he: "בחר/י יעד", en: "Choose a destination" })}</h3>
+              <div class="action-buttons">
+                ${targets.map((city) => buttonMarkup(
+                  "flyTo",
+                  city.id,
+                  localize(city.name),
+                  localize(city.mood),
+                  localize({ he: "כרטיס טיסה · " + formatMoney(flightCost(city.id)), en: "Flight ticket · " + formatMoney(flightCost(city.id)) })
+                )).join("")}
+              </div>
+            </div>
+          </div>
+        `;
+      }
       const route = lifeRouteForBuilding(buildingId);
       const cards = lifeDecisionDeck(route);
       const wait = lifeWaitAction();
       const building = getBuilding(buildingId);
       return `
+        <div class="annual-action-place">
+          <strong>${localize(building.label)}</strong>
+          <p>${buildingSpeech(buildingId)}</p>
+        </div>
         <div class="action-groups annual-action-groups">
           <div class="action-group">
             <h3>${localize(building.label)} · ${localize({ he: "הפעולה של החודש", en: "This month's action" })}</h3>
@@ -11596,9 +11659,8 @@
                 <section class="annual-city-board" style="--scene-a:${currentBuilding.color[0]};--scene-b:${currentBuilding.color[1]};">
                   <div class="annual-map-head"><span>${localize({ he: "המפה של " + localize(city.name), en: localize(city.name) + " map" })}</span><small>${localize({ he: "נקודה פותחת פעולה · פעולה מקדמת חודש", en: "A point opens an action · an action advances a month" })}</small></div>
                   <div class="annual-plaza">
-                    ${buildings.map((buildingId) => annualMapNodeMarkup(buildingId, hintBuilding)).join("")}
+                    ${buildings.map((buildingId, index) => annualMapNodeMarkup(buildingId, hintBuilding, index, buildings.length)).join("")}
                   </div>
-                  <div class="annual-current-place"><span>${localize(currentBuilding.label)}</span><p>${buildingSpeech(gameState.currentBuilding)}</p></div>
                 </section>
                 <section class="annual-actions-panel">
                   ${renderLifeMonthlyActions(gameState.currentBuilding)}
