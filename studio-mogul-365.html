@@ -5312,6 +5312,87 @@
       .life-choice-skip { grid-template-columns:auto 1fr; }
       .life-choice-skip .life-choice-cta { grid-column:1/-1; grid-row:auto; padding-top:8px; border-top:1px solid rgba(229,238,255,.11); }
     }
+
+    /* ---- Annual city mode -------------------------------------------------
+       One game only: the familiar daily city loop, with a calendar month in
+       place of a day. Places are navigation; an action is the time cost. */
+    .annual-life-shell {
+      min-height:calc(100vh - 54px);
+      padding:clamp(18px,3vw,42px);
+      color:var(--studio-cream);
+      background:
+        radial-gradient(720px 420px at 7% -10%, rgba(78,65,152,.30), transparent 65%),
+        radial-gradient(650px 430px at 95% 3%, rgba(23,129,129,.17), transparent 65%),
+        linear-gradient(155deg,#0d1320,#090b11 70%);
+      overflow:auto;
+    }
+    .annual-life-layout { width:min(1380px,100%); margin:0 auto; display:grid; grid-template-columns:minmax(0,1fr) minmax(255px,310px); gap:24px; align-items:start; }
+    .annual-life-header { margin-bottom:17px; }
+    .annual-label { display:block; color:var(--studio-gold); font-size:.68rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+    .annual-life-header h1 { margin:7px 0 0; color:var(--studio-cream); font-size:clamp(1.7rem,3vw,3.15rem); line-height:1; letter-spacing:-.05em; }
+    .annual-life-header p { max-width:62ch; margin:9px 0 0; color:var(--studio-muted); font-size:.82rem; line-height:1.5; }
+    .annual-life-intro { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:10px; align-items:center; margin:0 0 14px; padding:10px 12px; border:1px solid rgba(244,185,66,.34); border-radius:11px; background:rgba(244,185,66,.08); }
+    .annual-life-intro > span { color:var(--studio-gold); font-size:1rem; }
+    .annual-life-intro p { margin:0; color:rgba(247,242,232,.84); font-size:.72rem; line-height:1.42; }
+    .annual-life-intro button { padding:7px 9px; color:#1b160c; font-size:.68rem; font-weight:800; background:var(--studio-gold); border-radius:7px; }
+    .annual-play-area { display:grid; grid-template-columns:minmax(340px,.94fr) minmax(330px,1.06fr); gap:15px; align-items:stretch; }
+    .annual-city-board,
+    .annual-actions-panel,
+    .annual-side-card { border:1px solid var(--studio-line); border-radius:15px; background:rgba(19,24,36,.86); box-shadow:0 13px 38px rgba(0,0,0,.12); }
+    .annual-city-board { padding:14px; }
+    .annual-map-head { display:flex; justify-content:space-between; gap:10px; align-items:center; color:var(--studio-cream); font-size:.77rem; font-weight:800; }
+    .annual-map-head small { color:var(--studio-muted); font-size:.62rem; font-weight:600; }
+    .annual-plaza { position:relative; aspect-ratio:1 / .72; margin-top:11px; overflow:hidden; border:1px solid rgba(229,238,255,.1); border-radius:12px; background:
+      radial-gradient(200px 130px at 50% 49%, rgba(244,185,66,.12), transparent 65%),
+      linear-gradient(145deg,rgba(5,9,18,.95),rgba(23,31,49,.92)); }
+    .annual-plaza::before { content:""; position:absolute; inset:12% 15%; border:1px dashed rgba(229,238,255,.11); border-radius:50%; }
+    .annual-plaza .building { width:clamp(54px,7vw,78px); }
+    .annual-plaza .building-card { background:linear-gradient(160deg,rgba(255,255,255,.15),transparent 42%),linear-gradient(180deg,var(--b1),var(--b2)); border:1px solid rgba(255,255,255,.16); border-radius:11px; }
+    .annual-plaza .sign { color:#171c29; background:rgba(247,242,232,.91); border-radius:8px; font-family:inherit; font-size:clamp(.56rem,.66vw,.69rem); }
+    .annual-plaza .building.selected .building-card { box-shadow:0 0 0 2px var(--studio-gold),0 0 22px rgba(244,185,66,.2); }
+    .annual-plaza .building.selected .sign { color:#171c29; }
+    .annual-plaza .building.target .sign { color:#171c29; animation:blinkSign 1s infinite alternate; }
+    .annual-plaza .avatar .torso { background:var(--studio-gold); border-color:rgba(255,255,255,.22); }
+    .annual-current-place { display:grid; gap:4px; margin-top:11px; }
+    .annual-current-place span { color:var(--studio-gold); font-size:.72rem; font-weight:800; }
+    .annual-current-place p { margin:0; color:var(--studio-muted); font-size:.7rem; line-height:1.45; }
+    .annual-actions-panel { padding:13px; }
+    .annual-action-groups { gap:10px; }
+    .annual-actions-panel .action-group { padding:0; overflow:hidden; background:transparent; border:0; border-radius:0; }
+    .annual-actions-panel .action-group h3 { margin:0 0 8px; color:var(--studio-muted); font-size:.69rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+    .annual-actions-panel .action-buttons { gap:7px; }
+    .annual-actions-panel .action-btn { padding:11px 12px; color:var(--studio-cream); background:rgba(255,255,255,.035); border:1px solid rgba(229,238,255,.12); border-radius:10px; }
+    .annual-actions-panel .action-btn:hover { transform:translateX(-2px); border-color:var(--studio-gold); background:rgba(244,185,66,.08); }
+    .annual-actions-panel .action-btn .topline { color:var(--studio-cream); font-family:inherit; font-size:.78rem; font-weight:800; }
+    .annual-actions-panel .action-btn .topline span:last-child { padding:3px 6px; color:var(--studio-gold); font-size:.6rem; background:rgba(244,185,66,.1); border-radius:999px; }
+    .annual-actions-panel .action-btn .subline { color:var(--studio-muted); font-size:.66rem; line-height:1.42; }
+    .annual-wait-group { margin-top:5px; padding-top:11px !important; border-top:1px solid var(--studio-line) !important; }
+    .annual-wait-group .action-btn { opacity:.78; }
+    .annual-life-side { position:sticky; top:12px; display:grid; gap:10px; }
+    .annual-side-card { padding:14px; }
+    .annual-side-card > strong { display:block; margin-top:6px; color:var(--studio-cream); font-size:.93rem; }
+    .annual-side-card > p { margin:8px 0 0; color:var(--studio-muted); font-size:.67rem; line-height:1.42; }
+    .annual-months { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:6px; margin-top:12px; }
+    .annual-months span { height:25px; display:grid; place-items:center; color:var(--studio-muted); font-size:.6rem; font-weight:800; border:1px solid var(--studio-line); border-radius:7px; }
+    .annual-months span.done { color:#10261e; border-color:var(--studio-green); background:var(--studio-green); }
+    .annual-months span.now { color:#342609; border-color:var(--studio-gold); background:var(--studio-gold); box-shadow:0 0 0 3px rgba(244,185,66,.12); }
+    .annual-log { display:grid; gap:7px; margin:10px 0 0; padding:0; list-style:none; }
+    .annual-log li { display:grid; grid-template-columns:48px 1fr; gap:6px; color:var(--studio-muted); font-size:.66rem; }
+    .annual-log b { color:var(--studio-gold); font-size:.62rem; }
+    .annual-event-card { border-color:rgba(244,185,66,.3); background:linear-gradient(145deg,rgba(244,185,66,.10),rgba(19,24,36,.88)); }
+    .annual-event-card small { display:block; margin-top:8px; color:var(--studio-green); font-size:.62rem; line-height:1.4; }
+    @media (max-width: 1060px) {
+      .annual-life-layout { grid-template-columns:1fr; }
+      .annual-life-side { position:static; grid-template-columns:repeat(3,minmax(0,1fr)); }
+    }
+    @media (max-width: 760px) {
+      .annual-life-shell { padding:17px 12px 34px; }
+      .annual-play-area { grid-template-columns:1fr; }
+      .annual-plaza { aspect-ratio:1.22 / 1; }
+      .annual-life-side { grid-template-columns:1fr; }
+      .annual-life-intro { grid-template-columns:auto 1fr; }
+      .annual-life-intro button { grid-column:2; justify-self:start; }
+    }
   </style>
 </head>
 <body>
@@ -5373,7 +5454,7 @@
         daysLeft: "ימים נותרו",
         nextMove: "מה עכשיו",
         startIntro: "מתחילים עם 300$, ספה של חבר, בלי עבודה, בלי דירה ובלי קריירה. תתלבש כמו בן אדם, תשיג משמרות, תשלם שכירות, תקנה מצלמה ורק אז תנסה להיות אגדה.",
-        startHowTo: "כל יום מתחלק לשעות שאת/ה מחלק/ת בין עבודה, לימודים וחיי היומיום; המיקומים בעיר מקובצים לפי נושא כדי שיהיה קל למצוא לאן ללכת. המטרה: לעמוד ביעדים שתבחר/י למטה — עושר, קריירה, השכלה ואושר — לפני שהעונה נגמרת.",
+        startHowTo: "כל שנה מחולקת ל־12 חודשים. בכל חודש מטיילים בין המקומות בעיר ובוחרים פעולה אחת: עבודה, לימודים, יצירה, כסף או חיים. הפעולה מקדמת חודש, ובסוף דצמבר קורה אירוע שנתי. המטרה: לעמוד ביעדים שתבחר/י למטה — עושר, קריירה, השכלה ואושר — לאורך מסלול החיים.",
         playerName: "שם הדמות",
         economyDiff: "קושי כלכלי",
         language: "שפה",
@@ -5518,7 +5599,7 @@
         daysLeft: "Days left",
         nextMove: "What now",
         startIntro: "You begin with $300, a borrowed couch, no job, no apartment, and no film career. Dress like a professional, land shifts, pay rent, buy a camera, then try to become a legend.",
-        startHowTo: "Each day splits into hours you spend on work, training, and daily life; locations in the city are grouped by topic so it's easy to find where to go. The goal: hit the targets you pick below — wealth, career, education, happiness — before the season runs out.",
+        startHowTo: "Every year is split into 12 months. Each month, travel between places in the city and choose one action: work, learn, create, handle money, or live. An action advances one month, and an annual event lands after December. The goal: reach the targets you choose below — wealth, career, education, and happiness — across your life path.",
         playerName: "Character name",
         economyDiff: "Economy difficulty",
         language: "Language",
@@ -6247,10 +6328,9 @@
     function createState(overrides = {}) {
       const prefs = loadPrefs();
       return Object.assign({
-        // "life" is the new strategic layer: one year is three meaningful
-        // decisions, rather than dozens of tiny clicks. Old saves do not have
-        // this key and are normalized to the familiar daily simulation below.
-        gameMode: ["life", "daily"].includes(prefs.gameMode) ? prefs.gameMode : "life",
+        // The game has one rhythm: a free city map with one consequential
+        // monthly action at a time.
+        gameMode: "life",
         life: createLifeState(prefs.lifeHorizon),
         day: 1,
         hour: 7,
@@ -7066,9 +7146,8 @@
         }
         const parsed = JSON.parse(raw);
         gameState = Object.assign(createState(), parsed);
-        // A save created before the life-route release is intentionally kept
-        // in daily mode. Starting a new game is the opt-in to the new rhythm.
-        gameState.gameMode = ["life", "daily"].includes(parsed.gameMode) ? parsed.gameMode : "daily";
+        // All existing saves continue in the single monthly city rhythm.
+        gameState.gameMode = "life";
         ensureLifeState();
         gameState.activeNotice = null;
         if (!Array.isArray(gameState.highscores)) {
@@ -7892,6 +7971,16 @@
           en: "That building is not in this city right now."
         }), "bad");
         return false;
+      }
+      // In the yearly game, walking around town is exploration, not the
+      // monthly decision. Only a chosen action advances the calendar.
+      if (isLifeMode()) {
+        gameState.currentBuilding = id;
+        if (!gameState.buildingVisits) gameState.buildingVisits = {};
+        gameState.buildingVisits[city.id + ":" + id] = true;
+        saveGame();
+        render();
+        return true;
       }
       const distance = distanceBetween(city, gameState.currentBuilding, id);
       if (distance > 0 && !spendHours(distance, t("travelCost", { hours: distance }))) {
@@ -10758,7 +10847,6 @@
         <button class="icon-btn hud-more-btn ${dom.hudMenuOpen ? "active" : ""}" data-action="toggleHudMenu" title="${localize({ he: "עוד אפשרויות", en: "More options" })}">⋯</button>
         <div class="hud-secondary-group ${dom.hudMenuOpen ? "open" : ""}">
           <button class="icon-btn" data-action="toggleStatusWindow" title="${localize({ he: "סטטוס יומי", en: "Daily status" })}">${localize({ he: "סטטוס", en: "Status" })}</button>
-          <button class="icon-btn ${gameState.focusMode ? "active" : ""}" data-action="toggleFocusMode" title="${localize({ he: "מסך ממוקד", en: "Focus mode" })}">${gameState.focusMode ? localize({ he: "ממוקד", en: "Focus" }) : localize({ he: "קלאסי", en: "Classic" })}</button>
           <button class="icon-btn" data-action="setLanguage" data-value="${gameState.language === "he" ? "en" : "he"}">${gameState.language === "he" ? "EN" : "עב"}</button>
           <button class="icon-btn" data-action="saveGame" title="${localize({ he: "שמור", en: "Save" })}">${localize({ he: "שמור", en: "Save" })}</button>
           <button class="icon-btn" data-action="toggleMute" title="${t("mute")}">${gameState.muted ? localize({ he: "שקט", en: "Muted" }) : localize({ he: "צליל", en: "Sound" })}</button>
@@ -11395,25 +11483,117 @@
       `;
     }
 
+    function lifeRouteForBuilding(buildingId) {
+      const routes = {
+        employment: "work", wardrobe: "work", cafe: "life", home: "life",
+        script: "create", cinematheque: "create", filmSchool: "create", post: "create", gear: "create",
+        bank: "finance", fund: "finance", investor: "finance", loan: "finance"
+      };
+      return routes[buildingId] || "life";
+    }
+
+    function lifeEffectsLine(effects) {
+      return Object.entries(effects || {}).map(([key, value]) => lifeEffectLabel(key, value)).join(" · ");
+    }
+
+    function renderLifeMonthlyActions(buildingId) {
+      const route = lifeRouteForBuilding(buildingId);
+      const cards = lifeDecisionDeck(route);
+      const wait = lifeWaitAction();
+      const building = getBuilding(buildingId);
+      return `
+        <div class="action-groups annual-action-groups">
+          <div class="action-group">
+            <h3>${localize(building.label)} · ${localize({ he: "הפעולה של החודש", en: "This month's action" })}</h3>
+            <div class="action-buttons">
+              ${cards.map((card) => buttonMarkup(
+                "makeLifeDecision",
+                route + ":" + card.id,
+                localize(card.title),
+                localize(card.copy) + " · " + lifeEffectsLine(card.effects),
+                localize({ he: "חודש אחד", en: "One month" })
+              )).join("")}
+            </div>
+          </div>
+          <div class="action-group annual-wait-group">
+            <h3>${localize({ he: "אין חובה להספיק הכול", en: "You do not have to do it all" })}</h3>
+            <div class="action-buttons">${buttonMarkup(
+              "makeLifeDecision",
+              "wait:" + wait.id,
+              localize(wait.title),
+              localize(wait.copy) + " · " + lifeEffectsLine(wait.effects),
+              localize({ he: "חודש אחד", en: "One month" })
+            )}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderLifeMonthClock() {
+      const life = ensureLifeState();
+      return `
+        <section class="annual-side-card annual-clock-card">
+          <span class="annual-label">${localize({ he: "שעון השנה", en: "Year clock" })}</span>
+          <strong>${localize({ he: "חודש " + life.month + " מתוך 12", en: "Month " + life.month + " of 12" })}</strong>
+          <div class="annual-months">${Array.from({ length: 12 }, (_, index) => {
+            const month = index + 1;
+            return `<span class="${month < life.month ? "done" : ""} ${month === life.month ? "now" : ""}">${month}</span>`;
+          }).join("")}</div>
+          <p>${localize({ he: "פעולה אחת במקום אחד = חודש אחד. בדצמבר יקרה אירוע שנתי.", en: "One action at one place = one month. December brings an annual event." })}</p>
+        </section>
+      `;
+    }
+
+    function renderLifeSide() {
+      const life = ensureLifeState();
+      const latestEvent = life.events[0];
+      const yearActions = life.yearActions.slice().reverse().slice(0, 4);
+      return `
+        <aside class="annual-life-side">
+          ${renderLifeMonthClock()}
+          <section class="annual-side-card">
+            <span class="annual-label">${localize({ he: "מה עשית השנה", en: "This year so far" })}</span>
+            ${yearActions.length ? `<ul class="annual-log">${yearActions.map((entry) => `<li><b>${localize({ he: "חודש " + entry.month, en: "Month " + entry.month })}</b><span>${entry.title}</span></li>`).join("")}</ul>` : `<p>${localize({ he: "עוד לא בחרת פעולה השנה.", en: "No action chosen this year yet." })}</p>`}
+          </section>
+          ${latestEvent ? `<section class="annual-side-card annual-event-card"><span class="annual-label">✦ ${localize({ he: "מה קרה בסוף " + latestEvent.year, en: "What happened at the end of " + latestEvent.year })}</span><strong>${latestEvent.title}</strong><p>${latestEvent.copy}</p><small>${lifeEffectsLine(latestEvent.effects)}</small></section>` : ""}
+        </aside>
+      `;
+    }
+
     function renderLifeBoard() {
       const life = ensureLifeState();
       const period = lifePeriod();
-      const intro = !life.introSeen ? `
-        <div class="life-intro-note"><span>✦</span><p>${localize({ he: "שנה מתנהלת כמו יום: בכל חודש מטיילים בין המקומות בעיר ובוחרים פעולה אחת. הפעולה מקדמת את השעון; בדצמבר קורה אירוע שנתי. אין תשובה שגויה — יש מחיר, השלכה ודלת שנפתחת.", en: "A year plays like a day: each month you travel around town and choose one action. The action moves the clock; December brings an annual event. There is no wrong answer — only cost, consequence, and an opened door." })}</p><button data-action="dismissLifeIntro">${localize({ he: "הבנתי", en: "Got it" })}</button></div>` : "";
+      const city = getCity();
+      const buildings = visibleBuildings(city);
+      const currentBuilding = getBuilding(gameState.currentBuilding);
+      const hint = currentHint();
+      const hintBuilding = buildings.includes(hint.building) ? hint.building : null;
+      const intro = !life.introSeen ? `<div class="annual-life-intro"><span>✦</span><p>${localize({ he: "זהו אותו משחק חיים, בקצב שנתי: מטיילים במפה כמו ביום רגיל, בוחרים פעולה אחת במקום, ורק היא מעבירה חודש. אין כרטיסי מסלול ואין בחירה כפויה בין קטגוריות.", en: "This is the same life game at a yearly pace: travel the map as on a normal day, choose one action at a place, and only it moves one month. There are no route cards or forced category picks." })}</p><button data-action="dismissLifeIntro">${localize({ he: "הבנתי", en: "Got it" })}</button></div>` : "";
       dom.boardStage.innerHTML = `
-        <main class="life-shell">
-          <div class="life-layout">
-            <section class="life-main">
-              <div class="life-heading">
-                <span class="life-kicker">${localize({ he: "מסלול חיים · " + period.he + " " + life.calendarYear, en: "Life route · " + period.en + " " + life.calendarYear })}</span>
-                <h1>${life.age === life.startAge && life.month === 1 ? localize({ he: "גיל 21. החודש הראשון.", en: "Age 21. The first month." }) : localize({ he: "לאן הולכים ב" + period.he + "?", en: "Where do you go in " + period.en + "?" })}</h1>
-                <p>${localize({ he: "מטרה: לבנות כסף, שם וחופש יצירתי — בלי למחוק את החיים בדרך.", en: "Goal: build money, a name, and creative freedom — without erasing life along the way." })}</p>
-              </div>
+        <main class="annual-life-shell">
+          <div class="annual-life-layout">
+            <section class="annual-life-main">
+              <header class="annual-life-header">
+                <span class="annual-label">${localize({ he: "גיל " + life.age + " · " + period.he + " " + life.calendarYear + " · " + localize(city.name), en: "Age " + life.age + " · " + period.en + " " + life.calendarYear + " · " + localize(city.name) })}</span>
+                <h1>${localize({ he: "מה עושים החודש?", en: "What do you do this month?" })}</h1>
+                <p>${localize({ he: "מזומן, חוב, עבודה וחיים מתקדמים יחד. לטייל בין מקומות חופשי; לבחור פעולה אחת זה מה שמקדם זמן.", en: "Cash, debt, work, and life move together. Travel freely between places; choosing one action is what advances time." })}</p>
+              </header>
               ${intro}
-              ${renderLifeRouteMap()}
-              ${renderLifeChoiceDeck()}
+              <div class="annual-play-area">
+                <section class="annual-city-board" style="--scene-a:${currentBuilding.color[0]};--scene-b:${currentBuilding.color[1]};">
+                  <div class="annual-map-head"><span>${localize({ he: "המפה של " + localize(city.name), en: localize(city.name) + " map" })}</span><small>${localize({ he: "לחץ/י על מקום כדי להגיע אליו", en: "Select a place to go there" })}</small></div>
+                  <div class="annual-plaza">
+                    ${buildings.map((buildingId, index) => buildingMarkup(buildingId, index, buildings.length, hintBuilding)).join("")}
+                    ${avatarMarkup()}
+                  </div>
+                  <div class="annual-current-place"><span>${localize(currentBuilding.label)}</span><p>${buildingSpeech(gameState.currentBuilding)}</p></div>
+                </section>
+                <section class="annual-actions-panel">
+                  ${renderLifeMonthlyActions(gameState.currentBuilding)}
+                </section>
+              </div>
             </section>
-            ${renderLifeYearRail()}
+            ${renderLifeSide()}
           </div>
           ${renderClassicPanel()}
         </main>
@@ -13000,7 +13180,6 @@
         dom.startScreen.innerHTML = "";
         return;
       }
-      const startsLife = gameState.gameMode !== "daily";
       dom.startScreen.classList.remove("hidden");
       dom.startScreen.innerHTML = `
         <div class="start-card">
@@ -13020,13 +13199,6 @@
               </select>
             </div>
             <div class="field">
-              <label>${localize({ he: "קצב המשחק", en: "Game rhythm" })}</label>
-              <select id="startMode">
-                <option value="life" ${startsLife ? "selected" : ""}>${localize({ he: "מסלול חיים · החלטה בכל חודש", en: "Life route · one decision a month" })}</option>
-                <option value="daily" ${!startsLife ? "selected" : ""}>${localize({ he: "סימולציה יומית · שעות ומשמרות", en: "Daily simulation · hours and shifts" })}</option>
-              </select>
-            </div>
-            <div class="field">
               <label>${localize({ he: "אורך מסלול החיים", en: "Life route length" })}</label>
               <select id="startLifeHorizon">
                 ${[
@@ -13034,12 +13206,6 @@
                   [25, localize({ he: "קריירה · 25 שנים · 15–25 דק׳", en: "Career · 25 years · 15–25 min" })],
                   [70, localize({ he: "חיים מלאים · גיל 21–91 · נשמר", en: "Full life · age 21–91 · saved" })]
                 ].map(([len, label]) => `<option value="${len}" ${ensureLifeState().horizon === len ? "selected" : ""}>${label}</option>`).join("")}
-              </select>
-            </div>
-            <div class="field">
-              <label>${localize({ he: "אורך הסימולציה היומית", en: "Daily simulation length" })}</label>
-              <select id="startSeason">
-                ${[30, 90, 365].map((len) => `<option value="${len}" ${seasonLength() === len ? "selected" : ""}>${t("season" + len)}</option>`).join("")}
               </select>
             </div>
           </div>
@@ -13104,25 +13270,13 @@
       applyTheme();
       renderHud();
       dom.sidePanel.innerHTML = "";
-      if (isLifeMode()) {
-        renderLifeBoard();
-      } else if (gameState.focusMode) {
-        renderBoardFocus();
-      } else {
-        renderBoard();
-      }
+      renderLifeBoard();
       renderStatusWindow();
       renderNoticeWindow();
       renderCollectionWindow();
-      if (!isLifeMode()) {
-        renderMorningBrief();
-        renderPitchWindow();
-        renderDayRecapWindow();
-      } else {
-        dom.morningBriefWindow.classList.add("hidden");
-        dom.pitchWindow.classList.add("hidden");
-        dom.dayRecapWindow.classList.add("hidden");
-      }
+      dom.morningBriefWindow.classList.add("hidden");
+      dom.pitchWindow.classList.add("hidden");
+      dom.dayRecapWindow.classList.add("hidden");
       renderStartScreen();
       renderWinLoss();
     }
@@ -13341,9 +13495,7 @@
     function startFromScreen() {
       const nameField = document.getElementById("startName");
       const economyField = document.getElementById("startEconomy");
-      const modeField = document.getElementById("startMode");
       const lifeHorizonField = document.getElementById("startLifeHorizon");
-      const seasonField = document.getElementById("startSeason");
       const goals = {
         wealth: document.getElementById("goal-wealth").value,
         career: document.getElementById("goal-career").value,
@@ -13353,9 +13505,7 @@
       startGame({
         playerName: (nameField.value || "").trim() || (gameState.language === "he" ? "קובי" : "Jones"),
         economyDifficulty: economyField.value,
-        gameMode: modeField.value,
         lifeHorizon: Number(lifeHorizonField.value),
-        seasonLength: Number(seasonField.value),
         goalLevels: goals
       });
     }
@@ -13388,12 +13538,12 @@
       const prefs = loadPrefs();
       gameState = createState({
         started: true,
-        gameMode: options.gameMode === "daily" ? "daily" : "life",
+        gameMode: "life",
         life: createLifeState(options.lifeHorizon || prefs.lifeHorizon),
         playerName: options.playerName || prefs.playerName || gameState.playerName,
         economyDifficulty: options.economyDifficulty || prefs.economyDifficulty || "modest",
         goalLevels: options.goalLevels || prefs.goalLevels || { wealth: "modest", career: "modest", education: "modest", happiness: "modest" },
-        seasonLength: [30, 90, 365].includes(options.seasonLength) ? options.seasonLength : (prefs.seasonLength || 30),
+        seasonLength: 30,
         language: gameState.language,
         themeIndex: gameState.themeIndex,
         muted: gameState.muted,
@@ -13408,7 +13558,6 @@
       }
       savePrefs();
       saveGame();
-      if (!isLifeMode()) triggerDailyBriefing();
       render();
       return true;
     }
