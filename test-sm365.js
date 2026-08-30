@@ -121,6 +121,10 @@ function run(htmlPath) {
   assert.strictEqual(game.resolveLifeMonthlyEvent(surprise.id, surprise.choices[0].id), true, "surprise task choice resolves");
   assert.strictEqual(state().life.month, 2, "surprise task does not consume another month");
   assert.strictEqual(state().life.monthlyEvent, null, "resolved surprise task closes");
+
+  state().experience = 17;
+  assert.strictEqual(game.makeLifeDecision("work", "anchor-shift"), true, "a later monthly choice resolves");
+  assert.ok(state().life.completedMissionIds.includes("first-credit"), "reaching a route mission records it exactly once");
 }
 
 if (require.main === module) {

@@ -5327,15 +5327,15 @@
         linear-gradient(155deg,#0d1320,#090b11 70%);
       overflow:auto;
     }
-    .annual-life-layout { width:min(1380px,100%); margin:0 auto; display:grid; grid-template-columns:minmax(0,1fr) minmax(255px,310px); gap:24px; align-items:start; }
-    .annual-life-header { margin-bottom:17px; }
+    .annual-life-layout { width:min(1380px,100%); margin:0 auto; display:grid; grid-template-columns:minmax(0,1fr) minmax(230px,270px); gap:20px; align-items:start; }
+    .annual-life-header { margin-bottom:11px; }
     .annual-label { display:block; color:var(--studio-gold); font-size:.82rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
-    .annual-life-header h1 { margin:7px 0 0; color:var(--studio-cream); font-size:clamp(2rem,3.25vw,3.45rem); line-height:1; letter-spacing:-.05em; }
-    .annual-life-header p { max-width:62ch; margin:10px 0 0; color:var(--studio-muted); font-size:1rem; line-height:1.55; }
-    .annual-life-intro { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:10px; align-items:center; margin:0 0 14px; padding:10px 12px; border:1px solid rgba(244,185,66,.34); border-radius:11px; background:rgba(244,185,66,.08); }
+    .annual-life-header h1 { margin:5px 0 0; color:var(--studio-cream); font-size:clamp(1.7rem,2.45vw,2.6rem); line-height:1.05; letter-spacing:-.045em; }
+    .annual-life-header p { display:none; }
+    .annual-life-intro { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:9px; align-items:center; margin:0 0 10px; padding:8px 11px; border:1px solid rgba(244,185,66,.34); border-radius:10px; background:rgba(244,185,66,.08); }
     .annual-life-intro > span { color:var(--studio-gold); font-size:1rem; }
-    .annual-life-intro p { margin:0; color:rgba(247,242,232,.84); font-size:.9rem; line-height:1.48; }
-    .annual-life-intro button { padding:8px 11px; color:#1b160c; font-size:.8rem; font-weight:800; background:var(--studio-gold); border-radius:7px; }
+    .annual-life-intro p { margin:0; color:rgba(247,242,232,.84); font-size:.78rem; line-height:1.38; }
+    .annual-life-intro button { padding:7px 10px; color:#1b160c; font-size:.72rem; font-weight:800; background:var(--studio-gold); border-radius:7px; }
     .annual-play-area { display:grid; grid-template-columns:1fr; gap:14px; }
     .annual-city-board,
     .annual-actions-panel,
@@ -5343,12 +5343,14 @@
     .annual-city-board { padding:10px 4px 0; border:0; background:transparent; box-shadow:none; }
     .annual-map-head { display:flex; justify-content:space-between; gap:10px; align-items:center; color:var(--studio-cream); font-size:.95rem; font-weight:800; }
     .annual-map-head small { color:var(--studio-muted); font-size:.78rem; font-weight:600; }
-    .annual-plaza { position:relative; aspect-ratio:3.8 / 1; min-height:300px; margin-top:12px; overflow:hidden; border-block:1px solid rgba(229,238,255,.1); background:
-      radial-gradient(420px 170px at 50% 45%, rgba(72,104,142,.14), transparent 69%),
-      linear-gradient(148deg, transparent 0 48%, rgba(229,238,255,.055) 48.1% 48.35%, transparent 48.45% 100%),
-      linear-gradient(28deg, transparent 0 44%, rgba(229,238,255,.05) 44.1% 44.3%, transparent 44.4% 100%); }
+    .annual-map-tools { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:6px; }
+    .annual-map-legend { display:flex; flex-wrap:wrap; gap:7px; color:var(--studio-muted); font-size:.65rem; }
+    .annual-map-legend span { display:inline-flex; align-items:center; gap:4px; }
+    .annual-map-legend i { width:7px; height:7px; border-radius:50%; background:var(--tone); }
+    .annual-map-advice { margin:0; color:var(--studio-blue); font-size:.69rem; text-align:end; }
+    .annual-plaza { position:relative; aspect-ratio:4.6 / 1; min-height:255px; margin-top:8px; overflow:hidden; border-block:1px solid rgba(229,238,255,.1); background:radial-gradient(420px 170px at 50% 45%, rgba(72,104,142,.14), transparent 69%); }
     .annual-plaza::before { content:""; position:absolute; inset:13% 8%; border:1px dashed rgba(229,238,255,.13); border-radius:48% 52% 47% 53%; transform:rotate(-7deg); }
-    .annual-plaza::after { content:""; position:absolute; inset:0; pointer-events:none; background:repeating-linear-gradient(90deg,transparent 0 11%,rgba(229,238,255,.035) 11.1% 11.28%,transparent 11.4% 22%); opacity:.55; }
+    .annual-plaza::after { content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(90deg,transparent,rgba(229,238,255,.035),transparent); opacity:.35; }
     .annual-map-node { position:absolute; z-index:1; min-width:0; width:max-content; max-width:150px; display:flex; align-items:center; justify-content:center; gap:8px; padding:6px 4px; color:var(--node); background:transparent; border:0; border-radius:0; cursor:pointer; transform:translate(-50%,-50%); transition:transform .18s ease,opacity .18s ease; }
     .annual-map-node:hover { transform:translate(-50%,calc(-50% - 3px)); opacity:.88; }
     .annual-node-dot { width:12px; height:12px; flex:0 0 12px; border-radius:50%; background:var(--node); box-shadow:0 0 0 3px color-mix(in srgb,var(--node) 16%,transparent),0 0 13px color-mix(in srgb,var(--node) 52%,transparent); }
@@ -5356,9 +5358,12 @@
     .annual-map-node.selected { color:var(--studio-cream); }
     .annual-map-node.selected .annual-node-dot { background:var(--studio-cream); box-shadow:0 0 0 2px var(--studio-gold),0 0 18px rgba(244,185,66,.44); }
     .annual-map-node.target .annual-node-dot { animation:annualNodePulse 1s ease-in-out infinite alternate; }
+    .annual-map-node.fresh .annual-node-dot { box-shadow:0 0 0 3px rgba(244,185,66,.22),0 0 17px rgba(244,185,66,.65); }
+    .annual-map-node.locked { opacity:.55; }
+    .annual-node-lock { margin-inline-start:1px; color:var(--studio-muted); font-size:.64rem; }
     .annual-player-marker { width:0; height:0; flex:0 0 auto; border-right:5px solid transparent; border-left:5px solid transparent; border-bottom:9px solid var(--studio-gold); filter:drop-shadow(0 0 5px rgba(244,185,66,.5)); }
     @keyframes annualNodePulse { from { transform:scale(1); } to { transform:scale(1.35); } }
-    .annual-actions-panel { padding:18px; }
+    .annual-actions-panel { padding:14px 16px; }
     .annual-action-place { display:grid; gap:5px; margin-bottom:15px; padding-bottom:14px; border-bottom:1px solid var(--studio-line); }
     .annual-action-place strong { color:var(--studio-cream); font-size:1.18rem; }
     .annual-action-place p { margin:0; color:var(--studio-muted); font-size:.88rem; line-height:1.5; }
@@ -5371,17 +5376,44 @@
     .annual-actions-panel .action-btn .topline { color:var(--studio-cream); font-family:inherit; font-size:1rem; font-weight:800; }
     .annual-actions-panel .action-btn .topline span:last-child { padding:4px 7px; color:var(--studio-gold); font-size:.74rem; background:rgba(244,185,66,.1); border-radius:999px; }
     .annual-actions-panel .action-btn .subline { color:var(--studio-muted); font-size:.82rem; line-height:1.48; }
+    .annual-actions-panel .annual-life-choice { display:grid; gap:8px; align-content:start; min-height:174px; text-align:start; }
+    .annual-life-choice .life-effects { display:flex; flex-wrap:wrap; gap:5px; margin:0; }
+    .annual-life-choice .life-choice-cta { display:flex; align-items:center; justify-content:space-between; padding-top:8px; color:var(--studio-gold); font-size:.74rem; font-weight:800; border-top:1px solid rgba(229,238,255,.11); }
+    .annual-life-choice .life-choice-cta b { font-size:1rem; }
     .annual-wait-group { margin-top:5px; padding-top:11px !important; border-top:1px solid var(--studio-line) !important; }
     .annual-wait-group .action-buttons { grid-template-columns:1fr; }
     .annual-wait-group .action-btn { opacity:.78; }
+    .annual-more-actions { margin-top:8px; }
+    .annual-more-actions summary { color:var(--studio-blue); font-size:.8rem; font-weight:800; cursor:pointer; }
+    .annual-more-actions[open] summary { margin-bottom:8px; }
     .annual-life-side { position:sticky; top:12px; display:grid; gap:10px; }
     .annual-side-card { padding:14px; }
     .annual-side-card > strong { display:block; margin-top:7px; color:var(--studio-cream); font-size:1.12rem; }
     .annual-side-card > p { margin:9px 0 0; color:var(--studio-muted); font-size:.84rem; line-height:1.48; }
+    .annual-status-card { display:grid; gap:12px; }
+    .annual-status-card > strong { margin:0; font-size:1rem; }
+    .annual-status-metrics { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+    .annual-status-metrics div { display:grid; gap:2px; padding:8px; border:1px solid var(--studio-line); border-radius:9px; background:rgba(255,255,255,.025); }
+    .annual-status-metrics span { color:var(--studio-muted); font-size:.67rem; font-weight:700; }
+    .annual-status-metrics b { color:var(--studio-cream); font-size:.83rem; }
+    .annual-next-goal { padding-top:11px; border-top:1px solid var(--studio-line); }
+    .annual-next-goal span { display:block; color:var(--studio-gold); font-size:.68rem; font-weight:800; }
+    .annual-next-goal p { margin:4px 0 0; color:var(--studio-muted); font-size:.76rem; line-height:1.4; }
+    .annual-mission { padding-top:11px; border-top:1px solid var(--studio-line); }
+    .annual-mission-head { display:flex; align-items:center; justify-content:space-between; gap:8px; color:var(--studio-gold); font-size:.68rem; font-weight:800; }
+    .annual-mission strong { display:block; margin-top:5px; color:var(--studio-cream); font-size:.82rem; line-height:1.3; }
+    .annual-mission p { margin:4px 0 0; color:var(--studio-muted); font-size:.72rem; line-height:1.4; }
+    .annual-mission-progress { height:5px; margin-top:8px; overflow:hidden; background:rgba(255,255,255,.08); border-radius:99px; }
+    .annual-mission-progress i { display:block; height:100%; background:linear-gradient(90deg,var(--studio-blue),var(--studio-gold)); border-radius:inherit; }
+    .annual-diary-link { justify-self:start; padding:0; color:var(--studio-blue); font-size:.78rem; background:transparent; }
     .annual-months { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:6px; margin-top:12px; }
     .annual-months span { height:31px; display:grid; place-items:center; color:var(--studio-muted); font-size:.75rem; font-weight:800; border:1px solid var(--studio-line); border-radius:7px; }
     .annual-months span.done { color:#10261e; border-color:var(--studio-green); background:var(--studio-green); }
     .annual-months span.now { color:#342609; border-color:var(--studio-gold); background:var(--studio-gold); box-shadow:0 0 0 3px rgba(244,185,66,.12); }
+    .annual-months span.month-mixed { color:#2b2915; border-color:#d9b75c; background:#d9b75c; }
+    .annual-months span.month-rough { color:#351e22; border-color:#d78078; background:#d78078; }
+    .annual-months span.month-event { position:relative; }
+    .annual-months span.month-event i { position:absolute; top:-6px; inset-inline-end:-3px; color:var(--studio-gold); font-size:.62rem; font-style:normal; text-shadow:0 1px 6px #000; }
     .annual-log { display:grid; gap:7px; margin:10px 0 0; padding:0; list-style:none; }
     .annual-log li { display:grid; grid-template-columns:58px 1fr; gap:7px; color:var(--studio-muted); font-size:.82rem; }
     .annual-log b { color:var(--studio-gold); font-size:.76rem; }
@@ -6489,6 +6521,7 @@
       life.yearActions = Array.isArray(life.yearActions) ? life.yearActions : life.completedThisYear.slice();
       life.history = Array.isArray(life.history) ? life.history : [];
       life.events = Array.isArray(life.events) ? life.events : [];
+      life.completedMissionIds = Array.isArray(life.completedMissionIds) ? life.completedMissionIds : [];
       life.monthlyEvent = life.monthlyEvent && typeof life.monthlyEvent === "object" ? life.monthlyEvent : null;
       return life;
     }
@@ -6565,6 +6598,69 @@
       const sign = value > 0 ? "+" : "";
       const unit = key === "cash" || key === "debt" ? "₪" : "";
       return sign + value + unit + " " + localize(labels[key] || { he: key, en: key });
+    }
+
+    const LIFE_MISSIONS = [
+      {
+        id: "first-credit",
+        title: { he: "לצבור קרדיט ראשון", en: "Earn a first credit" },
+        copy: { he: "להגיע ל־18 ניסיון. מישהו צריך לדעת שאפשר לסמוך עליך על הסט.", en: "Reach 18 experience. Someone needs to know they can rely on you on set." },
+        progress: () => ({ value: gameState.experience, target: 18 }),
+        done: () => gameState.experience >= 18,
+        reward: { cash: 220, reputation: 4 }
+      },
+      {
+        id: "debt-breath",
+        title: { he: "לייצר מרווח נשימה", en: "Create breathing room" },
+        copy: { he: "להוריד את החוב מתחת ל־6,500 ₪. כסף הוא לא ניצחון, אבל הוא בחירה.", en: "Bring debt below 6,500 ₪. Money is not victory, but it is choice." },
+        progress: () => ({ value: Math.max(0, 8000 - gameState.debt), target: 1500 }),
+        done: () => gameState.debt <= 6500,
+        reward: { soul: 5, reputation: 2 }
+      },
+      {
+        id: "public-voice",
+        title: { he: "לתת לקול לצאת החוצה", en: "Let the voice go public" },
+        copy: { he: "להגיע ל־70 יצירתיות ול־20 מוניטין. לא כל מי שרואה אותך גם זוכר.", en: "Reach 70 creativity and 20 reputation. Not everyone who sees you remembers you." },
+        progress: () => ({ value: Math.min(gameState.creativity / 70, gameState.reputation / 20) * 100, target: 100, percent: true }),
+        done: () => gameState.creativity >= 70 && gameState.reputation >= 20,
+        reward: { cash: 300, creativity: 4, reputation: 5 }
+      }
+    ];
+
+    function lifeActiveMission() {
+      const life = ensureLifeState();
+      return LIFE_MISSIONS.find((mission) => !life.completedMissionIds.includes(mission.id)) || null;
+    }
+
+    function lifeMissionStatus(mission) {
+      if (!mission) return null;
+      const raw = mission.progress();
+      const percent = raw.percent
+        ? clamp(raw.value, 0, 100)
+        : clamp(Math.round((raw.value / raw.target) * 100), 0, 100);
+      return { percent, value: raw.value, target: raw.target, percentStyle: !!raw.percent };
+    }
+
+    function resolveLifeMissions() {
+      const life = ensureLifeState();
+      const mission = lifeActiveMission();
+      if (!mission || !mission.done()) return null;
+      life.completedMissionIds.push(mission.id);
+      applyLifeEffects(mission.reward);
+      const entry = {
+        kind: "mission", age: life.age, year: life.calendarYear, month: life.month,
+        title: localize({ he: "משימה הושלמה: " + mission.title.he, en: "Mission complete: " + mission.title.en }),
+        copy: localize(mission.copy), effects: mission.reward
+      };
+      life.history.unshift(entry);
+      life.history = life.history.slice(0, 60);
+      gameState.storyDiary.unshift({
+        day: gameState.day, title: entry.title,
+        source: localize({ he: "מסלול חיים", en: "Life route" }),
+        copy: localize({ he: "פרס: " + lifeEffectsLine(mission.reward), en: "Reward: " + lifeEffectsLine(mission.reward) })
+      });
+      note(entry.title + " — " + localize({ he: "פרס: " + lifeEffectsLine(mission.reward), en: "Reward: " + lifeEffectsLine(mission.reward) }), "good");
+      return entry;
     }
 
     function lifeDecisionDeck(routeId) {
@@ -6754,6 +6850,8 @@
       gameState.storyDiary.unshift({ day: gameState.day, title: entry.title, source: localize({ he: "גיל " + life.age + " · " + period.he, en: "Age " + life.age + " · " + period.en }), copy: entry.copy });
       note(localize(choice.title) + " — " + localize(choice.copy), choice.skip ? "neutral" : "good");
       playSfx(choice.skip ? "cash" : "success");
+
+      resolveLifeMissions();
 
       life.month += choice.months || 1;
       if (life.month > 12) {
@@ -11635,16 +11733,54 @@
       return { left: point[0], top: point[1] };
     }
 
+    function annualCategoryColor(category) {
+      const colors = {
+        salary: "#8ea3c9",
+        production: "#d07c64",
+        training: "#8db982",
+        lifestyle: "#d0a85a",
+        finance: "#ac9a6a",
+        travel: "#82b4d2",
+        release: "#cf7d93"
+      };
+      return colors[category] || colors.lifestyle;
+    }
+
+    function annualLocationLock(buildingId) {
+      if (["fund", "investor", "casino"].includes(buildingId) && !gameState.jobId) {
+        return localize({ he: "ייפתח אחרי עבודה ראשונה", en: "Unlocks after your first job" });
+      }
+      if (buildingId === "bank" && gameState.cash < 500 && gameState.bank <= 0) {
+        return localize({ he: "דורש 500 ₪ נזילים", en: "Needs 500 ₪ liquid" });
+      }
+      return null;
+    }
+
     function annualMapNodeMarkup(buildingId, hintBuilding, index, total) {
       const building = getBuilding(buildingId);
       const selected = buildingId === gameState.currentBuilding;
       const target = buildingId === hintBuilding;
       const position = annualMapPosition(buildingId, index, total);
+      const visitKey = getCity().id + ":" + buildingId;
+      const fresh = sceneCardButtons(buildingId).length > 0 && !(gameState.buildingVisits && gameState.buildingVisits[visitKey]);
+      const lock = annualLocationLock(buildingId);
       return `
-        <button class="annual-map-node ${selected ? "selected" : ""} ${target ? "target" : ""}" style="--node:${building.color[0]};left:${position.left}%;top:${position.top}%;" data-action="goToBuilding" data-value="${buildingId}" title="${localize({ he: "לעבור אל " + building.label.he, en: "Go to " + building.label.en })}">
+        <button class="annual-map-node ${selected ? "selected" : ""} ${target ? "target" : ""} ${fresh ? "fresh" : ""} ${lock ? "locked" : ""}" style="--node:${annualCategoryColor(building.category)};left:${position.left}%;top:${position.top}%;" data-action="goToBuilding" data-value="${buildingId}" title="${lock || localize({ he: "לעבור אל " + building.label.he, en: "Go to " + building.label.en })}">
           <span class="annual-node-dot" aria-hidden="true"></span>
           <span class="annual-node-label">${localize(building.label)}</span>
+          ${lock ? `<span class="annual-node-lock" aria-label="${lock}">🔒</span>` : ""}
           ${selected ? `<span class="annual-player-marker" aria-label="${localize({ he: "את/ה כאן", en: "You are here" })}"></span>` : ""}
+        </button>
+      `;
+    }
+
+    function annualLifeChoiceButton(route, card) {
+      return `
+        <button class="action-btn annual-life-choice" data-action="makeLifeDecision" data-value="${route}:${card.id}">
+          <div class="topline"><span>${localize(card.title)}</span><span>${localize({ he: "חודש אחד", en: "One month" })}</span></div>
+          <div class="subline">${localize(card.copy)}</div>
+          ${lifeEffectsMarkup(card.effects)}
+          <div class="life-choice-cta"><span>${localize({ he: "לבחור לחודש הזה", en: "Choose for this month" })}</span><b>←</b></div>
         </button>
       `;
     }
@@ -11686,56 +11822,76 @@
           <div class="action-group">
             <h3>${localize(building.label)} · ${localize({ he: "הפעולה של החודש", en: "This month's action" })}</h3>
             <div class="action-buttons">
-              ${cards.map((card) => buttonMarkup(
-                "makeLifeDecision",
-                route + ":" + card.id,
-                localize(card.title),
-                localize(card.copy) + " · " + lifeEffectsLine(card.effects),
-                localize({ he: "חודש אחד", en: "One month" })
-              )).join("")}
+              ${cards.map((card) => annualLifeChoiceButton(route, card)).join("")}
             </div>
           </div>
-          <div class="action-group annual-wait-group">
-            <h3>${localize({ he: "אין חובה להספיק הכול", en: "You do not have to do it all" })}</h3>
-            <div class="action-buttons">${buttonMarkup(
-              "makeLifeDecision",
-              "wait:" + wait.id,
-              localize(wait.title),
-              localize(wait.copy) + " · " + lifeEffectsLine(wait.effects),
-              localize({ he: "חודש אחד", en: "One month" })
-            )}</div>
-          </div>
+          <details class="annual-more-actions">
+            <summary>${localize({ he: "עוד אפשרויות לחודש", en: "More options this month" })}</summary>
+            <div class="action-group annual-wait-group">
+              <h3>${localize({ he: "אין חובה להספיק הכול", en: "You do not have to do it all" })}</h3>
+              <div class="action-buttons">${annualLifeChoiceButton("wait", wait)}</div>
+            </div>
+          </details>
         </div>
       `;
     }
 
     function renderLifeMonthClock() {
       const life = ensureLifeState();
+      const period = lifePeriod();
+      const actionsByMonth = new Map(life.yearActions.map((entry) => [entry.month, entry]));
+      const eventMonths = new Set(life.history
+        .filter((entry) => entry.year === life.calendarYear && entry.kind === "monthly-event")
+        .map((entry) => entry.month));
+      function toneFor(entry) {
+        if (!entry) return "";
+        const score = Object.entries(entry.effects || {}).reduce((total, [key, value]) => {
+          if (key === "debt") return total + (value < 0 ? 1 : -1);
+          return total + (value > 0 ? 1 : -1);
+        }, 0);
+        return score <= 0 ? "month-rough" : (score === 1 ? "month-mixed" : "");
+      }
       return `
-        <section class="annual-side-card annual-clock-card">
+        <section class="annual-side-card annual-clock-card annual-year-timeline">
           <span class="annual-label">${localize({ he: "שעון השנה", en: "Year clock" })}</span>
-          <strong>${localize({ he: "חודש " + life.month + " מתוך 12", en: "Month " + life.month + " of 12" })}</strong>
+          <strong>${localize({ he: period.he + " · חודש " + life.month + " מתוך 12", en: period.en + " · month " + life.month + " of 12" })}</strong>
           <div class="annual-months">${Array.from({ length: 12 }, (_, index) => {
             const month = index + 1;
-            return `<span class="${month < life.month ? "done" : ""} ${month === life.month ? "now" : ""}">${month}</span>`;
+            const entry = actionsByMonth.get(month);
+            const classes = [month < life.month ? "done" : "", month === life.month ? "now" : "", toneFor(entry), eventMonths.has(month) ? "month-event" : ""].filter(Boolean).join(" ");
+            return `<span class="${classes}">${month}${eventMonths.has(month) ? "<i>✦</i>" : ""}</span>`;
           }).join("")}</div>
-          <p>${localize({ he: "פעולה אחת במקום אחד = חודש אחד. בדצמבר יקרה אירוע שנתי.", en: "One action at one place = one month. December brings an annual event." })}</p>
+          <p>${localize({ he: "ירוק = חודש מוצלח · זהב = מעורב · אדום = מחיר כבד · ✦ = אירוע", en: "Green = strong month · gold = mixed · red = costly · ✦ = event" })}</p>
         </section>
       `;
     }
 
     function renderLifeSide() {
       const life = ensureLifeState();
-      const latestEvent = life.events[0];
-      const yearActions = life.yearActions.slice().reverse().slice(0, 4);
+      const activeJob = getJob(gameState.jobId);
+      const hint = currentHint();
+      const mission = lifeActiveMission();
+      const missionStatus = lifeMissionStatus(mission);
       return `
         <aside class="annual-life-side">
-          ${renderLifeMonthClock()}
-          <section class="annual-side-card">
-            <span class="annual-label">${localize({ he: "מה עשית השנה", en: "This year so far" })}</span>
-            ${yearActions.length ? `<ul class="annual-log">${yearActions.map((entry) => `<li><b>${localize({ he: "חודש " + entry.month, en: "Month " + entry.month })}</b><span>${entry.title}</span></li>`).join("")}</ul>` : `<p>${localize({ he: "עוד לא בחרת פעולה השנה.", en: "No action chosen this year yet." })}</p>`}
+          <section class="annual-side-card annual-status-card">
+            <span class="annual-label">${localize({ he: "מצב המסלול", en: "Life status" })}</span>
+            <strong>${activeJob ? localize(activeJob.title) : localize({ he: "מחפש/ת עבודה", en: "Looking for work" })}</strong>
+            <div class="annual-status-metrics">
+              <div><span>${t("cash")}</span><b>${formatMoney(gameState.cash)}</b></div>
+              <div><span>${localize({ he: "חוב", en: "Debt" })}</span><b>${formatMoney(-gameState.debt)}</b></div>
+              <div><span>${t("reputation")}</span><b>${gameState.reputation}</b></div>
+              <div><span>${t("creativity")}</span><b>${gameState.creativity}</b></div>
+            </div>
+            <div class="annual-next-goal"><span>${localize({ he: "המטרה הקרובה", en: "Nearest goal" })}</span><p>${hint.copy}</p></div>
+            ${mission ? `<div class="annual-mission">
+              <div class="annual-mission-head"><span>✦ ${localize({ he: "משימת מסלול", en: "Route mission" })}</span><span>${missionStatus.percentStyle ? Math.round(missionStatus.percent) + "%" : Math.round(missionStatus.value) + "/" + missionStatus.target}</span></div>
+              <strong>${localize(mission.title)}</strong>
+              <p>${localize(mission.copy)}</p>
+              <div class="annual-mission-progress"><i style="width:${missionStatus.percent}%"></i></div>
+            </div>` : `<div class="annual-mission"><div class="annual-mission-head"><span>✦ ${localize({ he: "משימות מסלול", en: "Route missions" })}</span><span>✓</span></div><strong>${localize({ he: "השלמת את כל משימות המסלול", en: "You completed every route mission" })}</strong></div>`}
+            <button class="annual-diary-link" data-action="openClassicPanel" data-value="story">${localize({ he: "לפתוח את היומן ←", en: "Open diary ←" })}</button>
           </section>
-          ${latestEvent ? `<section class="annual-side-card annual-event-card"><span class="annual-label">✦ ${localize({ he: "מה קרה בסוף " + latestEvent.year, en: "What happened at the end of " + latestEvent.year })}</span><strong>${latestEvent.title}</strong><p>${latestEvent.copy}</p><small>${lifeEffectsLine(latestEvent.effects)}</small></section>` : ""}
         </aside>
       `;
     }
@@ -11748,20 +11904,32 @@
       const currentBuilding = getBuilding(gameState.currentBuilding);
       const hint = currentHint();
       const hintBuilding = buildings.includes(hint.building) ? hint.building : null;
-      const intro = !life.introSeen ? `<div class="annual-life-intro"><span>✦</span><p>${localize({ he: "זהו אותו משחק חיים, בקצב שנתי: מטיילים במפה כמו ביום רגיל, בוחרים פעולה אחת במקום, ורק היא מעבירה חודש. אין כרטיסי מסלול ואין בחירה כפויה בין קטגוריות.", en: "This is the same life game at a yearly pace: travel the map as on a normal day, choose one action at a place, and only it moves one month. There are no route cards or forced category picks." })}</p><button data-action="dismissLifeIntro">${localize({ he: "הבנתי", en: "Got it" })}</button></div>` : "";
+      const intro = !life.introSeen ? `<div class="annual-life-intro"><span>✦</span><p>${localize({ he: "מטיילים חופשי בין נקודות העיר; רק פעולה אחת מקדמת חודש.", en: "Travel freely between city points; only one action advances the month." })}</p><button data-action="dismissLifeIntro">${localize({ he: "הבנתי", en: "Got it" })}</button></div>` : "";
       dom.boardStage.innerHTML = `
         <main class="annual-life-shell">
           <div class="annual-life-layout">
             <section class="annual-life-main">
               <header class="annual-life-header">
                 <span class="annual-label">${localize({ he: "גיל " + life.age + " · " + period.he + " " + life.calendarYear + " · " + localize(city.name), en: "Age " + life.age + " · " + period.en + " " + life.calendarYear + " · " + localize(city.name) })}</span>
-                <h1>${localize({ he: "מה עושים החודש?", en: "What do you do this month?" })}</h1>
-                <p>${localize({ he: "מזומן, חוב, עבודה וחיים מתקדמים יחד. לטייל בין מקומות חופשי; לבחור פעולה אחת זה מה שמקדם זמן.", en: "Cash, debt, work, and life move together. Travel freely between places; choosing one action is what advances time." })}</p>
+                <h1>${localize({ he: period.he + " · מה המהלך שלך?", en: period.en + " · What's your move?" })}</h1>
               </header>
               ${intro}
               <div class="annual-play-area">
+                ${renderLifeMonthClock()}
                 <section class="annual-city-board" style="--scene-a:${currentBuilding.color[0]};--scene-b:${currentBuilding.color[1]};">
                   <div class="annual-map-head"><span>${localize({ he: "המפה של " + localize(city.name), en: localize(city.name) + " map" })}</span><small>${localize({ he: "נקודה פותחת פעולה · פעולה מקדמת חודש", en: "A point opens an action · an action advances a month" })}</small></div>
+                  <div class="annual-map-tools">
+                    <div class="annual-map-legend">
+                      ${[
+                        ["#8ea3c9", { he: "עבודה", en: "Work" }],
+                        ["#d07c64", { he: "יצירה", en: "Create" }],
+                        ["#d0a85a", { he: "חיים", en: "Life" }],
+                        ["#ac9a6a", { he: "כסף", en: "Money" }],
+                        ["#82b4d2", { he: "טיסות", en: "Flights" }]
+                      ].map(([color, label]) => `<span style="--tone:${color}"><i></i>${localize(label)}</span>`).join("")}
+                    </div>
+                    <p class="annual-map-advice">✦ ${hint.copy}</p>
+                  </div>
                   <div class="annual-plaza">
                     ${buildings.map((buildingId, index) => annualMapNodeMarkup(buildingId, hintBuilding, index, buildings.length)).join("")}
                   </div>
