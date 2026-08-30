@@ -62,7 +62,9 @@ function run(htmlPath) {
     "flyTo",
     "endDay",
     "bankDo",
-    "buyEquip"
+    "buyEquip",
+    "makeLifeDecision",
+    "resolveLifeMonthlyEvent"
   ].forEach((fnName) => assert.strictEqual(typeof game[fnName], "function", fnName + " should exist"));
 
   game.startGame({
@@ -105,6 +107,20 @@ function run(htmlPath) {
   assert.strictEqual(state().projects.length, 1, "script creates a project");
 
   assert.strictEqual(state().day, 2, "ending day advances the calendar");
+
+  game.startGame({
+    playerName: "Monthly Tester",
+    economyDifficulty: "modest",
+    goalLevels: { wealth: "modest", career: "modest", education: "modest", happiness: "modest" }
+  });
+  assert.strictEqual(state().life.month, 1, "life mode starts in January");
+  assert.strictEqual(game.makeLifeDecision("work", "first-job"), true, "monthly choice resolves");
+  assert.strictEqual(state().life.month, 2, "monthly choice advances the calendar by one month");
+  const surprise = state().life.monthlyEvent;
+  assert.ok(surprise, "February opens a surprise task");
+  assert.strictEqual(game.resolveLifeMonthlyEvent(surprise.id, surprise.choices[0].id), true, "surprise task choice resolves");
+  assert.strictEqual(state().life.month, 2, "surprise task does not consume another month");
+  assert.strictEqual(state().life.monthlyEvent, null, "resolved surprise task closes");
 }
 
 if (require.main === module) {

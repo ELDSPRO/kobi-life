@@ -5387,6 +5387,18 @@
     .annual-log b { color:var(--studio-gold); font-size:.76rem; }
     .annual-event-card { border-color:rgba(244,185,66,.3); background:linear-gradient(145deg,rgba(244,185,66,.10),rgba(19,24,36,.88)); }
     .annual-event-card small { display:block; margin-top:8px; color:var(--studio-green); font-size:.78rem; line-height:1.45; }
+    .notice-dialog.life-month-event { width:min(660px,calc(100vw - 32px)); padding:0; overflow:hidden; color:var(--studio-cream); background:linear-gradient(150deg,#1c2436,#111722); border:1px solid rgba(244,185,66,.5); border-radius:16px; box-shadow:0 24px 80px rgba(0,0,0,.55); }
+    .life-month-event-head { padding:13px 17px; color:var(--studio-gold); background:rgba(244,185,66,.08); border-bottom:1px solid rgba(244,185,66,.22); font-size:.83rem; letter-spacing:.08em; text-transform:uppercase; }
+    .life-month-event-body { padding:20px; color:var(--studio-muted); font-size:.96rem; line-height:1.55; }
+    .life-month-event-body h2 { margin:0; color:var(--studio-cream); font-size:clamp(1.45rem,2.8vw,2rem); letter-spacing:-.035em; }
+    .life-month-event-body > p { margin:8px 0 0; }
+    .life-month-event-choices { display:grid; gap:9px; margin-top:17px; }
+    .life-month-event-choice { display:grid; gap:4px; padding:13px 14px; text-align:start; color:var(--studio-cream); background:rgba(255,255,255,.035); border:1px solid rgba(229,238,255,.14); border-radius:10px; transition:transform .16s ease,border-color .16s ease,background .16s ease; }
+    .life-month-event-choice:hover { transform:translateY(-2px); border-color:var(--studio-gold); background:rgba(244,185,66,.09); }
+    .life-month-event-choice strong { font-size:1rem; }
+    .life-month-event-choice span { color:var(--studio-muted); font-size:.84rem; line-height:1.4; }
+    .life-month-event-choice small { color:var(--studio-green); font-size:.76rem; font-weight:800; }
+    .life-month-event-note { color:var(--studio-blue); font-size:.78rem; }
     @media (max-width: 1060px) {
       .annual-life-layout { grid-template-columns:1fr; }
       .annual-life-side { position:static; grid-template-columns:repeat(3,minmax(0,1fr)); }
@@ -5398,6 +5410,7 @@
       .annual-life-side { grid-template-columns:1fr; }
       .annual-life-intro { grid-template-columns:auto 1fr; }
       .annual-life-intro button { grid-column:2; justify-self:start; }
+      .life-month-event-body { padding:16px; }
     }
   </style>
 </head>
@@ -6447,6 +6460,7 @@
         yearActions: [],
         history: [],
         events: [],
+        monthlyEvent: null,
         introSeen: false
       };
     }
@@ -6475,6 +6489,7 @@
       life.yearActions = Array.isArray(life.yearActions) ? life.yearActions : life.completedThisYear.slice();
       life.history = Array.isArray(life.history) ? life.history : [];
       life.events = Array.isArray(life.events) ? life.events : [];
+      life.monthlyEvent = life.monthlyEvent && typeof life.monthlyEvent === "object" ? life.monthlyEvent : null;
       return life;
     }
 
@@ -6500,6 +6515,45 @@
         { id: "finance", icon: "◒", he: "כסף וקשרים", en: "Money & people", copyHe: "חוב, מימון ודלתות", copyEn: "Debt, backing and doors" }
       ];
     }
+
+    const LIFE_MONTHLY_EVENTS = [
+      {
+        id: "night-shoot", title: { he: "משימת פתע: סט קטן צריך ידיים", en: "Surprise task: a small set needs hands" },
+        copy: { he: "חברה מתקשרת בלילה: מישהו הבריז מצילומים, ויש מקום אחד פנוי ברשימת הצוות.", en: "A friend calls at night: someone bailed on a shoot, and there is one open place on the crew list." },
+        choices: [
+          { id: "stay", title: { he: "להישאר עד סוף הצילומים", en: "Stay through wrap" }, copy: { he: "פחות שינה, יותר אנשים שזוכרים אותך.", en: "Less sleep, more people who remember you." }, effects: { cash: 130, experience: 4, reputation: 4, soul: -3 } },
+          { id: "pitch", title: { he: "להביא רעיון במקום כוח", en: "Bring an idea, not muscle" }, copy: { he: "את/ה לא נשאר/ת לסחוב, אבל נותנ/ת לסצנה כיוון.", en: "You do not stay to carry gear, but you give the scene a direction." }, effects: { creativity: 6, reputation: 3, cash: -40 } },
+          { id: "decline", title: { he: "לשמור את הערב לעצמך", en: "Keep the evening for yourself" }, copy: { he: "לא כל דלת חייבת להיפתח הלילה.", en: "Not every door needs to open tonight." }, effects: { soul: 5, love: 2, reputation: -1 } }
+        ]
+      },
+      {
+        id: "festival-pass", title: { he: "הזמנה שנפלה ברגע האחרון", en: "A last-minute invitation" },
+        copy: { he: "כרטיס לפאנל קטן בסינמטק הגיע אליך. לא ברור מי יהיה שם, וזה בדיוק העניין.", en: "A ticket to a small cinematheque panel lands with you. You do not know who will be there — that is the point." },
+        choices: [
+          { id: "network", title: { he: "ללכת ולדבר עם כולם", en: "Go and talk to everyone" }, copy: { he: "מביך לרגע, שימושי הרבה אחר כך.", en: "Awkward for a moment, useful much later." }, effects: { cash: -45, reputation: 6, creativity: 2, soul: -1 } },
+          { id: "watch", title: { he: "לשבת מאחור ולספוג", en: "Sit in back and absorb" }, copy: { he: "פחות כרטיסי ביקור, יותר חומר לחשוב עליו.", en: "Fewer business cards, more material to think with." }, effects: { creativity: 7, soul: 3 } },
+          { id: "sell", title: { he: "להעביר את הכרטיס הלאה", en: "Pass the ticket on" }, copy: { he: "מחווה קטנה בונה חוב חברתי אחר.", en: "A small gesture builds a different kind of social debt." }, effects: { love: 4, reputation: 2 } }
+        ]
+      },
+      {
+        id: "rent-gap", title: { he: "הפתעה בדירה", en: "A surprise at home" },
+        copy: { he: "השותף מודיע שהוא יוצא מוקדם. החודש יש חור אמיתי בשכירות — ואת/ה מחליט/ה איך לסגור אותו.", en: "Your roommate says they are leaving early. This month has a real rent gap — and you decide how to close it." },
+        choices: [
+          { id: "sublet", title: { he: "להכניס סאבלט זמני", en: "Bring in a temporary sublet" }, copy: { he: "הכסף מציל, השקט משלם מחיר.", en: "The money saves you; the calm pays a price." }, effects: { cash: 260, soul: -3, love: -1 } },
+          { id: "cut", title: { he: "לחתוך הוצאות ולהישאר לבד", en: "Cut costs and stay alone" }, copy: { he: "פחות נוח, אבל הבית נשאר שלך.", en: "Less comfortable, but the home remains yours." }, effects: { cash: -120, soul: 4, creativity: 2 } },
+          { id: "ask", title: { he: "לבקש עזרה מחבר/ה", en: "Ask a friend for help" }, copy: { he: "הכסף לא בחינם, אבל גם קשרים לא נוצרים בוואקום.", en: "The money is not free, but neither are relationships." }, effects: { cash: 140, love: 5, reputation: -1 } }
+        ]
+      },
+      {
+        id: "script-deadline", title: { he: "דדליין קטן עם ריח של דלת", en: "A small deadline that smells like a door" },
+        copy: { he: "תחרות תסריטים קטנה נסגרת מחר. הפרס צנוע, אבל הקורא/ת הנכון/ה יכול/ה להיות שם.", en: "A small script contest closes tomorrow. The prize is modest, but the right reader might be there." },
+        choices: [
+          { id: "submit", title: { he: "להגיש גרסה לא מושלמת", en: "Submit an imperfect draft" }, copy: { he: "להוציא לעולם עדיף מלהמשיך לשמור במגירה.", en: "Putting it into the world beats keeping it in a drawer." }, effects: { cash: -60, creativity: 5, reputation: 5, soul: -1 } },
+          { id: "polish", title: { he: "לבקש הערה אחת חדה", en: "Ask for one sharp note" }, copy: { he: "פחות חשיפה עכשיו, יותר בהירות לפרויקט הבא.", en: "Less exposure now, more clarity for the next project." }, effects: { creativity: 7, love: 2, reputation: 1 } },
+          { id: "skip", title: { he: "לוותר ולהגן על הכיוון", en: "Skip it and protect the direction" }, copy: { he: "לא כל תאריך יעד הוא הסיפור הנכון שלך.", en: "Not every deadline is your story." }, effects: { soul: 4, creativity: 3 } }
+        ]
+      }
+    ];
 
     function lifeEffectLabel(key, value) {
       const labels = {
@@ -6588,6 +6642,55 @@
       });
     }
 
+    function queueLifeMonthlyEvent() {
+      const life = ensureLifeState();
+      if (life.monthlyEvent || gameState.winState) return null;
+      // An interruption every other month keeps the rhythm lively without
+      // turning the game into a chain of popups. February is the first one.
+      const serialMonth = life.yearIndex * 12 + life.month;
+      if (serialMonth % 2 !== 0) return null;
+      const event = LIFE_MONTHLY_EVENTS[(life.yearIndex * 5 + life.month) % LIFE_MONTHLY_EVENTS.length];
+      life.monthlyEvent = {
+        id: event.id,
+        age: life.age,
+        year: life.calendarYear,
+        month: life.month,
+        title: event.title,
+        copy: event.copy,
+        choices: event.choices
+      };
+      return life.monthlyEvent;
+    }
+
+    function resolveLifeMonthlyEvent(eventId, choiceId) {
+      if (!isLifeMode()) return false;
+      const life = ensureLifeState();
+      const event = life.monthlyEvent;
+      if (!event || event.id !== eventId) return false;
+      const choice = (event.choices || []).find((item) => item.id === choiceId);
+      if (!choice) return false;
+      applyLifeEffects(choice.effects);
+      const period = lifePeriod();
+      const entry = {
+        kind: "monthly-event", age: life.age, year: life.calendarYear, month: life.month, period: period.id,
+        title: localize(event.title), copy: localize(choice.copy), effects: choice.effects
+      };
+      life.history.unshift(entry);
+      life.history = life.history.slice(0, 60);
+      gameState.storyDiary.unshift({
+        day: gameState.day,
+        title: entry.title,
+        source: localize({ he: "משימת הפתעה · " + period.he, en: "Surprise task · " + period.en }),
+        copy: entry.copy
+      });
+      life.monthlyEvent = null;
+      note(localize(choice.title) + " — " + localize(choice.copy), "good");
+      playSfx("success");
+      saveGame();
+      render();
+      return true;
+    }
+
     function lifeYearEvent() {
       const life = ensureLifeState();
       const events = [
@@ -6669,6 +6772,7 @@
       life.seasonIndex = Math.floor((life.month - 1) / 4);
       updateUnlocks();
       if (life.yearIndex >= life.horizon) finishLifeRun();
+      queueLifeMonthlyEvent();
       saveGame();
       render();
       return true;
@@ -12370,6 +12474,35 @@
       if (!dom || !dom.incidentWindow) {
         return;
       }
+      const life = isLifeMode() ? ensureLifeState() : null;
+      if (life && life.monthlyEvent) {
+        const event = life.monthlyEvent;
+        const period = lifePeriod();
+        dom.incidentWindow.classList.remove("hidden");
+        dom.incidentWindow.innerHTML = `
+          <div class="notice-dialog life-month-event">
+            <div class="notice-dialog-head life-month-event-head">
+              <span>${localize({ he: "משימת הפתעה · " + period.he + " " + life.calendarYear, en: "Surprise task · " + period.en + " " + life.calendarYear })}</span>
+              <span aria-hidden="true">✦</span>
+            </div>
+            <div class="notice-dialog-body life-month-event-body">
+              <h2>${localize(event.title)}</h2>
+              <p>${localize(event.copy)}</p>
+              <div class="life-month-event-choices">
+                ${(event.choices || []).map((choice) => `
+                  <button class="life-month-event-choice" data-action="resolveLifeMonthlyEvent" data-value="${event.id}:${choice.id}">
+                    <strong>${localize(choice.title)}</strong>
+                    <span>${localize(choice.copy)}</span>
+                    <small>${lifeEffectsLine(choice.effects)}</small>
+                  </button>
+                `).join("")}
+              </div>
+              <p class="life-month-event-note">${localize({ he: "הבחירה לא מקדמת את החודש — היא משנה את התנאים שבהם תבחר/י את המהלך הבא.", en: "This choice does not advance the month — it changes the conditions for your next move." })}</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
       if (!gameState.activeNotice) {
         dom.incidentWindow.classList.add("hidden");
         dom.incidentWindow.innerHTML = "";
@@ -13388,6 +13521,9 @@
         } else if (action === "makeLifeDecision") {
           const [routeId, decisionId] = String(value || "").split(":");
           makeLifeDecision(routeId, decisionId);
+        } else if (action === "resolveLifeMonthlyEvent") {
+          const [eventId, choiceId] = String(value || "").split(":");
+          resolveLifeMonthlyEvent(eventId, choiceId);
         } else if (action === "dismissLifeIntro") {
           ensureLifeState().introSeen = true;
           saveGame();
@@ -13697,6 +13833,7 @@
     root.doFund = doFund;
     root.doPinv = doPinv;
     root.bankDo = bankDo;
+    root.resolveLifeMonthlyEvent = resolveLifeMonthlyEvent;
     root.setFocusedProject = setFocusedProject;
     root.saveGame = saveGame;
     root.loadGame = loadGame;
