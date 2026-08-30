@@ -4129,6 +4129,296 @@
       color: var(--kc-text-dim);
     }
 
+    @keyframes kcDialogIn {
+      from { opacity: 0; transform: translateY(6px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .recap-dialog, .pitch-dialog {
+        animation: none !important;
+      }
+    }
+
+    .day-recap-window {
+      position: fixed;
+      inset: 0;
+      z-index: 99;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .recap-dialog {
+      width: min(440px, calc(100vw - 36px));
+      max-height: min(88vh, 640px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+      background: var(--kc-card);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius);
+      overflow-y: auto;
+      animation: kcDialogIn 0.22s ease-out;
+    }
+
+    .recap-head {
+      display: grid;
+      gap: 4px;
+    }
+
+    .recap-head strong {
+      font-size: 16px;
+      color: var(--kc-text);
+      line-height: 1.35;
+    }
+
+    .recap-subtitle {
+      font-size: 11.5px;
+      color: var(--kc-text-faint);
+    }
+
+    .recap-body {
+      display: grid;
+      gap: 10px;
+    }
+
+    .recap-deltas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .recap-delta {
+      padding: 5px 9px;
+      font-size: 12.5px;
+      font-weight: 700;
+      border-radius: 999px;
+      border: 1px solid var(--kc-line);
+      background: var(--kc-card-2);
+      color: var(--kc-text);
+    }
+
+    .recap-delta.good { border-color: color-mix(in srgb, var(--kc-good) 45%, var(--kc-line)); color: var(--kc-good); }
+    .recap-delta.bad { border-color: color-mix(in srgb, var(--kc-bad) 45%, var(--kc-line)); color: var(--kc-bad); }
+
+    .recap-sown {
+      display: grid;
+      gap: 4px;
+      padding-top: 8px;
+      border-top: 1px solid var(--kc-line);
+    }
+
+    .recap-sown-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      color: var(--kc-text-faint);
+    }
+
+    .recap-sown p {
+      margin: 0;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: var(--kc-text-dim);
+    }
+
+    .recap-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding-top: 4px;
+      border-top: 1px solid var(--kc-line);
+    }
+
+    .recap-cta {
+      flex: 1 1 auto;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--kc-accent);
+      color: #ffffff;
+      border: 0;
+      border-radius: var(--kc-radius-sm);
+      cursor: pointer;
+    }
+
+    .pitch-window {
+      position: fixed;
+      inset: 0;
+      z-index: 97;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .pitch-dialog {
+      width: min(560px, calc(100vw - 36px));
+      max-height: min(90vh, 720px);
+      display: flex;
+      flex-direction: column;
+      background: var(--kc-card);
+      border: 1px solid var(--kc-line);
+      border-radius: var(--kc-radius);
+      overflow: hidden;
+      animation: kcDialogIn 0.22s ease-out;
+    }
+
+    .pitch-head {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 12px 14px;
+      background: var(--kc-card-2);
+      color: var(--kc-text);
+    }
+
+    .pitch-head strong {
+      font-size: 15px;
+    }
+
+    .pitch-daytag {
+      font-size: 11px;
+      color: var(--kc-text-faint);
+    }
+
+    .pitch-body {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      overflow-y: auto;
+      color: var(--kc-text);
+    }
+
+    .pitch-context {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--kc-text-dim);
+    }
+
+    .pitch-cost-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      font-size: 11.5px;
+      color: var(--kc-text-dim);
+      background: var(--kc-card-2);
+      border: 1px solid var(--kc-line);
+      border-inline-start: 3px solid var(--kc-warn);
+      border-radius: var(--kc-radius-sm);
+    }
+
+    .pitch-cost-line.risk { border-inline-start-color: var(--kc-bad); }
+
+    .pitch-cost-warn {
+      font-weight: 700;
+      color: var(--kc-bad);
+    }
+
+    .pitch-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 8px;
+    }
+
+    .pitch-card {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-height: 76px;
+      padding: 10px 12px;
+      text-align: start;
+      background: var(--kc-card-2);
+      color: var(--kc-text);
+      border: 2px solid var(--kc-line);
+      border-radius: var(--kc-radius-sm);
+      cursor: pointer;
+    }
+
+    .pitch-card:hover { border-color: var(--kc-line-strong); }
+
+    .pitch-card.selected {
+      border-color: var(--kc-accent);
+      background: color-mix(in srgb, var(--kc-accent) 12%, var(--kc-card-2));
+    }
+
+    .pitch-card-check {
+      display: inline-block;
+      min-height: 14px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--kc-accent);
+    }
+
+    .pitch-card-label {
+      font-size: 13.5px;
+      font-weight: 700;
+    }
+
+    .pitch-card-tag {
+      font-size: 11px;
+      color: var(--kc-text-faint);
+    }
+
+    .pitch-card-preview {
+      margin-top: 4px;
+      padding-top: 6px;
+      border-top: 1px solid var(--kc-line);
+      font-size: 11.5px;
+      line-height: 1.45;
+      color: var(--kc-text-dim);
+    }
+
+    .pitch-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding-top: 4px;
+      border-top: 1px solid var(--kc-line);
+    }
+
+    .pitch-cta {
+      flex: 1 1 auto;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--kc-accent);
+      color: #ffffff;
+      border: 0;
+      border-radius: var(--kc-radius-sm);
+      cursor: pointer;
+    }
+
+    .pitch-cta:disabled {
+      background: var(--kc-card-2);
+      color: var(--kc-text-faint);
+      cursor: not-allowed;
+    }
+
+    .pitch-result {
+      margin: 0;
+      font-size: 13px;
+      font-style: italic;
+      color: var(--kc-text);
+    }
+
+    .pitch-card:focus-visible,
+    .pitch-cta:focus-visible,
+    .recap-cta:focus-visible,
+    .brief-choice-btn:focus-visible {
+      outline: 2px solid var(--kc-accent);
+      outline-offset: 2px;
+    }
+
     .win-card-actions {
       display: flex;
       flex-direction: column;
@@ -4370,10 +4660,12 @@
   <section id="incidentWindow" class="incident-window hidden"></section>
   <section id="collectionWindow" class="collection-window hidden"></section>
   <section id="morningBriefWindow" class="morning-brief-window hidden"></section>
+  <section id="dayRecapWindow" class="day-recap-window hidden"></section>
+  <section id="pitchWindow" class="pitch-window hidden"></section>
   <div id="floatLayer" class="float-layer"></div>
   <div id="nightVeil" class="night-veil"></div>
 
-  <script src="data.js?v=20260830"></script>
+  <script src="data.js?v=20260830b"></script>
   <script>
   (() => {
     "use strict";
@@ -5355,7 +5647,16 @@
         npcs: {},
         buildingVisits: {},
         filmTasks: {},
-        endingShown: false
+        filmTaskDays: {},
+        endingShown: false,
+        artisticReputation: 0,
+        commercialReputation: 0,
+        relationshipReputation: 0,
+        pitchOffered: false,
+        pitchAttempts: 0,
+        selectedPitchStyle: null,
+        pitch: null,
+        dayRecap: null
       }, overrides);
     }
 
@@ -5436,7 +5737,7 @@
       if (effects.equipment && gameState.equipment) {
         gameState.equipment[effects.equipment] = true;
       }
-      ["reputation", "education", "soul", "creativity", "love"].forEach((key) => {
+      ["reputation", "education", "soul", "creativity", "love", "artisticReputation", "commercialReputation", "relationshipReputation"].forEach((key) => {
         if (typeof effects[key] === "number") adjustStat(key, effects[key]);
       });
     }
@@ -5591,6 +5892,110 @@
       if (gameState.dailyBriefing) {
         gameState.dailyBriefing.dismissed = true;
       }
+      render();
+    }
+
+    /*
+     * "First Pitch" career milestone — a one-time dedicated screen (NOT the
+     * brief popup), triggered once the player has an active idea, has met
+     * at least one industry contact, and a few days have passed. See
+     * GAME_DATA.pitchMoment (data.js) for the 3 styles/config.
+     */
+
+    // resolvePitchTarget — who the pitch meeting is with: the player's
+    // established industry contact (Lior) if met, else the closest met NPC
+    // by relationship. Real state, never fabricated.
+    function resolvePitchTarget() {
+      if (!gameState.npcs) return null;
+      if (gameState.npcs.lior_agent && gameState.npcs.lior_agent.met) return "lior_agent";
+      let bestId = null;
+      let bestRel = -Infinity;
+      Object.keys(gameState.npcs).forEach((id) => {
+        const state = gameState.npcs[id];
+        if (state && state.met && NPCS[id] && state.relationship > bestRel) {
+          bestRel = state.relationship;
+          bestId = id;
+        }
+      });
+      return bestId;
+    }
+
+    function maybeTriggerPitch() {
+      if (gameState.pitchOffered || gameState.winState) return;
+      const moment = root.GAME_DATA && root.GAME_DATA.pitchMoment;
+      if (!moment) return;
+      if (!gameState.filmTasks || !gameState.filmTasks[moment.requiredFilmTaskId]) return;
+      const ideaDay = gameState.filmTaskDays && gameState.filmTaskDays[moment.requiredFilmTaskId];
+      if (typeof ideaDay !== "number") return;
+      if (gameState.day - ideaDay < (moment.minDaysAfterIdea || 0)) return;
+      const targetNpcId = resolvePitchTarget();
+      if (!targetNpcId) return;
+      gameState.pitchOffered = true;
+      gameState.pitch = {
+        day: gameState.day,
+        targetNpcId,
+        resolved: false,
+        dismissed: false,
+        pickedStyleId: null,
+        resultCopy: null
+      };
+    }
+
+    function resolvePitchChoice(styleId) {
+      const pitch = gameState.pitch;
+      const moment = root.GAME_DATA && root.GAME_DATA.pitchMoment;
+      if (!pitch || pitch.resolved || pitch.dismissed || !moment) return false;
+      const style = moment.styles.find((s) => s.id === styleId);
+      if (!style) return false;
+      const hours = (moment.cost && moment.cost.hours) || 0;
+      if (!ensureTime(hours)) {
+        flashMessage(localize({
+          he: "היום קצר מדי לזה. תישן/י קודם.",
+          en: "The day is too short for that. Sleep first."
+        }), "bad");
+        return false;
+      }
+      gameState.hour += hours;
+      applyBriefEffects(style.effects);
+      const npc = NPCS[pitch.targetNpcId];
+      const npcName = npc ? localize(npc.name) : "";
+      if (style.npcRelationshipDelta) meetNpc(pitch.targetNpcId, style.npcRelationshipDelta);
+      if (moment.unlocksFilmTaskId) markFilmTask(moment.unlocksFilmTaskId);
+      if (style.followUpEventId) {
+        if (!Array.isArray(gameState.pendingFollowUps)) gameState.pendingFollowUps = [];
+        gameState.pendingFollowUps.push({ id: style.followUpEventId, day: gameState.day + (style.followUpInDays || 1) });
+      }
+      const resultCopy = localize(style.result).replace("{npcName}", npcName);
+      pitch.resolved = true;
+      pitch.pickedStyleId = styleId;
+      pitch.resultCopy = resultCopy;
+      gameState.pitchAttempts += 1;
+      gameState.selectedPitchStyle = styleId;
+      logDiary(localize(moment.title), npcName, resultCopy);
+      note(resultCopy, "good");
+      saveGame();
+      render();
+      return true;
+    }
+
+    // dismissPitch — first call while unresolved IS the skip: a neutral,
+    // non-blocking outcome (no diary entry, since nothing was actually
+    // pitched) that still shows its own result screen, same rhythm as a
+    // committed choice. Only a second call (now resolved) actually closes
+    // the window — mirrors how a committed pitch shows its result before
+    // "Continue" closes it.
+    function dismissPitch() {
+      const pitch = gameState.pitch;
+      if (!pitch) return;
+      if (pitch.resolved) {
+        pitch.dismissed = true;
+      } else {
+        const moment = root.GAME_DATA && root.GAME_DATA.pitchMoment;
+        pitch.resolved = true;
+        pitch.pickedStyleId = null;
+        pitch.resultCopy = moment ? localize(moment.skipResult) : null;
+      }
+      saveGame();
       render();
     }
 
@@ -6399,7 +6804,9 @@
     }
 
     function adjustStat(key, delta) {
-      const bounds = key === "reputation" || key === "education" ? [0, 999] : [0, 100];
+      const uncapped = key === "reputation" || key === "education"
+        || key === "artisticReputation" || key === "commercialReputation" || key === "relationshipReputation";
+      const bounds = uncapped ? [0, 999] : [0, 100];
       gameState[key] = clamp(gameState[key] + delta, bounds[0], bounds[1]);
       return gameState[key];
     }
@@ -7406,6 +7813,8 @@
       if (!gameState.filmTasks) gameState.filmTasks = {};
       if (gameState.filmTasks[id]) return;
       gameState.filmTasks[id] = true;
+      if (!gameState.filmTaskDays) gameState.filmTaskDays = {};
+      gameState.filmTaskDays[id] = gameState.day;
       const task = FILM_TASKS.find((t) => t.id === id);
       if (task) {
         flashMessage(localize({
@@ -9011,6 +9420,68 @@
       }
     }
 
+    // DAY_CLOSE_LINES — a short cinematic closer for the day-end recap,
+    // keyed by the category of wherever the player was standing when they
+    // went to sleep. Real, always-available signal (gameState.currentBuilding),
+    // not a random/fabricated pick. "quiet" reuses the game's own existing
+    // sleepCopy string so there's no new placeholder text in the fallback case.
+    const DAY_CLOSE_LINES = {
+      salary: { he: "היום נסגר עם משמרת מאחור.", en: "The day closed with a shift behind you." },
+      lifestyle: { he: "היום נסגר על כוס אחרונה.", en: "The day closed over one last drink." },
+      training: { he: "היום נסגר בין דפי תסריט.", en: "The day closed between pages of a script." },
+      production: { he: "היום נסגר על ריח של סט.", en: "The day closed with the smell of a set." },
+      finance: { he: "היום נסגר מול טבלת מספרים.", en: "The day closed facing a spreadsheet." },
+      release: { he: "היום נסגר באור הבמה.", en: "The day closed in stage light." },
+      travel: { he: "היום נסגר באוויר, בין שתי ערים.", en: "The day closed mid-air, between two cities." },
+      quiet: { he: TEXT.he.sleepCopy, en: TEXT.en.sleepCopy }
+    };
+
+    function computeDayHighlight(prevDay, buildingId) {
+      const building = BUILDINGS[buildingId];
+      const category = building ? building.category : null;
+      const closer = localize(DAY_CLOSE_LINES[category] || DAY_CLOSE_LINES.quiet);
+      const placeLabel = building ? localize(building.label) : localize(getCity().name);
+      const subtitle = localize({ he: "יום {day} · {place}", en: "Day {day} · {place}" })
+        .replace("{day}", String(prevDay)).replace("{place}", placeLabel);
+      return { headline: closer, subtitle };
+    }
+
+    // formatDayDeltas — at most 3 non-zero deltas from the day that just
+    // ended (reuses the exact same gameState.dayDelta the morning brief
+    // already computes), cash first, then whichever of experience/reputation
+    // is non-zero, then happiness. Never fabricates a "+0" line.
+    function formatDayDeltas(delta) {
+      if (!delta) return [];
+      const rows = [];
+      if (delta.cash) rows.push({ label: (delta.cash > 0 ? "+" : "") + formatMoney(delta.cash), tone: delta.cash > 0 ? "good" : "bad" });
+      if (delta.experience) rows.push({ label: (delta.experience > 0 ? "+" : "") + Math.round(delta.experience) + " " + localize({ he: "ניסיון", en: "exp" }), tone: delta.experience > 0 ? "good" : "bad" });
+      if (delta.reputation) rows.push({ label: (delta.reputation > 0 ? "+" : "") + delta.reputation + " " + t("reputation"), tone: delta.reputation > 0 ? "good" : "bad" });
+      if (delta.happiness) rows.push({ label: (delta.happiness > 0 ? "+" : "") + delta.happiness + " " + localize({ he: "אושר", en: "happiness" }), tone: delta.happiness > 0 ? "good" : "bad" });
+      return rows.slice(0, 3);
+    }
+
+    // computeSownLine — "sown for tomorrow": the nearest real scheduled
+    // follow-up (from a pitch or a briefing choice), or — if nothing is
+    // pending — the current city's own mood line (real content already in
+    // CITIES, not a placeholder).
+    function computeSownLine() {
+      const pending = Array.isArray(gameState.pendingFollowUps) ? gameState.pendingFollowUps : [];
+      // Strictly future (day > today): a follow-up due TODAY is about to
+      // fire as this morning's brief, not something still "sown for tomorrow".
+      const upcoming = pending.filter((f) => f.day > gameState.day).sort((a, b) => a.day - b.day)[0];
+      if (upcoming) {
+        const events = (root.GAME_DATA && root.GAME_DATA.dailyEvents) || [];
+        const eventDef = events.find((e) => e.id === upcoming.id);
+        if (eventDef && eventDef.teaser) {
+          return localize(eventDef.teaser);
+        }
+        if (eventDef) {
+          return localize(eventDef.source || defaultBriefSource(true)) + ": " + localize(eventDef.headline);
+        }
+      }
+      return localize(getCity().mood);
+    }
+
     function endDay() {
       if (gameState.hour < 23) {
         gameState.hour = 23;
@@ -9019,7 +9490,14 @@
         dom.nightVeil.classList.add("active");
       }
       playSfx("sleep");
-      const before = { cash: gameState.cash, experience: gameState.experience, reputation: gameState.reputation, happiness: scoreHappiness() };
+      const before = {
+        cash: gameState.cash,
+        experience: gameState.experience,
+        reputation: gameState.reputation,
+        happiness: scoreHappiness(),
+        day: gameState.day,
+        buildingId: gameState.currentBuilding
+      };
       root.setTimeout(() => {
         gameState.day += 1;
         gameState.hour = 7;
@@ -9031,12 +9509,22 @@
         tickStocks();
         maybeTriggerEvents();
         updateUnlocks();
+        maybeTriggerPitch();
         checkEndings();
         gameState.dayDelta = {
           cash: gameState.cash - before.cash,
           experience: gameState.experience - before.experience,
           reputation: gameState.reputation - before.reputation,
           happiness: scoreHappiness() - before.happiness
+        };
+        const highlight = computeDayHighlight(before.day, before.buildingId);
+        gameState.dayRecap = {
+          day: before.day,
+          headline: highlight.headline,
+          subtitle: highlight.subtitle,
+          deltas: formatDayDeltas(gameState.dayDelta),
+          sownLine: computeSownLine(),
+          dismissed: false
         };
         saveGame();
         triggerDailyBriefing();
@@ -10474,7 +10962,8 @@
         return;
       }
       const brief = gameState.dailyBriefing;
-      const open = brief && !brief.dismissed;
+      const recapOpen = gameState.dayRecap && !gameState.dayRecap.dismissed;
+      const open = brief && !brief.dismissed && !recapOpen;
       if (!open) {
         dom.morningBriefWindow.classList.add("hidden");
         dom.morningBriefWindow.innerHTML = "";
@@ -10534,6 +11023,135 @@
           </div>
         </div>
       `;
+    }
+
+    // focusDialog — moves keyboard focus into a freshly-opened overlay
+    // (its first enabled button) so keyboard/screen-reader users land
+    // inside the dialog instead of on whatever was focused behind it.
+    function focusDialog(container) {
+      if (!container) return;
+      const target = container.querySelector("button:not([disabled])");
+      if (target && typeof target.focus === "function") {
+        target.focus();
+      }
+    }
+
+    function renderDayRecapWindow() {
+      if (!dom || !dom.dayRecapWindow) {
+        return;
+      }
+      const recap = gameState.dayRecap;
+      const open = recap && !recap.dismissed;
+      if (!open) {
+        dom.dayRecapWindow.classList.add("hidden");
+        dom.dayRecapWindow.innerHTML = "";
+        return;
+      }
+      dom.dayRecapWindow.classList.remove("hidden");
+      dom.dayRecapWindow.innerHTML = `
+        <div class="recap-dialog" role="dialog" aria-modal="true" aria-labelledby="recapTitle">
+          <div class="recap-head">
+            <strong id="recapTitle">${recap.headline}</strong>
+            <span class="recap-subtitle">${recap.subtitle}</span>
+          </div>
+          <div class="recap-body">
+            ${recap.deltas.length ? `
+              <div class="recap-deltas">
+                ${recap.deltas.map((d) => `<span class="recap-delta ${d.tone}">${d.label}</span>`).join("")}
+              </div>
+            ` : ""}
+            ${recap.sownLine ? `
+              <div class="recap-sown">
+                <span class="recap-sown-label">${localize({ he: "נזרע למחר", en: "Sown for tomorrow" })}</span>
+                <p>${recap.sownLine}</p>
+              </div>
+            ` : ""}
+          </div>
+          <div class="recap-actions">
+            <button class="mini-btn secondary" data-action="openStoryFromRecap">${localize({ he: "פתח/י את יומן העונה", en: "Open the season diary" })}</button>
+            <button class="recap-cta" data-action="dismissDayRecap">${localize({ he: "לישון", en: "Sleep" })} · ${localize({ he: "יום", en: "Day" })} ${gameState.day}</button>
+          </div>
+        </div>
+      `;
+      focusDialog(dom.dayRecapWindow);
+    }
+
+    function renderPitchWindow() {
+      if (!dom || !dom.pitchWindow) {
+        return;
+      }
+      const moment = root.GAME_DATA && root.GAME_DATA.pitchMoment;
+      const pitch = gameState.pitch;
+      const recapOpen = gameState.dayRecap && !gameState.dayRecap.dismissed;
+      const briefOpen = gameState.dailyBriefing && !gameState.dailyBriefing.dismissed;
+      const open = pitch && !pitch.dismissed && !recapOpen && !briefOpen && moment;
+      if (!open) {
+        dom.pitchWindow.classList.add("hidden");
+        dom.pitchWindow.innerHTML = "";
+        return;
+      }
+      const npc = NPCS[pitch.targetNpcId];
+      const npcName = npc ? localize(npc.name) : "";
+      const npcRole = npc ? localize(npc.role) : "";
+      dom.pitchWindow.classList.remove("hidden");
+
+      if (pitch.resolved) {
+        dom.pitchWindow.innerHTML = `
+          <div class="pitch-dialog" role="dialog" aria-modal="true" aria-labelledby="pitchTitle">
+            <div class="pitch-head">
+              <strong id="pitchTitle">🎬 ${localize(moment.title)}</strong>
+              <span class="pitch-daytag">${npcName}${npcRole ? " · " + npcRole : ""}</span>
+            </div>
+            <div class="pitch-body">
+              <p class="pitch-result">${pitch.resultCopy || ""}</p>
+              <button class="pitch-cta" data-action="dismissPitch">${localize({ he: "המשך", en: "Continue" })}</button>
+            </div>
+          </div>
+        `;
+        focusDialog(dom.pitchWindow);
+        return;
+      }
+
+      const context = localize(moment.contextTemplate).replace("{npcName}", npcName);
+      const hours = (moment.cost && moment.cost.hours) || 0;
+      const affordable = ensureTime(hours);
+      const staged = dom.pitchStagedStyle;
+      const cards = moment.styles.map((style) => {
+        const isSelected = staged === style.id;
+        return `
+          <button class="pitch-card ${isSelected ? "selected" : ""}" type="button"
+            data-action="stagePitchStyle" data-value="${style.id}" aria-pressed="${isSelected}">
+            <span class="pitch-card-check" aria-hidden="true">${isSelected ? "✓" : ""}</span>
+            <span class="pitch-card-label">${localize(style.label)}</span>
+            <span class="pitch-card-tag">${localize(style.tag)}</span>
+            ${isSelected ? `<span class="pitch-card-preview">${localize(style.preview)}</span>` : ""}
+          </button>
+        `;
+      }).join("");
+
+      dom.pitchWindow.innerHTML = `
+        <div class="pitch-dialog" role="dialog" aria-modal="true" aria-labelledby="pitchTitle">
+          <div class="pitch-head">
+            <strong id="pitchTitle">🎬 ${localize(moment.title)}</strong>
+            <span class="pitch-daytag">${npcName}${npcRole ? " · " + npcRole : ""}</span>
+          </div>
+          <div class="pitch-body">
+            <p class="pitch-context">${context}</p>
+            <div class="pitch-cost-line ${affordable ? "" : "risk"}">
+              <span>${formatDuration(hours)} · ${localize({ he: "הזדמנות חד־פעמית", en: "One-time opportunity" })} · ${localize({ he: "אין סיכון לכישלון מסלול", en: "No route-failure risk" })}</span>
+              ${affordable ? "" : `<span class="pitch-cost-warn">${localize({ he: "אין מספיק שעות היום", en: "Not enough hours left today" })}</span>`}
+            </div>
+            <div class="pitch-cards">${cards}</div>
+            <div class="pitch-actions">
+              <button class="pitch-cta" data-action="commitPitch" data-value="${staged || ""}" ${staged && affordable ? "" : "disabled"}>
+                ${localize({ he: "שלח/י את הפיץ׳", en: "Send the pitch" })} · ${formatDuration(hours)}
+              </button>
+              <button class="mini-btn secondary" data-action="dismissPitch">${localize({ he: "לא עכשיו", en: "Not now" })}</button>
+            </div>
+          </div>
+        </div>
+      `;
+      focusDialog(dom.pitchWindow);
     }
 
     /*
@@ -11220,11 +11838,24 @@
       renderNoticeWindow();
       renderCollectionWindow();
       renderMorningBrief();
+      renderPitchWindow();
+      renderDayRecapWindow();
       renderStartScreen();
       renderWinLoss();
     }
 
     function bindEvents() {
+      // Escape skips the pitch (an explicitly non-blocking, optional
+      // opportunity) — but never the day-recap, which must be closed via
+      // its own CTA so the day's summary is actually seen.
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape") return;
+        const pitch = gameState.pitch;
+        if (pitch && !pitch.dismissed && !pitch.resolved) {
+          dom.pitchStagedStyle = null;
+          dismissPitch();
+        }
+      });
       document.body.addEventListener("click", (event) => {
         const target = event.target.closest("[data-action]");
         if (!target) {
@@ -11341,6 +11972,23 @@
           dismissMorningBrief();
           dom.hereActionsOpen = true;
           goToBuilding(value);
+        } else if (action === "dismissDayRecap") {
+          if (gameState.dayRecap) gameState.dayRecap.dismissed = true;
+          saveGame();
+          render();
+        } else if (action === "openStoryFromRecap") {
+          if (gameState.dayRecap) gameState.dayRecap.dismissed = true;
+          dom.classicPanelTab = "story";
+          saveGame();
+          render();
+        } else if (action === "stagePitchStyle") {
+          dom.pitchStagedStyle = value;
+          render();
+        } else if (action === "commitPitch") {
+          if (value) resolvePitchChoice(value);
+        } else if (action === "dismissPitch") {
+          dom.pitchStagedStyle = null;
+          dismissPitch();
         } else if (action === "toggleCategoryGroup") {
           dom.openCategoryGroup = dom.openCategoryGroup === value ? null : value;
           render();
@@ -11420,6 +12068,7 @@
       if (dom) {
         dom.forceStart = true;
         dom.statusWindowOpen = false;
+        dom.pitchStagedStyle = null;
       }
       savePrefs();
       applyTheme();
@@ -11448,6 +12097,7 @@
       if (dom) {
         dom.forceStart = false;
         dom.statusWindowOpen = false;
+        dom.pitchStagedStyle = null;
       }
       savePrefs();
       saveGame();
@@ -11467,6 +12117,9 @@
         incidentWindow: document.getElementById("incidentWindow"),
         collectionWindow: document.getElementById("collectionWindow"),
         morningBriefWindow: document.getElementById("morningBriefWindow"),
+        dayRecapWindow: document.getElementById("dayRecapWindow"),
+        pitchWindow: document.getElementById("pitchWindow"),
+        pitchStagedStyle: null,
         floatLayer: document.getElementById("floatLayer"),
         nightVeil: document.getElementById("nightVeil"),
         noticeTimer: null,
@@ -11536,8 +12189,17 @@
     root.nextFilmTask = nextFilmTask;
     root.filmTasksComplete = filmTasksComplete;
     root.resolveBriefChoice = resolveBriefChoice;
+    root.render = render;
     root.dismissMorningBrief = dismissMorningBrief;
     root.triggerDailyBriefing = triggerDailyBriefing;
+    root.maybeTriggerPitch = maybeTriggerPitch;
+    root.resolvePitchTarget = resolvePitchTarget;
+    root.resolvePitchChoice = resolvePitchChoice;
+    root.dismissPitch = dismissPitch;
+    root.markFilmTask = markFilmTask;
+    root.computeDayHighlight = computeDayHighlight;
+    root.formatDayDeltas = formatDayDeltas;
+    root.computeSownLine = computeSownLine;
 
     if (canRender) {
       init();
