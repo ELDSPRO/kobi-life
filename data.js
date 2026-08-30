@@ -1036,7 +1036,159 @@
             result: { he: "מחר יהיה שוב עמוס. היום לא.", en: "Tomorrow will be busy again. Today isn't." }
           }
         ]
+      },
+      /* === follow-ups scheduled by the "First Pitch" moment (see pitchMoment below) === */
+      {
+        id: "pitch_followup_human",
+        weight: 0, tone: "good",
+        teaser: { he: "איש הקשר מהפיץ' האחרון אמור לחזור עם תשובה.", en: "The contact from your last pitch is due to write back." },
+        headline: { he: "השיחה מהפיץ' חוזרת", en: "The pitch conversation comes back" },
+        body: {
+          he: "'בוא/י נדבר שוב,' כתב/ה. 'יש מישהו שכדאי שתכיר/י.'",
+          en: "'Let's talk again,' they wrote. 'There's someone you should meet.'"
+        },
+        choices: [
+          {
+            id: "take_intro",
+            label: { he: "לקחת את ההיכרות · 0 ₪ · 1ש", en: "Take the introduction · $0 · 1h" },
+            cost: { hours: 1 },
+            effects: { relationshipReputation: 4, experience: 4 },
+            result: { he: "עוד שם ברשימת אנשי הקשר. עוד דלת פתוחה.", en: "Another name in your contacts. Another open door." }
+          },
+          {
+            id: "stay_focused",
+            label: { he: "להישאר ממוקד/ת בעבודה · 0 ₪ · 0ש", en: "Stay focused on the work · $0 · 0h" },
+            effects: { soul: 2 },
+            result: { he: "לא כל דלת צריכה להיפתח מיד.", en: "Not every door needs opening right away." }
+          }
+        ]
+      },
+      {
+        id: "pitch_followup_vision",
+        weight: 0, tone: "good",
+        teaser: { he: "מישהו מהפיץ' האחרון ביקש moodboard.", en: "Someone from your last pitch asked for a moodboard." },
+        headline: { he: "הבקשה ל-moodboard מגיעה", en: "The moodboard request arrives" },
+        body: {
+          he: "מייל קצר: 'תשלח/י לי משהו ויזואלי לפני שאני מציג/ה את זה הלאה.'",
+          en: "A short email: 'send me something visual before I take this further.'"
+        },
+        choices: [
+          {
+            id: "send_moodboard",
+            label: { he: "להרכיב moodboard · 0 ₪ · 2ש", en: "Put together a moodboard · $0 · 2h" },
+            cost: { hours: 2 },
+            effects: { artisticReputation: 4, creativity: 3 },
+            result: { he: "שלחת עשר תמונות ומשפט אחד טוב. זה עבר הלאה.", en: "You sent ten images and one good sentence. It moved forward." }
+          },
+          {
+            id: "skip_moodboard",
+            label: { he: "לענות שאין זמן כרגע · 0 ₪ · 0ש", en: "Reply there's no time right now · $0 · 0h" },
+            effects: { artisticReputation: -1 },
+            result: { he: "היא הבינה. זה לא נעלם, זה רק מחכה.", en: "They understood. It didn't vanish, just waits." }
+          }
+        ]
+      },
+      {
+        id: "pitch_followup_audience",
+        weight: 0, tone: "good",
+        teaser: { he: "מישהו מהפיץ' האחרון בודק תקציב עבורך.", en: "Someone from your last pitch is checking a budget for you." },
+        headline: { he: "שיחת תקציב קצרה", en: "A short budget call" },
+        body: {
+          he: "'רק מספרים,' כתב/ה. 'בלי רגש. תתקשר/י כשנוח.'",
+          en: "'Just numbers,' they wrote. 'No feelings. Call when it suits you.'"
+        },
+        choices: [
+          {
+            id: "take_call",
+            label: { he: "לקיים את השיחה · 0 ₪ · 1ש", en: "Take the call · $0 · 1h" },
+            cost: { hours: 1 },
+            effects: { commercialReputation: 4, cash: 120 },
+            result: { he: "יצאת עם מספר ראשוני וכיוון קר אבל אמיתי.", en: "You left with a first number and a cold but real direction." }
+          },
+          {
+            id: "decline_call",
+            label: { he: "לדחות לשבוע הבא · 0 ₪ · 0ש", en: "Push it to next week · $0 · 0h" },
+            result: { he: "המספרים לא בורחים. הם רק מחכים בסבלנות.", en: "The numbers don't run away. They just wait." }
+          }
+        ]
       }
-    ]
+    ],
+
+    /*
+     * pitchMoment — the one-time "First Pitch" career milestone. Not part of
+     * the daily-briefing pool: triggered explicitly by maybeTriggerPitch()
+     * once the player has an active idea (filmTasks.have_idea), has met at
+     * least one industry contact, and minDaysAfterIdea has passed. Rendered
+     * by its own dedicated renderPitchWindow() screen, not the brief popup.
+     * Each style's effects/result/followUpEventId follow the exact same
+     * shape as a dailyEvents choice, so resolvePitchChoice() can reuse
+     * applyBriefEffects()/pendingFollowUps unchanged.
+     */
+    pitchMoment: {
+      id: "first_pitch",
+      cost: { hours: 2 },
+      requiredFilmTaskId: "have_idea",
+      minDaysAfterIdea: 2,
+      unlocksFilmTaskId: "treatment",
+      title: { he: "פיץ' ראשון", en: "First Pitch" },
+      contextTemplate: {
+        he: "{npcName} הסכים/ה לשמוע. עשר דקות, לא יותר. הזדמנות חד־פעמית — היא לא תיפתח שוב.",
+        en: "{npcName} agreed to listen. Ten minutes, no more. A one-time opportunity — it won't reopen."
+      },
+      styles: [
+        {
+          id: "human",
+          label: { he: "הסיפור האנושי", en: "The Human Story" },
+          tag: { he: "קשרים ורגש", en: "Connection & feeling" },
+          preview: {
+            he: "תספר/י למה זה חשוב לך באמת. עשוי להיקרא פחות מקצועי.",
+            en: "Tell them why it actually matters to you. May read as less professional."
+          },
+          effects: { relationshipReputation: 6, reputation: 1, love: 2 },
+          npcRelationshipDelta: 3,
+          result: {
+            he: "{npcName} הנמיך/ה את הטלפון. זה כבר משהו.",
+            en: "{npcName} put the phone down. That's already something."
+          },
+          followUpEventId: "pitch_followup_human", followUpInDays: 2
+        },
+        {
+          id: "vision",
+          label: { he: "החזון הקולנועי", en: "The Cinematic Vision" },
+          tag: { he: "כיוון אמנותי", en: "Artistic direction" },
+          preview: {
+            he: "תדבר/י על התמונה, לא על התקציב. עשוי להיקרא פחות מציאותי.",
+            en: "Talk about the image, not the budget. May read as less grounded."
+          },
+          effects: { artisticReputation: 6, reputation: 1, creativity: 2 },
+          npcRelationshipDelta: 1,
+          result: {
+            he: "{npcName} ביקש/ה moodboard. זה אומר שהיא זוכרת.",
+            en: "{npcName} asked for a moodboard. That means they remember."
+          },
+          followUpEventId: "pitch_followup_vision", followUpInDays: 2
+        },
+        {
+          id: "audience",
+          label: { he: "הקהל והפוטנציאל", en: "The Audience & Potential" },
+          tag: { he: "מסחור והפקה", en: "Commerce & production" },
+          preview: {
+            he: "תדבר/י מספרים ופלטפורמות. עשוי להיקרא פחות אישי.",
+            en: "Talk numbers and platforms. May read as less personal."
+          },
+          effects: { commercialReputation: 6, reputation: 1 },
+          npcRelationshipDelta: 1,
+          result: {
+            he: "{npcName} כתב/ה מספר על הנייר. תמיד סימן טוב.",
+            en: "{npcName} wrote a number on the paper. Always a good sign."
+          },
+          followUpEventId: "pitch_followup_audience", followUpInDays: 3
+        }
+      ],
+      skipResult: {
+        he: "לא היום. ההזדמנות הזאת נסגרה — הבאה תגיע כשתגיע.",
+        en: "Not today. This opportunity is closed — the next one arrives when it arrives."
+      }
+    }
   };
 })(typeof globalThis !== "undefined" ? globalThis : this);
