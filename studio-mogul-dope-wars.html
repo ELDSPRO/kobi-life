@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#090c0a">
-  <title>KOBI // NIGHT MARKET</title>
+  <meta name="theme-color" content="#070a11">
+  <title>KOBI / FIRST CUT</title>
   <style>
     :root {
       --ink:#090c0a; --panel:#101711; --panel-2:#151d14; --line:#40513b;
@@ -94,6 +94,46 @@
     .end-score b { display:block; margin-top:4px; color:var(--cream); font-size:.9rem; }
     @media (max-width:780px) { .command,.grid { grid-template-columns:1fr; } .headline { align-items:start; display:grid; } .headline p { text-align:right; } .rail { grid-template-columns:repeat(2,minmax(0,1fr)); } .rail .log-panel { grid-column:1/-1; } }
     @media (max-width:520px) { .shell { width:min(100% - 20px,1160px); padding-top:14px; } .goods,.rail { grid-template-columns:1fr; } .rail .log-panel { grid-column:auto; } .finance { min-height:72px; } .finance div { padding:9px; } .mission { min-height:76px; } .market { padding:12px; } .topbar { align-items:start; } }
+    /* Film-school skin: the economic loop stays terse, but its visual system
+       now belongs to KOBI / LIFE rather than a green DOS terminal. */
+    :root { --ink:#070a11; --panel:#121928; --panel-2:#1a2336; --line:#303b50; --cream:#f7f2e8; --muted:#9aa3b4; --green:#67cfc4; --amber:#f4bd4b; --rose:#e28c83; --cyan:#93b6e0; }
+    body { background:radial-gradient(820px 520px at 12% 0%,rgba(72,57,158,.25),transparent 66%),radial-gradient(650px 420px at 95% 4%,rgba(36,117,137,.15),transparent 66%),var(--ink); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif; }
+    .shell { width:min(1240px,calc(100% - 42px)); padding-top:30px; }
+    .topbar { padding-bottom:17px; border-color:rgba(229,238,255,.15); }
+    .brand { color:var(--amber); font-family:var(--mono); letter-spacing:.14em; }
+    .brand b { color:var(--cream); }
+    .turn strong { color:var(--cream); }
+    .headline { padding:31px 0 20px; }
+    .eyebrow { color:var(--amber); }
+    h1 { letter-spacing:-.06em; }
+    .panel { border-color:rgba(229,238,255,.15); border-radius:15px; background:linear-gradient(145deg,rgba(29,37,57,.96),rgba(13,18,29,.98)); box-shadow:0 20px 50px rgba(0,0,0,.23); }
+    .panel::before { opacity:1; background:radial-gradient(420px 170px at 100% 0%,rgba(125,110,204,.1),transparent 70%); }
+    .mission { min-height:104px; }
+    .mission-mark { color:#18130a; background:var(--amber); border-radius:8px; transform:none; }
+    .mission-mark b { transform:none; }
+    .mission span,.finance label,.market-kicker { color:var(--amber); }
+    .finance { grid-template-columns:repeat(4,1fr); }
+    .finance div { border-color:rgba(229,238,255,.11); }
+    .finance .slots b { color:var(--cyan); }
+    .finance .fame b { color:var(--green); }
+    .market { padding:21px; }
+    .market-head { border-color:rgba(229,238,255,.12); }
+    .good { border-color:rgba(229,238,255,.13); border-radius:10px; background:rgba(255,255,255,.028); }
+    .good:hover { border-color:var(--amber); background:rgba(244,185,66,.06); }
+    .good-owned { color:var(--cyan); }
+    .deal-actions button,.travel button,.debt-control button,.footer-actions button,.event button { border-color:rgba(229,238,255,.16); border-radius:7px; background:rgba(255,255,255,.045); }
+    .deal-actions button:hover,.travel button:hover,.debt-control button:hover,.footer-actions button:hover,.event button:hover { color:#191308; background:var(--amber); border-color:var(--amber); }
+    .deal-actions .sell { color:var(--cyan); }
+    .deal-actions .sell:hover { background:var(--cyan); border-color:var(--cyan); color:#071014; }
+    .travel button.current { color:var(--amber); border-color:var(--amber); background:rgba(244,185,66,.08); }
+    .travel button.current:hover { color:var(--amber); background:rgba(244,185,66,.08); }
+    .bag-row { border-color:rgba(229,238,255,.14); }
+    .debt-control button { color:var(--rose); }
+    .debt-control button:hover { color:#230b0b; background:var(--rose); border-color:var(--rose); }
+    .event { border-color:rgba(244,185,66,.65); border-radius:16px; background:linear-gradient(145deg,#1b2438,#101621); }
+    .event b { color:var(--green); }
+    .end-score div { border-radius:8px; background:rgba(255,255,255,.055); }
+    @media (max-width:520px) { .shell { width:min(100% - 24px,1240px); } .finance { grid-template-columns:repeat(2,1fr); } .finance div:nth-child(3) { border-inline-start:0; } }
   </style>
 </head>
 <body>
@@ -102,20 +142,20 @@
   <script>
     (() => {
       const GOODS = [
-        { id:"script", name:"אופציית תסריט", note:"זולה ברחובות הנכונים", base:115, fame:1 },
-        { id:"edit", name:"שעות עריכה", note:"כולם צריכים אותן אחרי הצילומים", base:165, fame:1 },
-        { id:"set", name:"יום סט", note:"זמן צוות שמתאדה מהר", base:245, fame:2 },
-        { id:"camera", name:"קיט מצלמה", note:"יקר, אבל עיר אחרת תשלם", base:390, fame:3 },
-        { id:"brand", name:"בריף למותג", note:"פחות אישי, יותר מזומן", base:290, fame:2 },
-        { id:"festival", name:"ספוט פסטיבל", note:"מסוכן, עם סיכוי לתהילה", base:520, fame:5 }
+        { id:"script", name:"אופציית תסריט", note:"רעיון טוב לפני שמישהו אחר סוגר אותו", base:115, fame:1 },
+        { id:"edit", name:"לילות עריכה", note:"שעות שיכולות להציל סרט קצר", base:165, fame:1 },
+        { id:"set", name:"יום סט", note:"קרדיט ראשון, קפה, וקשרים", base:245, fame:2 },
+        { id:"camera", name:"קיט מצלמה", note:"ציוד שמקצר את הדרך לסרט הבא", base:390, fame:3 },
+        { id:"brand", name:"סרטון למותג", note:"פחות אישי, אבל מממן את היצירה", base:290, fame:2 },
+        { id:"festival", name:"ספוט פסטיבל", note:"הסיכון הכי יקר בדרך לשם", base:520, fame:5 }
       ];
       const CITIES = [
-        { id:"tlv", name:"תל אביב", zone:"שוק חם", fare:0, mods:{ script:.82, edit:1.12, set:1.15, camera:1.06, brand:1.22, festival:1.08 } },
-        { id:"jerusalem", name:"ירושלים", zone:"מסלולים ומוסדות", fare:90, mods:{ script:1.1, edit:.88, set:1.08, camera:1.16, brand:.82, festival:1.28 } },
-        { id:"haifa", name:"חיפה", zone:"ציוד ועורכים", fare:110, mods:{ script:1.08, edit:.76, set:.86, camera:.79, brand:1.12, festival:1.1 } },
-        { id:"athens", name:"אתונה", zone:"פסטיבלים זולים", fare:260, mods:{ script:1.22, edit:1.02, set:1.18, camera:.92, brand:1.18, festival:.68 } }
+        { id:"tlv", name:"תל אביב", zone:"לימודים והפקות", fare:0, mods:{ script:.82, edit:1.12, set:1.15, camera:1.06, brand:1.22, festival:1.08 } },
+        { id:"jerusalem", name:"ירושלים", zone:"מוסדות ופיצ׳ינג", fare:90, mods:{ script:1.1, edit:.88, set:1.08, camera:1.16, brand:.82, festival:1.28 } },
+        { id:"haifa", name:"חיפה", zone:"ציוד וחדרי עריכה", fare:110, mods:{ script:1.08, edit:.76, set:.86, camera:.79, brand:1.12, festival:1.1 } },
+        { id:"athens", name:"אתונה", zone:"פסטיבלים וקו־פרודוקציה", fare:260, mods:{ script:1.22, edit:1.02, set:1.18, camera:.92, brand:1.18, festival:.68 } }
       ];
-      const STORAGE_KEY = "kobi-night-market-v1";
+      const STORAGE_KEY = "kobi-first-cut-v2";
       const app = typeof document !== "undefined" ? document.getElementById("app") : null;
       const modal = typeof document !== "undefined" ? document.getElementById("modal") : null;
       const money = (n) => new Intl.NumberFormat("he-IL", { style:"currency", currency:"ILS", maximumFractionDigits:0 }).format(Math.round(n));
@@ -127,7 +167,7 @@
       function createState() {
         const next = { day:1, maxDays:30, city:"tlv", cash:620, debt:8000, fame:0, followers:0, capacity:10, bag:{}, prices:{}, log:[], event:null, ended:false };
         next.prices = generatePrices(next.city);
-        next.log = ["יום 1: יש לך חודש להפוך עבודה קטנה למסלול גדול."];
+        next.log = ["שבוע 1: סטודנט/ית לקולנוע עם חוב, תיק ריק וסרט ראשון בראש."];
         return next;
       }
       let state = createState();
@@ -156,6 +196,12 @@
         if (ratio > 1.2) return "חם היום";
         return "מחיר רגיל";
       }
+      function careerStage() {
+        if (state.fame >= 48) return { name:"במאי/ת עולה", copy:"יש לך כבר שם קטן, קהל, וסיבה טובה לספר על הסרט הבא." };
+        if (state.fame >= 24) return { name:"יוצר/ת סרט קצר", copy:"עכשיו מחפשים את העסקה שתיקח את הסרט מהרעיון למסך." };
+        if (state.fame >= 9) return { name:"איש/אשת צוות", copy:"הקרדיטים הראשונים נצברים. מישהו כבר יודע את השם שלך." };
+        return { name:"סטודנט/ית לקולנוע", copy:"כל עסקה קטנה יכולה לקנות לך זמן, ציוד או קרדיט ראשון." };
+      }
       function buy(id) {
         if (state.ended || state.event) return false;
         const price = state.prices[id];
@@ -181,15 +227,15 @@
         const roll = Math.random();
         if (roll < .19) {
           const target = GOODS[randomInt(0, GOODS.length - 1)]; state.prices[target.id] = Math.round(state.prices[target.id] * .55 / 5) * 5;
-          setEvent("היצע מטורף", "מישהו זרק לשוק " + target.name + ". המחיר התרסק רק בעיר הזאת.", "המחיר של " + target.name + " ירד ב־45%.");
+          setEvent("מחסן הפקה מתפנה", "הפקה שנסגרה משחררת " + target.name + " במחיר רצפה בעיר הזאת.", "המחיר של " + target.name + " ירד ב־45%.");
         } else if (roll < .35) {
           const target = GOODS[randomInt(0, GOODS.length - 1)]; state.prices[target.id] = Math.round(state.prices[target.id] * 1.75 / 5) * 5;
-          setEvent("כולם צריכים את זה עכשיו", "הפקה גדולה נתקעה ומחפשת " + target.name + " בלי להתמקח.", "המחיר קפץ ב־75%.");
+          setEvent("הפקה גדולה נתקעה", "הם מחפשים " + target.name + " בלי להתמקח. בדיוק הרגע למכור אם יש לך.", "המחיר קפץ ב־75%.");
         } else if (roll < .47) {
-          state.capacity += 3; setEvent("תיק ציוד נוסף", "צלם שעזב סט נתן לך תיק קשיח. הוא לא יפה, אבל הוא מכיל יותר.", "+3 מקומות בתיק.");
+          state.capacity += 3; setEvent("תיק ציוד נוסף", "בוגר/ת שנה ד׳ מסר/ה לך תיק קשיח. הוא לא יפה, אבל הוא פותח עוד שלוש עסקאות.", "+3 מקומות בתיק.");
         } else if (roll < .58) {
           const loss = Math.min(state.cash, randomInt(70, 160)); state.cash -= loss;
-          setEvent("חשבונית דחופה", "הודעה ישנה חזרה בדיוק כשנחתת. אין סיכוי להתעלם ממנה.", "-" + money(loss) + " מזומן.");
+          setEvent("שכר לימוד מזכיר את עצמו", "הודעה ישנה חזרה בדיוק כשנחתת. אין סיכוי להתעלם ממנה.", "-" + money(loss) + " מזומן.");
         }
       }
       function travel(id) {
@@ -197,7 +243,7 @@
         const destination = CITIES.find((entry) => entry.id === id); if (!destination) return false;
         if (state.cash < destination.fare) return notify("אין כסף לטיסה", "צריך " + money(destination.fare) + " כדי להגיע ל" + destination.name + ".", "");
         state.cash -= destination.fare; state.city = id; state.day += 1; state.debt = Math.ceil(state.debt * 1.008); state.prices = generatePrices(id);
-        addLog("יום " + state.day + ": הגעת ל" + destination.name + ". החוב צמח ב־0.8%.");
+        addLog("שבוע " + state.day + ": הגעת ל" + destination.name + ". החוב צמח ב־0.8%.");
         if (state.day > state.maxDays) return finish();
         triggerTravelEvent(); save(); render(); return true;
       }
@@ -209,22 +255,23 @@
         if (!modal) return;
         if (state.ended) {
           const final = state.final || { inventory:0, score:0 };
-          modal.classList.remove("hidden"); modal.innerHTML = `<section class="event"><span>סוף המסלול · 30 ימים</span><h2>${final.score >= 0 ? "נשארת במשחק." : "החוב ניצח הפעם."}</h2><p>הניקוד שלך הוא מזומן + שווי תיק − חוב + תהילה.</p><div class="end-score"><div><span>מזומן</span><b>${money(state.cash)}</b></div><div><span>שווי תיק</span><b>${money(final.inventory)}</b></div><div><span>חוב</span><b>${money(state.debt)}</b></div></div><button data-action="new">משחק חדש ←</button></section>`; return;
+          modal.classList.remove("hidden"); modal.innerHTML = `<section class="event"><span>סוף המסלול · 30 שבועות</span><h2>${careerStage().name}</h2><p>${final.score >= 0 ? "סגרת ריצה עם חומר, ניסיון וסיבה להתחיל את הסרט הבא." : "החוב עדיין שם, אבל גם הקרדיטים והאנשים שהכרת בדרך."}</p><div class="end-score"><div><span>מזומן</span><b>${money(state.cash)}</b></div><div><span>שווי תיק</span><b>${money(final.inventory)}</b></div><div><span>חוב</span><b>${money(state.debt)}</b></div></div><button data-action="new">להתחיל מסלול חדש ←</button></section>`; return;
         }
         if (!state.event) { modal.classList.add("hidden"); modal.innerHTML = ""; return; }
         modal.classList.remove("hidden"); modal.innerHTML = `<section class="event"><span>אירוע בדרך</span><h2>${state.event.title}</h2><p>${state.event.copy}${effectText(state.event)}</p><button data-action="dismiss">להמשיך לשוק ←</button></section>`;
       }
       function render() {
         if (!app) return;
-        const here = city(), used = totalBag(), focus = state.debt > 0 ? "קנה בזול, טוס, מכור ביוקר. כל מעבר מגדיל את החוב." : "החוב נסגר. עכשיו כל עסקה בונה שם וקהל.";
+        const here = city(), used = totalBag(), stage = careerStage();
+        const focus = state.debt > 0 ? "קנה נכס הפקה כשהוא זול, טוס לעיר שבה הוא נדרש, ומכור כדי לממן את הצעד הבא." : "החוב נסגר. עכשיו כל עסקה יכולה לבנות את הסרט ואת השם שלך.";
         const bagRows = Object.entries(state.bag).map(([id, qty]) => `<div class="bag-row"><span>${item(id).name}</span><b>×${qty}</b></div>`).join("");
         app.innerHTML = `<div class="shell">
-          <header class="topbar"><div class="brand">KOBI <b>//</b> NIGHT MARKET</div><div class="turn"><span>ימים נשארו</span><strong>${Math.max(0, state.maxDays - state.day + 1)}</strong></div></header>
-          <section class="headline"><div><p class="eyebrow">${here.name.toUpperCase ? here.name : here.name} · ${here.zone}</p><h1>לקנות. לטוס. למכור.</h1></div><p>30 ימים לסגור חוב ולהפוך עסקאות קטנות לקריירה קולנועית.</p></section>
-          <section class="command"><div class="panel mission"><i class="mission-mark"><b>→</b></i><div><span>המהלך</span><strong>${state.debt > 0 ? "החוב רודף. השוק פתוח." : "החוב נסגר. עכשיו בונים שם."}</strong><p>${focus}</p></div></div><div class="panel finance"><div><label>מזומן</label><b>${money(state.cash)}</b></div><div class="debt"><label>חוב</label><b>${money(state.debt)}</b></div><div class="slots"><label>תיק</label><b>${used}/${state.capacity}</b></div></div></section>
-          <section class="grid"><main class="panel market"><header class="market-head"><div><span class="market-kicker">שוק מקומי · יום ${state.day}/30</span><h2>מה קונים ב${here.name}?</h2></div><p>קנה מתחת למחיר הרגיל.<br>מכור כשהשוק חם.</p></header><div class="goods">${GOODS.map((good) => { const owned=state.bag[good.id]||0, price=state.prices[good.id]; return `<article class="good"><div><div class="good-top"><span class="good-title">${good.name}</span><span class="good-owned">בתיק: ${owned}</span></div><p class="good-note">${good.note} · ${marketSignal(good)}</p></div><b class="price">${money(price)}</b><div class="deal-actions"><button data-action="buy" data-id="${good.id}" ${state.cash<price||used>=state.capacity?"disabled":""}>קנה 1</button><button class="sell" data-action="sell" data-id="${good.id}" ${owned?"":"disabled"}>מכור 1</button></div></article>`; }).join("")}</div></main>
-          <aside class="rail"><section class="panel"><h2>טוס לעיר אחרת</h2><div class="travel">${CITIES.map((place) => `<button class="${place.id===state.city?"current":""}" data-action="travel" data-id="${place.id}"><span>${place.name}<small> · ${place.zone}</small></span><b>${place.id===state.city?"כאן":""+(place.fare?money(place.fare):"חינם")}</b></button>`).join("")}</div></section><section class="panel"><h2>מה בתיק</h2><div class="bag">${bagRows||'<p class="bag-empty">התיק ריק. עסקה טובה מתחילה בפריט אחד זול.</p>'}</div></section><section class="panel"><h2>חוב</h2><div class="debt-control"><p>בכל טיסה החוב גדל ב־0.8%. אפשר לשלם 500 ₪ בכל פעם.</p><button data-action="pay">לשלם 500 ₪ לחוב</button></div></section><section class="panel log-panel"><h2>שידור מסלול</h2><div class="log">${state.log.map((line)=>`<p>› ${line}</p>`).join("")}</div></section></aside></section>
-          <div class="footer-actions"><button data-action="finish">לסיים מסלול עכשיו</button><button data-action="new">איפוס משחק</button></div>
+          <header class="topbar"><div class="brand">KOBI <b>/</b> FIRST CUT</div><div class="turn"><span>שבועות נשארו</span><strong>${Math.max(0, state.maxDays - state.day + 1)}</strong></div></header>
+          <section class="headline"><div><p class="eyebrow">${here.name} · ${here.zone}</p><h1>סטודנט/ית היום. במאי/ת מחר.</h1></div><p>30 שבועות לסגור חוב לימודים, לאסוף קרדיטים, ולממן את הסרט הראשון שלך.</p></section>
+          <section class="command"><div class="panel mission"><i class="mission-mark"><b>✦</b></i><div><span>המסלול שלך</span><strong>${stage.name}</strong><p>${stage.copy} ${focus}</p></div></div><div class="panel finance"><div><label>מזומן</label><b>${money(state.cash)}</b></div><div class="debt"><label>חוב לימודים</label><b>${money(state.debt)}</b></div><div class="fame"><label>קרדיטים</label><b>${state.fame}</b></div><div class="slots"><label>תיק הפקה</label><b>${used}/${state.capacity}</b></div></div></section>
+          <section class="grid"><main class="panel market"><header class="market-head"><div><span class="market-kicker">הזדמנויות מקומיות · שבוע ${state.day}/30</span><h2>מה זול ב${here.name}?</h2></div><p>קנה נכס הפקה בזול.<br>מכור אותו כשעיר אחרת צריכה אותו.</p></header><div class="goods">${GOODS.map((good) => { const owned=state.bag[good.id]||0, price=state.prices[good.id]; return `<article class="good"><div><div class="good-top"><span class="good-title">${good.name}</span><span class="good-owned">בתיק: ${owned}</span></div><p class="good-note">${good.note} · ${marketSignal(good)}</p></div><b class="price">${money(price)}</b><div class="deal-actions"><button data-action="buy" data-id="${good.id}" ${state.cash<price||used>=state.capacity?"disabled":""}>לקחת</button><button class="sell" data-action="sell" data-id="${good.id}" ${owned?"":"disabled"}>לסגור עסקה</button></div></article>`; }).join("")}</div></main>
+          <aside class="rail"><section class="panel"><h2>טיסה לעיר אחרת</h2><div class="travel">${CITIES.map((place) => `<button class="${place.id===state.city?"current":""}" data-action="travel" data-id="${place.id}"><span>${place.name}<small> · ${place.zone}</small></span><b>${place.id===state.city?"כאן":""+(place.fare?money(place.fare):"חינם")}</b></button>`).join("")}</div></section><section class="panel"><h2>תיק ההפקה</h2><div class="bag">${bagRows||'<p class="bag-empty">התיק ריק. מתחילים בעסקה קטנה שמאפשרת את הצילום הבא.</p>'}</div></section><section class="panel"><h2>מימון לימודים</h2><div class="debt-control"><p>בכל טיסה החוב גדל ב־0.8%. משלמים 500 ₪ כדי לקנות עוד חופש.</p><button data-action="pay">להחזיר 500 ₪</button></div></section><section class="panel log-panel"><h2>יומן הפקה</h2><div class="log">${state.log.map((line)=>`<p>› ${line}</p>`).join("")}</div></section></aside></section>
+          <div class="footer-actions"><button data-action="finish">לסכם את המסלול</button><button data-action="new">מסלול חדש</button></div>
         </div>`;
         renderModal();
       }
