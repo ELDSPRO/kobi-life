@@ -133,6 +133,22 @@
     .event { border-color:rgba(244,185,66,.65); border-radius:16px; background:linear-gradient(145deg,#1b2438,#101621); }
     .event b { color:var(--green); }
     .end-score div { border-radius:8px; background:rgba(255,255,255,.055); }
+    .price-wrap { display:grid; align-content:center; justify-items:end; gap:4px; }
+    .market-move { font-size:.63rem; font-weight:800; white-space:nowrap; }
+    .market-move.up { color:var(--rose); }
+    .market-move.down { color:var(--green); }
+    .market-move.steady { color:var(--muted); }
+    .production { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:16px; margin-bottom:12px; padding:15px 18px; }
+    .production-kicker { color:var(--amber); font-size:.68rem; font-weight:900; letter-spacing:.09em; }
+    .production h2 { margin:4px 0 0; font-size:1.13rem; }
+    .production p { margin:4px 0 0; color:var(--muted); font-size:.75rem; line-height:1.4; }
+    .film-requirements { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+    .film-requirements span { padding:4px 7px; color:var(--muted); border:1px solid rgba(229,238,255,.13); border-radius:999px; font-size:.66rem; }
+    .film-requirements span.ready { color:#0b1718; border-color:var(--green); background:var(--green); }
+    .production button { min-height:42px; padding:9px 13px; cursor:pointer; color:#21180a; border:0; border-radius:8px; background:var(--amber); font-weight:900; white-space:nowrap; }
+    .production button:disabled { cursor:not-allowed; opacity:.38; }
+    .production button:not(:disabled):hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(244,185,66,.18); }
+    @media (max-width:700px) { .production { grid-template-columns:1fr; } .production button { width:100%; } }
     @media (max-width:520px) { .shell { width:min(100% - 24px,1240px); } .finance { grid-template-columns:repeat(2,1fr); } .finance div:nth-child(3) { border-inline-start:0; } }
   </style>
 </head>
@@ -142,20 +158,21 @@
   <script>
     (() => {
       const GOODS = [
-        { id:"script", name:"אופציית תסריט", note:"רעיון טוב לפני שמישהו אחר סוגר אותו", base:115, fame:1 },
-        { id:"edit", name:"לילות עריכה", note:"שעות שיכולות להציל סרט קצר", base:165, fame:1 },
-        { id:"set", name:"יום סט", note:"קרדיט ראשון, קפה, וקשרים", base:245, fame:2 },
-        { id:"camera", name:"קיט מצלמה", note:"ציוד שמקצר את הדרך לסרט הבא", base:390, fame:3 },
-        { id:"brand", name:"סרטון למותג", note:"פחות אישי, אבל מממן את היצירה", base:290, fame:2 },
-        { id:"festival", name:"ספוט פסטיבל", note:"הסיכון הכי יקר בדרך לשם", base:520, fame:5 }
+        { id:"script", name:"תסריט קצר", note:"חומר הגלם של הסרט הראשון", base:115, fame:1 },
+        { id:"set", name:"יום סט", note:"צוות, לוקיישן ויום צילום אחד", base:245, fame:2 },
+        { id:"camera", name:"מצלמה משומשת", note:"נשארת בתיק ומאפשרת לצלם", base:390, fame:3 },
+        { id:"sound", name:"ערכת סאונד", note:"נשארת בתיק ומונעת סרט אילם", base:260, fame:2 },
+        { id:"lights", name:"ערכת תאורה", note:"לא חובה, אבל הסרט נראה אחרת", base:205, fame:2 },
+        { id:"edit", name:"עמדת עריכה ניידת", note:"לא חובה, אבל מעלה את איכות הסרט", base:330, fame:3 },
+        { id:"festival", name:"הגשה לפסטיבל", note:"הסיכון הכי יקר בדרך לשם", base:520, fame:5 }
       ];
       const CITIES = [
-        { id:"tlv", name:"תל אביב", zone:"לימודים והפקות", fare:0, mods:{ script:.82, edit:1.12, set:1.15, camera:1.06, brand:1.22, festival:1.08 } },
-        { id:"jerusalem", name:"ירושלים", zone:"מוסדות ופיצ׳ינג", fare:90, mods:{ script:1.1, edit:.88, set:1.08, camera:1.16, brand:.82, festival:1.28 } },
-        { id:"haifa", name:"חיפה", zone:"ציוד וחדרי עריכה", fare:110, mods:{ script:1.08, edit:.76, set:.86, camera:.79, brand:1.12, festival:1.1 } },
-        { id:"athens", name:"אתונה", zone:"פסטיבלים וקו־פרודוקציה", fare:260, mods:{ script:1.22, edit:1.02, set:1.18, camera:.92, brand:1.18, festival:.68 } }
+        { id:"tlv", name:"תל אביב", zone:"לימודים והפקות", fare:0, mods:{ script:.82, set:1.15, camera:1.06, sound:1.17, lights:1.1, edit:1.12, festival:1.08 } },
+        { id:"jerusalem", name:"ירושלים", zone:"מוסדות ופיצ׳ינג", fare:90, mods:{ script:1.1, set:1.08, camera:1.16, sound:1.03, lights:1.14, edit:.88, festival:1.28 } },
+        { id:"haifa", name:"חיפה", zone:"ציוד וחדרי עריכה", fare:110, mods:{ script:1.08, set:.86, camera:.79, sound:.82, lights:.88, edit:.76, festival:1.1 } },
+        { id:"athens", name:"אתונה", zone:"פסטיבלים וקו־פרודוקציה", fare:260, mods:{ script:1.22, set:1.18, camera:.92, sound:1.06, lights:1.02, edit:1.02, festival:.68 } }
       ];
-      const STORAGE_KEY = "kobi-first-cut-v2";
+      const STORAGE_KEY = "kobi-first-cut-v3";
       const app = typeof document !== "undefined" ? document.getElementById("app") : null;
       const modal = typeof document !== "undefined" ? document.getElementById("modal") : null;
       const money = (n) => new Intl.NumberFormat("he-IL", { style:"currency", currency:"ILS", maximumFractionDigits:0 }).format(Math.round(n));
@@ -165,8 +182,9 @@
       const item = (id) => GOODS.find((entry) => entry.id === id);
       const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
       function createState() {
-        const next = { day:1, maxDays:30, city:"tlv", cash:620, debt:8000, fame:0, followers:0, capacity:10, bag:{}, prices:{}, log:[], event:null, ended:false };
+        const next = { day:1, maxDays:30, city:"tlv", cash:1500, debt:8000, fame:0, followers:0, films:0, capacity:10, bag:{}, prices:{}, previousPrices:{}, log:[], event:null, ended:false };
         next.prices = generatePrices(next.city);
+        next.previousPrices = { ...next.prices };
         next.log = ["שבוע 1: סטודנט/ית לקולנוע עם חוב, תיק ריק וסרט ראשון בראש."];
         return next;
       }
@@ -174,7 +192,10 @@
       function load() {
         try {
           const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-          if (saved && saved.prices && !saved.ended) state = { ...createState(), ...saved, event:null };
+          if (saved && saved.prices && !saved.ended) {
+            const fresh = createState();
+            state = { ...fresh, ...saved, films:Number(saved.films)||0, prices:{ ...fresh.prices, ...saved.prices }, previousPrices:saved.previousPrices || fresh.prices, event:null };
+          }
         } catch (_) {}
       }
       function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {} }
@@ -202,6 +223,24 @@
         if (state.fame >= 9) return { name:"איש/אשת צוות", copy:"הקרדיטים הראשונים נצברים. מישהו כבר יודע את השם שלך." };
         return { name:"סטודנט/ית לקולנוע", copy:"כל עסקה קטנה יכולה לקנות לך זמן, ציוד או קרדיט ראשון." };
       }
+      const FILM_REQUIREMENTS = ["script", "set", "camera", "sound"];
+      function hasItem(id) { return (state.bag[id] || 0) > 0; }
+      function filmMissing() { return FILM_REQUIREMENTS.filter((id) => !hasItem(id)); }
+      function priceMove(id) {
+        const now = state.prices[id], before = state.previousPrices[id] || now;
+        const percent = before ? Math.round(((now - before) / before) * 100) : 0;
+        return { percent, tone: percent > 0 ? "up" : percent < 0 ? "down" : "steady" };
+      }
+      function advanceWeek(reason) {
+        state.day += 1;
+        state.debt = Math.ceil(state.debt * 1.008);
+        state.previousPrices = { ...state.prices };
+        state.prices = generatePrices(state.city);
+        addLog("שבוע " + state.day + ": " + reason + " החוב צמח ב־0.8%.");
+        if (state.day > state.maxDays) { finish(); return true; }
+        triggerTravelEvent();
+        return false;
+      }
       function buy(id) {
         if (state.ended || state.event) return false;
         const price = state.prices[id];
@@ -223,6 +262,20 @@
         if (!amount) return notify("אין מה לשלם", "צריך מזומן כדי להקטין את החוב.", "");
         state.cash -= amount; state.debt -= amount; addLog("הורדת " + money(amount) + " מהחוב."); save(); render(); return true;
       }
+      function produceFilm() {
+        if (state.ended || state.event) return false;
+        const missing = filmMissing();
+        if (missing.length) return notify("עדיין אין סרט לצלם", "חסרים: " + missing.map((id) => item(id).name).join(" · ") + ".", "מצלמה וסאונד נשארים בתיק; תסריט ויום סט ייצרכו בצילום.");
+        const cost = 180;
+        if (state.cash < cost) return notify("חסר תקציב לצילום", "צריך " + money(cost) + " לביטוח, נסיעות ואוכל לצוות.", "");
+        state.cash -= cost;
+        ["script", "set"].forEach((id) => { state.bag[id] -= 1; if (!state.bag[id]) delete state.bag[id]; });
+        const qualityBonus = (hasItem("lights") ? 3 : 0) + (hasItem("edit") ? 3 : 0);
+        const credits = 10 + qualityBonus;
+        state.films += 1; state.fame += credits; state.followers += credits * randomInt(16, 34);
+        if (advanceWeek("צילמת סרט קצר #" + state.films + " וקיבלת " + credits + " קרדיטים.")) return true;
+        save(); render(); return true;
+      }
       function triggerTravelEvent() {
         const roll = Math.random();
         if (roll < .19) {
@@ -236,16 +289,39 @@
         } else if (roll < .58) {
           const loss = Math.min(state.cash, randomInt(70, 160)); state.cash -= loss;
           setEvent("שכר לימוד מזכיר את עצמו", "הודעה ישנה חזרה בדיוק כשנחתת. אין סיכוי להתעלם ממנה.", "-" + money(loss) + " מזומן.");
+        } else if (roll < .68) {
+          const target = item("festival"); state.prices.festival = Math.round(state.prices.festival * .62 / 5) * 5;
+          setEvent("הרשמה מוקדמת לפסטיבל", "חלון הגשה נפתח הערב בלבד. " + target.name + " זולה מהרגיל.", "מחיר ההגשה ירד ב־38%.");
+        } else if (roll < .77) {
+          const target = item("camera"); state.prices.camera = Math.round(state.prices.camera * 1.45 / 5) * 5;
+          setEvent("כל העיר צריכה מצלמה", "סדרה חדשה התחילה לצלם, וכל קיט מצלמה הפך פתאום לזהב.", "מחיר מצלמה עלה ב־45%.");
+        } else if (roll < .85) {
+          const bonus = randomInt(1, 2); state.fame += bonus;
+          setEvent("מרצה זכר/ה את העבודה שלך", "הפניה קטנה ליום סט הגיעה משום מקום.", "+" + bonus + " קרדיטים.");
+        } else if (roll < .92 && hasItem("camera")) {
+          const repair = Math.min(state.cash, 95); state.cash -= repair;
+          setEvent("המצלמה צריכה תיקון", "היא עדיין עובדת, אבל לא לפני טיפול קטן ומעצבן.", "-" + money(repair) + " מזומן.");
+        } else if (roll < .98) {
+          state.followers += 90;
+          setEvent("קליפ מהלימודים תפס", "קטע קצר מהתהליך קיבל שיתופים בלי שביקשת.", "+90 עוקבים.");
+        } else if (roll < .986) {
+          state.prices.edit = Math.round(state.prices.edit * .58 / 5) * 5;
+          setEvent("חדר העריכה מתפנה", "לילה שלם בעמדת עריכה הוצע במחיר של קפה ולחץ.", "מחיר העריכה ירד ב־42%.");
+        } else if (roll < .992) {
+          state.cash += 180;
+          setEvent("גיג צילום קטן", "מישהו צריך יד נוספת ליום צילום מחר. זה לא קרדיט ענק, אבל זה משלם חשבון.", "+" + money(180) + " מזומן.");
+        } else if (state.films > 0) {
+          state.fame += 7;
+          setEvent("הסרט נכנס להקרנה", "הודעה קצרה מפסטיבל קטן: הסרט שלך קיבל מקום בלוח.", "+7 קרדיטים.");
         }
       }
       function travel(id) {
         if (state.ended || state.event || id === state.city) return false;
         const destination = CITIES.find((entry) => entry.id === id); if (!destination) return false;
         if (state.cash < destination.fare) return notify("אין כסף לטיסה", "צריך " + money(destination.fare) + " כדי להגיע ל" + destination.name + ".", "");
-        state.cash -= destination.fare; state.city = id; state.day += 1; state.debt = Math.ceil(state.debt * 1.008); state.prices = generatePrices(id);
-        addLog("שבוע " + state.day + ": הגעת ל" + destination.name + ". החוב צמח ב־0.8%.");
-        if (state.day > state.maxDays) return finish();
-        triggerTravelEvent(); save(); render(); return true;
+        state.cash -= destination.fare; state.city = id;
+        if (advanceWeek("טסת ל" + destination.name + ".")) return true;
+        save(); render(); return true;
       }
       function notify(title, copy, effect) { setEvent(title, copy, effect); render(); return false; }
       function dismissEvent() { state.event = null; save(); render(); }
@@ -262,14 +338,16 @@
       }
       function render() {
         if (!app) return;
-        const here = city(), used = totalBag(), stage = careerStage();
+        const here = city(), used = totalBag(), stage = careerStage(), missing = filmMissing();
+        const filmReady = missing.length === 0 && state.cash >= 180 && !state.event;
         const focus = state.debt > 0 ? "קנה נכס הפקה כשהוא זול, טוס לעיר שבה הוא נדרש, ומכור כדי לממן את הצעד הבא." : "החוב נסגר. עכשיו כל עסקה יכולה לבנות את הסרט ואת השם שלך.";
         const bagRows = Object.entries(state.bag).map(([id, qty]) => `<div class="bag-row"><span>${item(id).name}</span><b>×${qty}</b></div>`).join("");
         app.innerHTML = `<div class="shell">
           <header class="topbar"><div class="brand">KOBI <b>/</b> FIRST CUT</div><div class="turn"><span>שבועות נשארו</span><strong>${Math.max(0, state.maxDays - state.day + 1)}</strong></div></header>
           <section class="headline"><div><p class="eyebrow">${here.name} · ${here.zone}</p><h1>סטודנט/ית היום. במאי/ת מחר.</h1></div><p>30 שבועות לסגור חוב לימודים, לאסוף קרדיטים, ולממן את הסרט הראשון שלך.</p></section>
           <section class="command"><div class="panel mission"><i class="mission-mark"><b>✦</b></i><div><span>המסלול שלך</span><strong>${stage.name}</strong><p>${stage.copy} ${focus}</p></div></div><div class="panel finance"><div><label>מזומן</label><b>${money(state.cash)}</b></div><div class="debt"><label>חוב לימודים</label><b>${money(state.debt)}</b></div><div class="fame"><label>קרדיטים</label><b>${state.fame}</b></div><div class="slots"><label>תיק הפקה</label><b>${used}/${state.capacity}</b></div></div></section>
-          <section class="grid"><main class="panel market"><header class="market-head"><div><span class="market-kicker">הזדמנויות מקומיות · שבוע ${state.day}/30</span><h2>מה זול ב${here.name}?</h2></div><p>קנה נכס הפקה בזול.<br>מכור אותו כשעיר אחרת צריכה אותו.</p></header><div class="goods">${GOODS.map((good) => { const owned=state.bag[good.id]||0, price=state.prices[good.id]; return `<article class="good"><div><div class="good-top"><span class="good-title">${good.name}</span><span class="good-owned">בתיק: ${owned}</span></div><p class="good-note">${good.note} · ${marketSignal(good)}</p></div><b class="price">${money(price)}</b><div class="deal-actions"><button data-action="buy" data-id="${good.id}" ${state.cash<price||used>=state.capacity?"disabled":""}>לקחת</button><button class="sell" data-action="sell" data-id="${good.id}" ${owned?"":"disabled"}>לסגור עסקה</button></div></article>`; }).join("")}</div></main>
+          <section class="panel production"><div><span class="production-kicker">הסרט הראשון · ${state.films} צולמו</span><h2>${missing.length ? "אוספים ציוד לפני הצילום" : "הכול מוכן לצילום"}</h2><p>תסריט ויום סט נצרכים. מצלמה וסאונד נשארים אצלך. תאורה ועריכה משפרות את הקרדיטים.</p><div class="film-requirements">${["script","set","camera","sound","lights","edit"].map((id) => `<span class="${hasItem(id) ? "ready" : ""}">${hasItem(id) ? "✓ " : ""}${item(id).name}${["lights","edit"].includes(id) ? " · בונוס" : ""}</span>`).join("")}</div></div><button data-action="produce" ${filmReady ? "" : "disabled"}>לצלם סרט קצר<br><small>שבוע אחד · ${money(180)}</small></button></section>
+          <section class="grid"><main class="panel market"><header class="market-head"><div><span class="market-kicker">הזדמנויות מקומיות · שבוע ${state.day}/30</span><h2>מה זול ב${here.name}?</h2></div><p>החץ משווה לשבוע הקודם.<br>ירוק = מחיר ירד; אדום = מחיר עלה.</p></header><div class="goods">${GOODS.map((good) => { const owned=state.bag[good.id]||0, price=state.prices[good.id], move=priceMove(good.id), arrow=move.percent>0?"▲":move.percent<0?"▼":"—"; return `<article class="good"><div><div class="good-top"><span class="good-title">${good.name}</span><span class="good-owned">בתיק: ${owned}</span></div><p class="good-note">${good.note} · ${marketSignal(good)}</p></div><div class="price-wrap"><b class="price">${money(price)}</b><span class="market-move ${move.tone}">${arrow} ${Math.abs(move.percent)}% מהשבוע שעבר</span></div><div class="deal-actions"><button data-action="buy" data-id="${good.id}" ${state.cash<price||used>=state.capacity?"disabled":""}>קנה</button><button class="sell" data-action="sell" data-id="${good.id}" ${owned?"":"disabled"}>מכור</button></div></article>`; }).join("")}</div></main>
           <aside class="rail"><section class="panel"><h2>טיסה לעיר אחרת</h2><div class="travel">${CITIES.map((place) => `<button class="${place.id===state.city?"current":""}" data-action="travel" data-id="${place.id}"><span>${place.name}<small> · ${place.zone}</small></span><b>${place.id===state.city?"כאן":""+(place.fare?money(place.fare):"חינם")}</b></button>`).join("")}</div></section><section class="panel"><h2>תיק ההפקה</h2><div class="bag">${bagRows||'<p class="bag-empty">התיק ריק. מתחילים בעסקה קטנה שמאפשרת את הצילום הבא.</p>'}</div></section><section class="panel"><h2>מימון לימודים</h2><div class="debt-control"><p>בכל טיסה החוב גדל ב־0.8%. משלמים 500 ₪ כדי לקנות עוד חופש.</p><button data-action="pay">להחזיר 500 ₪</button></div></section><section class="panel log-panel"><h2>יומן הפקה</h2><div class="log">${state.log.map((line)=>`<p>› ${line}</p>`).join("")}</div></section></aside></section>
           <div class="footer-actions"><button data-action="finish">לסכם את המסלול</button><button data-action="new">מסלול חדש</button></div>
         </div>`;
@@ -277,9 +355,9 @@
       }
       if (app) {
         load(); render();
-        document.addEventListener("click", (event) => { const button = event.target.closest("[data-action]"); if (!button) return; const action=button.dataset.action, id=button.dataset.id; if (action==="buy") buy(id); if (action==="sell") sell(id); if (action==="travel") travel(id); if (action==="pay") payDebt(); if (action==="dismiss") dismissEvent(); if (action==="finish") finish(); if (action==="new") newGame(); });
+        document.addEventListener("click", (event) => { const button = event.target.closest("[data-action]"); if (!button) return; const action=button.dataset.action, id=button.dataset.id; if (action==="buy") buy(id); if (action==="sell") sell(id); if (action==="travel") travel(id); if (action==="pay") payDebt(); if (action==="produce") produceFilm(); if (action==="dismiss") dismissEvent(); if (action==="finish") finish(); if (action==="new") newGame(); });
       }
-      globalThis.kobiNightMarket = { getState:()=>clone(state), newGame, buy, sell, travel, payDebt, finish, dismissEvent, GOODS, CITIES };
+      globalThis.kobiNightMarket = { getState:()=>clone(state), newGame, buy, sell, travel, payDebt, produceFilm, finish, dismissEvent, GOODS, CITIES };
     })();
   </script>
 </body>

@@ -19,6 +19,7 @@ function run(htmlPath) {
   assert.strictEqual(typeof game.buy, "function", "buy is playable");
   assert.strictEqual(typeof game.sell, "function", "sell is playable");
   assert.strictEqual(typeof game.travel, "function", "travel is playable");
+  assert.strictEqual(typeof game.produceFilm, "function", "a physical film-production action is playable");
 
   const initial = game.getState();
   assert.strictEqual(initial.day, 1, "a run begins on day 1");
@@ -38,6 +39,15 @@ function run(htmlPath) {
   const beforePay = game.getState();
   assert.strictEqual(game.payDebt(), true, "cash can be used to pay debt");
   assert.ok(game.getState().debt < beforePay.debt, "a debt payment reduces debt");
+
+  game.newGame();
+  ["script", "set", "camera", "sound"].forEach((id) => {
+    assert.strictEqual(game.buy(id), true, id + " can be acquired for the first film");
+  });
+  assert.strictEqual(game.produceFilm(), true, "script, shoot day, camera and sound can become a short film");
+  assert.strictEqual(game.getState().films, 1, "producing records a completed short film");
+  assert.ok(game.getState().fame >= 10, "a completed film earns substantial credits");
+  if (game.getState().event) game.dismissEvent();
   game.finish();
   assert.strictEqual(game.getState().ended, true, "a run can end and receive a final score");
 }
