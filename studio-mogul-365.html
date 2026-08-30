@@ -5453,7 +5453,7 @@
         focused: "בפוקוס",
         daysLeft: "ימים נותרו",
         nextMove: "מה עכשיו",
-        startIntro: "מתחילים עם 300$, ספה של חבר, בלי עבודה, בלי דירה ובלי קריירה. תתלבש כמו בן אדם, תשיג משמרות, תשלם שכירות, תקנה מצלמה ורק אז תנסה להיות אגדה.",
+        startIntro: "מתחילים עם 300$, ספה של חבר, בלי עבודה, בלי דירה ובלי קריירה. תתלבש כמו בן אדם, תמצא עבודה, תשלם שכירות, תקנה מצלמה ורק אז תנסה להיות אגדה.",
         startHowTo: "כל שנה מחולקת ל־12 חודשים. בכל חודש מטיילים בין המקומות בעיר ובוחרים פעולה אחת: עבודה, לימודים, יצירה, כסף או חיים. הפעולה מקדמת חודש, ובסוף דצמבר קורה אירוע שנתי. המטרה: לעמוד ביעדים שתבחר/י למטה — עושר, קריירה, השכלה ואושר — לאורך מסלול החיים.",
         playerName: "שם הדמות",
         economyDiff: "קושי כלכלי",
@@ -5573,7 +5573,7 @@
         weeklyRevenue: "תשלום שבועי",
         langName: "עברית",
         continue: "להמשיך",
-        stats: "סטטוס יומי",
+        stats: "מצב החיים",
         notice: "הודעה",
         marqueeWaiting: "אין כרגע בכורה נוצצת. גם זה סוג של מתח."
       },
@@ -5598,7 +5598,7 @@
         focused: "Focused",
         daysLeft: "Days left",
         nextMove: "What now",
-        startIntro: "You begin with $300, a borrowed couch, no job, no apartment, and no film career. Dress like a professional, land shifts, pay rent, buy a camera, then try to become a legend.",
+        startIntro: "You begin with $300, a borrowed couch, no job, no apartment, and no film career. Dress like a professional, find work, pay rent, buy a camera, then try to become a legend.",
         startHowTo: "Every year is split into 12 months. Each month, travel between places in the city and choose one action: work, learn, create, handle money, or live. An action advances one month, and an annual event lands after December. The goal: reach the targets you choose below — wealth, career, education, and happiness — across your life path.",
         playerName: "Character name",
         economyDiff: "Economy difficulty",
@@ -5718,7 +5718,7 @@
         weeklyRevenue: "Weekly payout",
         langName: "English",
         continue: "Continue",
-        stats: "Daily status",
+        stats: "Life status",
         notice: "Notice",
         marqueeWaiting: "No blazing premiere right now. That is also a kind of tension."
       }
@@ -10846,7 +10846,7 @@
       return `
         <button class="icon-btn hud-more-btn ${dom.hudMenuOpen ? "active" : ""}" data-action="toggleHudMenu" title="${localize({ he: "עוד אפשרויות", en: "More options" })}">⋯</button>
         <div class="hud-secondary-group ${dom.hudMenuOpen ? "open" : ""}">
-          <button class="icon-btn" data-action="toggleStatusWindow" title="${localize({ he: "סטטוס יומי", en: "Daily status" })}">${localize({ he: "סטטוס", en: "Status" })}</button>
+          <button class="icon-btn" data-action="toggleStatusWindow" title="${localize({ he: "מצב החיים", en: "Life status" })}">${localize({ he: "סטטוס", en: "Status" })}</button>
           <button class="icon-btn" data-action="setLanguage" data-value="${gameState.language === "he" ? "en" : "he"}">${gameState.language === "he" ? "EN" : "עב"}</button>
           <button class="icon-btn" data-action="saveGame" title="${localize({ he: "שמור", en: "Save" })}">${localize({ he: "שמור", en: "Save" })}</button>
           <button class="icon-btn" data-action="toggleMute" title="${t("mute")}">${gameState.muted ? localize({ he: "שקט", en: "Muted" }) : localize({ he: "צליל", en: "Sound" })}</button>
@@ -12261,7 +12261,7 @@
       dom.statusWindow.innerHTML = `
         <div class="status-dialog">
           <div class="status-dialog-head">
-            <strong>${localize({ he: "סטטוס יומי", en: "Daily status" })}</strong>
+            <strong>${localize({ he: "מצב החיים", en: "Life status" })}</strong>
             <button class="mini-btn" data-action="toggleStatusWindow">${t("close")}</button>
           </div>
           <div class="status-dialog-body">
