@@ -5339,20 +5339,19 @@
     .annual-city-board,
     .annual-actions-panel,
     .annual-side-card { border:1px solid var(--studio-line); border-radius:15px; background:rgba(19,24,36,.86); box-shadow:0 13px 38px rgba(0,0,0,.12); }
-    .annual-city-board { padding:14px; }
+    .annual-city-board { padding:10px 4px 0; border:0; background:transparent; box-shadow:none; }
     .annual-map-head { display:flex; justify-content:space-between; gap:10px; align-items:center; color:var(--studio-cream); font-size:.77rem; font-weight:800; }
     .annual-map-head small { color:var(--studio-muted); font-size:.62rem; font-weight:600; }
-    .annual-plaza { position:relative; aspect-ratio:1 / .72; margin-top:11px; overflow:hidden; border:1px solid rgba(229,238,255,.1); border-radius:12px; background:
-      radial-gradient(200px 130px at 50% 49%, rgba(244,185,66,.12), transparent 65%),
-      linear-gradient(145deg,rgba(5,9,18,.95),rgba(23,31,49,.92)); }
-    .annual-plaza::before { content:""; position:absolute; inset:12% 15%; border:1px dashed rgba(229,238,255,.11); border-radius:50%; }
-    .annual-plaza .building { width:clamp(54px,7vw,78px); }
-    .annual-plaza .building-card { background:linear-gradient(160deg,rgba(255,255,255,.15),transparent 42%),linear-gradient(180deg,var(--b1),var(--b2)); border:1px solid rgba(255,255,255,.16); border-radius:11px; }
-    .annual-plaza .sign { color:#171c29; background:rgba(247,242,232,.91); border-radius:8px; font-family:inherit; font-size:clamp(.56rem,.66vw,.69rem); }
-    .annual-plaza .building.selected .building-card { box-shadow:0 0 0 2px var(--studio-gold),0 0 22px rgba(244,185,66,.2); }
-    .annual-plaza .building.selected .sign { color:#171c29; }
-    .annual-plaza .building.target .sign { color:#171c29; animation:blinkSign 1s infinite alternate; }
-    .annual-plaza .avatar .torso { background:var(--studio-gold); border-color:rgba(255,255,255,.22); }
+    .annual-plaza { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px 7px; min-height:294px; margin-top:11px; padding:18px 5px 8px; }
+    .annual-map-node { min-width:0; display:flex; align-items:center; justify-content:center; gap:7px; padding:5px 3px; color:var(--node); background:transparent; border:0; border-radius:0; cursor:pointer; transition:transform .18s ease,opacity .18s ease; }
+    .annual-map-node:hover { transform:translateY(-2px); opacity:.88; }
+    .annual-node-dot { width:10px; height:10px; flex:0 0 10px; border-radius:50%; background:var(--node); box-shadow:0 0 0 3px color-mix(in srgb,var(--node) 16%,transparent),0 0 13px color-mix(in srgb,var(--node) 52%,transparent); }
+    .annual-node-label { color:inherit; font-size:clamp(.62rem,.78vw,.75rem); font-weight:800; line-height:1.18; text-align:center; text-shadow:0 1px 12px rgba(0,0,0,.75); }
+    .annual-map-node.selected { color:var(--studio-cream); }
+    .annual-map-node.selected .annual-node-dot { background:var(--studio-cream); box-shadow:0 0 0 2px var(--studio-gold),0 0 18px rgba(244,185,66,.44); }
+    .annual-map-node.target .annual-node-dot { animation:annualNodePulse 1s ease-in-out infinite alternate; }
+    .annual-player-marker { width:0; height:0; flex:0 0 auto; border-right:5px solid transparent; border-left:5px solid transparent; border-bottom:9px solid var(--studio-gold); filter:drop-shadow(0 0 5px rgba(244,185,66,.5)); }
+    @keyframes annualNodePulse { from { transform:scale(1); } to { transform:scale(1.35); } }
     .annual-current-place { display:grid; gap:4px; margin-top:11px; }
     .annual-current-place span { color:var(--studio-gold); font-size:.72rem; font-weight:800; }
     .annual-current-place p { margin:0; color:var(--studio-muted); font-size:.7rem; line-height:1.45; }
@@ -5388,7 +5387,7 @@
     @media (max-width: 760px) {
       .annual-life-shell { padding:17px 12px 34px; }
       .annual-play-area { grid-template-columns:1fr; }
-      .annual-plaza { aspect-ratio:1.22 / 1; }
+      .annual-plaza { grid-template-columns:repeat(2,minmax(0,1fr)); min-height:0; gap:15px 7px; }
       .annual-life-side { grid-template-columns:1fr; }
       .annual-life-intro { grid-template-columns:auto 1fr; }
       .annual-life-intro button { grid-column:2; justify-self:start; }
@@ -11496,6 +11495,19 @@
       return Object.entries(effects || {}).map(([key, value]) => lifeEffectLabel(key, value)).join(" · ");
     }
 
+    function annualMapNodeMarkup(buildingId, hintBuilding) {
+      const building = getBuilding(buildingId);
+      const selected = buildingId === gameState.currentBuilding;
+      const target = buildingId === hintBuilding;
+      return `
+        <button class="annual-map-node ${selected ? "selected" : ""} ${target ? "target" : ""}" style="--node:${building.color[0]};" data-action="goToBuilding" data-value="${buildingId}" title="${localize({ he: "לעבור אל " + building.label.he, en: "Go to " + building.label.en })}">
+          <span class="annual-node-dot" aria-hidden="true"></span>
+          <span class="annual-node-label">${localize(building.label)}</span>
+          ${selected ? `<span class="annual-player-marker" aria-label="${localize({ he: "את/ה כאן", en: "You are here" })}"></span>` : ""}
+        </button>
+      `;
+    }
+
     function renderLifeMonthlyActions(buildingId) {
       const route = lifeRouteForBuilding(buildingId);
       const cards = lifeDecisionDeck(route);
@@ -11581,10 +11593,9 @@
               ${intro}
               <div class="annual-play-area">
                 <section class="annual-city-board" style="--scene-a:${currentBuilding.color[0]};--scene-b:${currentBuilding.color[1]};">
-                  <div class="annual-map-head"><span>${localize({ he: "המפה של " + localize(city.name), en: localize(city.name) + " map" })}</span><small>${localize({ he: "לחץ/י על מקום כדי להגיע אליו", en: "Select a place to go there" })}</small></div>
+                  <div class="annual-map-head"><span>${localize({ he: "המפה של " + localize(city.name), en: localize(city.name) + " map" })}</span><small>${localize({ he: "נקודה פותחת פעולה · פעולה מקדמת חודש", en: "A point opens an action · an action advances a month" })}</small></div>
                   <div class="annual-plaza">
-                    ${buildings.map((buildingId, index) => buildingMarkup(buildingId, index, buildings.length, hintBuilding)).join("")}
-                    ${avatarMarkup()}
+                    ${buildings.map((buildingId) => annualMapNodeMarkup(buildingId, hintBuilding)).join("")}
                   </div>
                   <div class="annual-current-place"><span>${localize(currentBuilding.label)}</span><p>${buildingSpeech(gameState.currentBuilding)}</p></div>
                 </section>
