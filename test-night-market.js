@@ -20,6 +20,9 @@ function run(htmlPath) {
   assert.strictEqual(typeof game.sell, "function", "sell is playable");
   assert.strictEqual(typeof game.travel, "function", "travel is playable");
   assert.strictEqual(typeof game.produceFilm, "function", "a physical film-production action is playable");
+  assert.strictEqual(typeof game.startProject, "function", "the production slate is playable");
+  assert.strictEqual(typeof game.acceptJob, "function", "location jobs are a playable choice");
+  assert.strictEqual(game.PROJECTS.length, 3, "the player can choose among three distinct productions");
 
   const initial = game.getState();
   assert.strictEqual(initial.day, 1, "a run begins on day 1");
@@ -47,6 +50,28 @@ function run(htmlPath) {
   assert.strictEqual(game.produceFilm(), true, "script, shoot day, camera and sound can become a short film");
   assert.strictEqual(game.getState().films, 1, "producing records a completed short film");
   assert.ok(game.getState().fame >= 10, "a completed film earns substantial credits");
+  if (game.getState().event) game.dismissEvent();
+
+  game.newGame();
+  ["set", "camera", "sound"].forEach((id) => {
+    assert.strictEqual(game.buy(id), true, id + " can be acquired for a commercial project");
+  });
+  const beforeCommercial = game.getState();
+  assert.strictEqual(game.startProject("brand-reel"), true, "a commercial project can fund the next creative step");
+  assert.ok(game.getState().cash > beforeCommercial.cash, "a commercial project pays more than its production cost");
+  assert.strictEqual(game.getState().projects["brand-reel"], 1, "completed projects are recorded by type");
+  assert.ok(game.getState().followers > beforeCommercial.followers, "projects build a direct audience as well as credits");
+  if (game.getState().event) game.dismissEvent();
+
+  game.newGame();
+  const job = game.getState().offer;
+  assert.ok(job && job.destination && job.good, "a local job offers a clear target and a required production item");
+  assert.strictEqual(game.acceptJob(), true, "the player can choose to accept a local production job");
+  assert.strictEqual(game.buy(job.good), true, "the required item can be carried to the destination");
+  const beforeJob = game.getState();
+  assert.strictEqual(game.travel(job.destination), true, "the player can travel to fulfill a job");
+  assert.ok(!game.getState().contract, "arriving with the required item completes the job");
+  assert.ok(game.getState().cash > beforeJob.cash - game.CITIES.find((city) => city.id === job.destination).fare, "a fulfilled job pays on top of travel costs");
   if (game.getState().event) game.dismissEvent();
   game.finish();
   assert.strictEqual(game.getState().ended, true, "a run can end and receive a final score");
