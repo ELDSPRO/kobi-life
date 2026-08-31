@@ -14,10 +14,16 @@
     .shell { width:min(1120px,calc(100% - 34px)); margin:0 auto; padding:26px 0 38px; }
     .topbar { display:flex; align-items:center; justify-content:space-between; gap:18px; padding-bottom:15px; border-bottom:1px solid rgba(229,238,255,.14); }
     .brand { color:var(--amber); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:1.1rem; font-weight:900; letter-spacing:.13em; }
-    .turn { display:flex; gap:20px; align-items:baseline; }
+    .turn { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:14px; align-items:baseline; }
     .turn div { color:var(--muted); font-size:.69rem; text-align:left; }
     .turn b { display:block; margin-top:3px; color:var(--cream); font-size:1rem; }
     .turn .debt b { color:var(--rose); }
+    .turn .fame b { color:var(--green); }
+    .turn .followers b { color:var(--amber); }
+    .turn .contacts b { color:var(--blue); }
+    .mode-switch { display:flex; gap:6px; margin:12px 0 0; }
+    .mode-switch button { min-height:33px; padding:6px 11px; cursor:pointer; color:var(--muted); border:1px solid rgba(229,238,255,.15); border-radius:7px; background:rgba(255,255,255,.04); font-size:.73rem; font-weight:850; }
+    .mode-switch button.active { color:#171307; border-color:var(--amber); background:var(--amber); }
     .goals { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; margin:15px 0 22px; }
     .goal { min-height:60px; padding:9px 10px; color:var(--muted); border:1px solid rgba(229,238,255,.13); border-radius:10px; background:rgba(255,255,255,.025); }
     .goal small { display:block; color:var(--amber); font-size:.63rem; font-weight:900; letter-spacing:.06em; }
@@ -32,24 +38,39 @@
     h2 { margin:0; font-size:1.25rem; }
     .screen-copy { max-width:34ch; margin:0; color:var(--muted); font-size:.79rem; line-height:1.52; text-align:left; }
     .map { min-height:390px; padding:24px; }
-    .map-board { position:relative; min-height:225px; margin-top:18px; overflow:hidden; border-top:1px solid rgba(229,238,255,.12); border-bottom:1px solid rgba(229,238,255,.12); }
+    .map-board { position:relative; min-height:285px; margin-top:18px; overflow:hidden; border-top:1px solid rgba(229,238,255,.12); border-bottom:1px solid rgba(229,238,255,.12); }
     .map-board:before { content:""; position:absolute; top:50%; right:10%; left:10%; height:1px; background:linear-gradient(90deg,transparent,rgba(147,182,224,.55),transparent); transform:rotate(-7deg); }
     .place { position:absolute; display:grid; justify-items:center; gap:8px; cursor:pointer; color:var(--blue); border:0; background:transparent; font-size:.79rem; }
     .place:before { content:""; width:16px; height:16px; border:4px solid var(--blue); border-radius:50%; background:#162035; box-shadow:0 0 0 6px rgba(147,182,224,.07); }
     .place.current { color:var(--cream); font-weight:900; }
     .place.current:before { border-color:var(--amber); background:var(--amber); box-shadow:0 0 0 7px rgba(244,189,75,.12); }
     .place.target:before { border-color:var(--green); }
-    .place.tlv { top:22%; right:10%; }
-    .place.jerusalem { top:61%; right:33%; }
-    .place.haifa { top:21%; left:38%; }
-    .place.athens { top:63%; left:10%; }
+    .place.locked { color:#667188; }
+    .place.locked:before { border-color:#667188; background:#101724; box-shadow:none; }
+    .place.tlv { top:23%; right:8%; }
+    .place.jerusalem { top:63%; right:20%; }
+    .place.haifa { top:19%; right:28%; }
+    .place.athens { top:56%; right:43%; }
+    .place.berlin { top:18%; right:55%; }
+    .place.london { top:62%; right:61%; }
+    .place.newyork { top:25%; left:20%; }
+    .place.losangeles { top:66%; left:5%; }
+    .region { position:absolute; top:12px; color:rgba(229,238,255,.36); font-size:.61rem; font-weight:900; letter-spacing:.1em; }
+    .region.il { right:8%; }
+    .region.eu { right:45%; }
+    .region.us { left:8%; }
     .destination { display:flex; align-items:center; justify-content:space-between; gap:15px; margin-top:16px; padding:14px 15px; border:1px solid rgba(229,238,255,.13); border-radius:10px; background:rgba(255,255,255,.025); }
     .destination h3 { margin:0; font-size:1rem; }
     .destination p { margin:4px 0 0; color:var(--muted); font-size:.73rem; }
+    .destination small { display:block; margin-top:5px; color:var(--amber); font-size:.66rem; font-weight:800; }
     .primary,.back,.service-row,.row-action,.footer-actions button,.event button { min-height:34px; padding:7px 11px; cursor:pointer; border-radius:7px; font-size:.74rem; font-weight:850; }
     .primary { color:#191307; border:0; background:var(--amber); }
     .back { color:#cbd5e6; border:1px solid rgba(229,238,255,.15); background:rgba(255,255,255,.045); }
     .city { padding:24px; }
+    .next-move { display:flex; align-items:center; justify-content:space-between; gap:13px; margin:0 0 15px; padding:12px 14px; border:1px solid rgba(244,189,75,.5); border-radius:10px; background:rgba(244,189,75,.07); }
+    .next-move small { display:block; color:var(--amber); font-size:.65rem; font-weight:900; letter-spacing:.06em; }
+    .next-move b { display:block; margin-top:3px; color:var(--cream); font-size:.83rem; }
+    .next-move span { display:block; margin-top:3px; color:var(--muted); font-size:.7rem; line-height:1.4; }
     .service-list { border-top:1px solid rgba(229,238,255,.12); }
     .service-row { display:grid; grid-template-columns:32px minmax(0,1fr) auto; align-items:center; gap:12px; width:100%; min-height:66px; padding:12px 2px; color:var(--cream); border:0; border-bottom:1px solid rgba(229,238,255,.11); border-radius:0; background:transparent; text-align:right; }
     .service-row:hover { color:var(--amber); background:rgba(244,189,75,.035); }
@@ -94,7 +115,7 @@
     .final-grid div { padding:9px; border-radius:8px; background:rgba(255,255,255,.055); }
     .final-grid small { color:var(--muted); font-size:.64rem; }
     .final-grid b { display:block; margin-top:4px; color:var(--cream); font-size:.84rem; }
-    @media (max-width:720px) { .goals { grid-template-columns:repeat(2,1fr); } .screen-head { align-items:start; display:grid; } .screen-copy { text-align:right; } .turn { gap:11px; } .film-status { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:720px) { .goals { grid-template-columns:repeat(2,1fr); } .screen-head { align-items:start; display:grid; } .screen-copy { text-align:right; } .turn { gap:11px; } .film-status { grid-template-columns:repeat(2,1fr); } .next-move { align-items:start; display:grid; } }
     @media (max-width:520px) { .shell { width:min(100% - 20px,1120px); padding-top:15px; } .topbar { align-items:start; display:grid; } .turn { justify-content:space-between; width:100%; } .map,.city,.service,.bag { padding:16px; } .bag-grid { grid-template-columns:1fr; } .action-row { align-items:start; } .action-meta { justify-items:start; text-align:right; } .destination { display:grid; } .final-grid { grid-template-columns:repeat(2,1fr); } }
   </style>
 </head>
@@ -112,10 +133,14 @@
         { id:"edit", name:"עמדת עריכה", note:"נשארת בתיק", base:330 }
       ];
       const CITIES = [
-        { id:"tlv", name:"תל אביב", zone:"לימודים והפקות", fare:0, copy:"לימודים, גיגים קטנים ושוק מהיר.", mods:{script:.82,set:1.15,camera:1.06,sound:1.17,lights:1.1,edit:1.12} },
-        { id:"jerusalem", name:"ירושלים", zone:"פיצ׳ינג וקרנות", fare:90, copy:"מוסדות, קשרים וקרנות מימון.", mods:{script:1.1,set:1.08,camera:1.16,sound:1.03,lights:1.14,edit:.88} },
-        { id:"haifa", name:"חיפה", zone:"ציוד ופוסט", fare:110, copy:"ציוד, עריכה וצוותי פוסט־פרודקשן.", mods:{script:1.08,set:.86,camera:.79,sound:.82,lights:.88,edit:.76} },
-        { id:"athens", name:"אתונה", zone:"פסטיבלים והפצה", fare:260, copy:"הגשות, פסטיבלים והפצה בינלאומית.", mods:{script:1.22,set:1.18,camera:.92,sound:1.06,lights:1.02,edit:1.02} }
+        { id:"tlv", name:"תל אביב", zone:"ישראל · לימודים והפקות", fare:0, copy:"לימודים, גיגים קטנים ושוק מהיר.", mods:{script:.82,set:1.15,camera:1.06,sound:1.17,lights:1.1,edit:1.12} },
+        { id:"jerusalem", name:"ירושלים", zone:"ישראל · פיצ׳ינג וקרנות", fare:90, copy:"מוסדות, קשרים וקרנות מימון.", mods:{script:1.1,set:1.08,camera:1.16,sound:1.03,lights:1.14,edit:.88} },
+        { id:"haifa", name:"חיפה", zone:"ישראל · ציוד ופוסט", fare:110, copy:"ציוד, עריכה וצוותי פוסט־פרודקשן.", mods:{script:1.08,set:.86,camera:.79,sound:.82,lights:.88,edit:.76} },
+        { id:"athens", name:"אתונה", zone:"אירופה · פסטיבלים", fare:260, copy:"הגשות, פסטיבלים והפצה בינלאומית.", mods:{script:1.22,set:1.18,camera:.92,sound:1.06,lights:1.02,edit:1.02} },
+        { id:"berlin", name:"ברלין", zone:"אירופה · בתי קולנוע", fare:440, copy:"פסטיבלי קולנוע, ביקורות וקשרים מקצועיים.", mods:{script:1.14,set:1.05,camera:.96,sound:.98,lights:1.08,edit:.9} },
+        { id:"london", name:"לונדון", zone:"אירופה · קו־פרודוקציה", fare:510, copy:"מפיקים, קו־פרודוקציות והפצה בינלאומית.", mods:{script:1.2,set:1.12,camera:1.04,sound:1.08,lights:.95,edit:1.05} },
+        { id:"newyork", name:"ניו יורק", zone:"ארה״ב · אינדי וקהל", fare:900, copy:"הקרנות אינדי, קהל דיגיטלי ומפיצים.", mods:{script:1.26,set:1.2,camera:1.1,sound:1.12,lights:1.06,edit:1.12} },
+        { id:"losangeles", name:"לוס אנג׳לס", zone:"ארה״ב · אולפנים והפצה", fare:1080, copy:"פגישות אולפן, מפיצים ועסקאות גדולות.", mods:{script:1.3,set:1.28,camera:1.14,sound:1.16,lights:1.1,edit:1.17} }
       ];
       const GIGS = [
         { id:"runner", title:"עוזר/ת הפקה", copy:"ג׳וב כניסה שמכיר לך אנשי צוות.", needs:{}, cash:260, fame:1, contacts:1, followers:0, weeks:1 },
@@ -131,6 +156,22 @@
       const item = (id) => GOODS.find((good) => good.id === id);
       const cityById = (id) => CITIES.find((city) => city.id === id) || CITIES[0];
       const clone = (value) => JSON.parse(JSON.stringify(value));
+      function destinationRule(city) {
+        if (["tlv","jerusalem","haifa"].includes(city.id)) return "פתוח מההתחלה";
+        if (city.id==="athens") return "צריך סרט גמור ו־6 קרדיטים";
+        if (city.id==="berlin") return "צריך סרט שנבחר לפסטיבל";
+        if (city.id==="london") return "צריך 20 קרדיטים ו־2 קשרים";
+        if (city.id==="newyork") return "צריך 900 עוקבים וסרט גמור";
+        return "צריך סרט פסטיבל ו־4 קשרים";
+      }
+      function destinationUnlocked(city) {
+        if (["tlv","jerusalem","haifa"].includes(city.id)) return true;
+        if (city.id==="athens") return state.films.length>0&&state.fame>=6;
+        if (city.id==="berlin") return state.achievements.festival;
+        if (city.id==="london") return state.fame>=20&&state.contacts>=2;
+        if (city.id==="newyork") return state.followers>=900&&state.films.length>0;
+        return state.achievements.festival&&state.contacts>=4;
+      }
       function newFilm(index) { return { title:"סרט " + index, writer:false, dop:false, editor:false, shot:false }; }
       function generatePrices(cityId) {
         const city = cityById(cityId), prices = {};
@@ -167,6 +208,32 @@
           { label:"קשרים", value:state.contacts+" / "+GOALS.contacts, done:state.contacts>=GOALS.contacts },
           { label:"פסטיבל", value:state.achievements.festival?"נבחר סרט":"צריך סרט נבחר", done:state.achievements.festival }
         ];
+      }
+      function nextMove() {
+        const film=state.film;
+        const ready=firstReadyFilm();
+        if (ready) {
+          if (ready.quality>=15&&!state.achievements.festival&&!destinationUnlocked(cityById("athens"))) return { target:"work", title:"השלב הבא: לפתוח את הטיסה לאתונה", copy:"צריך סרט גמור ו־6 קרדיטים; עבודה מקצועית תקדם את שניהם." };
+          if (ready.quality>=15&&!state.achievements.festival) return { target:"map", title:"השלב הבא: להגיש לפסטיבל באתונה", copy:"הסרט מוכן. פתח/י מפה, טוס/י לאתונה ואז עבור/י להפצה." };
+          return { target:"release", title:"השלב הבא: להפיץ את הסרט", copy:"הקרנה או סטרימינג יהפכו את הסרט לכסף, קהל וקרדיטים." };
+        }
+        if (!film.writer) return has("script")
+          ? { target:"create", title:"השלב הבא: לבנות את הסיפור", copy:"יש תסריט בתיק — שכור/י תסריטאי/ת במסך יצירה." }
+          : { target:"shop", title:"השלב הבא: להשיג תסריט", copy:"תסריט הוא חומר הגלם הראשון של הסרט." };
+        if (!film.dop) return has("camera")
+          ? { target:"create", title:"השלב הבא: לגייס צלם/ת", copy:"המצלמה כבר בתיק; אפשר לבנות את מחלקת הצילום." }
+          : { target:"shop", title:"השלב הבא: להשיג מצלמה", copy:"היא תפתח גם גיגים טובים יותר וגם את הצילום עצמו." };
+        if (!film.editor) return has("edit")
+          ? { target:"create", title:"השלב הבא: לגייס עורך/ת", copy:"אחרי הצילום יהיה מי שיסגור את הסרט." }
+          : { target:"shop", title:"השלב הבא: להשיג עמדת עריכה", copy:"עמדת עריכה נדרשת כדי לסיים סרט." };
+        if (!film.shot) {
+          const needs=missing({set:1,camera:1,sound:1});
+          return needs.length
+            ? { target:"shop", title:"השלב הבא: להתכונן ליום צילום", copy:"חסר בתיק: "+needs.join(" · ")+"." }
+            : { target:"create", title:"השלב הבא: לצלם את "+film.title, copy:"הצוות והציוד מוכנים. הפעולה תעלה שני שבועות." };
+        }
+        if (film.shot) return { target:"create", title:"השלב הבא: לסיים את "+film.title, copy:"הצילום מוכן; העריכה תהפוך אותו לנכס שאפשר להפיץ." };
+        return { target:"work", title:"השלב הבא: לקחת גיג", copy:"גיג מעלה מזומן, קרדיטים וקשרים לפתיחת האפשרויות הבאות." };
       }
       function isWinner() { return goalList().every((goal)=>goal.done); }
       function finish(win) {
@@ -208,6 +275,7 @@
       function travel(id) {
         if (state.ended||state.event||id===state.city) return false;
         const destination=cityById(id);
+        if (!destinationUnlocked(destination)) return announce("הטיסה עדיין נעולה", destinationRule(destination)+". זאת המטרה שתפתח את הטיסה הזאת.");
         if (state.cash<destination.fare) return announce("אין מספיק כסף לטיסה","צריך "+money(destination.fare)+" כדי להגיע ל"+destination.name+".");
         state.cash-=destination.fare; state.city=id; state.target=id; state.view="city";
         advanceWeek("טסת ל"+destination.name+".",1,true); save(); render(); return true;
@@ -322,10 +390,11 @@
       function render() {
         if (!app) return;
         const city=cityById(state.city), target=cityById(state.target), goals=goalList();
-        const head=`<header class="topbar"><div class="brand">KOBI / FIRST CUT</div><div class="turn"><div>שבוע<b>${Math.min(state.week,state.maxWeeks)} / ${state.maxWeeks}</b></div><div>מזומן<b>${money(state.cash)}</b></div><div class="debt">חוב<b>${money(state.debt)}</b></div><div>תיק<b>${bagCount()} / ${state.capacity}</b></div></div></header><section class="goals">${goals.map((goal)=>`<div class="goal ${goal.done?"done":""}"><small>${goal.done?"✓ ":""}${goal.label}</small><b>${goal.value}</b></div>`).join("")}</section>`;
+        const mapActive=state.view==="map", cityActive=state.view==="city"||state.view==="service";
+        const head=`<header class="topbar"><div class="brand">KOBI / FIRST CUT</div><div class="turn"><div>שבוע<b>${Math.min(state.week,state.maxWeeks)} / ${state.maxWeeks}</b></div><div>מזומן<b>${money(state.cash)}</b></div><div class="debt">חוב<b>${money(state.debt)}</b></div><div class="fame">קרדיטים<b>${state.fame}</b></div><div class="followers">עוקבים<b>${state.followers.toLocaleString("he-IL")}</b></div><div class="contacts">קשרים<b>${state.contacts}</b></div><div>תיק<b>${bagCount()} / ${state.capacity}</b></div></div></header><nav class="mode-switch" aria-label="ניווט ראשי"><button class="${mapActive?"active":""}" data-action="map">מפה וטיסות</button><button class="${cityActive?"active":""}" data-action="city">העיר שלי · ${city.name}</button><button class="${state.view==="bag"?"active":""}" data-action="bag">תיק הפקה</button></nav><section class="goals">${goals.map((goal)=>`<div class="goal ${goal.done?"done":""}"><small>${goal.done?"✓ ":""}${goal.label}</small><b>${goal.value}</b></div>`).join("")}</section>`;
         let body="";
-        if (state.view==="map") body=`<section class="panel map"><header class="screen-head"><div><p class="eyebrow">המסלול שלך · ${city.name}</p><h1>לאן נוסעים?</h1></div><p class="screen-copy">טיסה היא הפעולה היחידה שמחליפה עיר, מחיר ושבוע. בכל עיר מחכה אותה רשימת שירותים פשוטה.</p></header><div class="map-board">${CITIES.map((place)=>`<button class="place ${place.id===state.city?"current":""} ${place.id===state.target?"target":""} ${place.id}" data-action="target" data-id="${place.id}">${place.name}</button>`).join("")}</div><div class="destination"><div><h3>${target.name}</h3><p>${target.copy}</p></div><button class="primary" data-action="travel" data-id="${target.id}" ${target.id===state.city?"disabled":""}>${target.id===state.city?"את/ה כבר כאן":"לטוס ל"+target.name+" · "+money(target.fare)}</button></div><div class="footer-actions"><button data-action="finish">לסיים מסלול</button><button data-action="bag">לפתוח תיק הפקה</button></div></section>`;
-        if (state.view==="city") body=`<section class="panel city"><header class="screen-head"><div><p class="eyebrow">${city.name} · ${city.zone}</p><h1>מה עושים בעיר?</h1></div><p class="screen-copy">פעולה אחת, מסך אחד. חוזרים לכאן רק אחרי שמסיימים.</p></header><div class="service-list"><button class="service-row" data-action="service" data-id="work"><span class="service-number">1</span><span><h3>לעבוד</h3><p>גיגים, ימי צילום ועבודות קולנוע.</p></span><span class="service-arrow">←</span></button><button class="service-row" data-action="service" data-id="shop"><span class="service-number">2</span><span><h3>חנות</h3><p>לקנות ולמכור ציוד צילום.</p></span><span class="service-arrow">←</span></button><button class="service-row" data-action="service" data-id="create"><span class="service-number">3</span><span><h3>ליצור</h3><p>לשכור צוות ולבנות סרט.</p></span><span class="service-arrow">←</span></button><button class="service-row" data-action="service" data-id="release"><span class="service-number">4</span><span><h3>הפצה</h3><p>הקרנות, סטרימינג ופסטיבלים.</p></span><span class="service-arrow">←</span></button><button class="service-row" data-action="service" data-id="bank"><span class="service-number">5</span><span><h3>בנק</h3><p>להפקיד, למשוך או להחזיר חוב.</p></span><span class="service-arrow">←</span></button><button class="service-row" data-action="service" data-id="fund"><span class="service-number">6</span><span><h3>קרן מימון</h3><p>לבקש תקציב לסרט או מלגת לימודים.</p></span><span class="service-arrow">←</span></button></div><div class="footer-actions"><button data-action="finish">לסיים מסלול</button><button data-action="map">למפה וליעד הבא</button></div></section>`;
+        if (state.view==="map") { const targetOpen=destinationUnlocked(target); body=`<section class="panel map"><header class="screen-head"><div><p class="eyebrow">המסלול שלך · ${city.name}</p><h1>לאן נוסעים?</h1></div><p class="screen-copy">לחץ/י על יעד כדי לקרוא את תנאי הטיסה. טיסה מחליפה עיר ועולה שבוע אחד; השירותים מחכים בעיר החדשה.</p></header><div class="map-board"><span class="region il">ישראל</span><span class="region eu">אירופה</span><span class="region us">ארה״ב</span>${CITIES.map((place)=>`<button class="place ${place.id===state.city?"current":""} ${place.id===state.target?"target":""} ${!destinationUnlocked(place)?"locked":""} ${place.id}" data-action="target" data-id="${place.id}">${place.name}${destinationUnlocked(place)?"":" <small>🔒</small>"}</button>`).join("")}</div><div class="destination"><div><h3>${target.name}</h3><p>${target.copy}</p><small>${targetOpen?"טיסה: "+money(target.fare):"יעד נעול · "+destinationRule(target)}</small></div><button class="primary" data-action="travel" data-id="${target.id}" ${target.id===state.city||!targetOpen?"disabled":""}>${target.id===state.city?"את/ה כבר כאן":targetOpen?"לטוס ל"+target.name+" · "+money(target.fare):"יעד נעול"}</button></div><div class="footer-actions"><button data-action="finish">לסיים מסלול</button><button data-action="bag">לפתוח תיק הפקה</button></div></section>`; }
+        if (state.view==="city") { const next=nextMove(); body=`<section class="panel city"><header class="screen-head"><div><p class="eyebrow">${city.name} · ${city.zone}</p><h1>מה עושים בעיר?</h1></div><p class="screen-copy">בחר/י שירות אחד. המעבר למפה ולעיר זמין תמיד בראש המסך.</p></header><div class="next-move"><div><small>הצעד המומלץ</small><b>${next.title}</b><span>${next.copy}</span></div><button class="primary" data-action="next" data-id="${next.target}">${next.target==="map"?"למפה": "להמשך ←"}</button></div><div class="service-list"><button class="service-row" data-action="service" data-id="work"><span class="service-number">1</span><span><h3>לעבוד</h3><p>גיגים, ימי צילום ועבודות קולנוע.</p></span><span class="service-arrow">←</span></button><button class="service-row" data-action="service" data-id="shop"><span class="service-number">2</span><span><h3>חנות</h3><p>לקנות ולמכור ציוד צילום.</p></span><span class="service-arrow">←</span></button><button class="service-row" data-action="service" data-id="create"><span class="service-number">3</span><span><h3>ליצור</h3><p>לשכור צוות ולבנות סרט.</p></span><span class="service-arrow">←</span></button><button class="service-row" data-action="service" data-id="release"><span class="service-number">4</span><span><h3>הפצה</h3><p>הקרנות, סטרימינג ופסטיבלים.</p></span><span class="service-arrow">←</span></button><button class="service-row" data-action="service" data-id="bank"><span class="service-number">5</span><span><h3>בנק</h3><p>להפקיד, למשוך או להחזיר חוב.</p></span><span class="service-arrow">←</span></button><button class="service-row" data-action="service" data-id="fund"><span class="service-number">6</span><span><h3>קרן מימון</h3><p>לבקש תקציב לסרט או מלגת לימודים.</p></span><span class="service-arrow">←</span></button></div><div class="footer-actions"><button data-action="finish">לסיים מסלול</button><button data-action="map">למפה וליעד הבא</button></div></section>`; }
         if (state.view==="service") { const serviceNames={work:"לעבוד",shop:"חנות",create:"ליצור",release:"הפצה",bank:"בנק",fund:"קרן מימון"}; body=`<section class="panel service"><header class="service-top"><div><p class="eyebrow">${city.name} · ${serviceNames[state.service]}</p><h1>${serviceNames[state.service]}</h1></div><button class="back" data-action="city">חזרה לעיר ←</button></header><div class="list">${serviceRows()}</div><div class="footer-actions"><button data-action="finish">לסיים מסלול</button><button data-action="bag">תיק הפקה</button></div></section>`; }
         if (state.view==="bag") { const rows=GOODS.filter((good)=>state.bag[good.id]).map((good)=>`<div class="bag-item"><span>${good.name}</span><b>×${state.bag[good.id]}</b></div>`).join(""); body=`<section class="panel bag"><header class="service-top"><div><p class="eyebrow">ציוד שקנית</p><h1>תיק הפקה</h1></div><button class="back" data-action="city">חזרה לעיר ←</button></header><div class="bag-grid">${rows||'<p class="empty">התיק ריק. חנות הציוד נמצאת בכל עיר.</p>'}</div><div class="footer-actions"><button data-action="finish">לסיים מסלול</button><button data-action="map">למפה</button></div></section>`; }
         app.innerHTML=`<div class="shell">${head}${body}</div>`; renderModal();
@@ -339,6 +408,7 @@
         if (action==="city") openView("city");
         if (action==="bag") openView("bag");
         if (action==="service") openService(id);
+        if (action==="next") id==="map"?openView("map"):openService(id);
         if (action==="buy") buy(id);
         if (action==="sell") sell(id);
         if (action.startsWith("gig:")) doGig(action.slice(4));

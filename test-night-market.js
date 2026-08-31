@@ -29,6 +29,9 @@ function run(htmlPath) {
   assert.strictEqual(state.view, "map", "a new run begins on the travel map");
   assert.strictEqual(state.debt, 8000, "a new run begins with real debt pressure");
   assert.strictEqual(Object.keys(game.GOALS).length, 4, "the win model tracks money, credits, audience and contacts");
+  assert.strictEqual(game.CITIES.length, 8, "the world includes Israeli, European and US destinations");
+  assert.strictEqual(game.travel("berlin"), false, "advanced international flights explain their unlock condition before travel");
+  clearEvent(game);
 
   assert.strictEqual(game.travel("haifa"), true, "the player can fly to another city");
   state = game.getState();
