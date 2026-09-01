@@ -2,11 +2,20 @@ const fs = require("fs");
 const vm = require("vm");
 const assert = require("assert");
 
+function makeMemoryStorage() {
+  const store = {};
+  return {
+    getItem: (k) => (Object.prototype.hasOwnProperty.call(store, k) ? store[k] : null),
+    setItem: (k, v) => { store[k] = String(v); },
+    removeItem: (k) => { delete store[k]; }
+  };
+}
+
 function loadGame(htmlPath, randomFn) {
   const html = fs.readFileSync(htmlPath, "utf8");
   const match = html.match(/<script>([\s\S]*?)<\/script>\s*<\/body>/);
   assert.ok(match, "the game has a playable inline script");
-  const context = { console, Math: Object.create(Math), JSON, Intl };
+  const context = { console, Math: Object.create(Math), JSON, Intl, localStorage: makeMemoryStorage() };
   context.Math.random = randomFn || (() => 0.5);
   context.globalThis = context;
   vm.createContext(context);
@@ -60,6 +69,120 @@ function run(htmlPath) {
   assert.ok(state.cash > beforeGig.cash, "a gig pays cash");
   const expectedDebt = Math.ceil(8000 * Math.pow(1.028, 0.4));
   assert.strictEqual(state.debt, expectedDebt, "debt compounds at the annual rate applied to the gig's fractional-year duration");
+
+  // --- year-brief modal: briefPending lifecycle, populated from the gig that just ran ---
+  assert.strictEqual(state.briefPending, true, "the gig above opened the year-brief modal");
+  assert.ok(state.lastRecap, "the brief reads from lastRecap");
+  assert.strictEqual(state.lastRecap.age, Math.round(state.age), "the recap reflects the (rounded) year that just passed");
+  assert.strictEqual(state.event, null, "no incident happened to compete with the brief this time");
+  assert.strictEqual(game.closeBrief(), true, "closeBrief is a valid dismissal");
+  state = game.getState();
+  assert.strictEqual(state.briefPending, false, "closing the brief clears it");
+
+  // --- year-brief queues behind an incident opened by the same advanceYear call ---
+  // (an isolated game instance so it doesn't disturb `game`'s cumulative cash/fame that later sections rely on)
+  const bankruptGame = loadGame(path);
+  bankruptGame.__testSetState({ cash: 50, debt: 1000, bank: 0 });
+  assert.strictEqual(bankruptGame.startCommitment("shortCourse"), true);
+  let bstate = bankruptGame.getState();
+  assert.strictEqual(bstate.briefPending, true, "the brief opens even though this advanceYear call also queued a bankruptcy event");
+  assert.ok(bstate.event, "the bankruptcy event is queued behind the brief, not skipped");
+  assert.strictEqual(bankruptGame.closeBrief(), true);
+  bstate = bankruptGame.getState();
+  assert.strictEqual(bstate.briefPending, false);
+  assert.strictEqual(bstate.event.title, "החוב יצא משליטה", "the queued event survives closing the brief and is still there to resolve");
+
+  // --- gig forecast: a pre-turn preview that doesn't act until confirmed ---
+  const forecastGame = loadGame(path);
+  assert.strictEqual(forecastGame.startCommitment("selfTaught"), true);
+  const beforeForecast = forecastGame.getState();
+  assert.strictEqual(forecastGame.openGigForecast("waiter"), true, "a valid gig opens a forecast instead of acting immediately");
+  let fstate2 = forecastGame.getState();
+  assert.deepStrictEqual(fstate2.pendingAction, { kind: "gig", id: "waiter" });
+  assert.strictEqual(fstate2.age, beforeForecast.age, "opening the forecast doesn't advance time");
+  assert.strictEqual(fstate2.cash, beforeForecast.cash, "opening the forecast doesn't pay out yet");
+  assert.strictEqual(forecastGame.openGigForecast("waiter"), false, "a second forecast can't open while one is already pending");
+
+  assert.strictEqual(forecastGame.cancelPendingAction(), true);
+  fstate2 = forecastGame.getState();
+  assert.strictEqual(fstate2.pendingAction, null, "cancelling clears the pending forecast");
+  assert.strictEqual(fstate2.cash, beforeForecast.cash, "cancelling has no side effects");
+  assert.strictEqual(fstate2.age, beforeForecast.age);
+
+  assert.strictEqual(forecastGame.openGigForecast("waiter"), true);
+  assert.strictEqual(forecastGame.confirmGig(), true, "confirming executes the gig exactly like doGig");
+  fstate2 = forecastGame.getState();
+  assert.strictEqual(fstate2.pendingAction, null, "confirming clears the pending forecast");
+  assert.strictEqual(fstate2.age, beforeForecast.age + 0.4, "confirming advances 0.4 of a year, same as a direct doGig");
+  assert.strictEqual(fstate2.cash, beforeForecast.cash + 1200, "confirming pays out the gig");
+  assert.strictEqual(fstate2.briefPending, true, "confirming still opens the year-brief afterward, same as a direct doGig");
+
+  // a gig gated on missing equipment still opens the existing notice, not a forecast
+  const gatedGame = loadGame(path);
+  gatedGame.__testJumpToStage("industry");
+  assert.strictEqual(gatedGame.openGigForecast("lineProducer"), false, "a gated gig is refused, same as doGig");
+  const gstate = gatedGame.getState();
+  assert.ok(gstate.event, "the missing-equipment notice opens instead of a forecast");
+  assert.strictEqual(gstate.pendingAction, null);
+
+  // --- career log: unbounded history (was capped at 6), reachable via its own view ---
+  const logGame = loadGame(path);
+  assert.strictEqual(logGame.startCommitment("selfTaught"), true);
+  for (let i = 0; i < 10; i++) { logGame.doGig("waiter"); logGame.closeBrief(); clearEvent(logGame); } // waiter never grants fame, so a few of these cross the student stage's grace deadline and open a fallback event — drain it each time, same as the earlier fallback-path test
+  assert.ok(logGame.getState().log.length > 6, "the log is no longer capped at 6 entries");
+  assert.strictEqual(logGame.openView("log"), true, "the log has its own reachable view");
+  assert.strictEqual(logGame.getState().view, "log");
+
+  // --- festival-judge gig: a later-career prestige gig, breakthrough and legacy stages ---
+  const judgeGame = loadGame(path);
+  judgeGame.__testJumpToStage("breakthrough");
+  const beforeJudge = judgeGame.getState();
+  assert.strictEqual(judgeGame.doGig("festivalJudge"), true, "the festival-judge gig is playable in breakthrough");
+  assert.ok(judgeGame.getState().cash > beforeJudge.cash, "it pays out");
+
+  const judgeGame2 = loadGame(path);
+  judgeGame2.__testJumpToStage("legacy");
+  assert.strictEqual(judgeGame2.doGig("festivalJudge"), true, "the festival-judge gig is also playable in legacy");
+
+  // --- rabinovichGrant: an alternate, lower-debt indie-film path with a real-world funding-politics checkpoint ---
+  const grantGame = loadGame(path);
+  grantGame.__testJumpToStage("indie");
+  assert.strictEqual(grantGame.startCommitment("rabinovichGrant"), true);
+  let gstate2 = grantGame.getState();
+  assert.strictEqual(gstate2.event.title, "סעיף בחוזה המענק", "the loyalty-clause checkpoint opens first");
+  assert.strictEqual(grantGame.resolveEvent(0), true, "sign-clause"); // accept the grant's clause
+  gstate2 = grantGame.getState();
+  assert.strictEqual(gstate2.event.title, "הסרט משוחרר");
+  assert.strictEqual(grantGame.resolveEvent(0), true, "festival-track-grant");
+  gstate2 = grantGame.getState();
+  assert.strictEqual(gstate2.films.length, 1, "completing the grant path records a real film, same milestone as indieFilm");
+  assert.ok(gstate2.awards.some((a)=>a.title.indexOf("קרן ציבורית")>=0), "completing it adds an award-cabinet entry");
+
+  // --- political incident: a minister denounces the film sight-unseen, backlash pairs with acclaim either way ---
+  const politicsGame = loadGame(path, () => 0.01); // low roll: both the 8% incident-fire chance and this incident (first in the indie pool) trigger deterministically
+  politicsGame.__testJumpToStage("indie");
+  politicsGame.__testSetState({ cash: 5000 });
+  assert.strictEqual(politicsGame.doGig("commercialGig"), true);
+  const pstate = politicsGame.getState();
+  assert.strictEqual(pstate.event.title, "שר/ה מגנה את הסרט שלך");
+  const beforeClap = pstate;
+  assert.strictEqual(politicsGame.resolveEvent(0), true, "clap-back");
+  const afterClap = politicsGame.getState();
+  assert.ok(afterClap.followers > beforeClap.followers, "clapping back grows the audience despite (or because of) the controversy");
+  assert.ok(afterClap.awards.some((a)=>a.title === "פרס על אף המחלוקת"));
+
+  // --- stage-intro modal: shown at game start and re-opened on every real stage transition ---
+  const introGame = loadGame(path);
+  assert.strictEqual(introGame.getState().stageIntroPending, true, "a brand-new game opens with the stage-intro modal");
+  assert.strictEqual(introGame.startCommitment("selfTaught"), true, "picking an entry path is a valid action while the intro is showing");
+  assert.strictEqual(introGame.getState().stageIntroPending, false, "picking a path resolves the pending intro");
+
+  for (let i = 0; i < 10 && introGame.getState().stageId === "student"; i++) introGame.doGig("prodAssist");
+  let istate = introGame.getState();
+  assert.strictEqual(istate.stageId, "industry", "sanity: enough prodAssist gigs transition out of student, same milestone rule as the earlier test");
+  assert.strictEqual(istate.stageIntroPending, true, "a real stage transition re-opens the stage-intro modal for the new stage");
+  assert.strictEqual(introGame.closeStageIntro(), true);
+  assert.strictEqual(introGame.getState().stageIntroPending, false, "closing it clears the flag");
 
   // --- buy: asset vs. bag, capacity ---
   assert.strictEqual(game.buy("usedCamera"), true, "an asset-flagged good can be bought");
@@ -219,15 +342,18 @@ function run(htmlPath) {
   assert.strictEqual(jumped.age, 65, "jumping to a stage resets age to that stage's starting age");
 
   // --- festivals stage: rare flight invites, gated by a fixed RNG that clears the 30% offer threshold ---
+  // the player picks which city to fly to (or declines) — every unvisited flight city is offered, not one random pick
   const flightGame = loadGame(path, () => 0.01);
   flightGame.__testJumpToStage("festivals");
   flightGame.__testSetState({ cash: 5000 });
   assert.strictEqual(flightGame.doGig("consultingGig"), true);
   let fstate = flightGame.getState();
   assert.ok(fstate.event, "a flight invite can appear on any year-advancing action once the stage is festivals");
-  assert.strictEqual(fstate.event.title.indexOf("הוזמנת לפסטיבל "), 0);
+  assert.strictEqual(fstate.event.title, "הוזמנת לפסטיבל");
+  assert.strictEqual(fstate.event.choices.length, 6, "all 5 flight cities are offered as choices, plus declining");
+  assert.strictEqual(fstate.event.choices[fstate.event.choices.length - 1].kind, "decline-flight", "declining is always the last, quiet choice");
   const cityId = fstate.event.choices[0].cityId;
-  assert.strictEqual(cityId, "athens", "the city pick is reproducible under a fixed RNG");
+  assert.strictEqual(cityId, "athens", "cities are offered in a fixed order, athens first");
   const beforeFlight = fstate;
   assert.strictEqual(flightGame.resolveEvent(0), true, "accepting the flight");
   fstate = flightGame.getState();
@@ -255,7 +381,33 @@ function run(htmlPath) {
   assert.strictEqual(state.fame, 106, "95 + 1(drama) + 2(personal-story) + 3(solo-screening) + 5(grantsOnComplete) = 106");
   assert.strictEqual(state.ended, true, "meeting legacy's required milestones ends the run — there is no seventh stage");
   assert.strictEqual(state.win, true, "reaching the end of the career ladder is a win, not a timer running out");
-  assert.ok(state.final && state.final.score > 0, "a final score is computed on completion");
+  assert.ok(state.final && state.final.achievement > 0, "a final achievement score is computed on completion");
+  assert.strictEqual(typeof state.final.financial, "number", "a separate financial score is also computed — money is not the score");
+
+  // --- local high-score table: recorded on finish(), sorted best-first, capped at 10 ---
+  // a fresh instance, since `game` above already finished once earlier (the bankruptcy-strikes-exhausted test) and scores persist across game.newGame() within the same session, by design
+  const winScoreGame = loadGame(path);
+  winScoreGame.__testJumpToStage("legacy");
+  winScoreGame.__testSetState({ fame: 95, films: [{ title: "הסרט העצמאי הראשון" }] });
+  winScoreGame.startCommitment("legacyFilm");
+  winScoreGame.resolveEvent(0); // genre
+  winScoreGame.resolveEvent(0); // theme
+  winScoreGame.resolveEvent(0); // release
+  winScoreGame.resolveEvent(0); // poster-ack -> completeCommitment -> finish(true)
+  const winState = winScoreGame.getState();
+  let scores = winScoreGame.loadScores();
+  assert.strictEqual(scores.length, 1, "finishing a run records exactly one score entry");
+  assert.strictEqual(scores[0].achievement, winState.final.achievement, "the recorded score matches the run's final achievement score");
+  assert.strictEqual(scores[0].financial, winState.final.financial);
+  assert.strictEqual(scores[0].win, true);
+  assert.strictEqual(scores[0].stage, "מורשת ופרישה");
+
+  const scoreGame = loadGame(path);
+  scoreGame.__testSetState({ cash: 50, bank: 0, bankruptcyStrikes: 3, debt: 100000 });
+  assert.strictEqual(scoreGame.startCommitment("filmSchool"), true, "the fourth debt crisis ends the run (loss) and should still record a score");
+  const lossScores = scoreGame.loadScores();
+  assert.strictEqual(lossScores.length, 1);
+  assert.strictEqual(lossScores[0].win, false, "a loss records win:false, not just wins");
 
   // --- RNG-injected price events (crash / spike / unavailable) ---
   const studentGoods = game.STAGES[0].goods;
