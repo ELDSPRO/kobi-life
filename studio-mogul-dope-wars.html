@@ -251,8 +251,8 @@
           ],
           riskProfile:null,
           milestones:[
-            { id:"industry-credit",  label:"קרדיט מבוסס בתעשייה", check:(s)=>s.fame>=16,               required:true },
-            { id:"industry-network", label:"רשת קשרים בתעשייה",   check:(s)=>s.contacts>=6,            required:true },
+            { id:"industry-credit",  label:"קרדיט מבוסס בתעשייה", check:(s)=>s.fame>=40,               required:true },
+            { id:"industry-network", label:"רשת קשרים בתעשייה",   check:(s)=>s.contacts>=18,           required:true },
             { id:"pro-gear",         label:"ציוד מקצועי משלך",     check:(s)=>!!s.assets.proCamera,     required:false },
             { id:"cash-cushion",     label:"כרית ביטחון גדולה",    check:(s)=>(s.cash+s.bank)>=8000,    required:false }
           ],
@@ -332,7 +332,7 @@
           ],
           riskProfile:null,
           milestones:[
-            { id:"international-fame", label:"מוניטין בינלאומי", check:(s)=>s.fame>=30,      required:true },
+            { id:"international-fame", label:"מוניטין בינלאומי", check:(s)=>s.fame>=60,      required:true },
             { id:"global-audience",    label:"קהל גלובלי",       check:(s)=>s.followers>=3000, required:true },
             { id:"sales-agent",        label:"סוכן/ת מכירות",     check:(s)=>!!s.assets.salesAgentContract, required:false },
             { id:"toured",             label:"סבב פסטיבלים אמיתי", check:(s)=>Object.keys(s.achievements).filter((k)=>k.indexOf("visited-")===0).length>=2, required:false }
@@ -363,8 +363,8 @@
           ],
           riskProfile:null,
           milestones:[
-            { id:"studio-fame",  label:"מוניטין ברמת אולפן",  check:(s)=>s.fame>=60,               required:true },
-            { id:"real-wealth",  label:"הון משמעותי",          check:(s)=>(s.cash+s.bank)>=30000,   required:true },
+            { id:"studio-fame",  label:"מוניטין ברמת אולפן",  check:(s)=>s.fame>=90,               required:true },
+            { id:"real-wealth",  label:"הון משמעותי",          check:(s)=>(s.cash+s.bank)>=80000,   required:true },
             { id:"prod-company", label:"חלק בחברת הפקה",       check:(s)=>!!s.assets.productionCompanyShare, required:false },
             { id:"mass-audience",label:"קהל המוני",             check:(s)=>s.followers>=10000,       required:false }
           ],
