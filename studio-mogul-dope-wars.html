@@ -556,6 +556,11 @@
 
       function currentStage() { return STAGES.find((s) => s.id === state.stageId) || STAGES[0]; }
       function round5(n) { return Math.max(25, Math.round(n / 5) * 5); }
+      function formatDuration(years) {
+        if (years >= 1) return years + (years===1 ? " שנה" : " שנים");
+        const seasons = Math.max(1, Math.round(years * 4));
+        return seasons + (seasons===1 ? " עונה" : " עונות");
+      }
 
       function priceRoll(base, rp) {
         const roll = Math.random();
@@ -752,7 +757,7 @@
         const market = generateMarket(state.stageId);
         state.prices = market.prices; state.priceKinds = market.kinds;
         const roundedElapsed = Math.round(elapsed*10)/10;
-        addLog("גיל "+Math.round(state.age)+": "+reason+(elapsed!==1?" ("+roundedElapsed+" שנים).":""));
+        addLog("גיל "+Math.round(state.age)+": "+reason+(elapsed!==1?" ("+formatDuration(roundedElapsed)+").":""));
         state.lastRecap = { years:roundedElapsed, interestPaid: state.debt-before, age: Math.round(state.age) };
         state.briefPending = true;
         if (checkBankruptcy()) return true;
@@ -1144,7 +1149,7 @@
       function recapMarkup() {
         if (!state.lastRecap) return "";
         const r = state.lastRecap;
-        return `<div class="final-grid recap"><div><small>גיל</small><b>${r.age}</b></div><div><small>החוב גדל ב</small><b>${money(r.interestPaid)}</b></div><div><small>משך</small><b>${r.years} שנים</b></div></div>`;
+        return `<div class="final-grid recap"><div><small>גיל</small><b>${r.age}</b></div><div><small>החוב גדל ב</small><b>${money(r.interestPaid)}</b></div><div><small>משך</small><b>${formatDuration(r.years)}</b></div></div>`;
       }
 
       function stageIntroMarkup() {
