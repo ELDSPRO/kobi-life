@@ -296,7 +296,7 @@ function run(htmlPath) {
 
   // isolated fresh run: the 4th crisis, with strikes already exhausted, ends the run instead of rescuing again
   game.newGame();
-  game.__testSetState({ cash: 50, bank: 0, bankruptcyStrikes: 3, debt: 100000 });
+  game.__testSetState({ cash: 50, bank: 0, bankruptcyStrikes: 5, debt: 100000 });
   assert.strictEqual(game.startCommitment("filmSchool"), true);
   state = game.getState();
   assert.strictEqual(state.ended, true, "a fourth debt crisis ends the run instead of offering another rescue");
@@ -428,7 +428,7 @@ function run(htmlPath) {
   assert.strictEqual(scores[0].stage, "מורשת ופרישה");
 
   const scoreGame = loadGame(path);
-  scoreGame.__testSetState({ cash: 50, bank: 0, bankruptcyStrikes: 3, debt: 100000 });
+  scoreGame.__testSetState({ cash: 50, bank: 0, bankruptcyStrikes: 5, debt: 100000 });
   assert.strictEqual(scoreGame.startCommitment("filmSchool"), true, "the fourth debt crisis ends the run (loss) and should still record a score");
   const lossScores = scoreGame.loadScores();
   assert.strictEqual(lossScores.length, 1);
@@ -531,6 +531,31 @@ function run(htmlPath) {
   cState = collectorGame.getState();
   assert.strictEqual(cState.debtCollectorIgnores, 2);
   assert.strictEqual(cState.bankruptcyStrikes, 1, "a second consecutive ignore now counts toward the same bankruptcy-strike limit as the ratio-based crisis");
+
+  // --- the strike limit is a real hard cap, not just a ratio-crisis-time check ---
+  // every consecutive ignore from the 2nd onward adds a strike; keep ignoring past the 5-strike limit
+  // purely via the debt collector, with no ratio-based crisis ever active, and confirm it still ends the run
+  for (let ignoreNum = 3; ignoreNum <= 5; ignoreNum++) {
+    collectorGame.__testSetState({ debtCollectorStreak: 3 });
+    assert.strictEqual(collectorGame.doGig("waiter"), true);
+    cState = collectorGame.getState();
+    assert.strictEqual(cState.event.title, "אזהרה מההוצאה לפועל");
+    assert.strictEqual(collectorGame.resolveEvent(1), true, "collector-ignore, " + ignoreNum + "th time");
+    cState = collectorGame.getState();
+    assert.strictEqual(cState.bankruptcyStrikes, ignoreNum - 1);
+    assert.strictEqual(cState.ended, false, (ignoreNum - 1) + " strikes alone still doesn't end the run");
+  }
+
+  collectorGame.__testSetState({ debtCollectorStreak: 3 });
+  assert.strictEqual(collectorGame.doGig("waiter"), true);
+  cState = collectorGame.getState();
+  assert.strictEqual(cState.event.title, "אזהרה מההוצאה לפועל");
+  assert.ok(cState.cash >= 100, "sanity: no ratio-based crisis is active here (cash isn't critically low) - this is a pure debt-collector-driven ending");
+  assert.strictEqual(collectorGame.resolveEvent(1), true, "collector-ignore, 6th time");
+  cState = collectorGame.getState();
+  assert.strictEqual(cState.bankruptcyStrikes, 5, "the fifth strike, accrued purely from repeated collector visits");
+  assert.strictEqual(cState.ended, true, "hitting the strike limit ends the run immediately even with no ratio-based crisis active - closes the gap where strikes could silently exceed the limit");
+  assert.strictEqual(cState.win, false);
 }
 
 if (require.main === module) {
