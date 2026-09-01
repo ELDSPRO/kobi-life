@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#080c14">
-  <title>KOBI / FIRST CUT</title>
+  <title>קובי / קריירה</title>
   <style>
     :root { --ink:#080c14; --panel:#141c2c; --panel-2:#1d2840; --line:#34415a; --cream:#f7f2e8; --muted:#9ca8ba; --amber:#f4bd4b; --green:#67cfc4; --blue:#93b6e0; --rose:#e28c83; }
     * { box-sizing:border-box; }
@@ -21,67 +21,28 @@
     .turn .fame b { color:var(--green); }
     .turn .followers b { color:var(--amber); }
     .turn .contacts b { color:var(--blue); }
-    .mode-switch { display:flex; gap:6px; margin:12px 0 0; }
-    .mode-switch button { min-height:33px; padding:6px 11px; cursor:pointer; color:var(--muted); border:1px solid rgba(229,238,255,.15); border-radius:7px; background:rgba(255,255,255,.04); font-size:.73rem; font-weight:850; }
-    .mode-switch button.active { color:#171307; border-color:var(--amber); background:var(--amber); }
-    .goals { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; margin:15px 0 22px; }
-    .goal { min-height:60px; padding:9px 10px; color:var(--muted); border:1px solid rgba(229,238,255,.13); border-radius:10px; background:rgba(255,255,255,.025); }
-    .goal small { display:block; color:var(--amber); font-size:.63rem; font-weight:900; letter-spacing:.06em; }
-    .goal b { display:block; margin-top:4px; color:var(--cream); font-size:.79rem; }
-    .goal.done { border-color:rgba(103,207,196,.6); background:rgba(103,207,196,.09); }
-    .goal.done b { color:var(--green); }
-    .panel { border:1px solid rgba(229,238,255,.15); border-radius:15px; background:linear-gradient(145deg,rgba(29,38,59,.96),rgba(12,17,28,.98)); box-shadow:0 18px 45px rgba(0,0,0,.22); }
-    .screen-head { display:flex; align-items:end; justify-content:space-between; gap:16px; margin-bottom:18px; }
+    .mini-pay { margin-inline-start:5px; padding:2px 6px; cursor:pointer; color:var(--rose); border:1px solid rgba(226,140,131,.4); border-radius:5px; background:rgba(226,140,131,.08); font-size:.6rem; font-weight:800; }
+    .stage-track { display:flex; flex-wrap:wrap; gap:6px; margin:12px 0 0; }
+    .stage-node { padding:5px 10px; color:#5b6478; border:1px solid rgba(229,238,255,.13); border-radius:999px; background:rgba(255,255,255,.025); font-size:.63rem; font-weight:800; }
+    .stage-node.current { color:#171307; border-color:var(--amber); background:var(--amber); }
+    .stage-node.done { color:var(--green); border-color:rgba(103,207,196,.5); background:rgba(103,207,196,.07); }
+    .panel { border:1px solid rgba(229,238,255,.15); border-radius:15px; background:linear-gradient(145deg,rgba(29,38,59,.96),rgba(12,17,28,.98)); box-shadow:0 18px 45px rgba(0,0,0,.22); margin-top:15px; padding:24px; }
     .eyebrow { margin:0 0 5px; color:var(--amber); font-size:.71rem; font-weight:900; letter-spacing:.09em; }
     h1,h2,h3,p { margin-top:0; }
-    h1 { margin-bottom:0; font-size:clamp(1.9rem,4vw,3.1rem); letter-spacing:-.06em; line-height:.95; }
-    h2 { margin:0; font-size:1.25rem; }
-    .screen-copy { max-width:34ch; margin:0; color:var(--muted); font-size:.79rem; line-height:1.52; text-align:left; }
-    .map { min-height:390px; padding:24px; }
-    .map-board { position:relative; min-height:285px; margin-top:18px; overflow:hidden; border-top:1px solid rgba(229,238,255,.12); border-bottom:1px solid rgba(229,238,255,.12); }
-    .map-board:before { content:""; position:absolute; top:50%; right:10%; left:10%; height:1px; background:linear-gradient(90deg,transparent,rgba(147,182,224,.55),transparent); transform:rotate(-7deg); }
-    .place { position:absolute; display:grid; justify-items:center; gap:8px; cursor:pointer; color:var(--blue); border:0; background:transparent; font-size:.79rem; }
-    .place:before { content:""; width:16px; height:16px; border:4px solid var(--blue); border-radius:50%; background:#162035; box-shadow:0 0 0 6px rgba(147,182,224,.07); }
-    .place.current { color:var(--cream); font-weight:900; }
-    .place.current:before { border-color:var(--amber); background:var(--amber); box-shadow:0 0 0 7px rgba(244,189,75,.12); }
-    .place.target:before { border-color:var(--green); }
-    .place.locked { color:#667188; }
-    .place.locked:before { border-color:#667188; background:#101724; box-shadow:none; }
-    .place.tlv { top:23%; right:8%; }
-    .place.jerusalem { top:63%; right:20%; }
-    .place.haifa { top:19%; right:28%; }
-    .place.athens { top:56%; right:43%; }
-    .place.berlin { top:18%; right:55%; }
-    .place.london { top:62%; right:61%; }
-    .place.newyork { top:25%; left:20%; }
-    .place.losangeles { top:66%; left:5%; }
-    .region { position:absolute; top:12px; color:rgba(229,238,255,.36); font-size:.61rem; font-weight:900; letter-spacing:.1em; }
-    .region.il { right:8%; }
-    .region.eu { right:45%; }
-    .region.us { left:8%; }
-    .destination { display:flex; align-items:center; justify-content:space-between; gap:15px; margin-top:16px; padding:14px 15px; border:1px solid rgba(229,238,255,.13); border-radius:10px; background:rgba(255,255,255,.025); }
-    .destination h3 { margin:0; font-size:1rem; }
-    .destination p { margin:4px 0 0; color:var(--muted); font-size:.73rem; }
-    .destination small { display:block; margin-top:5px; color:var(--amber); font-size:.66rem; font-weight:800; }
+    h1 { margin-bottom:0; font-size:clamp(1.5rem,3vw,2.2rem); letter-spacing:-.04em; line-height:1.05; }
+    .next-move { display:flex; align-items:center; justify-content:space-between; gap:13px; margin:0 0 15px; padding:12px 14px; border:1px solid rgba(244,189,75,.5); border-radius:10px; background:rgba(244,189,75,.07); }
+    .next-move small { display:block; color:var(--amber); font-size:.65rem; font-weight:900; letter-spacing:.06em; }
+    .next-move b { display:block; margin-top:3px; color:var(--cream); font-size:.94rem; }
+    .next-move span { display:block; margin-top:3px; color:var(--muted); font-size:.7rem; line-height:1.4; }
+    .milestone-list { display:flex; flex-wrap:wrap; gap:6px; margin-top:9px; }
+    .milestone { padding:4px 9px; color:var(--muted); border:1px solid rgba(229,238,255,.15); border-radius:999px; background:rgba(255,255,255,.03); font-size:.65rem; font-weight:750; }
+    .milestone.required { border-color:rgba(244,189,75,.4); }
+    .milestone.done { color:var(--green); border-color:rgba(103,207,196,.5); background:rgba(103,207,196,.08); }
+    .recommend-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
     .primary,.back,.service-row,.row-action,.footer-actions button,.event button { min-height:34px; padding:7px 11px; cursor:pointer; border-radius:7px; font-size:.74rem; font-weight:850; }
     .primary { color:#191307; border:0; background:var(--amber); }
     .back { color:#cbd5e6; border:1px solid rgba(229,238,255,.15); background:rgba(255,255,255,.045); }
-    .city { padding:24px; }
-    .next-move { display:flex; align-items:center; justify-content:space-between; gap:13px; margin:0 0 15px; padding:12px 14px; border:1px solid rgba(244,189,75,.5); border-radius:10px; background:rgba(244,189,75,.07); }
-    .next-move small { display:block; color:var(--amber); font-size:.65rem; font-weight:900; letter-spacing:.06em; }
-    .next-move b { display:block; margin-top:3px; color:var(--cream); font-size:.83rem; }
-    .next-move span { display:block; margin-top:3px; color:var(--muted); font-size:.7rem; line-height:1.4; }
     .service-list { border-top:1px solid rgba(229,238,255,.12); }
-    .service-row { display:grid; grid-template-columns:32px minmax(0,1fr) auto; align-items:center; gap:12px; width:100%; min-height:66px; padding:12px 2px; color:var(--cream); border:0; border-bottom:1px solid rgba(229,238,255,.11); border-radius:0; background:transparent; text-align:right; }
-    .service-row:hover { color:var(--amber); background:rgba(244,189,75,.035); }
-    .service-number { display:grid; place-items:center; width:26px; height:26px; color:#171307; border-radius:6px; background:var(--amber); font-size:.66rem; }
-    .service-row h3 { margin:0; font-size:.96rem; }
-    .service-row p { margin:4px 0 0; color:var(--muted); font-size:.72rem; }
-    .service-arrow { color:var(--blue); font-size:1.1rem; }
-    .service { padding:24px; }
-    .service-top { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:17px; }
-    .service-top .back { white-space:nowrap; }
-    .list { border-top:1px solid rgba(229,238,255,.12); }
     .action-row { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:15px; min-height:73px; padding:12px 0; border-bottom:1px solid rgba(229,238,255,.11); }
     .action-row h3 { margin:0; font-size:.94rem; }
     .action-row p { margin:4px 0 0; color:var(--muted); font-size:.72rem; line-height:1.4; }
@@ -89,16 +50,20 @@
     .action-meta b { color:var(--green); font-size:.72rem; white-space:nowrap; }
     .row-action { color:#171307; border:0; background:var(--amber); white-space:nowrap; }
     .row-action.quiet { color:#dbe4f4; border:1px solid rgba(229,238,255,.16); background:rgba(255,255,255,.045); }
-    .film-status { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin:0 0 13px; }
-    .film-slot { min-height:56px; padding:8px; color:var(--muted); border:1px solid rgba(229,238,255,.12); border-radius:8px; font-size:.68rem; }
-    .film-slot b { display:block; margin-top:4px; color:var(--cream); font-size:.72rem; }
-    .film-slot.ready { border-color:rgba(103,207,196,.55); background:rgba(103,207,196,.08); }
-    .film-slot.ready b { color:var(--green); }
+    .row-action:disabled { opacity:.4; cursor:not-allowed; }
+    .trend-up { color:var(--rose); font-size:.62rem; font-weight:900; }
+    .trend-down { color:var(--green); font-size:.62rem; font-weight:900; }
+    .final-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:16px 0; }
+    .final-grid.recap { margin:0 0 16px; }
+    .final-grid div { padding:9px; border-radius:8px; background:rgba(255,255,255,.055); }
+    .final-grid small { color:var(--muted); font-size:.64rem; }
+    .final-grid b { display:block; margin-top:4px; color:var(--cream); font-size:.84rem; }
     .bag { padding:24px; }
-    .bag-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-top:16px; }
+    .bag-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-top:10px; }
     .bag-item { display:flex; justify-content:space-between; gap:10px; padding:12px; border:1px solid rgba(229,238,255,.12); border-radius:9px; background:rgba(255,255,255,.025); color:var(--muted); font-size:.78rem; }
     .bag-item b { color:var(--cream); }
     .empty { padding:20px 0; color:var(--muted); font-size:.82rem; }
+    .service-top { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; }
     .footer-actions { display:flex; justify-content:space-between; gap:10px; margin-top:15px; }
     .footer-actions button { color:var(--muted); border:1px solid rgba(229,238,255,.15); background:rgba(255,255,255,.045); }
     .footer-actions button:first-child { color:var(--rose); }
@@ -111,12 +76,8 @@
     .event-options { display:grid; gap:7px; }
     .event button { width:100%; color:#171307; border:0; background:var(--amber); text-align:right; }
     .event button.quiet { color:#dbe4f4; border:1px solid rgba(229,238,255,.15); background:rgba(255,255,255,.045); }
-    .final-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:16px 0; }
-    .final-grid div { padding:9px; border-radius:8px; background:rgba(255,255,255,.055); }
-    .final-grid small { color:var(--muted); font-size:.64rem; }
-    .final-grid b { display:block; margin-top:4px; color:var(--cream); font-size:.84rem; }
-    @media (max-width:720px) { .goals { grid-template-columns:repeat(2,1fr); } .screen-head { align-items:start; display:grid; } .screen-copy { text-align:right; } .turn { gap:11px; } .film-status { grid-template-columns:repeat(2,1fr); } .next-move { align-items:start; display:grid; } }
-    @media (max-width:520px) { .shell { width:min(100% - 20px,1120px); padding-top:15px; } .topbar { align-items:start; display:grid; } .turn { justify-content:space-between; width:100%; } .map,.city,.service,.bag { padding:16px; } .bag-grid { grid-template-columns:1fr; } .action-row { align-items:start; } .action-meta { justify-items:start; text-align:right; } .destination { display:grid; } .final-grid { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:720px) { .action-row { align-items:start; } .next-move { align-items:start; display:grid; } }
+    @media (max-width:520px) { .shell { width:min(100% - 20px,1120px); padding-top:15px; } .topbar { align-items:start; display:grid; } .turn { justify-content:space-between; width:100%; } .panel,.bag { padding:16px; } .bag-grid { grid-template-columns:1fr; } .action-meta { justify-items:start; text-align:right; } .final-grid { grid-template-columns:repeat(2,1fr); } }
   </style>
 </head>
 <body>
@@ -124,306 +85,850 @@
   <div id="modal" class="modal hidden"></div>
   <script>
     (() => {
-      const GOODS = [
-        { id:"script", name:"תסריט", note:"חומר גלם לסיפור", base:120 },
-        { id:"set", name:"יום סט", note:"צוות ולוקיישן לצילום", base:245 },
-        { id:"camera", name:"מצלמה", note:"נשארת בתיק", base:390 },
-        { id:"sound", name:"ערכת סאונד", note:"נשארת בתיק", base:260 },
-        { id:"lights", name:"תאורה", note:"משפרת איכות", base:205 },
-        { id:"edit", name:"עמדת עריכה", note:"נשארת בתיק", base:330 }
-      ];
+      // Cities are dormant in Phase 1 — reactivated in Phase 3 as the festival-stage
+      // flight-milestone destination list. Not used by any function yet.
       const CITIES = [
-        { id:"tlv", name:"תל אביב", zone:"ישראל · לימודים והפקות", fare:0, copy:"לימודים, גיגים קטנים ושוק מהיר.", mods:{script:.82,set:1.15,camera:1.06,sound:1.17,lights:1.1,edit:1.12} },
-        { id:"jerusalem", name:"ירושלים", zone:"ישראל · פיצ׳ינג וקרנות", fare:90, copy:"מוסדות, קשרים וקרנות מימון.", mods:{script:1.1,set:1.08,camera:1.16,sound:1.03,lights:1.14,edit:.88} },
-        { id:"haifa", name:"חיפה", zone:"ישראל · ציוד ופוסט", fare:110, copy:"ציוד, עריכה וצוותי פוסט־פרודקשן.", mods:{script:1.08,set:.86,camera:.79,sound:.82,lights:.88,edit:.76} },
-        { id:"athens", name:"אתונה", zone:"אירופה · פסטיבלים", fare:260, copy:"הגשות, פסטיבלים והפצה בינלאומית.", mods:{script:1.22,set:1.18,camera:.92,sound:1.06,lights:1.02,edit:1.02} },
-        { id:"berlin", name:"ברלין", zone:"אירופה · בתי קולנוע", fare:440, copy:"פסטיבלי קולנוע, ביקורות וקשרים מקצועיים.", mods:{script:1.14,set:1.05,camera:.96,sound:.98,lights:1.08,edit:.9} },
-        { id:"london", name:"לונדון", zone:"אירופה · קו־פרודוקציה", fare:510, copy:"מפיקים, קו־פרודוקציות והפצה בינלאומית.", mods:{script:1.2,set:1.12,camera:1.04,sound:1.08,lights:.95,edit:1.05} },
-        { id:"newyork", name:"ניו יורק", zone:"ארה״ב · אינדי וקהל", fare:900, copy:"הקרנות אינדי, קהל דיגיטלי ומפיצים.", mods:{script:1.26,set:1.2,camera:1.1,sound:1.12,lights:1.06,edit:1.12} },
-        { id:"losangeles", name:"לוס אנג׳לס", zone:"ארה״ב · אולפנים והפצה", fare:1080, copy:"פגישות אולפן, מפיצים ועסקאות גדולות.", mods:{script:1.3,set:1.28,camera:1.14,sound:1.16,lights:1.1,edit:1.17} }
+        { id:"tlv", name:"תל אביב", zone:"ישראל", fare:0, copy:"בית.", mods:{} },
+        { id:"jerusalem", name:"ירושלים", zone:"ישראל", fare:90, copy:"מוסדות וקרנות.", mods:{} },
+        { id:"haifa", name:"חיפה", zone:"ישראל", fare:110, copy:"ציוד ופוסט.", mods:{} },
+        { id:"athens", name:"אתונה", zone:"אירופה · פסטיבלים", fare:260, copy:"הגשות והפצה בינלאומית.", mods:{distroRights:1.1, screeningWindow:1.2, streamingDeal:.95, salesAgentContract:1.0} },
+        { id:"berlin", name:"ברלין", zone:"אירופה · בתי קולנוע", fare:440, copy:"פסטיבלי קולנוע וקשרים מקצועיים.", mods:{distroRights:1.05, screeningWindow:1.15, streamingDeal:1.0, salesAgentContract:1.1} },
+        { id:"london", name:"לונדון", zone:"אירופה · קו־פרודוקציה", fare:510, copy:"מפיקים והפצה בינלאומית.", mods:{distroRights:1.2, screeningWindow:1.0, streamingDeal:1.1, salesAgentContract:1.15} },
+        { id:"newyork", name:"ניו יורק", zone:"ארה״ב · אינדי וקהל", fare:900, copy:"הקרנות אינדי ומפיצים.", mods:{distroRights:1.15, screeningWindow:1.1, streamingDeal:1.25, salesAgentContract:1.2} },
+        { id:"losangeles", name:"לוס אנג׳לס", zone:"ארה״ב · אולפנים והפצה", fare:1080, copy:"פגישות אולפן ועסקאות גדולות.", mods:{distroRights:1.3, screeningWindow:1.2, streamingDeal:1.3, salesAgentContract:1.35} }
       ];
-      const GIGS = [
-        { id:"runner", title:"עוזר/ת הפקה", copy:"ג׳וב כניסה שמכיר לך אנשי צוות.", needs:{}, cash:260, fame:1, contacts:1, followers:0, weeks:1 },
-        { id:"camera-assist", title:"עוזר/ת צלם", copy:"יום צילום קצר; המצלמה נשארת אצלך.", needs:{camera:1}, cash:520, fame:2, contacts:1, followers:20, weeks:1 },
-        { id:"wedding", title:"צילום חתונה", copy:"מסחרי, מהיר, ומממן את הסרט הבא.", needs:{camera:1,sound:1}, cash:780, fame:1, contacts:1, followers:65, weeks:1 }
+      const FLIGHT_CITY_IDS = ["athens","berlin","london","newyork","losangeles"];
+
+      const DEFAULT_RISK = { crashChance:.05, spikeChance:.05, unavailableChance:.03, crashRange:[.3,.5], spikeRange:[1.6,2.4] };
+      const DEBT_ANNUAL_RATE = 1.045;
+      const BANKRUPTCY_STRIKE_LIMIT = 3;
+      const STAGE_GRACE_YEARS = 3;
+
+      const UNIVERSAL_INCIDENTS = [
+        { id:"bank-call", chance:.10, title:"הבנק מתקשר", copy:"החוב צבר ריבית והפקיד/ה מבקש/ת תשלום קטן עכשיו.", choices:[{label:"לשלם ₪500 מהחוב",kind:"debt-pay"},{label:"לדחות · החוב גדל ב-₪400",kind:"debt-delay",quiet:true}] },
+        { id:"road-gig", chance:.08, title:"עבודה בדרך", copy:"מישהו מחפש עזרה דחופה. זו דרך מהירה למזומן, אבל היא עולה שנה.", choices:[{label:"לקחת · +₪600",kind:"road-gig"},{label:"להמשיך במסלול",kind:"pass",quiet:true}] }
       ];
-      const GOALS = { cash:6000, fame:30, followers:2000, contacts:4 };
-      const STORAGE_KEY = "kobi-first-cut-v5";
+
+      function studentRecommend(s) {
+        if (s.commitment) {
+          return { title:"ממשיכים בהתחייבות הנוכחית", copy:"שנה "+Math.round(s.commitment.elapsedYears)+" מתוך "+s.commitment.totalYears+".", action:null, alternatives:[] };
+        }
+        if (!hasChosenEntryPath()) {
+          return { title:"לבחור מסלול כניסה", copy:"לימודי קולנוע, קורס קצר, או מסלול עצמאי — הבחירה קובעת את תחילת הדרך.", action:{type:"commitment",id:"filmSchool"}, actionLabel:"להתחיל לימודי קולנוע", alternatives:[{type:"commitment",id:"shortCourse",label:"קורס קצר"},{type:"commitment",id:"selfTaught",label:"מסלול עצמאי"}] };
+        }
+        if (s.fame < 6) {
+          return { title:"לצבור קרדיט מקצועי", copy:"עבודה בתעשייה עצמה בונה קרדיט וקשרים — צריך כמה שנים של זה כדי לצבור קרדיט מקצועי אמיתי, לא רק פעם אחת.", action:{type:"gig",id:"prodAssist"}, actionLabel:"לעבוד כעוזר/ת הפקה", alternatives:[{type:"gig",id:"photostore",label:"חנות צילום"}] };
+        }
+        if ((s.cash+s.bank) < 5000) {
+          return { title:"לבנות רשת ביטחון כלכלית", copy:"יש כבר קרדיט מקצועי — עכשיו צריך לצבור מספיק כסף כדי לצאת לשלב הבא בביטחון.", action:{type:"gig",id:"waiter"}, actionLabel:"לעבוד כמלצר/ית", alternatives:[{type:"gig",id:"usher",label:"סדרן/ית"}] };
+        }
+        return { title:"מוכנים להתקדם", copy:"היעדים המרכזיים של השלב הושלמו — עוד פעולה תסיים אותו.", action:{type:"gig",id:"waiter"}, actionLabel:"לעבוד כמלצר/ית", alternatives:[] };
+      }
+
+      function industryRecommend(s) {
+        if (s.fame < 16) {
+          return { title:"לבנות קרדיט בתעשייה", copy:"הקרדיטים מהשלב הקודם לא מספיקים לבד — צריך רצף אמיתי של עבודות מקצועיות.", action:{type:"gig",id:"camAssist"}, actionLabel:"לעבוד כעוזר/ת צלם", alternatives:[{type:"gig",id:"gaffer",label:"חשמלאי/ת תאורה"}] };
+        }
+        if (s.contacts < 6) {
+          return { title:"להרחיב רשת קשרים", copy:"בלי מספיק קשרים אין עם מי להרכיב צוות לסרט הראשון.", action:{type:"gig",id:"gaffer"}, actionLabel:"לעבוד כחשמלאי/ת תאורה", alternatives:[{type:"gig",id:"lineProducer",label:"מפיק/ת קו"}] };
+        }
+        return { title:"מוכנים להתקדם", copy:"היעדים המרכזיים של השלב הושלמו — עוד פעולה תסיים אותו.", action:{type:"gig",id:"camAssist"}, actionLabel:"לעבוד כעוזר/ת צלם", alternatives:[] };
+      }
+
+      function indieRecommend(s) {
+        if (s.commitment) {
+          return { title:"ממשיכים בהפקת הסרט", copy:"שנה "+Math.round(s.commitment.elapsedYears)+" מתוך "+s.commitment.totalYears+".", action:null, alternatives:[] };
+        }
+        if (!hasChosenEntryPath()) {
+          return { title:"להתחיל להפיק את הסרט", copy:"זה הרגע — 3 שנים של התחייבות אמיתית להפוך רעיון לסרט.", action:{type:"commitment",id:"indieFilm"}, actionLabel:"להתחיל את ההפקה", alternatives:[] };
+        }
+        if ((s.cash+s.bank) < 500) {
+          return { title:"לייצב את המצב הכלכלי", copy:"אחרי ההפקה כדאי לחזור לאיזון.", action:{type:"gig",id:"commercialGig"}, actionLabel:"לעבוד בעבודה מסחרית", alternatives:[] };
+        }
+        return { title:"מוכנים להתקדם", copy:"הסרט מוכן ויש בסיס כלכלי — עוד פעולה תסיים את השלב.", action:{type:"gig",id:"commercialGig"}, actionLabel:"לעבוד בעבודה מסחרית", alternatives:[] };
+      }
+
+      function festivalsRecommend(s) {
+        if (s.fame < 30) {
+          return { title:"להרחיב מוניטין בינלאומי", copy:"פאנלים והשתתפות בפסטיבלים בונים שם מעבר לגבולות — וטיסת-ציון נדירה תוצע מדי פעם משלב הזה בלבד.", action:{type:"gig",id:"festivalPanel"}, actionLabel:"להשתתף בפאנל", alternatives:[{type:"gig",id:"consultingGig",label:"ייעוץ"}] };
+        }
+        if (s.followers < 3000) {
+          return { title:"לבנות קהל גלובלי", copy:"החשיפה הבינלאומית עוד לא הפכה לקהל אמיתי.", action:{type:"gig",id:"festivalPanel"}, actionLabel:"להשתתף בפאנל", alternatives:[] };
+        }
+        return { title:"מוכנים להתקדם", copy:"המוניטין והקהל הבינלאומיים במקום — עוד פעולה תסיים את השלב.", action:{type:"gig",id:"consultingGig"}, actionLabel:"לעבוד בייעוץ", alternatives:[] };
+      }
+
+      function breakthroughRecommend(s) {
+        if (s.fame < 60) {
+          return { title:"לצבור מוניטין ברמת אולפן", copy:"פרויקטים גדולים דורשים שם שכבר מוכיח את עצמו.", action:{type:"gig",id:"showrunnerGig"}, actionLabel:"לנהל פרויקט אולפן", alternatives:[{type:"gig",id:"execProducing",label:"הפקה בכירה"}] };
+        }
+        if ((s.cash+s.bank) < 30000) {
+          return { title:"לבנות הון משמעותי", copy:"ההצלחה המקצועית עוד לא הפכה להון אמיתי.", action:{type:"gig",id:"execProducing"}, actionLabel:"לעבוד בהפקה בכירה", alternatives:[] };
+        }
+        return { title:"מוכנים להתקדם", copy:"המוניטין וההון במקום — עוד פעולה תסיים את השלב.", action:{type:"gig",id:"showrunnerGig"}, actionLabel:"לנהל פרויקט אולפן", alternatives:[] };
+      }
+
+      function legacyRecommend(s) {
+        if (s.commitment) {
+          return { title:"ממשיכים בסרט האישי", copy:"שנה "+Math.round(s.commitment.elapsedYears)+" מתוך "+s.commitment.totalYears+".", action:null, alternatives:[] };
+        }
+        if (!hasChosenEntryPath()) {
+          return { title:"לצלם את הסרט האישי האחרון", copy:"סיכום של קריירה שלמה, בשתי הכרעות בלבד.", action:{type:"commitment",id:"legacyFilm"}, actionLabel:"להתחיל את הסרט", alternatives:[] };
+        }
+        if (s.fame < 100) {
+          return { title:"להשלים מורשת", copy:"עוד קצת מוניטין, וזה יסתגר.", action:{type:"gig",id:"consultingLegacy"}, actionLabel:"לעבוד בייעוץ אסטרטגי", alternatives:[{type:"gig",id:"teachingGig",label:"הוראה"}] };
+        }
+        return { title:"מוכנים לסיים", copy:"קריירה שלמה מאחוריך — עוד פעולה תסגור את המסלול.", action:{type:"gig",id:"teachingGig"}, actionLabel:"ללמד", alternatives:[] };
+      }
+
+      const STAGES = [
+        {
+          id:"student", order:0, name:"סטודנט/ית לקולנוע", ageRange:[21,26],
+          headline:"לבנות בסיס: מקצוע, ציוד ראשון, קרדיט ראשון",
+          goods:[
+            { id:"usedCamera",   name:"מצלמה יד שנייה", base:340, persistsAsAsset:true  },
+            { id:"scriptRights", name:"זכויות לתסריט",  base:110, persistsAsAsset:false },
+            { id:"editComputer", name:"מחשב עריכה",     base:520, persistsAsAsset:true  },
+            { id:"mic",          name:"מיקרופון",       base:140, persistsAsAsset:false }
+          ],
+          gigs:[
+            { id:"usher",      title:"סדרן/ית בקולנוע",          copy:"עבודה קבועה וזמינה, בלי דרישות.",             needs:{}, cash:900,  fame:0, contacts:0, followers:0 },
+            { id:"waiter",     title:"מלצר/ית",                  copy:"הכי משתלם כלכלית, בלי קשרים בתעשייה.",         needs:{}, cash:1200, fame:0, contacts:1, followers:0 },
+            { id:"photostore", title:"עובד/ת חנות צילום",         copy:"פחות כסף, אבל טעימה ראשונה מהתעשייה.",         needs:{}, cash:1000, fame:1, contacts:1, followers:0 },
+            { id:"prodAssist", title:"עוזר/ת הפקה סטודנטיאלית",   copy:"הכי פחות כסף, הכי הרבה קרדיט וקשרים.",         needs:{}, cash:700,  fame:2, contacts:2, followers:30 }
+          ],
+          commitments:[
+            { id:"filmSchool", name:"לימודי קולנוע", copy:"התחייבות ארוכה — 4 שנים, שתי הכרעות באמצע.", years:4, entryDebt:16000,
+              checkpoints:[
+                { atYear:2, id:"specialize", title:"בחירת התמחות", copy:"השנה השנייה מסתיימת. לאיזה כיוון פונים?",
+                  choices:[{label:"בימוי",kind:"spec-directing"},{label:"עריכה",kind:"spec-editing"},{label:"הפקה",kind:"spec-producing"}] },
+                { atYear:4, id:"thesis", title:"פרויקט גמר", copy:"השנה האחרונה. איך מגישים את פרויקט הגמר?",
+                  choices:[{label:"פרויקט שאפתני · סיכון גבוה יותר",kind:"thesis-ambitious"},{label:"פרויקט בטוח · פחות רושם",kind:"thesis-safe"}] }
+              ], grantsOnComplete:{ fame:2 } },
+            { id:"shortCourse", name:"קורס קצר", copy:"התחייבות קצרה — שנה וחצי, הכרעה אחת.", years:1.5, entryDebt:4000,
+              checkpoints:[ { atYear:1.5, id:"cert", title:"סיום קורס", copy:"הקורס מסתיים. מה הלאה?", choices:[{label:"להמשיך הלאה",kind:"cert-done"}] } ],
+              grantsOnComplete:{ fame:1 } },
+            { id:"selfTaught", name:"מסלול עצמאי", copy:"בלי לימודים ובלי חוב — לומדים תוך כדי עבודה.", years:0, entryDebt:0,
+              immediateEffect: (s) => { s.pathTags.push("self-taught"); } }
+          ],
+          incidents:[
+            { id:"camera-repair", chance:.08, when:(s)=>s.assets.usedCamera, title:"המצלמה צריכה תיקון", copy:"המצלמה קיבלה מכה. אפשר לשלם על תיקון, או להמשיך עם הסיכון שתפסיק לעבוד.", choices:[{label:"לתקן ב-₪300",kind:"repair"},{label:"לא לתקן · לסכן את המצלמה",kind:"risk-camera",quiet:true}] },
+            { id:"gig-falls-through", chance:.08, title:"עבודה נופלת", copy:"עבודה שסמכת עליה בוטלה ברגע האחרון.", choices:[{label:"לחפש תחליף מהיר · -₪300",kind:"scramble"},{label:"להמשיך בלי הכנסה השנה",kind:"pass",quiet:true}] },
+            { id:"cheap-gear", chance:.08, title:"הזדמנות ציוד מוזל", copy:"מישהו מוכר ציוד מהר וזול — אבל צריך להחליט עכשיו.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
+          ],
+          riskProfile:null,
+          milestones:[
+            { id:"first-credit", label:"קרדיט מקצועי ראשון", check:(s)=>s.fame>=6,               required:true },
+            { id:"stable-cash",  label:"רשת ביטחון כלכלית",   check:(s)=>(s.cash+s.bank)>=5000,   required:true },
+            { id:"own-gear",     label:"ציוד יד שני משלך",     check:(s)=>!!s.assets.usedCamera,   required:false },
+            { id:"industry-tie", label:"קשר ראשון בתעשייה",    check:(s)=>s.contacts>=2,           required:false }
+          ],
+          fallbackPaths:[
+            { id:"commercial-work",  label:"לעבור לעבודה מסחרית קבועה", copy:"לא כל הדלתות האמנותיות נפתחו, אבל יש הכנסה יציבה.", effect:(s)=>{ s.cash+=2000; s.pathTags.push("commercial"); } },
+            { id:"digital-audience", label:"לבנות קהל דיגיטלי במקום",    copy:"במקום קרדיט מוסדי, קהל שגדל לבד.",                    effect:(s)=>{ s.followers+=500; s.pathTags.push("digital"); } }
+          ],
+          recommend: studentRecommend
+        },
+        {
+          id:"industry", order:1, name:"כניסה לתעשייה", ageRange:[26,34],
+          headline:"להתבסס כאיש/אשת מקצוע: קרדיטים אמיתיים, ציוד מקצועי, קשרים שסוחבים",
+          goods:[
+            { id:"proCamera",    name:"מצלמה מקצועית", base:1800, persistsAsAsset:true  },
+            { id:"lightingKit",  name:"ערכת תאורה",     base:950,  persistsAsAsset:true  },
+            { id:"shootDaySlot", name:"יום צילום פנוי",  base:550,  persistsAsAsset:false },
+            { id:"crewFavor",    name:"טובה מצוות",      base:220,  persistsAsAsset:false }
+          ],
+          gigs:[
+            { id:"camAssist",      title:"עוזר/ת צלם",           copy:"עבודה יציבה, בלי דרישות מיוחדות.",                needs:{}, cash:1600, fame:1, contacts:1, followers:0 },
+            { id:"gaffer",         title:"חשמלאי/ת תאורה",        copy:"פחות ידוע, אבל צוותי הפקה תמיד מחפשים.",           needs:{}, cash:1400, fame:1, contacts:2, followers:0 },
+            { id:"freelanceEditor",title:"עורך/ת פרילנס",         copy:"דורש יום צילום פנוי לעבוד עליו.",                  needs:{shootDaySlot:1}, cash:2200, fame:2, contacts:1, followers:0 },
+            { id:"lineProducer",   title:"מפיק/ת קו",             copy:"הכי משתלם, דורש טובה שכבר צברת בתעשייה.",          needs:{crewFavor:1}, cash:1200, fame:3, contacts:3, followers:50 }
+          ],
+          commitments:[],
+          incidents:[
+            { id:"contract-delay", chance:.08, title:"תשלום מתעכב", copy:"לקוח מעכב תשלום על עבודה שכבר בוצעה.", choices:[{label:"לרדוף אחרי התשלום · -₪300",kind:"scramble"},{label:"למחוק את החוב מהזיכרון",kind:"pass",quiet:true}] },
+            { id:"gear-deal", chance:.08, title:"הזדמנות ציוד מוזל", copy:"עמית שעוזב את התחום מוכר ציוד מהר וזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
+          ],
+          riskProfile:null,
+          milestones:[
+            { id:"industry-credit",  label:"קרדיט מבוסס בתעשייה", check:(s)=>s.fame>=16,               required:true },
+            { id:"industry-network", label:"רשת קשרים בתעשייה",   check:(s)=>s.contacts>=6,            required:true },
+            { id:"pro-gear",         label:"ציוד מקצועי משלך",     check:(s)=>!!s.assets.proCamera,     required:false },
+            { id:"cash-cushion",     label:"כרית ביטחון גדולה",    check:(s)=>(s.cash+s.bank)>=8000,    required:false }
+          ],
+          fallbackPaths:[
+            { id:"stay-crew",     label:"להישאר צוות טכני קבוע",     copy:"לא כולם צריכים להיות במאים — יש קריירה מכובדת כאיש/אשת מקצוע טכני/ת.", effect:(s)=>{ s.cash+=3000; s.pathTags.push("crew-career"); } },
+            { id:"self-promote",  label:"לבנות מותג עצמאי במקום",     copy:"במקום קרדיט מוסדי, קהל שגדל סביב התוכן שלך.",                            effect:(s)=>{ s.followers+=800; s.pathTags.push("self-promote"); } }
+          ],
+          recommend: industryRecommend
+        },
+        {
+          id:"indie", order:2, name:"קול עצמאי", ageRange:[34,43],
+          headline:"להפוך רעיון לסרט אמיתי — ולמצוא לו קהל",
+          goods:[
+            { id:"indieCameraPkg", name:"חבילת צילום עצמאית", base:2600, persistsAsAsset:true  },
+            { id:"editSuite",      name:"עמדת עריכה מקצועית", base:1900, persistsAsAsset:true  },
+            { id:"postSlot",       name:"חלון פוסט-פרודקשן",   base:700,  persistsAsAsset:false },
+            { id:"distroLead",     name:"ליד להפצה",           base:450,  persistsAsAsset:false }
+          ],
+          gigs:[
+            { id:"commercialGig", title:"עבודה מסחרית", copy:"מממנת את החיים בזמן שהסרט מתפתח.", needs:{}, cash:2600, fame:0, contacts:0, followers:0 },
+            { id:"workshopTeach", title:"הנחיית סדנה",   copy:"פחות כסף, אבל בונה שם וקשרים.",     needs:{}, cash:1800, fame:1, contacts:2, followers:0 }
+          ],
+          commitments:[
+            { id:"indieFilm", name:"לצלם סרט אינדי ראשון", copy:"הפרויקט שיהפוך אותך למי שאת/ה — 3 שנים, שלוש הכרעות אמיתיות.", years:3, entryDebt:6000,
+              checkpoints:[
+                { atYear:1, id:"script", title:"התסריט מוכן", copy:"שנה ראשונה מסתיימת. איך סוגרים את התסריט?",
+                  choices:[
+                    { label:"תסריט שאפתני יותר · -₪1,500", kind:"script-ambitious", effect:(s)=>{ s.cash-=1500; s.fame+=1; } },
+                    { label:"להישאר רזים ויעילים",          kind:"script-lean",      effect:(s)=>{ s.fame+=1; } }
+                  ] },
+                { atYear:2, id:"shoot", title:"הצילומים מסתיימים", copy:"שנה שנייה מסתיימת. איך סוגרים את הצילומים?",
+                  choices:[
+                    { label:"עוד יום צילום · -₪1,200", kind:"extra-shoot-day", effect:(s)=>{ s.cash-=1200; s.fame+=1; } },
+                    { label:"לעצור בתקציב",              kind:"on-budget",       effect:(s)=>{ s.cash+=500; } }
+                  ] },
+                { atYear:3, id:"distribution", title:"בחירת הפצה", copy:"השנה השלישית מסתיימת. הסרט מוכן — לאן הוא הולך?",
+                  choices:[
+                    { label:"מסלול פסטיבלים", kind:"festival-track",  effect:(s)=>{ s.achievements["festival-invite"]=true; s.fame+=2; } },
+                    { label:"ישר לסטרימינג",   kind:"streaming-track", effect:(s)=>{ s.followers+=600; s.cash+=1500; } }
+                  ] }
+              ], grantsOnComplete:{ fame:4 } }
+          ],
+          incidents:[
+            { id:"funding-falls-through", chance:.08, title:"מקור מימון נסוג", copy:"משקיע/ה שהבטיח/ה חלק מהתקציב נעלם/ת.", choices:[{label:"למצוא תחליף מהיר · -₪300",kind:"scramble"},{label:"להמשיך בלי זה",kind:"pass",quiet:true}] },
+            { id:"gear-deal-indie", chance:.08, title:"הזדמנות ציוד מוזל", copy:"סטודיו שסוגר מוכר ציוד מהר וזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
+          ],
+          riskProfile:null,
+          milestones:[
+            { id:"film-made", label:"סרט עצמאי ראשון הושלם", check:(s)=>s.films.length>=1,       required:true },
+            { id:"solvent",   label:"יציבות כלכלית בסיסית",   check:(s)=>(s.cash+s.bank)>=500,     required:true },
+            { id:"festival-ready", label:"מוכן/ה לפסטיבלים", check:(s)=>!!s.achievements["festival-invite"], required:false },
+            { id:"grew-audience",  label:"קהל שגדל",          check:(s)=>s.followers>=1000,        required:false }
+          ],
+          fallbackPaths:[
+            { id:"commercial-pivot", label:"לעבור לעבודה מסחרית קבועה",       copy:"הסרט לא יצא לדרך, אבל הניסיון נשאר.", effect:(s)=>{ s.cash+=4000; s.pathTags.push("commercial-pivot"); } },
+            { id:"digital-creator",  label:"להפוך ליוצר/ת תוכן עצמאי/ת",       copy:"קהל שנבנה ישירות, בלי לעבור דרך מסך.",  effect:(s)=>{ s.followers+=1500; s.pathTags.push("digital-creator"); } }
+          ],
+          recommend: indieRecommend
+        },
+        {
+          id:"festivals", order:3, name:"פסטיבלים", ageRange:[43,53],
+          headline:"לקחת את הסרט אל העולם — ולהפוך אותו לקריירה בינלאומית",
+          goods:[
+            { id:"distroRights",      name:"זכויות הפצה בינלאומיות", base:2200, persistsAsAsset:false },
+            { id:"screeningWindow",   name:"חלון הקרנה",              base:900,  persistsAsAsset:false },
+            { id:"streamingDeal",     name:"עסקת סטרימינג",           base:3400, persistsAsAsset:false },
+            { id:"salesAgentContract",name:"חוזה עם סוכן מכירות",      base:1600, persistsAsAsset:true  }
+          ],
+          gigs:[
+            { id:"festivalPanel", title:"פאנל בפסטיבל",       copy:"לא משלם הרבה, אבל בונה שם בינלאומי.", needs:{}, cash:900,  fame:2, contacts:2, followers:100 },
+            { id:"consultingGig", title:"ייעוץ לפרויקט אחר",   copy:"הכי משתלם כלכלית בשלב הזה.",           needs:{}, cash:3200, fame:0, contacts:1, followers:0 }
+          ],
+          commitments:[],
+          incidents:[
+            { id:"deal-falls-through", chance:.08, title:"עסקה נופלת ברגע האחרון", copy:"מפיץ שהתחייב נסוג מהעסקה.", choices:[{label:"למצוא פתרון מהיר · -₪300",kind:"scramble"},{label:"להמשיך הלאה",kind:"pass",quiet:true}] },
+            { id:"festival-deal-cheap", chance:.08, title:"הזדמנות במסדרונות הפסטיבל", copy:"מישהו רוצה למכור זכויות מהר ובזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
+          ],
+          riskProfile:null,
+          milestones:[
+            { id:"international-fame", label:"מוניטין בינלאומי", check:(s)=>s.fame>=30,      required:true },
+            { id:"global-audience",    label:"קהל גלובלי",       check:(s)=>s.followers>=3000, required:true },
+            { id:"sales-agent",        label:"סוכן/ת מכירות",     check:(s)=>!!s.assets.salesAgentContract, required:false },
+            { id:"toured",             label:"סבב פסטיבלים אמיתי", check:(s)=>Object.keys(s.achievements).filter((k)=>k.indexOf("visited-")===0).length>=2, required:false }
+          ],
+          fallbackPaths:[
+            { id:"streaming-only", label:"להתמקד לגמרי בסטרימינג", copy:"בלי מסע פסטיבלים, אבל עם קהל ישיר.", effect:(s)=>{ s.followers+=2000; s.pathTags.push("streaming-only"); } },
+            { id:"regional-focus", label:"להתמקד בשוק המקומי",     copy:"פחות זוהר בינלאומי, יותר יציבות.",      effect:(s)=>{ s.cash+=5000; s.pathTags.push("regional-focus"); } }
+          ],
+          recommend: festivalsRecommend
+        },
+        {
+          id:"breakthrough", order:4, name:"פריצה", ageRange:[53,65],
+          headline:"מפרויקט לפרויקט גדולים — לבנות הון וקריירה ברמת אולפן",
+          goods:[
+            { id:"studioOptionDeal",       name:"אופציה מאולפן",       base:5000,  persistsAsAsset:false },
+            { id:"packageDeal",            name:"חבילת פרויקט",         base:7500,  persistsAsAsset:false },
+            { id:"distributionStake",      name:"נתח בזכויות הפצה",     base:9000,  persistsAsAsset:true  },
+            { id:"productionCompanyShare", name:"חלק בחברת הפקה",       base:12000, persistsAsAsset:true  }
+          ],
+          gigs:[
+            { id:"showrunnerGig", title:"ניהול פרויקט אולפן", copy:"הכי הרבה מוניטין וקהל.",  needs:{}, cash:8000, fame:3, contacts:2, followers:500 },
+            { id:"execProducing", title:"הפקה בכירה",         copy:"הכי הרבה כסף וקשרים.",     needs:{}, cash:6000, fame:2, contacts:3, followers:200 }
+          ],
+          commitments:[],
+          incidents:[
+            { id:"deal-collapses", chance:.08, title:"עסקה גדולה קורסת", copy:"אולפן נסוג מעסקה שכמעט נחתמה.", choices:[{label:"לחפש תחליף מהיר · -₪300",kind:"scramble"},{label:"להמשיך הלאה",kind:"pass",quiet:true}] },
+            { id:"studio-deal-cheap", chance:.08, title:"הזדמנות נדירה", copy:"מישהו רוצה למכור נתח מהר ובזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
+          ],
+          riskProfile:null,
+          milestones:[
+            { id:"studio-fame",  label:"מוניטין ברמת אולפן",  check:(s)=>s.fame>=60,               required:true },
+            { id:"real-wealth",  label:"הון משמעותי",          check:(s)=>(s.cash+s.bank)>=30000,   required:true },
+            { id:"prod-company", label:"חלק בחברת הפקה",       check:(s)=>!!s.assets.productionCompanyShare, required:false },
+            { id:"mass-audience",label:"קהל המוני",             check:(s)=>s.followers>=10000,       required:false }
+          ],
+          fallbackPaths:[
+            { id:"boutique-studio", label:"להישאר סטודיו בוטיק עצמאי", copy:"פחות היקף, יותר שליטה.",   effect:(s)=>{ s.cash+=15000; s.pathTags.push("boutique-studio"); } },
+            { id:"legacy-teaching", label:"לעבור מוקדם להנחיה ולהוראה", copy:"להשקיע במי שבא/ה אחריך.", effect:(s)=>{ s.followers+=3000; s.pathTags.push("legacy-teaching"); } }
+          ],
+          recommend: breakthroughRecommend
+        },
+        {
+          id:"legacy", order:5, name:"מורשת ופרישה", ageRange:[65,81],
+          headline:"לסגור מעגל — הסרט האישי, ומה שנשאר אחריך",
+          goods:[
+            { id:"filmRightsLibrary", name:"ארכיון זכויות אישי", base:80000,  persistsAsAsset:true  },
+            { id:"mentorshipProgram", name:"תוכנית הנחיה",        base:15000,  persistsAsAsset:false },
+            { id:"retrospectiveDeal", name:"עסקת רטרוספקטיבה",    base:30000,  persistsAsAsset:false },
+            { id:"personalStudio",    name:"סטודיו אישי",          base:100000, persistsAsAsset:true  }
+          ],
+          gigs:[
+            { id:"teachingGig",     title:"הוראה באקדמיה",       copy:"מוריש/ה את הידע הלאה.", needs:{}, cash:25000, fame:2, contacts:1, followers:300 },
+            { id:"consultingLegacy",title:"ייעוץ אסטרטגי",        copy:"הכי משתלם כלכלית.",      needs:{}, cash:40000, fame:1, contacts:2, followers:0 }
+          ],
+          commitments:[
+            { id:"legacyFilm", name:"הסרט האישי האחרון", copy:"סיכום של קריירה שלמה — שנתיים, שתי הכרעות.", years:2, entryDebt:0,
+              checkpoints:[
+                { atYear:1, id:"theme", title:"לבחור נושא אישי", copy:"על מה הסרט הזה, באמת?",
+                  choices:[
+                    { label:"הסיפור הכי אישי שלך", kind:"personal-story", effect:(s)=>{ s.fame+=2; } },
+                    { label:"תיעוד הקריירה עצמה",   kind:"career-doc",     effect:(s)=>{ s.followers+=1000; } }
+                  ] },
+                { atYear:2, id:"release", title:"העמדה מול קהל", copy:"איך הסרט האחרון יוצא לעולם?",
+                  choices:[
+                    { label:"הקרנת יחיד בפסטיבל הבית", kind:"solo-screening", effect:(s)=>{ s.fame+=3; } },
+                    { label:"לשחרר בחינם לציבור",       kind:"free-release",   effect:(s)=>{ s.followers+=3000; } }
+                  ] }
+              ], grantsOnComplete:{ fame:5 } }
+          ],
+          incidents:[
+            { id:"health-slowdown", chance:.08, title:"האטה בריאותית", copy:"הגוף מבקש לנוח יותר ממה שתכננת.", choices:[{label:"לקחת עזרה בתשלום · -₪300",kind:"scramble"},{label:"להאט לבד",kind:"pass",quiet:true}] },
+            { id:"archive-deal", chance:.08, title:"הצעה לארכיון", copy:"מישהו רוצה לרכוש חלק מהארכיון שלך מהר ובזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
+          ],
+          riskProfile:null,
+          milestones:[
+            { id:"storied-career", label:"קריירה מלאה",         check:(s)=>s.fame>=100,          required:true },
+            { id:"capstone-film",  label:"הסרט האישי הושלם",    check:(s)=>s.films.length>=2,    required:true },
+            { id:"wealthy-retire", label:"פרישה עם הון",         check:(s)=>(s.cash+s.bank)>=150000, required:false },
+            { id:"beloved",        label:"קהל שאוהב",            check:(s)=>s.followers>=15000,   required:false }
+          ],
+          fallbackPaths:[
+            { id:"quiet-retirement", label:"פרישה שקטה",                 copy:"לא כל סוף חייב להיות רועש.",       effect:(s)=>{ s.cash+=10000; s.pathTags.push("quiet-retirement"); } },
+            { id:"cult-following",   label:"מוניטין של יוצר/ת נישה",     copy:"קטן, אבל אמיתי ונאמן.",             effect:(s)=>{ s.followers+=5000; s.pathTags.push("cult-following"); } }
+          ],
+          recommend: legacyRecommend
+        }
+      ];
+
+      const STORAGE_KEY = "kobi-career-v2";
       const app = typeof document !== "undefined" ? document.getElementById("app") : null;
       const modal = typeof document !== "undefined" ? document.getElementById("modal") : null;
       const money = (value) => new Intl.NumberFormat("he-IL", { style:"currency", currency:"ILS", maximumFractionDigits:0 }).format(Math.round(value));
-      const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-      const item = (id) => GOODS.find((good) => good.id === id);
-      const cityById = (id) => CITIES.find((city) => city.id === id) || CITIES[0];
       const clone = (value) => JSON.parse(JSON.stringify(value));
-      function destinationRule(city) {
-        if (["tlv","jerusalem","haifa"].includes(city.id)) return "פתוח מההתחלה";
-        if (city.id==="athens") return "צריך סרט גמור ו־6 קרדיטים";
-        if (city.id==="berlin") return "צריך סרט שנבחר לפסטיבל";
-        if (city.id==="london") return "צריך 20 קרדיטים ו־2 קשרים";
-        if (city.id==="newyork") return "צריך 900 עוקבים וסרט גמור";
-        return "צריך סרט פסטיבל ו־4 קשרים";
+
+      function currentStage() { return STAGES.find((s) => s.id === state.stageId) || STAGES[0]; }
+      function round5(n) { return Math.max(25, Math.round(n / 5) * 5); }
+
+      function priceRoll(base, rp) {
+        const roll = Math.random();
+        if (roll < rp.crashChance) return { price: round5(base*(rp.crashRange[0]+Math.random()*(rp.crashRange[1]-rp.crashRange[0]))), kind:"crash" };
+        if (roll < rp.crashChance+rp.spikeChance) return { price: round5(base*(rp.spikeRange[0]+Math.random()*(rp.spikeRange[1]-rp.spikeRange[0]))), kind:"spike" };
+        if (roll < rp.crashChance+rp.spikeChance+rp.unavailableChance) return { price:null, kind:"unavailable" };
+        return { price: round5(base*(.72+Math.random()*.66)), kind:"normal" };
       }
-      function destinationUnlocked(city) {
-        if (["tlv","jerusalem","haifa"].includes(city.id)) return true;
-        if (city.id==="athens") return state.films.length>0&&state.fame>=6;
-        if (city.id==="berlin") return state.achievements.festival;
-        if (city.id==="london") return state.fame>=20&&state.contacts>=2;
-        if (city.id==="newyork") return state.followers>=900&&state.films.length>0;
-        return state.achievements.festival&&state.contacts>=4;
+
+      function generateMarket(stageId) {
+        const stage = STAGES.find((s) => s.id === stageId) || STAGES[0];
+        const rp = stage.riskProfile || DEFAULT_RISK;
+        const prices = {}, kinds = {};
+        (stage.goods||[]).forEach((g) => { const roll = priceRoll(g.base, rp); prices[g.id]=roll.price; kinds[g.id]=roll.kind; });
+        return { prices, kinds };
       }
-      function newFilm(index) { return { title:"סרט " + index, writer:false, dop:false, editor:false, shot:false }; }
-      function generatePrices(cityId) {
-        const city = cityById(cityId), prices = {};
-        GOODS.forEach((good) => { const wave=.72 + Math.random()*.66; prices[good.id]=Math.max(25,Math.round(good.base*city.mods[good.id]*wave/5)*5); });
-        return prices;
-      }
+
       function createState() {
-        const next = { week:1, maxWeeks:30, city:"tlv", target:"haifa", view:"map", service:"work", cash:2700, bank:0, debt:8000, fame:0, followers:0, contacts:0, capacity:10, bag:{}, prices:{}, previousPrices:{}, film:newFilm(1), films:[], funding:{short:false,scholarship:false}, achievements:{festival:false}, event:null, ended:false, win:false, log:[] };
-        next.prices=generatePrices(next.city); next.previousPrices={...next.prices};
-        next.log=["שבוע 1: מתחילים עם חוב לימודים, זמן מוגבל וסרט ראשון לבנות."];
+        const next = {
+          age:21, year:1, retirementAge:81,
+          stageId:"student", stageYear:0, nextMilestoneAge:26,
+          cash:2700, bank:0, debt:8000,
+          fame:0, followers:0, contacts:0,
+          capacity:10, bag:{}, prices:{}, previousPrices:{}, priceKinds:{},
+          assets:{ usedCamera:false, editComputer:false, diploma:false },
+          films:[],
+          commitment:null, activeCheckpoint:null,
+          pathTags:[], bankruptcyStrikes:0,
+          view:"hud", flight:null,
+          funding:{}, achievements:{}, event:null, ended:false, win:false, log:[], lastRecap:null
+        };
+        const market = generateMarket(next.stageId);
+        next.prices = market.prices; next.priceKinds = market.kinds; next.previousPrices = {...market.prices};
+        next.log = ["גיל 21: מתחילים עם חוב לימודים ותיק ריק. הזמן לבחור מסלול כניסה."];
         return next;
       }
-      let state=createState();
+
+      let state = createState();
+
       function load() {
         try {
-          const saved=JSON.parse(localStorage.getItem(STORAGE_KEY));
-          if (saved && saved.prices && !saved.ended) {
-            const fresh=createState();
-            state={...fresh,...saved,bag:saved.bag||{},prices:{...fresh.prices,...saved.prices},previousPrices:saved.previousPrices||fresh.prices,film:saved.film||fresh.film,films:Array.isArray(saved.films)?saved.films:[],funding:{...fresh.funding,...(saved.funding||{})},achievements:{...fresh.achievements,...(saved.achievements||{})},event:null};
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (saved && typeof saved.age === "number" && typeof saved.stageId === "string" && !saved.ended) {
+            const fresh = createState();
+            state = {
+              ...fresh, ...saved,
+              bag: saved.bag || {}, assets: {...fresh.assets, ...(saved.assets||{})},
+              prices: {...fresh.prices, ...(saved.prices||{})}, previousPrices: saved.previousPrices || fresh.prices,
+              priceKinds: saved.priceKinds || fresh.priceKinds, films: Array.isArray(saved.films) ? saved.films : [],
+              pathTags: Array.isArray(saved.pathTags) ? saved.pathTags : [], commitment: saved.commitment || null,
+              funding: {...(saved.funding||{})}, achievements: {...(saved.achievements||{})},
+              event: null, activeCheckpoint: saved.activeCheckpoint || null
+            };
           }
         } catch (_) {}
       }
-      function save() { try { localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); } catch (_) {} }
-      function addLog(text) { state.log.unshift(text); state.log=state.log.slice(0,6); }
+      function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {} }
+      function addLog(text) { state.log.unshift(text); state.log = state.log.slice(0,6); }
+
+      function goodName(id) { const g = currentStage().goods.find((x)=>x.id===id); return g ? g.name : id; }
+      function assetName(id) { for (const s of STAGES) { const g=(s.goods||[]).find((x)=>x.id===id); if (g) return g.name; } return id; }
       function bagCount() { return Object.values(state.bag).reduce((sum,qty)=>sum+qty,0); }
-      function has(id,qty=1) { return (state.bag[id]||0)>=qty; }
-      function missing(needs) { return Object.entries(needs).filter(([id,qty])=>!has(id,qty)).map(([id,qty])=>item(id).name+(qty>1?" ×"+qty:"")); }
+      function has(id,qty=1) { return (state.bag[id]||0) >= qty; }
+      function missing(needs) { return Object.entries(needs||{}).filter(([id,qty])=>!has(id,qty)).map(([id,qty])=>goodName(id)+(qty>1?" ×"+qty:"")); }
       function remove(id,qty=1) { state.bag[id]-=qty; if (!state.bag[id]) delete state.bag[id]; }
-      function goalList() {
-        return [
-          { label:"כסף וחוב", value:state.debt<=0&&state.cash>=GOALS.cash ? "הושלם" : money(state.cash)+" / "+money(GOALS.cash)+" · חוב "+money(state.debt), done:state.debt<=0&&state.cash>=GOALS.cash },
-          { label:"קרדיטים", value:state.fame+" / "+GOALS.fame, done:state.fame>=GOALS.fame },
-          { label:"עוקבים", value:state.followers.toLocaleString("he-IL")+" / "+GOALS.followers.toLocaleString("he-IL"), done:state.followers>=GOALS.followers },
-          { label:"קשרים", value:state.contacts+" / "+GOALS.contacts, done:state.contacts>=GOALS.contacts },
-          { label:"פסטיבל", value:state.achievements.festival?"נבחר סרט":"צריך סרט נבחר", done:state.achievements.festival }
-        ];
+      function sellPrice(id) {
+        if (state.prices[id] != null) return state.prices[id];
+        if (state.previousPrices[id] != null) return state.previousPrices[id];
+        const g = currentStage().goods.find((x)=>x.id===id);
+        return g ? g.base : 0;
       }
-      function nextMove() {
-        const film=state.film;
-        const ready=firstReadyFilm();
-        if (ready) {
-          if (ready.quality>=15&&!state.achievements.festival&&!destinationUnlocked(cityById("athens"))) return { target:"work", title:"השלב הבא: לפתוח את הטיסה לאתונה", copy:"צריך סרט גמור ו־6 קרדיטים; עבודה מקצועית תקדם את שניהם." };
-          if (ready.quality>=15&&!state.achievements.festival) return { target:"map", title:"השלב הבא: להגיש לפסטיבל באתונה", copy:"הסרט מוכן. פתח/י מפה, טוס/י לאתונה ואז עבור/י להפצה." };
-          return { target:"release", title:"השלב הבא: להפיץ את הסרט", copy:"הקרנה או סטרימינג יהפכו את הסרט לכסף, קהל וקרדיטים." };
-        }
-        if (!film.writer) return has("script")
-          ? { target:"create", title:"השלב הבא: לבנות את הסיפור", copy:"יש תסריט בתיק — שכור/י תסריטאי/ת במסך יצירה." }
-          : { target:"shop", title:"השלב הבא: להשיג תסריט", copy:"תסריט הוא חומר הגלם הראשון של הסרט." };
-        if (!film.dop) return has("camera")
-          ? { target:"create", title:"השלב הבא: לגייס צלם/ת", copy:"המצלמה כבר בתיק; אפשר לבנות את מחלקת הצילום." }
-          : { target:"shop", title:"השלב הבא: להשיג מצלמה", copy:"היא תפתח גם גיגים טובים יותר וגם את הצילום עצמו." };
-        if (!film.editor) return has("edit")
-          ? { target:"create", title:"השלב הבא: לגייס עורך/ת", copy:"אחרי הצילום יהיה מי שיסגור את הסרט." }
-          : { target:"shop", title:"השלב הבא: להשיג עמדת עריכה", copy:"עמדת עריכה נדרשת כדי לסיים סרט." };
-        if (!film.shot) {
-          const needs=missing({set:1,camera:1,sound:1});
-          return needs.length
-            ? { target:"shop", title:"השלב הבא: להתכונן ליום צילום", copy:"חסר בתיק: "+needs.join(" · ")+"." }
-            : { target:"create", title:"השלב הבא: לצלם את "+film.title, copy:"הצוות והציוד מוכנים. הפעולה תעלה שני שבועות." };
-        }
-        if (film.shot) return { target:"create", title:"השלב הבא: לסיים את "+film.title, copy:"הצילום מוכן; העריכה תהפוך אותו לנכס שאפשר להפיץ." };
-        return { target:"work", title:"השלב הבא: לקחת גיג", copy:"גיג מעלה מזומן, קרדיטים וקשרים לפתיחת האפשרויות הבאות." };
+      function hasChosenEntryPath() {
+        const ids = (currentStage().commitments||[]).map((c)=>c.id);
+        return !!state.commitment || state.pathTags.some((t)=>ids.includes(t));
       }
-      function isWinner() { return goalList().every((goal)=>goal.done); }
+      function currentCommitmentConfig(s) {
+        if (!s.commitment) return null;
+        return (currentStage().commitments||[]).find((c)=>c.id===s.commitment.id) || null;
+      }
+
+      function notify(title,copy,choices) { state.event = {title,copy,choices}; }
+      function announce(title,copy) { notify(title,copy,[{label:"להמשיך",kind:"pass"}]); render(); return false; }
+
+      function isWinner() { return false; }
+
       function finish(win) {
-        state.ended=true; state.win=!!win; state.event=null;
-        const inventory=Object.entries(state.bag).reduce((sum,[id,qty])=>sum+(state.prices[id]||0)*qty,0);
-        state.final={inventory,score:state.cash+state.bank+inventory-state.debt+state.fame*100+state.followers*2+state.contacts*350+(state.achievements.festival?1500:0)};
-        addLog(win?"סגרת את כל יעדי המסלול בזמן שיא.":"הזמן למסלול נגמר.");
+        state.ended = true; state.win = !!win; state.event = null;
+        const bagValue = Object.entries(state.bag).reduce((sum,[id,qty])=>sum+sellPrice(id)*qty,0);
+        state.final = { bagValue, score: state.cash+state.bank+bagValue-state.debt+state.fame*100+state.followers*2+state.contacts*350 };
+        addLog(win ? "הגעת/הגעה לפרישה — מסלול קריירה שלם." : "המסלול נעצר כאן.");
       }
-      function advanceWeek(reason,weeks=1,incident=false) {
-        const elapsed=Math.max(1,Number(weeks)||1);
-        state.week+=elapsed; state.debt=Math.ceil(state.debt*Math.pow(1.008,elapsed));
-        state.previousPrices={...state.prices}; state.prices=generatePrices(state.city);
-        addLog("שבוע "+Math.min(state.week,state.maxWeeks)+": "+reason+(elapsed>1?" ("+elapsed+" שבועות).":""));
-        if (state.week>state.maxWeeks) { finish(false); return true; }
-        if (isWinner()) { finish(true); return true; }
-        if (incident) triggerIncident();
+
+      function requiredMilestonesMet(stage) { return (stage.milestones||[]).filter((m)=>m.required).every((m)=>m.check(state)); }
+
+      function liquidateIrrelevantBag(nextStage) {
+        const nextIds = new Set(((nextStage && nextStage.goods) || []).map((g)=>g.id));
+        Object.keys(state.bag).forEach((id) => {
+          if (nextIds.has(id)) return;
+          const qty = state.bag[id]; const value = sellPrice(id)*qty;
+          delete state.bag[id];
+          if (value > 0) { state.cash += value; addLog("מומש אוטומטית: "+goodName(id)+" × "+qty+" תמורת "+money(value)+" — לא רלוונטי לשלב הבא."); }
+        });
+      }
+
+      function applyStageTransition() {
+        const stage = currentStage();
+        const nextStage = STAGES[stage.order+1];
+        liquidateIrrelevantBag(nextStage);
+        if (!nextStage) { finish(true); return; }
+        state.stageId = nextStage.id; state.stageYear = 0;
+        state.nextMilestoneAge = nextStage.ageRange[1];
+        addLog("עברת לשלב: "+nextStage.name+".");
+        const market = generateMarket(nextStage.id);
+        state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices};
+      }
+
+      function offerFallback(stage) {
+        notify("השלב לא הושלם כמתוכנן", "היעדים המרכזיים של '"+stage.name+"' לא הושלמו. יש דרך להמשיך בכל זאת:",
+          stage.fallbackPaths.map((f)=>({label:f.label, kind:"fallback:"+f.id})));
+      }
+
+      function checkStageProgress() {
+        if (state.ended || state.event || state.commitment) return false;
+        const stage = currentStage();
+        if (requiredMilestonesMet(stage)) { applyStageTransition(); return true; }
+        if (state.age >= stage.ageRange[1] + STAGE_GRACE_YEARS && stage.fallbackPaths && stage.fallbackPaths.length) { offerFallback(stage); return true; }
         return false;
       }
-      function notify(title,copy,choices) { state.event={title,copy,choices}; }
-      function triggerIncident() {
-        const roll=Math.random();
-        if (roll<.22 && has("camera")) notify("המצלמה צריכה תיקון","בדרך לעיר הבאה המצלמה קיבלה מכה. אפשר לשלם, או לקחת סיכון ולהמשיך בלעדיה.",[{label:"לתקן ב־₪100",kind:"repair"},{label:"לא לתקן · לאבד את המצלמה",kind:"lose-camera",quiet:true}]);
-        else if (roll<.43) notify("הבנק מתקשר","החוב צבר ריבית והפקיד/ה מבקש/ת תשלום קטן עכשיו.",[{label:"לשלם ₪350 מהחוב",kind:"debt-pay"},{label:"לדחות · החוב גדל ב־₪250",kind:"debt-delay",quiet:true}]);
-        else if (roll<.60) notify("גיג בדרך","מפיק/ה מחפש/ת עזרה מחר. זו דרך מהירה למזומן, אבל היא עולה שבוע.",[{label:"לקחת גיג · +₪420",kind:"road-gig"},{label:"להמשיך למסלול",kind:"pass",quiet:true}]);
-        else if (roll<.74 && firstReadyFilm()) notify("דדליין לפסטיבל","חלון הגשה באתונה נסגר בעוד שבועיים. צריך להגיע לשם עם סרט מוכן ודמי הגשה.",[{label:"לסמן את אתונה כיעד",kind:"athens"},{label:"לוותר הפעם",kind:"pass",quiet:true}]);
+
+      function checkBankruptcy() {
+        if (state.ended || state.event) return false;
+        if (state.debt > (state.cash+state.bank)*8 && state.cash < 100) {
+          if (state.bankruptcyStrikes >= BANKRUPTCY_STRIKE_LIMIT) { finish(false); return true; }
+          notify("החוב יצא משליטה","הבנקאי דורש הכרעה עכשיו: הלוואת חירום בריבית גבוהה, או לוותר על המסלול כאן.",
+            [{label:"הלוואת חירום · +₪2,000",kind:"emergency-loan"},{label:"לוותר על המסלול",kind:"give-up",quiet:true}]);
+          return true;
+        }
+        return false;
       }
-      function resolveEvent(index) {
-        if (!state.event) return false;
-        const choice=state.event.choices[index]; state.event=null;
-        if (!choice) return false;
-        if (choice.kind==="repair") { if (state.cash<100) return notify("אין מספיק מזומן","אין כרגע כסף לתיקון.",[{label:"להמשיך",kind:"pass"}]),render(),false; state.cash-=100; addLog("תיקנת את המצלמה ב־₪100."); }
-        if (choice.kind==="lose-camera") { remove("camera"); addLog("המשכת בלי המצלמה."); }
-        if (choice.kind==="debt-pay") { const amount=Math.min(350,state.cash,state.debt); state.cash-=amount; state.debt-=amount; addLog("החזרת "+money(amount)+" מהחוב."); }
-        if (choice.kind==="debt-delay") { state.debt+=250; addLog("דחית את הבנק והחוב גדל."); }
-        if (choice.kind==="road-gig") { state.cash+=420; state.contacts+=1; advanceWeek("לקחת גיג ספונטני בדרך."); }
-        if (choice.kind==="athens") { state.target="athens"; addLog("סימנת את אתונה כיעד להגשה."); }
+
+      function triggerIncident() {
+        if (state.event) return;
+        const stage = currentStage();
+        const pool = (stage.incidents||[]).concat(UNIVERSAL_INCIDENTS).filter((inc)=>!inc.when || inc.when(state));
+        if (!pool.length) return;
+        const roll = Math.random();
+        let acc = 0;
+        for (const inc of pool) { acc += inc.chance; if (roll < acc) { notify(inc.title, inc.copy, inc.choices); return; } }
+      }
+
+      function advanceYear(reason, years) {
+        const elapsed = Math.max(0.5, Number(years)||1);
+        state.age += elapsed; state.stageYear += elapsed; state.year += elapsed;
+        const before = state.debt;
+        state.debt = Math.ceil(state.debt * Math.pow(DEBT_ANNUAL_RATE, elapsed));
+        state.previousPrices = {...state.prices};
+        const market = generateMarket(state.stageId);
+        state.prices = market.prices; state.priceKinds = market.kinds;
+        addLog("גיל "+Math.round(state.age)+": "+reason+(elapsed!==1?" ("+elapsed+" שנים).":""));
+        state.lastRecap = { years:elapsed, interestPaid: state.debt-before, age: Math.round(state.age) };
+        if (checkBankruptcy()) return true;
+        if (checkStageProgress()) return true;
+        if (state.stageId === "festivals") { maybeOfferFlight(); if (state.event) return false; }
+        triggerIncident();
+        return false;
+      }
+
+      function pickUninvitedCity() {
+        const pool = CITIES.filter((c)=>FLIGHT_CITY_IDS.includes(c.id) && !state.achievements["visited-"+c.id]);
+        if (!pool.length) return null;
+        return pool[Math.floor(Math.random()*pool.length)];
+      }
+
+      function maybeOfferFlight() {
+        if (state.event) return;
+        if (Math.random() > 0.3) return;
+        const city = pickUninvitedCity();
+        if (!city) return;
+        notify("הוזמנת לפסטיבל "+city.name, "עלות "+money(city.fare)+" ושנה מהחיים. לטוס או להישאר להפצה מקומית?",
+          [{label:"לטוס", kind:"accept-flight", cityId:city.id}, {label:"להישאר ולהפיץ מקומית", kind:"decline-flight", quiet:true}]);
+      }
+
+      function acceptFlight(cityId) {
+        if (state.ended) return false;
+        const city = CITIES.find((c)=>c.id===cityId);
+        if (!city) return false;
+        if (state.cash < city.fare) { addLog("לא היה מספיק כסף לטיסה ל"+city.name+" — נשארת להפיץ מקומית."); advanceYear("הפצה מקומית במקום טיסה.", 1); save(); render(); return false; }
+        state.cash -= city.fare;
+        state.achievements["visited-"+city.id] = true;
+        state.fame += 3; state.followers += 400; state.contacts += 1;
+        addLog("טסת ל"+city.name+" והשתתפת בפסטיבל.");
+        advanceYear("פסטיבל ב"+city.name+".", 1);
         save(); render(); return true;
       }
-      function travel(id) {
-        if (state.ended||state.event||id===state.city) return false;
-        const destination=cityById(id);
-        if (!destinationUnlocked(destination)) return announce("הטיסה עדיין נעולה", destinationRule(destination)+". זאת המטרה שתפתח את הטיסה הזאת.");
-        if (state.cash<destination.fare) return announce("אין מספיק כסף לטיסה","צריך "+money(destination.fare)+" כדי להגיע ל"+destination.name+".");
-        state.cash-=destination.fare; state.city=id; state.target=id; state.view="city";
-        advanceWeek("טסת ל"+destination.name+".",1,true); save(); render(); return true;
+
+      function declineFlight() {
+        if (state.ended) return false;
+        addLog("בחרת להישאר ולהפיץ מקומית.");
+        advanceYear("הפצה מקומית במקום טיסה.", 1);
+        save(); render(); return true;
       }
-      function announce(title,copy) { notify(title,copy,[{label:"להמשיך",kind:"pass"}]); render(); return false; }
-      function openView(view) { if (state.ended||state.event) return false; state.view=view; save(); render(); return true; }
-      function openService(service) { if (state.ended||state.event) return false; state.service=service; state.view="service"; save(); render(); return true; }
+
+      function progressCommitment() {
+        const config = currentCommitmentConfig(state);
+        if (!config || !state.commitment) return;
+        const next = config.checkpoints.find((c)=>!state.commitment.resolvedCheckpoints.includes(c.id));
+        const targetYear = next ? next.atYear : config.years;
+        const years = Math.max(0, targetYear - state.commitment.elapsedYears);
+        state.commitment.elapsedYears = targetYear;
+        if (years > 0) { const ended = advanceYear(config.name+" ממשיכה.", years); if (ended || state.ended || state.event) return; }
+        if (next) { state.activeCheckpoint = { commitmentId:config.id, checkpointId:next.id }; notify(next.title, next.copy, next.choices); return; }
+        completeCommitment(config);
+      }
+
+      function completeCommitment(config) {
+        if (config.grantsOnComplete && config.grantsOnComplete.fame) state.fame += config.grantsOnComplete.fame;
+        if (config.id === "filmSchool") state.assets.diploma = true;
+        if (config.id === "indieFilm") state.films.push({ title:"הסרט העצמאי הראשון", completedAge: Math.round(state.age) });
+        if (config.id === "legacyFilm") state.films.push({ title:"הסרט האישי האחרון", completedAge: Math.round(state.age) });
+        state.pathTags.push(config.id);
+        addLog("סיימת: "+config.name+".");
+        state.commitment = null;
+        checkStageProgress();
+      }
+
+      function startCommitment(id) {
+        if (state.ended || state.event || state.commitment) return false;
+        const config = (currentStage().commitments||[]).find((c)=>c.id===id);
+        if (!config) return false;
+        if (config.entryDebt) { state.debt += config.entryDebt; addLog("נכנסת ל"+config.name+" — החוב עלה ב-"+money(config.entryDebt)+"."); }
+        if (config.immediateEffect) config.immediateEffect(state);
+        if (!config.years) {
+          state.pathTags.push(config.id);
+          addLog("בחרת: "+config.name+".");
+          checkStageProgress();
+          save(); render(); return true;
+        }
+        state.commitment = { id:config.id, elapsedYears:0, totalYears:config.years, resolvedCheckpoints:[] };
+        addLog("התחלת: "+config.name+".");
+        progressCommitment();
+        save(); render(); return true;
+      }
+
+      function openView(view) { if (state.ended||state.event) return false; state.view = view; save(); render(); return true; }
+
       function buy(id) {
         if (state.ended||state.event) return false;
-        const price=state.prices[id];
-        if (bagCount()>=state.capacity) return announce("התיק מלא","מכור ציוד או צא לעבוד כדי להגדיל את האפשרויות.");
-        if (state.cash<price) return announce("אין מספיק מזומן","חסרים "+money(price-state.cash)+" לקנייה הזאת.");
-        state.cash-=price; state.bag[id]=(state.bag[id]||0)+1; addLog("קנית "+item(id).name+" ב־"+money(price)+"."); save(); render(); return true;
-      }
-      function sell(id) {
-        if (state.ended||state.event||!has(id)) return false;
-        const price=state.prices[id]; remove(id); state.cash+=price; addLog("מכרת "+item(id).name+" ב־"+money(price)+"."); save(); render(); return true;
-      }
-      function doGig(id) {
-        if (state.ended||state.event) return false;
-        const gig=GIGS.find((entry)=>entry.id===id); if (!gig) return false;
-        const lack=missing(gig.needs); if (lack.length) return announce("חסר ציוד לגיג","צריך: "+lack.join(" · ")+".");
-        state.cash+=gig.cash; state.fame+=gig.fame; state.contacts+=gig.contacts; state.followers+=gig.followers;
-        advanceWeek("עבדת כ"+gig.title+".",gig.weeks); save(); render(); return true;
-      }
-      function hire(role) {
-        if (state.ended||state.event) return false;
-        const film=state.film;
-        const roles={ writer:{name:"תסריטאי/ת",cost:240,done:"writer",need:{script:1},copy:"כתבת את הסיפור של הסרט."}, dop:{name:"צלם/ת",cost:310,done:"dop",need:{camera:1},copy:"גייסת צלם/ת לסרט."}, editor:{name:"עורך/ת",cost:270,done:"editor",need:{edit:1},copy:"גייסת עורך/ת לסרט."} };
-        const roleData=roles[role]; if (!roleData||film[roleData.done]) return false;
-        const lack=missing(roleData.need); if (lack.length) return announce("חסר ציוד","כדי לשכור "+roleData.name+" צריך: "+lack.join(" · ")+".");
-        if (state.cash<roleData.cost) return announce("חסר תקציב","צריך "+money(roleData.cost)+" כדי לשכור "+roleData.name+".");
-        state.cash-=roleData.cost; film[roleData.done]=true; if (role==="writer") remove("script");
-        advanceWeek(roleData.copy); save(); render(); return true;
-      }
-      function shootFilm() {
-        if (state.ended||state.event||state.film.shot) return false;
-        const film=state.film, needs={set:1,camera:1,sound:1};
-        const lack=missing(needs); if (!film.writer||!film.dop||lack.length) return announce("עוד לא מוכנים לצילום","צריך סיפור, צלם/ת, וציוד: "+[...(!film.writer?["תסריטאי/ת"]:[]),...(!film.dop?["צלם/ת"]:[]),...lack].join(" · ")+".");
-        if (state.cash<220) return announce("חסר תקציב צילום","צריך "+money(220)+" לנסיעות, ביטוח ואוכל לצוות.");
-        state.cash-=220; remove("set"); film.shot=true;
-        advanceWeek("צילמת את "+film.title+".",2); save(); render(); return true;
-      }
-      function finishFilm() {
-        if (state.ended||state.event) return false;
-        const film=state.film;
-        if (!film.shot||!film.editor) return announce("עוד לא הגיע הזמן לסיים","צריך צילום גמור ועורך/ת לפני פוסט־פרודקשן.");
-        const quality=4+(film.writer?4:0)+(film.dop?4:0)+(film.editor?4:0)+(has("camera")?1:0)+(has("sound")?1:0)+(has("lights")?2:0)+(has("edit")?2:0);
-        const completed={ id:"film-"+(state.films.length+1), title:film.title, quality, status:"ready", festivalTried:false };
-        state.films.push(completed); state.fame+=4; state.followers+=70; state.film=newFilm(state.films.length+1);
-        advanceWeek("סיימת את "+completed.title+" באיכות "+quality+"."); save(); render(); return true;
-      }
-      function firstReadyFilm() { return state.films.find((film)=>film.status==="ready"); }
-      function release(type) {
-        if (state.ended||state.event) return false;
-        const film=firstReadyFilm(); if (!film) return announce("אין סרט להפיץ","צריך קודם לסיים סרט במסך יצירה.");
-        if (type==="stream" && state.contacts<2&&state.followers<400) return announce("עוד אין קהל להפצה","לסטרימינג צריך לפחות 2 קשרים או 400 עוקבים.");
-        if (type==="festival") {
-          if (state.city!=="athens") return announce("הפסטיבל נמצא באתונה","סע/י לאתונה עם הסרט המוכן כדי להגיש.");
-          if (film.quality<15) return announce("הסרט עוד לא מוכן לפסטיבל","צריך איכות 15 לפחות. שיפור הצוות והציוד מעלה איכות.");
-          if (film.festivalTried) return announce("כבר הוגש לפסטיבל הזה","אפשר לבחור בהפצה מקומית או סטרימינג.");
-          if (state.cash<520) return announce("חסרים דמי הגשה","צריך "+money(520)+" להגשת פסטיבל.");
-          state.cash-=520; film.festivalTried=true;
-          if (Math.random()<.35+film.quality/40) { film.status="festival"; state.achievements.festival=true; state.fame+=14; state.contacts+=2; state.followers+=650; advanceWeek("הסרט התקבל לפסטיבל באתונה."); }
-          else { state.fame+=3; state.followers+=110; advanceWeek("הסרט לא נבחר, אבל קיבל צפיות מההגשה."); }
+        const good = currentStage().goods.find((g)=>g.id===id);
+        if (!good) return false;
+        const price = state.prices[id];
+        if (price == null) return announce("לא זמין השנה","הפריט הזה לא נמכר השנה. נסה שוב מאוחר יותר.");
+        if (good.persistsAsAsset) {
+          if (state.assets[id]) return announce("כבר יש לך את זה","זה נכס קבוע — אין צורך בעוד אחד.");
+          if (state.cash < price) return announce("אין מספיק מזומן","חסרים "+money(price-state.cash)+" לקנייה הזאת.");
+          state.cash -= price; state.assets[id] = true;
+          addLog("קנית "+good.name+" ב-"+money(price)+" — נכס קבוע.");
+          save(); render(); return true;
         }
-        if (type==="local") { film.status="local"; state.cash+=480+film.quality*45; state.fame+=5; state.followers+=130; advanceWeek("הקרנת את "+film.title+" בעיר."); }
-        if (type==="stream") { film.status="stream"; state.cash+=800+film.quality*65; state.fame+=4; state.followers+=420+film.quality*18; advanceWeek("מכרת את "+film.title+" לסטרימינג."); }
+        if (bagCount() >= state.capacity) return announce("התיק מלא","מכור סחורה כדי לפנות מקום.");
+        if (state.cash < price) return announce("אין מספיק מזומן","חסרים "+money(price-state.cash)+" לקנייה הזאת.");
+        state.cash -= price; state.bag[id] = (state.bag[id]||0)+1;
+        addLog("קנית "+good.name+" ב-"+money(price)+".");
         save(); render(); return true;
       }
+
+      function sell(id) {
+        if (state.ended||state.event||!has(id)) return false;
+        const price = sellPrice(id);
+        remove(id); state.cash += price;
+        addLog("מכרת "+goodName(id)+" ב-"+money(price)+"."); save(); render(); return true;
+      }
+
+      function doGig(id) {
+        if (state.ended||state.event||state.commitment) return false;
+        const gig = (currentStage().gigs||[]).find((g)=>g.id===id);
+        if (!gig) return false;
+        const lack = missing(gig.needs);
+        if (lack.length) return announce("חסר ציוד לעבודה הזאת","צריך: "+lack.join(" · ")+".");
+        state.cash += gig.cash; state.fame += (gig.fame||0); state.contacts += (gig.contacts||0); state.followers += (gig.followers||0);
+        advanceYear("עבדת כ"+gig.title+".", 1);
+        save(); render(); return true;
+      }
+
+      function payAmount() { return Math.max(500, Math.round(state.debt*0.1)); }
+
       function bank(action) {
         if (state.ended||state.event) return false;
-        const amount=500;
-        if (action==="pay") { const paid=Math.min(amount,state.cash,state.debt); if (!paid) return announce("אין מה להחזיר","צריך מזומן כדי להקטין את החוב."); state.cash-=paid; state.debt-=paid; addLog("החזרת "+money(paid)+" מהחוב."); }
+        const amount = 500;
+        if (action==="pay") { const paid=Math.min(payAmount(),state.cash,state.debt); if (!paid) return announce("אין מה להחזיר","צריך מזומן כדי להקטין את החוב."); state.cash-=paid; state.debt-=paid; addLog("החזרת "+money(paid)+" מהחוב."); }
         if (action==="deposit") { if (state.cash<amount) return announce("אין מספיק מזומן","צריך "+money(amount)+" כדי להפקיד."); state.cash-=amount; state.bank+=amount; addLog("הפקדת "+money(amount)+" בבנק."); }
         if (action==="withdraw") { const drawn=Math.min(amount,state.bank); if (!drawn) return announce("אין פיקדון למשוך","עדיין לא הופקד כסף בבנק."); state.bank-=drawn; state.cash+=drawn; addLog("משכת "+money(drawn)+" מהבנק."); }
         save(); render(); return true;
       }
-      function requestFunding(kind) {
-        if (state.ended||state.event) return false;
-        if (kind==="short") {
-          if (state.funding.short) return announce("כבר הוגשה בקשה","אפשר להתקדם עם הסרט או לבחור במסלול מימון אחר.");
-          if (!state.film.writer||state.fame<2) return announce("הבקשה עדיין לא בשלה","צריך תסריט כתוב ולפחות 2 קרדיטים מקצועיים.");
-          state.funding.short=true; advanceWeek("הגשת בקשה לקרן סרט קצר.",2);
-          if (Math.random()<.58) { state.cash+=3000; state.contacts+=1; notify("הקרן אישרה תקציב","התסריט והקרדיטים עשו את שלהם.",[{label:"לקבל ₪3,000",kind:"pass"}]); }
-          else notify("הקרן לא בחרה בפרויקט","הסרט לא מת, אבל צריך לממן אותו דרך עבודה או מסלול אחר.",[{label:"להמשיך",kind:"pass"}]);
+
+      function takeCheapGear() {
+        const stage = currentStage();
+        const affordable = stage.goods.filter((g)=> state.prices[g.id]!=null && (!g.persistsAsAsset || !state.assets[g.id]));
+        if (!affordable.length) { addLog("לא נמצא ציוד מתאים להזדמנות."); return; }
+        const good = affordable[0];
+        const price = round5(state.prices[good.id]*.5);
+        if (state.cash < price) { addLog("לא היה מספיק מזומן לתפוס את ההזדמנות."); return; }
+        state.cash -= price;
+        if (good.persistsAsAsset) state.assets[good.id]=true; else state.bag[good.id]=(state.bag[good.id]||0)+1;
+        addLog("תפסת הזדמנות: "+good.name+" ב-"+money(price)+".");
+      }
+
+      function resolveEvent(index) {
+        if (!state.event) return false;
+        const choice = state.event.choices[index];
+        const checkpointRef = state.activeCheckpoint;
+        state.event = null; state.activeCheckpoint = null;
+        if (!choice) return false;
+
+        if (checkpointRef) {
+          state.pathTags.push(choice.kind);
+          if (choice.effect) choice.effect(state);
+          state.commitment.resolvedCheckpoints.push(checkpointRef.checkpointId);
+          addLog("החלטה: "+choice.label+".");
+          progressCommitment();
+          save(); render(); return true;
         }
-        if (kind==="scholarship") {
-          if (state.funding.scholarship) return announce("כבר ביקשת מלגה","הבקשה הבאה תיפתח במסלול חדש.");
-          if (state.fame<1) return announce("צריך קרדיט ראשון","עבוד/י בגיג קטן לפני בקשת המלגה.");
-          state.funding.scholarship=true; advanceWeek("הגשת בקשה למלגת לימודים.");
-          const relief=Math.min(1200,state.debt); state.debt-=relief; notify("המלגה אושרה","החוב קטן בלי לשרוף מזומן.",[{label:"החוב ירד ב־"+money(relief),kind:"pass"}]);
+        if (choice.kind && choice.kind.indexOf("fallback:") === 0) {
+          const fb = currentStage().fallbackPaths.find((f)=>choice.kind==="fallback:"+f.id);
+          if (fb) { fb.effect(state); addLog("מסלול חלופי: "+fb.label+"."); }
+          applyStageTransition();
+          save(); render(); return true;
         }
+
+        if (choice.kind === "repair") {
+          if (state.cash < 300) { notify("אין מספיק מזומן","אין כרגע כסף לתיקון.",[{label:"להמשיך",kind:"pass"}]); render(); return false; }
+          state.cash -= 300; addLog("תיקנת את המצלמה ב-₪300.");
+        } else if (choice.kind === "risk-camera") { addLog("המשכת עם הסיכון על המצלמה."); }
+        else if (choice.kind === "scramble") { state.cash -= 300; addLog("מצאת תחליף מהיר, בעלות."); }
+        else if (choice.kind === "cheap-gear-take") { takeCheapGear(); }
+        else if (choice.kind === "debt-pay") { const amt=Math.min(500,state.cash,state.debt); state.cash-=amt; state.debt-=amt; addLog("החזרת "+money(amt)+" מהחוב."); }
+        else if (choice.kind === "debt-delay") { state.debt += 400; addLog("דחית את הבנק והחוב גדל."); }
+        else if (choice.kind === "road-gig") { state.cash += 600; state.contacts += 1; advanceYear("עבודה ספונטנית בדרך.", 1); }
+        else if (choice.kind === "emergency-loan") { state.cash += 2000; state.debt = Math.ceil((state.debt+2000)*1.15); state.bankruptcyStrikes += 1; addLog("לקחת הלוואת חירום — החוב גדל משמעותית."); }
+        else if (choice.kind === "give-up") { finish(false); }
+        else if (choice.kind === "accept-flight") { return acceptFlight(choice.cityId); }
+        else if (choice.kind === "decline-flight") { return declineFlight(); }
+
+        if (state.commitment && !state.event && !state.ended) progressCommitment();
         save(); render(); return true;
       }
-      function serviceRows() {
-        const city=cityById(state.city);
-        if (state.service==="work") return GIGS.map((gig)=>row(gig.title,gig.copy,"+"+money(gig.cash)+" · +"+gig.fame+" קרדיטים",`gig:${gig.id}`,"לקחת גיג")).join("");
-        if (state.service==="shop") return GOODS.map((good)=>{ const price=state.prices[good.id],owned=state.bag[good.id]||0; return `<article class="action-row"><div><h3>${good.name}</h3><p>${good.note} · בתיק: ${owned}</p></div><div class="action-meta"><b>${money(price)}</b><span><button class="row-action" data-action="buy" data-id="${good.id}">קנה</button> <button class="row-action quiet" data-action="sell" data-id="${good.id}" ${owned?"":"disabled"}>מכור</button></span></div></article>`; }).join("");
-        if (state.service==="create") { const film=state.film; const status=`<div class="film-status"><div class="film-slot ${film.writer?"ready":""}">סיפור<b>${film.writer?"מוכן":"חסר תסריטאי/ת"}</b></div><div class="film-slot ${film.dop?"ready":""}">צילום<b>${film.dop?"מוכן":"חסר צלם/ת"}</b></div><div class="film-slot ${film.shot?"ready":""}">יום סט<b>${film.shot?"צולם":"עוד לא צולם"}</b></div><div class="film-slot ${film.editor?"ready":""}">עריכה<b>${film.editor?"מוכן":"חסר עורך/ת"}</b></div></div>`; return status+row("לשכור תסריטאי/ת","תסריט אחד · שבוע אחד",money(240),"hire:writer",film.writer?"הושלם":"לשכור")+row("לשכור צלם/ת","דורש מצלמה · שבוע אחד",money(310),"hire:dop",film.dop?"הושלם":"לשכור")+row("לשכור עורך/ת","דורש עמדת עריכה · שבוע אחד",money(270),"hire:editor",film.editor?"הושלם":"לשכור")+row("לצלם את "+film.title,"דורש סיפור, צלם/ת, מצלמה, סאונד ויום סט · 2 שבועות",money(220),"shoot",film.shot?"צולם":"לצלם")+row("לסיים סרט","דורש צילום ועורך/ת · שבוע אחד","איכות קובעת הפצה","finish-film","לסיים"); }
-        if (state.service==="release") { const film=firstReadyFilm(); const stateCopy=film?film.title+" · איכות "+film.quality:"אין סרט מוכן"; return row("הקרנה מקומית",stateCopy,"מזומן + קהל","release:local","להקרין")+row("מכירה לסטרימינג",stateCopy,"דורש 2 קשרים או 400 עוקבים","release:stream","למכור")+row("פסטיבל באתונה",stateCopy,"דורש איכות 15 · דמי הגשה ₪520","release:festival",state.city==="athens"?"להגיש":"לאתונה"); }
-        if (state.service==="bank") return row("להחזיר חוב","החוב גדל בכל שבוע שעובר",money(500),"bank:pay","להחזיר")+row("להפקיד","שומר כסף בצד",money(500),"bank:deposit","להפקיד")+row("למשוך פיקדון","כרגע בבנק: "+money(state.bank),money(500),"bank:withdraw","למשוך");
-        return row("קרן סרט קצר","דורש תסריט כתוב ו־2 קרדיטים · 2 שבועות","סיכוי ל־₪3,000","fund:short",state.funding.short?"הוגש":"להגיש")+row("מלגת לימודים","דורש קרדיט מקצועי · שבוע אחד","הפחתת חוב עד ₪1,200","fund:scholarship",state.funding.scholarship?"הוגש":"לבקש");
-      }
+
       function row(title,copy,meta,action,label) { return `<article class="action-row"><div><h3>${title}</h3><p>${copy}</p></div><div class="action-meta"><b>${meta}</b><button class="row-action" data-action="${action}">${label}</button></div></article>`; }
+
+      function trendBadge(id) {
+        const kind = state.priceKinds && state.priceKinds[id];
+        if (kind==="crash") return ' <small class="trend-down">↓ מבצע</small>';
+        if (kind==="spike") return ' <small class="trend-up">↑ ביקוש</small>';
+        return "";
+      }
+
+      function marketRows() {
+        const stage = currentStage();
+        let html = "";
+        if (!hasChosenEntryPath() && stage.commitments && stage.commitments.length) {
+          html += stage.commitments.map((c)=> row(c.name, c.copy+(c.entryDebt?" · חוב +"+money(c.entryDebt):" · בלי חוב"), c.years?c.years+" שנים":"מיידי", "commit:"+c.id, "לבחור")).join("");
+        }
+        if (state.commitment) {
+          const config = currentCommitmentConfig(state);
+          html += `<article class="action-row"><div><h3>${config.name}</h3><p>בעיצומה · שנה ${Math.round(state.commitment.elapsedYears)} מתוך ${config.years}</p></div><div class="action-meta"><b>בתהליך</b></div></article>`;
+        } else {
+          html += (stage.gigs||[]).map((gig) => {
+            const lack = missing(gig.needs);
+            const meta = "+"+money(gig.cash)+(gig.fame?" · +"+gig.fame+" קרדיטים":"");
+            return row(gig.title, gig.copy+(lack.length?" · חסר: "+lack.join(" · "):""), meta, "gig:"+gig.id, lack.length?"חסר ציוד":"לעבוד");
+          }).join("");
+        }
+        html += (stage.goods||[]).map((good) => {
+          const price = state.prices[good.id];
+          const unavailable = price == null;
+          const already = good.persistsAsAsset && state.assets[good.id];
+          const owned = good.persistsAsAsset ? (already?1:0) : (state.bag[good.id]||0);
+          return `<article class="action-row"><div><h3>${good.name}${trendBadge(good.id)}</h3><p>${good.persistsAsAsset ? "נכס קבוע" : ("סחורה · בתיק: "+owned)}</p></div><div class="action-meta"><b>${unavailable?"לא זמין":(already?"נרכש":money(price))}</b><span><button class="row-action" data-action="buy" data-id="${good.id}" ${unavailable||already?"disabled":""}>קנה</button> ${good.persistsAsAsset ? "" : `<button class="row-action quiet" data-action="sell" data-id="${good.id}" ${owned?"":"disabled"}>מכור</button>`}</span></div></article>`;
+        }).join("");
+        return html;
+      }
+
+      function bankRows() {
+        return row("להחזיר חוב","החוב גדל בכל שנה שעוברת · 10% מהחוב הנוכחי",money(payAmount()),"bank:pay","להחזיר")
+          + row("להפקיד","שומר כסף בצד",money(500),"bank:deposit","להפקיד")
+          + row("למשוך פיקדון","כרגע בבנק: "+money(state.bank),money(500),"bank:withdraw","למשוך");
+      }
+
+      function actionAttr(action) {
+        if (!action) return "";
+        if (action.type==="gig") return "gig:"+action.id;
+        if (action.type==="commitment") return "commit:"+action.id;
+        return "";
+      }
+
+      function stageTrackMarkup() {
+        const stage = currentStage();
+        return `<nav class="stage-track" aria-label="מסלול קריירה">${STAGES.map((s)=>{
+          const cls = s.order<stage.order ? "done" : s.order===stage.order ? "current" : "locked";
+          return `<span class="stage-node ${cls}">${s.order<stage.order?"✓ ":""}${s.name}</span>`;
+        }).join("")}</nav>`;
+      }
+
+      function goalPanelMarkup(stage) {
+        const items = (stage.milestones||[]).map((m)=>`<span class="milestone ${m.check(state)?"done":""} ${m.required?"required":""}">${m.check(state)?"✓ ":""}${m.label}</span>`).join("");
+        return `<div class="next-move"><div><small>המטרה הנוכחית · ${stage.name} (${stage.ageRange[0]}–${stage.ageRange[1]})</small><b>${stage.headline}</b><div class="milestone-list">${items||'<span class="milestone">אין עדיין יעדים מוגדרים</span>'}</div></div></div>`;
+      }
+
+      function recommendPanelMarkup(stage) {
+        const rec = stage.recommend(state);
+        const alts = (rec.alternatives||[]).slice(0,2).map((a)=>`<button class="row-action quiet" data-action="${actionAttr(a)}">${a.label}</button>`).join(" ");
+        return `<div class="next-move"><div><small>המהלך המוצע</small><b>${rec.title}</b><span>${rec.copy}</span></div><div class="recommend-actions">${rec.action?`<button class="primary" data-action="${actionAttr(rec.action)}">${rec.actionLabel||"לבצע"}</button>`:""}${alts}</div></div>`;
+      }
+
+      function recapMarkup() {
+        if (!state.lastRecap) return "";
+        const r = state.lastRecap;
+        return `<div class="final-grid recap"><div><small>גיל</small><b>${r.age}</b></div><div><small>ריבית ששולמה</small><b>${money(r.interestPaid)}</b></div><div><small>משך</small><b>${r.years} שנים</b></div></div>`;
+      }
+
+      function hudView() {
+        const stage = currentStage();
+        const hasContent = (stage.goods.length||stage.gigs.length||stage.commitments.length);
+        return `<section class="panel">
+          ${goalPanelMarkup(stage)}
+          ${recommendPanelMarkup(stage)}
+          ${recapMarkup()}
+          <div class="service-list">${hasContent ? marketRows() : '<p class="empty">השלב הזה עדיין בבנייה — חזרו בקרוב.</p>'}</div>
+          <p class="eyebrow" style="margin-top:16px">בנק</p>
+          <div class="service-list">${bankRows()}</div>
+          <div class="footer-actions"><button data-action="finish">לוותר על המסלול</button><button data-action="bag">תיק הפקה</button></div>
+        </section>`;
+      }
+
+      function bagView() {
+        const bagRows = Object.keys(state.bag).filter((id)=>state.bag[id]).map((id)=>`<div class="bag-item"><span>${goodName(id)}</span><b>×${state.bag[id]}</b></div>`).join("");
+        const assetRows = Object.keys(state.assets).filter((id)=>state.assets[id] && id!=="diploma").map((id)=>`<div class="bag-item"><span>${assetName(id)}</span><b>נכס</b></div>`).join("") + (state.assets.diploma ? `<div class="bag-item"><span>תעודת לימודי קולנוע</span><b>נכס</b></div>` : "");
+        return `<section class="panel bag"><header class="service-top"><div><p class="eyebrow">ציוד ונכסים</p><h1>תיק הפקה</h1></div><button class="back" data-action="hud">חזרה ←</button></header>
+          <p class="eyebrow">בתיק (סחורה זמנית)</p>
+          <div class="bag-grid">${bagRows||'<p class="empty">התיק ריק.</p>'}</div>
+          <p class="eyebrow" style="margin-top:14px">נכסים קבועים</p>
+          <div class="bag-grid">${assetRows||'<p class="empty">עוד אין נכסים קבועים.</p>'}</div>
+          <div class="footer-actions"><button data-action="finish">לוותר על המסלול</button><button data-action="hud">למסך הראשי</button></div></section>`;
+      }
+
       function renderModal() {
         if (!modal) return;
-        if (state.ended) { const final=state.final||{score:0,inventory:0}; modal.classList.remove("hidden"); modal.innerHTML=`<section class="event"><span>${state.win?"ניצחון מוקדם":"סוף 30 השבועות"}</span><h2>${state.win?"הפכת לבמאי/ת עם מסלול יציב.":"המסלול נעצר כאן."}</h2><p>${state.win?"סגרת כסף, חוב, שם מקצועי, קהל ופסטיבל — לפני שנגמר הזמן.":"אפשר להתחיל מחדש עם הידע שצברת ולסגור את היעדים מהר יותר."}</p><div class="final-grid"><div><small>ציון</small><b>${money(final.score)}</b></div><div><small>שבוע</small><b>${Math.min(state.week,state.maxWeeks)} / ${state.maxWeeks}</b></div><div><small>סרטים</small><b>${state.films.length}</b></div></div><button data-action="new">מסלול חדש ←</button></section>`; return; }
+        if (state.ended) {
+          const final = state.final || {score:0};
+          modal.classList.remove("hidden");
+          modal.innerHTML = `<section class="event"><span>${state.win?"סוף דרך — פרישה":"המסלול נעצר"}</span><h2>${state.win?"קובי הגיע/ה לפרישה אחרי קריירה שלמה.":"המסלול נעצר כאן."}</h2><p>${state.win?"עברת את כל שלבי הקריירה — מסטודנט/ית ועד פרישה.":"אפשר להתחיל מחדש עם הידע שצברת."}</p><div class="final-grid"><div><small>ציון</small><b>${money(final.score)}</b></div><div><small>גיל</small><b>${Math.round(state.age)}</b></div><div><small>שלב</small><b>${currentStage().name}</b></div></div><button data-action="new">מסלול חדש ←</button></section>`;
+          return;
+        }
         if (!state.event) { modal.classList.add("hidden"); modal.innerHTML=""; return; }
-        modal.classList.remove("hidden"); modal.innerHTML=`<section class="event"><span>תקלה בדרך</span><h2>${state.event.title}</h2><p>${state.event.copy}</p><div class="event-options">${state.event.choices.map((choice,index)=>`<button class="${choice.quiet?"quiet":""}" data-action="event" data-id="${index}">${choice.label}</button>`).join("")}</div></section>`;
+        modal.classList.remove("hidden");
+        modal.innerHTML = `<section class="event"><span>אירוע</span><h2>${state.event.title}</h2><p>${state.event.copy}</p><div class="event-options">${state.event.choices.map((c,i)=>`<button class="${c.quiet?"quiet":""}" data-action="event" data-id="${i}">${c.label}</button>`).join("")}</div></section>`;
       }
+
       function render() {
         if (!app) return;
-        const city=cityById(state.city), target=cityById(state.target), goals=goalList();
-        const mapActive=state.view==="map", cityActive=state.view==="city"||state.view==="service";
-        const head=`<header class="topbar"><div class="brand">KOBI / FIRST CUT</div><div class="turn"><div>שבוע<b>${Math.min(state.week,state.maxWeeks)} / ${state.maxWeeks}</b></div><div>מזומן<b>${money(state.cash)}</b></div><div class="debt">חוב<b>${money(state.debt)}</b></div><div class="fame">קרדיטים<b>${state.fame}</b></div><div class="followers">עוקבים<b>${state.followers.toLocaleString("he-IL")}</b></div><div class="contacts">קשרים<b>${state.contacts}</b></div><div>תיק<b>${bagCount()} / ${state.capacity}</b></div></div></header><nav class="mode-switch" aria-label="ניווט ראשי"><button class="${mapActive?"active":""}" data-action="map">מפה וטיסות</button><button class="${cityActive?"active":""}" data-action="city">העיר שלי · ${city.name}</button><button class="${state.view==="bag"?"active":""}" data-action="bag">תיק הפקה</button></nav><section class="goals">${goals.map((goal)=>`<div class="goal ${goal.done?"done":""}"><small>${goal.done?"✓ ":""}${goal.label}</small><b>${goal.value}</b></div>`).join("")}</section>`;
-        let body="";
-        if (state.view==="map") { const targetOpen=destinationUnlocked(target); body=`<section class="panel map"><header class="screen-head"><div><p class="eyebrow">המסלול שלך · ${city.name}</p><h1>לאן נוסעים?</h1></div><p class="screen-copy">לחץ/י על יעד כדי לקרוא את תנאי הטיסה. טיסה מחליפה עיר ועולה שבוע אחד; השירותים מחכים בעיר החדשה.</p></header><div class="map-board"><span class="region il">ישראל</span><span class="region eu">אירופה</span><span class="region us">ארה״ב</span>${CITIES.map((place)=>`<button class="place ${place.id===state.city?"current":""} ${place.id===state.target?"target":""} ${!destinationUnlocked(place)?"locked":""} ${place.id}" data-action="target" data-id="${place.id}">${place.name}${destinationUnlocked(place)?"":" <small>🔒</small>"}</button>`).join("")}</div><div class="destination"><div><h3>${target.name}</h3><p>${target.copy}</p><small>${targetOpen?"טיסה: "+money(target.fare):"יעד נעול · "+destinationRule(target)}</small></div><button class="primary" data-action="travel" data-id="${target.id}" ${target.id===state.city||!targetOpen?"disabled":""}>${target.id===state.city?"את/ה כבר כאן":targetOpen?"לטוס ל"+target.name+" · "+money(target.fare):"יעד נעול"}</button></div><div class="footer-actions"><button data-action="finish">לסיים מסלול</button><button data-action="bag">לפתוח תיק הפקה</button></div></section>`; }
-        if (state.view==="city") { const next=nextMove(); body=`<section class="panel city"><header class="screen-head"><div><p class="eyebrow">${city.name} · ${city.zone}</p><h1>מה עושים בעיר?</h1></div><p class="screen-copy">בחר/י שירות אחד. המעבר למפה ולעיר זמין תמיד בראש המסך.</p></header><div class="next-move"><div><small>הצעד המומלץ</small><b>${next.title}</b><span>${next.copy}</span></div><button class="primary" data-action="next" data-id="${next.target}">${next.target==="map"?"למפה": "להמשך ←"}</button></div><div class="service-list"><button class="service-row" data-action="service" data-id="work"><span class="service-number">1</span><span><h3>לעבוד</h3><p>גיגים, ימי צילום ועבודות קולנוע.</p></span><span class="service-arrow">←</span></button><button class="service-row" data-action="service" data-id="shop"><span class="service-number">2</span><span><h3>חנות</h3><p>לקנות ולמכור ציוד צילום.</p></span><span class="service-arrow">←</span></button><button class="service-row" data-action="service" data-id="create"><span class="service-number">3</span><span><h3>ליצור</h3><p>לשכור צוות ולבנות סרט.</p></span><span class="service-arrow">←</span></button><button class="service-row" data-action="service" data-id="release"><span class="service-number">4</span><span><h3>הפצה</h3><p>הקרנות, סטרימינג ופסטיבלים.</p></span><span class="service-arrow">←</span></button><button class="service-row" data-action="service" data-id="bank"><span class="service-number">5</span><span><h3>בנק</h3><p>להפקיד, למשוך או להחזיר חוב.</p></span><span class="service-arrow">←</span></button><button class="service-row" data-action="service" data-id="fund"><span class="service-number">6</span><span><h3>קרן מימון</h3><p>לבקש תקציב לסרט או מלגת לימודים.</p></span><span class="service-arrow">←</span></button></div><div class="footer-actions"><button data-action="finish">לסיים מסלול</button><button data-action="map">למפה וליעד הבא</button></div></section>`; }
-        if (state.view==="service") { const serviceNames={work:"לעבוד",shop:"חנות",create:"ליצור",release:"הפצה",bank:"בנק",fund:"קרן מימון"}; body=`<section class="panel service"><header class="service-top"><div><p class="eyebrow">${city.name} · ${serviceNames[state.service]}</p><h1>${serviceNames[state.service]}</h1></div><button class="back" data-action="city">חזרה לעיר ←</button></header><div class="list">${serviceRows()}</div><div class="footer-actions"><button data-action="finish">לסיים מסלול</button><button data-action="bag">תיק הפקה</button></div></section>`; }
-        if (state.view==="bag") { const rows=GOODS.filter((good)=>state.bag[good.id]).map((good)=>`<div class="bag-item"><span>${good.name}</span><b>×${state.bag[good.id]}</b></div>`).join(""); body=`<section class="panel bag"><header class="service-top"><div><p class="eyebrow">ציוד שקנית</p><h1>תיק הפקה</h1></div><button class="back" data-action="city">חזרה לעיר ←</button></header><div class="bag-grid">${rows||'<p class="empty">התיק ריק. חנות הציוד נמצאת בכל עיר.</p>'}</div><div class="footer-actions"><button data-action="finish">לסיים מסלול</button><button data-action="map">למפה</button></div></section>`; }
-        app.innerHTML=`<div class="shell">${head}${body}</div>`; renderModal();
+        const head = `<header class="topbar"><div class="brand">KOBI / קריירה</div><div class="turn"><div>גיל<b>${Math.round(state.age)}</b></div><div>שנה<b>${state.year}</b></div><div>מזומן<b>${money(state.cash)}</b></div><div class="debt">חוב<b>${money(state.debt)}</b><button class="mini-pay" data-action="bank:pay">להחזיר</button></div><div class="fame">קרדיטים<b>${state.fame}</b></div><div class="followers">עוקבים<b>${state.followers.toLocaleString("he-IL")}</b></div><div class="contacts">קשרים<b>${state.contacts}</b></div><div>תיק<b>${bagCount()} / ${state.capacity}</b></div></div></header>${stageTrackMarkup()}`;
+        const body = state.view==="bag" ? bagView() : hudView();
+        app.innerHTML = `<div class="shell">${head}${body}</div>`;
+        renderModal();
       }
-      function bindEvents() { document.addEventListener("click",(event)=>{
-        const button=event.target.closest("[data-action]"); if (!button) return;
-        const action=button.dataset.action,id=button.dataset.id;
-        if (action==="target") { state.target=id; save(); render(); }
-        if (action==="travel") travel(id);
-        if (action==="map") openView("map");
-        if (action==="city") openView("city");
-        if (action==="bag") openView("bag");
-        if (action==="service") openService(id);
-        if (action==="next") id==="map"?openView("map"):openService(id);
-        if (action==="buy") buy(id);
-        if (action==="sell") sell(id);
-        if (action.startsWith("gig:")) doGig(action.slice(4));
-        if (action.startsWith("hire:")) hire(action.slice(5));
-        if (action==="shoot") shootFilm();
-        if (action==="finish-film") finishFilm();
-        if (action.startsWith("release:")) release(action.slice(8));
-        if (action.startsWith("bank:")) bank(action.slice(5));
-        if (action.startsWith("fund:")) requestFunding(action.slice(5));
-        if (action==="event") resolveEvent(Number(id));
-        if (action==="finish") { finish(false); save(); render(); }
-        if (action==="new") { state=createState(); save(); render(); }
-      }); }
+
+      function bindEvents() {
+        document.addEventListener("click", (event) => {
+          const button = event.target.closest("[data-action]"); if (!button) return;
+          const action = button.dataset.action, id = button.dataset.id;
+          if (action==="hud") openView("hud");
+          if (action==="bag") openView("bag");
+          if (action==="buy") buy(id);
+          if (action==="sell") sell(id);
+          if (action.indexOf("gig:")===0) doGig(action.slice(4));
+          if (action.indexOf("commit:")===0) startCommitment(action.slice(7));
+          if (action.indexOf("bank:")===0) bank(action.slice(5));
+          if (action==="event") resolveEvent(Number(id));
+          if (action==="finish") { finish(false); save(); render(); }
+          if (action==="new") { state = createState(); save(); render(); }
+        });
+      }
+
       if (app) { load(); render(); bindEvents(); }
-      globalThis.kobiFilmTrader={ getState:()=>clone(state), newGame:()=>{state=createState();return clone(state);}, openView, openService, travel, buy, sell, doGig, hire, shootFilm, finishFilm, release, bank, requestFunding, resolveEvent, finish:()=>{finish(false);return clone(state);}, GOODS, CITIES, GIGS, GOALS };
+
+      globalThis.kobiFilmTrader = {
+        getState: () => clone(state),
+        newGame: () => { state = createState(); return clone(state); },
+        openView, buy, sell, doGig, startCommitment, resolveEvent, bank, acceptFlight, declineFlight,
+        finish: () => { finish(false); return clone(state); },
+        STAGES, CITIES,
+        __testJumpToStage: (id) => {
+          const stage = STAGES.find((s)=>s.id===id) || STAGES[0];
+          state.stageId = stage.id; state.stageYear = 0; state.commitment = null; state.activeCheckpoint = null;
+          if (stage.ageRange) state.age = stage.ageRange[0];
+          const market = generateMarket(stage.id);
+          state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices};
+          return clone(state);
+        },
+        __testSetState: (patch) => { Object.assign(state, patch); return clone(state); }
+      };
     })();
   </script>
 </body>
