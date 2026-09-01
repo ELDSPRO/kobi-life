@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#080c14">
   <title>קובי / קריירה</title>
   <style>
-    :root { --ink:#080c14; --panel:#141c2c; --panel-2:#1d2840; --line:#34415a; --cream:#f7f2e8; --muted:#9ca8ba; --amber:#f4bd4b; --green:#67cfc4; --blue:#93b6e0; --rose:#e28c83; }
+    :root { --ink:#080c14; --panel:#141c2c; --panel-2:#1d2840; --line:#34415a; --cream:#f7f2e8; --muted:#9ca8ba; --amber:#f4bd4b; --green:#67cfc4; --blue:#93b6e0; --rose:#e28c83; --violet:#b79aef; }
     * { box-sizing:border-box; }
     body { min-width:320px; min-height:100vh; margin:0; color:var(--cream); background:radial-gradient(800px 460px at 12% 0%,rgba(77,63,166,.24),transparent 68%),radial-gradient(580px 340px at 96% 7%,rgba(43,114,138,.14),transparent 68%),var(--ink); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif; }
     button { font:inherit; }
@@ -90,8 +90,24 @@
     .event.brief { border-color:rgba(147,182,224,.7); }
     .event.brief span { color:var(--blue); }
     .event.brief .final-grid.recap { margin-top:2px; }
+    .event.forecast { border-color:rgba(103,207,196,.7); }
+    .event.forecast span { color:var(--green); }
+    .event.intro { border-color:rgba(183,154,239,.7); }
+    .event.intro span { color:var(--violet); }
+    .event.intro .primary { margin-bottom:7px; }
     @media (max-width:720px) { .action-row { align-items:start; } .next-move { align-items:start; display:grid; } }
-    @media (max-width:520px) { .shell { width:min(100% - 20px,1120px); padding-top:15px; } .topbar { align-items:start; display:grid; } .turn { justify-content:space-between; width:100%; } .panel,.bag { padding:16px; } .bag-grid { grid-template-columns:1fr; } .action-meta { justify-items:start; text-align:right; } .final-grid { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:520px) {
+      .shell { width:min(100% - 20px,1120px); padding-top:15px; }
+      .topbar { align-items:start; display:grid; }
+      .turn { display:grid; grid-template-columns:repeat(4,1fr); justify-content:normal; gap:10px 6px; width:100%; }
+      .turn div { text-align:center; }
+      .panel,.bag { padding:16px; }
+      .bag-grid { grid-template-columns:1fr; }
+      .action-meta { justify-items:start; text-align:right; }
+      .final-grid { grid-template-columns:repeat(2,1fr); }
+      .primary,.back,.service-row,.row-action,.footer-actions button,.event button { min-height:44px; }
+      .market-table td.actions { gap:8px; }
+    }
   </style>
 </head>
 <body>
@@ -473,7 +489,7 @@
           commitment:null, activeCheckpoint:null,
           pathTags:[], bankruptcyStrikes:0,
           view:"hud", flight:null,
-          funding:{}, achievements:{}, event:null, ended:false, win:false, log:[], lastRecap:null, briefPending:false
+          funding:{}, achievements:{}, event:null, ended:false, win:false, log:[], lastRecap:null, briefPending:false, pendingAction:null, stageIntroPending:true
         };
         const market = generateMarket(next.stageId);
         next.prices = market.prices; next.priceKinds = market.kinds; next.previousPrices = {...market.prices};
@@ -495,7 +511,7 @@
               priceKinds: saved.priceKinds || fresh.priceKinds, films: Array.isArray(saved.films) ? saved.films : [],
               pathTags: Array.isArray(saved.pathTags) ? saved.pathTags : [], commitment: saved.commitment || null,
               funding: {...(saved.funding||{})}, achievements: {...(saved.achievements||{})},
-              event: null, briefPending: false, activeCheckpoint: saved.activeCheckpoint || null
+              event: null, briefPending: false, pendingAction: null, stageIntroPending: false, activeCheckpoint: saved.activeCheckpoint || null
             };
           }
         } catch (_) {}
@@ -526,6 +542,7 @@
 
       function notify(title,copy,choices) { state.event = {title,copy,choices}; }
       function closeBrief() { state.briefPending = false; save(); render(); return true; }
+      function closeStageIntro() { state.stageIntroPending = false; save(); render(); return true; }
       function announce(title,copy) { notify(title,copy,[{label:"להמשיך",kind:"pass"}]); render(); return false; }
 
       function isWinner() { return false; }
@@ -556,6 +573,7 @@
         if (!nextStage) { finish(true); return; }
         state.stageId = nextStage.id; state.stageYear = 0;
         state.nextMilestoneAge = nextStage.ageRange[1];
+        state.stageIntroPending = true;
         addLog("עברת לשלב: "+nextStage.name+".");
         const market = generateMarket(nextStage.id);
         state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices};
@@ -676,6 +694,7 @@
         if (state.ended || state.event || state.commitment) return false;
         const config = (currentStage().commitments||[]).find((c)=>c.id===id);
         if (!config) return false;
+        state.stageIntroPending = false;
         if (config.entryDebt) { state.debt += config.entryDebt; addLog("נכנסת ל"+config.name+" — החוב עלה ב-"+money(config.entryDebt)+"."); }
         if (config.immediateEffect) config.immediateEffect(state);
         if (!config.years) {
@@ -718,6 +737,25 @@
         remove(id); state.cash += price;
         addLog("מכרת "+goodName(id)+" ב-"+money(price)+"."); save(); render(); return true;
       }
+
+      function openGigForecast(id) {
+        if (state.ended||state.event||state.commitment||state.briefPending||state.pendingAction) return false;
+        const gig = (currentStage().gigs||[]).find((g)=>g.id===id);
+        if (!gig) return false;
+        const lack = missing(gig.needs);
+        if (lack.length) return announce("חסר ציוד לעבודה הזאת","צריך: "+lack.join(" · ")+".");
+        state.pendingAction = { kind:"gig", id };
+        save(); render(); return true;
+      }
+
+      function confirmGig() {
+        if (!state.pendingAction || state.pendingAction.kind!=="gig") return false;
+        const id = state.pendingAction.id;
+        state.pendingAction = null;
+        return doGig(id);
+      }
+
+      function cancelPendingAction() { state.pendingAction = null; save(); render(); return true; }
 
       function doGig(id) {
         if (state.ended||state.event||state.commitment) return false;
@@ -885,12 +923,46 @@
         return `<div class="final-grid recap"><div><small>גיל</small><b>${r.age}</b></div><div><small>ריבית ששולמה</small><b>${money(r.interestPaid)}</b></div><div><small>משך</small><b>${r.years} שנים</b></div></div>`;
       }
 
+      function stageIntroMarkup() {
+        const stage = currentStage();
+        const milestoneChips = (stage.milestones||[]).filter((m)=>m.required).map((m)=>`<span class="milestone required">${m.label}</span>`).join("");
+        const showCommitments = !hasChosenEntryPath() && stage.commitments && stage.commitments.length;
+        const commitButtons = showCommitments ? stage.commitments.map((c)=>
+          `<button class="primary" data-action="commit:${c.id}">${c.name} · ${c.years?c.years+" שנים":"מיידי"}${c.entryDebt?" · חוב +"+money(c.entryDebt):" · בלי חוב"}</button>`
+        ).join("") : "";
+        return `<section class="event intro"><span>שלב חדש</span><h2>${stage.name}</h2>
+          <p>${stage.headline}</p>
+          ${milestoneChips?`<div class="milestone-list">${milestoneChips}</div>`:""}
+          ${commitButtons?`<p class="eyebrow" style="margin-top:14px">בחירת מסלול כניסה</p>${commitButtons}`:""}
+          <button class="quiet" data-action="stage-intro:close">${showCommitments?"אחליט אחר כך":"להתחיל ←"}</button>
+        </section>`;
+      }
+
       function briefMarkup() {
         const stage = currentStage();
         return `<section class="event brief"><span>בריף השנה</span><h2>גיל ${Math.round(state.age)}</h2>
           ${recapMarkup()}
           ${recommendPanelMarkup(stage)}
           <button class="quiet" data-action="brief:close">המשך ←</button>
+        </section>`;
+      }
+
+      function gigForecastMarkup() {
+        const gig = (currentStage().gigs||[]).find((g)=>g.id===state.pendingAction.id);
+        if (!gig) return "";
+        const nextAge = Math.round(state.age+1);
+        const nextDebt = Math.ceil(state.debt * DEBT_ANNUAL_RATE);
+        const chips = [
+          gig.fame ? `<span class="milestone">+${gig.fame} קרדיטים</span>` : "",
+          gig.contacts ? `<span class="milestone">+${gig.contacts} קשרים</span>` : "",
+          gig.followers ? `<span class="milestone">+${gig.followers.toLocaleString("he-IL")} עוקבים</span>` : ""
+        ].filter(Boolean).join("");
+        return `<section class="event forecast"><span>לפני שממשיכים</span><h2>${gig.title}</h2>
+          <p>שנה אחת תעבור — גיל ${Math.round(state.age)} ← ${nextAge}.</p>
+          <div class="final-grid recap"><div><small>מזומן</small><b>+${money(gig.cash)}</b></div><div><small>ריבית חוב צפויה</small><b>${money(nextDebt-state.debt)}</b></div></div>
+          ${chips?`<div class="milestone-list">${chips}</div>`:""}
+          <button class="primary" data-action="gig-confirm">לבצע ←</button>
+          <button class="quiet" data-action="gig-cancel">ביטול</button>
         </section>`;
       }
 
@@ -926,9 +998,19 @@
           modal.innerHTML = `<section class="event"><span>${state.win?"סוף דרך — פרישה":"המסלול נעצר"}</span><h2>${state.win?"קובי הגיע/ה לפרישה אחרי קריירה שלמה.":"המסלול נעצר כאן."}</h2><p>${state.win?"עברת את כל שלבי הקריירה — מסטודנט/ית ועד פרישה.":"אפשר להתחיל מחדש עם הידע שצברת."}</p><div class="final-grid"><div><small>ציון</small><b>${money(final.score)}</b></div><div><small>גיל</small><b>${Math.round(state.age)}</b></div><div><small>שלב</small><b>${currentStage().name}</b></div></div><button data-action="new">מסלול חדש ←</button></section>`;
           return;
         }
+        if (state.pendingAction) {
+          modal.classList.remove("hidden");
+          modal.innerHTML = state.pendingAction.kind==="gig" ? gigForecastMarkup() : "";
+          return;
+        }
         if (state.briefPending && state.lastRecap) {
           modal.classList.remove("hidden");
           modal.innerHTML = briefMarkup();
+          return;
+        }
+        if (state.stageIntroPending) {
+          modal.classList.remove("hidden");
+          modal.innerHTML = stageIntroMarkup();
           return;
         }
         if (!state.event) { modal.classList.add("hidden"); modal.innerHTML=""; return; }
@@ -952,11 +1034,14 @@
           if (action==="bag") openView("bag");
           if (action==="buy") buy(id);
           if (action==="sell") sell(id);
-          if (action.indexOf("gig:")===0) doGig(action.slice(4));
+          if (action.indexOf("gig:")===0) openGigForecast(action.slice(4));
           if (action.indexOf("commit:")===0) startCommitment(action.slice(7));
           if (action.indexOf("bank:")===0) bank(action.slice(5));
           if (action==="event") resolveEvent(Number(id));
           if (action==="brief:close") closeBrief();
+          if (action==="stage-intro:close") closeStageIntro();
+          if (action==="gig-confirm") confirmGig();
+          if (action==="gig-cancel") cancelPendingAction();
           if (action==="finish") { finish(false); save(); render(); }
           if (action==="new") { state = createState(); save(); render(); }
         });
@@ -968,6 +1053,7 @@
         getState: () => clone(state),
         newGame: () => { state = createState(); return clone(state); },
         openView, buy, sell, doGig, startCommitment, resolveEvent, bank, acceptFlight, declineFlight, closeBrief,
+        openGigForecast, confirmGig, cancelPendingAction, closeStageIntro,
         finish: () => { finish(false); return clone(state); },
         STAGES, CITIES,
         __testJumpToStage: (id) => {

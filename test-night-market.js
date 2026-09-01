@@ -51,6 +51,74 @@ function run(htmlPath) {
   const expectedDebt = Math.ceil(8000 * Math.pow(1.03, 1));
   assert.strictEqual(state.debt, expectedDebt, "debt compounds at the annual rate, not the old weekly rate");
 
+  // --- year-brief modal: briefPending lifecycle, populated from the gig that just ran ---
+  assert.strictEqual(state.briefPending, true, "the gig above opened the year-brief modal");
+  assert.ok(state.lastRecap, "the brief reads from lastRecap");
+  assert.strictEqual(state.lastRecap.age, state.age, "the recap reflects the year that just passed");
+  assert.strictEqual(state.event, null, "no incident happened to compete with the brief this time");
+  assert.strictEqual(game.closeBrief(), true, "closeBrief is a valid dismissal");
+  state = game.getState();
+  assert.strictEqual(state.briefPending, false, "closing the brief clears it");
+
+  // --- year-brief queues behind an incident opened by the same advanceYear call ---
+  // (an isolated game instance so it doesn't disturb `game`'s cumulative cash/fame that later sections rely on)
+  const bankruptGame = loadGame(path);
+  bankruptGame.__testSetState({ cash: 50, debt: 1000, bank: 0 });
+  assert.strictEqual(bankruptGame.startCommitment("shortCourse"), true);
+  let bstate = bankruptGame.getState();
+  assert.strictEqual(bstate.briefPending, true, "the brief opens even though this advanceYear call also queued a bankruptcy event");
+  assert.ok(bstate.event, "the bankruptcy event is queued behind the brief, not skipped");
+  assert.strictEqual(bankruptGame.closeBrief(), true);
+  bstate = bankruptGame.getState();
+  assert.strictEqual(bstate.briefPending, false);
+  assert.strictEqual(bstate.event.title, "החוב יצא משליטה", "the queued event survives closing the brief and is still there to resolve");
+
+  // --- gig forecast: a pre-turn preview that doesn't act until confirmed ---
+  const forecastGame = loadGame(path);
+  assert.strictEqual(forecastGame.startCommitment("selfTaught"), true);
+  const beforeForecast = forecastGame.getState();
+  assert.strictEqual(forecastGame.openGigForecast("waiter"), true, "a valid gig opens a forecast instead of acting immediately");
+  let fstate2 = forecastGame.getState();
+  assert.deepStrictEqual(fstate2.pendingAction, { kind: "gig", id: "waiter" });
+  assert.strictEqual(fstate2.age, beforeForecast.age, "opening the forecast doesn't advance time");
+  assert.strictEqual(fstate2.cash, beforeForecast.cash, "opening the forecast doesn't pay out yet");
+  assert.strictEqual(forecastGame.openGigForecast("waiter"), false, "a second forecast can't open while one is already pending");
+
+  assert.strictEqual(forecastGame.cancelPendingAction(), true);
+  fstate2 = forecastGame.getState();
+  assert.strictEqual(fstate2.pendingAction, null, "cancelling clears the pending forecast");
+  assert.strictEqual(fstate2.cash, beforeForecast.cash, "cancelling has no side effects");
+  assert.strictEqual(fstate2.age, beforeForecast.age);
+
+  assert.strictEqual(forecastGame.openGigForecast("waiter"), true);
+  assert.strictEqual(forecastGame.confirmGig(), true, "confirming executes the gig exactly like doGig");
+  fstate2 = forecastGame.getState();
+  assert.strictEqual(fstate2.pendingAction, null, "confirming clears the pending forecast");
+  assert.strictEqual(fstate2.age, beforeForecast.age + 1, "confirming advances exactly one year, same as a direct doGig");
+  assert.strictEqual(fstate2.cash, beforeForecast.cash + 1200, "confirming pays out the gig");
+  assert.strictEqual(fstate2.briefPending, true, "confirming still opens the year-brief afterward, same as a direct doGig");
+
+  // a gig gated on missing equipment still opens the existing notice, not a forecast
+  const gatedGame = loadGame(path);
+  gatedGame.__testJumpToStage("industry");
+  assert.strictEqual(gatedGame.openGigForecast("lineProducer"), false, "a gated gig is refused, same as doGig");
+  const gstate = gatedGame.getState();
+  assert.ok(gstate.event, "the missing-equipment notice opens instead of a forecast");
+  assert.strictEqual(gstate.pendingAction, null);
+
+  // --- stage-intro modal: shown at game start and re-opened on every real stage transition ---
+  const introGame = loadGame(path);
+  assert.strictEqual(introGame.getState().stageIntroPending, true, "a brand-new game opens with the stage-intro modal");
+  assert.strictEqual(introGame.startCommitment("selfTaught"), true, "picking an entry path is a valid action while the intro is showing");
+  assert.strictEqual(introGame.getState().stageIntroPending, false, "picking a path resolves the pending intro");
+
+  for (let i = 0; i < 10 && introGame.getState().stageId === "student"; i++) introGame.doGig("prodAssist");
+  let istate = introGame.getState();
+  assert.strictEqual(istate.stageId, "industry", "sanity: enough prodAssist gigs transition out of student, same milestone rule as the earlier test");
+  assert.strictEqual(istate.stageIntroPending, true, "a real stage transition re-opens the stage-intro modal for the new stage");
+  assert.strictEqual(introGame.closeStageIntro(), true);
+  assert.strictEqual(introGame.getState().stageIntroPending, false, "closing it clears the flag");
+
   // --- buy: asset vs. bag, capacity ---
   assert.strictEqual(game.buy("usedCamera"), true, "an asset-flagged good can be bought");
   state = game.getState();
