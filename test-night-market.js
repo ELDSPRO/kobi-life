@@ -33,13 +33,17 @@ function clearEvent(game) {
 }
 
 // multi-year commitment jumps (checkpoints, filmSchool, indieFilm/legacyFilm) can cross the debt-collector's
-// 3-year-neglect threshold mid-flow, inserting a "אזהרה מההוצאה לפועל" event before the real next checkpoint opens.
-// Call this right before asserting on state.event when the intervening gap could plausibly be >=3 years.
-function drainDebtCollector(game) {
-  const state = game.getState();
-  // "ignore" (not "pay") so draining this incidental interruption doesn't perturb the cash/debt trajectory
-  // the surrounding test is actually asserting on - it only touches state.debt itself, no cash side effect.
-  if (state.event && state.event.title === "אזהרה מההוצאה לפועל") game.resolveEvent(1);
+// 3-year-neglect threshold, or simply roll a plain random incident (a fairly large pool now), before the
+// real next checkpoint opens. Call this right before asserting on state.event after any such jump. Drains
+// anything that isn't the expected title via its last (quiet/no-op) choice - for the debt-collector notice
+// specifically, that's "ignore" rather than "pay", so draining never perturbs the cash/debt trajectory the
+// surrounding test is actually asserting on.
+function drainIncidental(game, expectedTitle) {
+  let state = game.getState();
+  while (state.event && state.event.title !== expectedTitle) {
+    game.resolveEvent(state.event.choices.length - 1);
+    state = game.getState();
+  }
 }
 
 function run(htmlPath) {
@@ -74,10 +78,16 @@ function run(htmlPath) {
   assert.strictEqual(state.briefPending, true, "the gig above opened the year-brief modal");
   assert.ok(state.lastRecap, "the brief reads from lastRecap");
   assert.strictEqual(state.lastRecap.age, Math.round(state.age), "the recap reflects the (rounded) year that just passed");
-  assert.strictEqual(state.event, null, "no incident happened to compete with the brief this time");
+  // with the fixed 0.5 random seed, this exact gig also deterministically rolls the "friend-in-trouble"
+  // universal incident, queued behind the brief - same ordering as the bankruptcy case tested just below.
+  assert.strictEqual(state.event && state.event.title, "חבר/ה בצרות", "this roll also deterministically queues an incident behind the brief");
   assert.strictEqual(game.closeBrief(), true, "closeBrief is a valid dismissal");
   state = game.getState();
   assert.strictEqual(state.briefPending, false, "closing the brief clears it");
+  assert.ok(state.event, "the queued incident survives closing the brief");
+  clearEvent(game); // drain it via its quiet no-op choice so later assertions on `game` see a clean state
+  state = game.getState();
+  assert.strictEqual(state.event, null, "draining the incidental incident clears it");
 
   // --- year-brief queues behind an incident opened by the same advanceYear call ---
   // (an isolated game instance so it doesn't disturb `game`'s cumulative cash/fame that later sections rely on)
@@ -145,7 +155,8 @@ function run(htmlPath) {
   assert.strictEqual(judgeGame2.doGig("festivalJudge"), true, "the festival-judge gig is also playable in legacy");
 
   // --- rabinovichGrant: an alternate, lower-debt indie-film path with a real-world funding-politics checkpoint ---
-  const grantGame = loadGame(path);
+  // high roll: keeps this checkpoint sequence free of incidental incidents, which aren't the point of this test
+  const grantGame = loadGame(path, () => 0.99);
   grantGame.__testJumpToStage("indie");
   assert.strictEqual(grantGame.startCommitment("rabinovichGrant"), true);
   let gstate2 = grantGame.getState();
@@ -177,7 +188,7 @@ function run(htmlPath) {
   assert.strictEqual(introGame.startCommitment("selfTaught"), true, "picking an entry path is a valid action while the intro is showing");
   assert.strictEqual(introGame.getState().stageIntroPending, false, "picking a path resolves the pending intro");
 
-  for (let i = 0; i < 10 && introGame.getState().stageId === "student"; i++) introGame.doGig("prodAssist");
+  for (let i = 0; i < 10 && introGame.getState().stageId === "student"; i++) { introGame.doGig("prodAssist"); clearEvent(introGame); }
   let istate = introGame.getState();
   assert.strictEqual(istate.stageId, "industry", "sanity: enough prodAssist gigs transition out of student, same milestone rule as the earlier test");
   assert.strictEqual(istate.stageIntroPending, true, "a real stage transition re-opens the stage-intro modal for the new stage");
@@ -200,10 +211,13 @@ function run(htmlPath) {
   // required milestones (fame>=6, cash+bank>=5000) take several gigs, not one, to reach
   const beforeTransition = game.getState();
   assert.strictEqual(game.doGig("prodAssist"), true, "the credit-and-contacts gig can be repeated");
+  clearEvent(game); // an incidental incident can fire on any gig now that the pool is larger - drain it so the next gig isn't guard-blocked
   assert.strictEqual(game.doGig("prodAssist"), true);
+  clearEvent(game);
   state = game.getState();
   assert.strictEqual(state.stageId, "student", "two gigs are not yet enough to meet both required milestones");
   assert.strictEqual(game.doGig("prodAssist"), true);
+  clearEvent(game);
   state = game.getState();
   assert.strictEqual(state.stageId, "industry", "meeting both required milestones after enough gigs transitions to the next stage automatically");
   assert.strictEqual(state.bag.scriptRights, undefined, "a bag good irrelevant to the next stage is liquidated on transition");
@@ -217,6 +231,8 @@ function run(htmlPath) {
   state = game.getState();
   assert.ok(state.commitment, "a multi-year commitment is tracked on state");
   assert.strictEqual(state.commitment.id, "filmSchool");
+  drainIncidental(game, "בחירת התמחות"); // a two-year jump can also roll a plain incident before this checkpoint opens
+  state = game.getState();
   assert.ok(state.event, "the first checkpoint opens as a real event, not silently");
   assert.strictEqual(state.event.title, "בחירת התמחות");
   assert.strictEqual(state.age, 23, "the commitment advanced two years to reach the first checkpoint in one action");
@@ -229,7 +245,7 @@ function run(htmlPath) {
   // two more full years pass with zero chance to touch the bank mid-commitment -> the debt-collector's
   // 3-year-neglect threshold trips here; draining it lets progressCommitment reach the real checkpoint
   // right after, with no extra time cost (elapsedYears was already bumped before the interruption fired)
-  drainDebtCollector(game); state = game.getState();
+  drainIncidental(game, "פרויקט גמר"); state = game.getState();
   assert.strictEqual(state.event.title, "פרויקט גמר");
   assert.strictEqual(state.age, 25, "the commitment advanced to the second checkpoint at year 4");
 
@@ -244,10 +260,12 @@ function run(htmlPath) {
 
   // --- fallback path: required milestones never met before the grace deadline ---
   // grace deadline is age 29 (ageRange[1]=26 + STAGE_GRACE_YEARS=3); at 0.4y/gig that's 20 gigs from age 21.
-  // never paying down debt over that stretch also trips the debt-collector every ~3 years of neglect -
-  // drain those (and any other incident) so the grind toward the real fallback event can continue.
+  // never paying down debt over that stretch also trips the debt-collector every ~3 years of neglect, and
+  // with a much bigger incident pool a plain incident fires on most gigs too - drain those (and any other
+  // incident) so the grind toward the real fallback event can continue. With ~1 drain-only iteration per
+  // real gig, budget well past the ~20 gigs actually needed.
   game.newGame();
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 100; i++) {
     const s = game.getState();
     if (s.event && s.event.title === "השלב לא הושלם כמתוכנן") break; // the real fallback event - stop and let the assertions below inspect it
     if (s.event) { game.resolveEvent(s.event.choices.length - 1); continue; } // drain a debt-collector visit or other incident, then keep grinding
@@ -304,25 +322,25 @@ function run(htmlPath) {
   state = game.getState();
   assert.strictEqual(state.event.title, "לבחור ז'אנר", "production opens on a genre pick before any time passes");
   assert.strictEqual(game.resolveEvent(0), true, "דרמה"); // genre-drama: fame+1, filmDraft.genre="דרמה"
-  drainDebtCollector(game); state = game.getState();
+  drainIncidental(game, "התסריט מוכן"); state = game.getState();
   assert.strictEqual(state.fame, 1, "a checkpoint choice's effect() applies immediately, not just its pathTag");
   assert.strictEqual(state.event.title, "התסריט מוכן");
   assert.strictEqual(game.resolveEvent(1), true, "להישאר רזים ויעילים"); // script-lean: fame+1
-  drainDebtCollector(game); state = game.getState();
+  drainIncidental(game, "מי מככב/ת?"); state = game.getState();
   assert.strictEqual(state.fame, 2);
   assert.strictEqual(state.event.title, "מי מככב/ת?", "casting is its own real decision, not folded into the shoot checkpoint");
   assert.strictEqual(game.resolveEvent(0), true, "כוכב/ת מוכר/ת"); // cast-star: -2000 cash, fame+2, followers+500, sets filmDraft.starName
-  drainDebtCollector(game); state = game.getState();
+  drainIncidental(game, "הצילומים מסתיימים"); state = game.getState();
   assert.strictEqual(state.fame, 4);
   assert.strictEqual(state.event.title, "הצילומים מסתיימים");
   assert.strictEqual(game.resolveEvent(1), true, "לעצור בתקציב"); // on-budget: cash+500
-  drainDebtCollector(game); state = game.getState();
+  drainIncidental(game, "משמרות עריכה"); state = game.getState();
   assert.strictEqual(state.event.title, "משמרות עריכה", "editing shifts are their own checkpoint after the shoot wraps");
   assert.strictEqual(game.resolveEvent(1), true, "לסגור בגרסה הראשונה"); // edit-rough: no effect
-  drainDebtCollector(game); state = game.getState();
+  drainIncidental(game, "בחירת הפצה"); state = game.getState();
   assert.strictEqual(state.event.title, "בחירת הפצה");
   assert.strictEqual(game.resolveEvent(0), true, "מסלול פסטיבלים"); // festival-track: achievements flag + fame+2
-  drainDebtCollector(game); state = game.getState();
+  drainIncidental(game, "הסרט יוצא לאקרנים"); state = game.getState();
   assert.strictEqual(state.achievements["festival-invite"], true, "the festival-track checkpoint choice sets the flag festivals-stage flights will read");
   assert.strictEqual(state.event.title, "הסרט יוצא לאקרנים", "the finished production ends on a poster reveal, right after distribution, no time elapsed between them");
   assert.ok(state.event.html && state.event.html.indexOf("poster-card") !== -1, "the poster checkpoint renders a real poster card, not plain text");
@@ -369,7 +387,11 @@ function run(htmlPath) {
   state = game.getState();
   assert.strictEqual(state.event.title, "לבחור ז'אנר", "the capstone film still opens on a genre pick, even in its leaner two-decision flow");
   assert.strictEqual(game.resolveEvent(0), true, "דרמה"); // genre-drama: fame+1 -> 96
+  drainIncidental(game, "לבחור נושא אישי"); state = game.getState();
+  assert.strictEqual(state.event.title, "לבחור נושא אישי");
   assert.strictEqual(game.resolveEvent(0), true, "הסיפור הכי אישי שלך"); // fame+2 -> 98
+  drainIncidental(game, "העמדה מול קהל"); state = game.getState();
+  assert.strictEqual(state.event.title, "העמדה מול קהל");
   assert.strictEqual(game.resolveEvent(0), true, "הקרנת יחיד בפסטיבל הבית"); // fame+3 -> 101
   state = game.getState();
   assert.strictEqual(state.event.title, "הסרט יוצא לאקרנים", "the capstone film also ends on a poster reveal");
@@ -391,8 +413,11 @@ function run(htmlPath) {
   winScoreGame.__testSetState({ fame: 95, films: [{ title: "הסרט העצמאי הראשון" }] });
   winScoreGame.startCommitment("legacyFilm");
   winScoreGame.resolveEvent(0); // genre
+  drainIncidental(winScoreGame, "לבחור נושא אישי");
   winScoreGame.resolveEvent(0); // theme
+  drainIncidental(winScoreGame, "העמדה מול קהל");
   winScoreGame.resolveEvent(0); // release
+  drainIncidental(winScoreGame, "הסרט יוצא לאקרנים");
   winScoreGame.resolveEvent(0); // poster-ack -> completeCommitment -> finish(true)
   const winState = winScoreGame.getState();
   let scores = winScoreGame.loadScores();
@@ -439,14 +464,15 @@ function run(htmlPath) {
   clearEvent(payoffGame);
 
   // --- the "bank calls" incident only fires while there's real debt to collect on ---
-  // roll 0.20 lands on bank-call's band when debt>0 (pool: gig-falls-through[0,.08) cheap-gear[.08,.16) bank-call[.16,.26) road-gig[.26,.34)),
+  // roll 0.32 lands on bank-call's band when debt>0 (pool: gig-falls-through[0,.08) cheap-gear[.08,.16)
+  // friends-project[.16,.23) small-scholarship[.23,.29) bank-call[.29,.39) road-gig[.39,.47) ...),
   // and on road-gig's shifted band when debt=0 filters bank-call out of the pool entirely
-  const bankCallGame = loadGame(path, () => 0.20);
+  const bankCallGame = loadGame(path, () => 0.32);
   bankCallGame.startCommitment("selfTaught");
   bankCallGame.doGig("waiter");
   assert.strictEqual(bankCallGame.getState().event.title, "הבנק מתקשר", "the bank still calls about real debt");
 
-  const noDebtCallGame = loadGame(path, () => 0.20);
+  const noDebtCallGame = loadGame(path, () => 0.32);
   noDebtCallGame.startCommitment("selfTaught");
   noDebtCallGame.__testSetState({ debt: 0 });
   noDebtCallGame.doGig("waiter");
@@ -462,6 +488,7 @@ function run(htmlPath) {
   assert.strictEqual(collectorGame.doGig("waiter"), true);
   let cState = collectorGame.getState();
   assert.ok(!cState.event || cState.event.title !== "אזהרה מההוצאה לפועל", "under the 3-year neglect threshold, the collector stays away");
+  clearEvent(collectorGame); // a plain incident can also have fired on this gig - drain it before reusing this instance below
 
   collectorGame.__testSetState({ debt: 5000, debtCollectorStreak: 0, debtCollectorIgnores: 0 });
   collectorGame.__testSetState({ debtCollectorStreak: 3 });
@@ -482,6 +509,7 @@ function run(htmlPath) {
   cState = collectorGame.getState();
   assert.ok(!cState.event || cState.event.title !== "אזהרה מההוצאה לפועל", "below the minimum debt floor, the collector has nothing worth collecting");
   assert.strictEqual(cState.debtCollectorStreak, 0, "dropping under the floor resets the streak outright, same as paying");
+  clearEvent(collectorGame); // a plain incident can also have fired on this gig - drain it before reusing this instance below
 
   collectorGame.__testSetState({ debt: 5000, debtCollectorStreak: 3, debtCollectorIgnores: 0 });
   assert.strictEqual(collectorGame.doGig("waiter"), true);

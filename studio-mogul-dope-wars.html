@@ -180,7 +180,17 @@
 
       const UNIVERSAL_INCIDENTS = [
         { id:"bank-call", chance:.10, when:(s)=>s.debt>0, title:"הבנק מתקשר", copy:"החוב צבר ריבית והפקיד/ה מבקש/ת תשלום קטן עכשיו.", choices:[{label:"לשלם ₪500 מהחוב",kind:"debt-pay"},{label:"לדחות · החוב גדל ב-₪300",kind:"debt-delay",quiet:true}] },
-        { id:"road-gig", chance:.08, title:"עבודה בדרך", copy:"מישהו מחפש עזרה דחופה. זו דרך מהירה למזומן, אבל היא עולה שנה.", choices:[{label:"לקחת · +₪600",kind:"road-gig"},{label:"להמשיך במסלול",kind:"pass",quiet:true}] }
+        { id:"road-gig", chance:.08, title:"עבודה בדרך", copy:"מישהו מחפש עזרה דחופה. זו דרך מהירה למזומן, אבל היא עולה שנה.", choices:[{label:"לקחת · +₪600",kind:"road-gig"},{label:"להמשיך במסלול",kind:"pass",quiet:true}] },
+        { id:"friend-in-trouble", chance:.07, title:"חבר/ה בצרות", copy:"חבר/ה קרוב/ה נקלע/ת לקשיים כלכליים ומבקש/ת הלוואה קטנה.",
+          choices:[
+            { label:"לעזור · -₪400", kind:"help-friend", effect:(s)=>{ s.cash-=400; s.contacts+=1; addLog("עזרת לחבר/ה בכסף — הקשר התחזק."); } },
+            { label:"להתנצל ולסרב", kind:"pass", quiet:true }
+          ] },
+        { id:"viral-moment", chance:.07, title:"רגע ויראלי", copy:"פוסט או קליפ שלך מתפשט ברשת בלי אזהרה מוקדמת.",
+          choices:[
+            { label:"לרכוב על הגל", kind:"ride-viral", effect:(s)=>{ s.followers+=800; s.fame+=1; addLog("רכבת על הגל הוויראלי — החשיפה עלתה משמעותית."); } },
+            { label:"להתעלם ולהמשיך בשקט", kind:"pass", quiet:true }
+          ] }
       ];
 
       function studentRecommend(s) {
@@ -289,8 +299,22 @@
           ],
           incidents:[
             { id:"camera-repair", chance:.08, when:(s)=>s.assets.usedCamera, title:"המצלמה צריכה תיקון", copy:"המצלמה קיבלה מכה. אפשר לשלם על תיקון, או להמשיך עם הסיכון שתפסיק לעבוד.", choices:[{label:"לתקן ב-₪300",kind:"repair"},{label:"לא לתקן · לסכן את המצלמה",kind:"risk-camera",quiet:true}] },
-            { id:"gig-falls-through", chance:.08, title:"עבודה נופלת", copy:"עבודה שסמכת עליה בוטלה ברגע האחרון.", choices:[{label:"לחפש תחליף מהיר · -₪300",kind:"scramble"},{label:"להמשיך בלי הכנסה השנה",kind:"pass",quiet:true}] },
-            { id:"cheap-gear", chance:.08, title:"הזדמנות ציוד מוזל", copy:"מישהו מוכר ציוד מהר וזול — אבל צריך להחליט עכשיו.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
+            { id:"gig-falls-through", chance:.08, title:"עבודה נופלת", copy:"עבודה שסמכת עליה בוטלה ברגע האחרון.",
+              choices:[
+                { label:"לחפש תחליף מהיר · -₪300", kind:"scramble-student", effect:(s)=>{ s.cash-=300; addLog("מצאת עבודה חלופית ברגע האחרון, בעלות של ₪300."); } },
+                { label:"להמשיך בלי הכנסה השנה", kind:"pass", quiet:true }
+              ] },
+            { id:"cheap-gear", chance:.08, title:"הזדמנות ציוד מוזל", copy:"מישהו מוכר ציוד מהר וזול — אבל צריך להחליט עכשיו.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] },
+            { id:"friends-project", chance:.07, title:"הזמנה לפרויקט חברים", copy:"קבוצת סטודנטים מזמינה אותך להצטרף לפרויקט הגמר שלהם — בלי תשלום, אבל עם קרדיט אמיתי.",
+              choices:[
+                { label:"להצטרף · קרדיט וקשר", kind:"join-project", effect:(s)=>{ s.fame+=1; s.contacts+=1; addLog("הצטרפת לפרויקט חברים — קרדיט וקשר חדש, בלי תשלום."); } },
+                { label:"לוותר · אין זמן פנוי", kind:"pass", quiet:true }
+              ] },
+            { id:"small-scholarship", chance:.06, title:"מלגה קטנה", copy:"האוניברסיטה מציעה מלגה חד-פעמית לתלמיד/ה מצטיין/ת.",
+              choices:[
+                { label:"להגיש בקשה · +₪500", kind:"apply-scholarship", effect:(s)=>{ s.cash+=500; addLog("קיבלת מלגה חד-פעמית."); } },
+                { label:"לוותר · אין זמן לטפסים", kind:"pass", quiet:true }
+              ] }
           ],
           riskProfile:null,
           milestones:[
@@ -324,8 +348,22 @@
           ],
           commitments:[],
           incidents:[
-            { id:"contract-delay", chance:.08, title:"תשלום מתעכב", copy:"לקוח מעכב תשלום על עבודה שכבר בוצעה.", choices:[{label:"לרדוף אחרי התשלום · -₪300",kind:"scramble"},{label:"למחוק את החוב מהזיכרון",kind:"pass",quiet:true}] },
-            { id:"gear-deal", chance:.08, title:"הזדמנות ציוד מוזל", copy:"עמית שעוזב את התחום מוכר ציוד מהר וזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
+            { id:"contract-delay", chance:.08, title:"תשלום מתעכב", copy:"לקוח מעכב תשלום על עבודה שכבר בוצעה.",
+              choices:[
+                { label:"לרדוף אחרי התשלום · -₪600", kind:"chase-payment", effect:(s)=>{ s.cash-=600; addLog("רדפת אחרי התשלום המתעכב — עלה זמן וכסף."); } },
+                { label:"למחוק את החוב מהזיכרון", kind:"pass", quiet:true }
+              ] },
+            { id:"gear-deal", chance:.08, title:"הזדמנות ציוד מוזל", copy:"עמית שעוזב את התחום מוכר ציוד מהר וזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] },
+            { id:"warm-intro", chance:.07, title:"המלצה חמה", copy:"עמית/ה בתעשייה ממליץ/ה עליך בפני מפיק/ה מוכר/ת.",
+              choices:[
+                { label:"לנצל את ההיכרות", kind:"warm-intro-take", effect:(s)=>{ s.contacts+=2; s.fame+=1; addLog("המלצה חמה פתחה דלת לקשר חדש בתעשייה."); } },
+                { label:"להישאר בצד", kind:"pass", quiet:true }
+              ] },
+            { id:"minor-injury", chance:.06, title:"תאונת עבודה קלה", copy:"פציעה קלה בסט. אפשר לטפל בזה כמו שצריך, או להמשיך לעבוד.",
+              choices:[
+                { label:"לטפל · -₪400", kind:"treat-injury", effect:(s)=>{ s.cash-=400; addLog("טיפלת בפציעה כמו שצריך."); } },
+                { label:"להמשיך לעבוד פצוע/ה", kind:"push-through-injury", effect:(s)=>{ s.fame=Math.max(0,s.fame-1); addLog("המשכת לעבוד פצוע/ה — זה עלה במוניטין, לא בכסף."); }, quiet:true }
+              ] }
           ],
           riskProfile:null,
           milestones:[
@@ -409,8 +447,22 @@
                 { label:"לענות בראיון חריף", kind:"clap-back" },
                 { label:"לשתוק ולתת לסרט לדבר", kind:"stay-quiet", quiet:true }
               ] },
-            { id:"funding-falls-through", chance:.08, title:"מקור מימון נסוג", copy:"משקיע/ה שהבטיח/ה חלק מהתקציב נעלם/ת.", choices:[{label:"למצוא תחליף מהיר · -₪300",kind:"scramble"},{label:"להמשיך בלי זה",kind:"pass",quiet:true}] },
-            { id:"gear-deal-indie", chance:.08, title:"הזדמנות ציוד מוזל", copy:"סטודיו שסוגר מוכר ציוד מהר וזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
+            { id:"funding-falls-through", chance:.08, title:"מקור מימון נסוג", copy:"משקיע/ה שהבטיח/ה חלק מהתקציב נעלם/ת.",
+              choices:[
+                { label:"למצוא מימון חלופי · -₪800", kind:"scramble-indie", effect:(s)=>{ s.cash-=800; addLog("מצאת מימון חלופי ברגע האחרון, ביוקר."); } },
+                { label:"להמשיך בלי זה", kind:"pass", quiet:true }
+              ] },
+            { id:"gear-deal-indie", chance:.08, title:"הזדמנות ציוד מוזל", copy:"סטודיו שסוגר מוכר ציוד מהר וזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] },
+            { id:"harsh-early-screening", chance:.07, title:"ביקורת קשה מראש-הצגה", copy:"הקרנת בדיקה ראשונה מקבלת תגובות קשות מהקהל.",
+              choices:[
+                { label:"לחזור לחדר עריכה · -₪600", kind:"reedit", effect:(s)=>{ s.cash-=600; s.fame+=1; addLog("חזרת לעריכה ותיקנת את הבעיות — עלה כסף, אבל השתפר."); } },
+                { label:"להשאיר כמו שזה", kind:"ignore-critique", effect:(s)=>{ s.fame=Math.max(0,s.fame-2); addLog("השארת את הגרסה כמו שהיא — הביקורות הבאות היו קשות."); }, quiet:true }
+              ] },
+            { id:"collab-offer", chance:.06, title:"הצעת שיתוף פעולה", copy:"יוצר/ת עצמאי/ת אחר/ת מציע/ה שיתוף פעולה בקידום.",
+              choices:[
+                { label:"לשתף פעולה", kind:"collab-promote", effect:(s)=>{ s.followers+=600; s.contacts+=1; addLog("שיתוף הפעולה הרחיב את הקהל של שניכם."); } },
+                { label:"להעדיף לעבוד לבד", kind:"pass", quiet:true }
+              ] }
           ],
           riskProfile:null,
           milestones:[
@@ -442,8 +494,22 @@
           ],
           commitments:[],
           incidents:[
-            { id:"deal-falls-through", chance:.08, title:"עסקה נופלת ברגע האחרון", copy:"מפיץ שהתחייב נסוג מהעסקה.", choices:[{label:"למצוא פתרון מהיר · -₪300",kind:"scramble"},{label:"להמשיך הלאה",kind:"pass",quiet:true}] },
-            { id:"festival-deal-cheap", chance:.08, title:"הזדמנות במסדרונות הפסטיבל", copy:"מישהו רוצה למכור זכויות מהר ובזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
+            { id:"deal-falls-through", chance:.08, title:"עסקה נופלת ברגע האחרון", copy:"מפיץ שהתחייב נסוג מהעסקה.",
+              choices:[
+                { label:"למצוא מפיץ חלופי · -₪1,200", kind:"scramble-festivals", effect:(s)=>{ s.cash-=1200; addLog("מצאת מפיץ חלופי ברגע האחרון, ביוקר משמעותי."); } },
+                { label:"להמשיך הלאה", kind:"pass", quiet:true }
+              ] },
+            { id:"festival-deal-cheap", chance:.08, title:"הזדמנות במסדרונות הפסטיבל", copy:"מישהו רוצה למכור זכויות מהר ובזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] },
+            { id:"international-interview", chance:.07, title:"ריאיון בינלאומי", copy:"עיתונאי/ת בינלאומי/ת מבקש/ת ריאיון על הסרט.",
+              choices:[
+                { label:"לתת ריאיון", kind:"give-interview", effect:(s)=>{ s.fame+=2; s.followers+=500; addLog("הריאיון הבינלאומי חיזק את המוניטין."); } },
+                { label:"לסרב · לשמור על פרטיות", kind:"pass", quiet:true }
+              ] },
+            { id:"slot-cancelled", chance:.06, title:"תור בפסטיבל מתבטל", copy:"פסטיבל מרכזי מבטל את מקום ההקרנה שלך ברגע האחרון בגלל לוח זמנים.",
+              choices:[
+                { label:"ללחוץ על הקשרים לפיצוי", kind:"push-contacts", effect:(s)=>{ s.contacts=Math.max(0,s.contacts-1); s.cash+=800; addLog("קיבלת פיצוי כספי, אבל הקשר עם הפסטיבל נפגע."); } },
+                { label:"לקבל את זה ולהמשיך", kind:"pass", quiet:true }
+              ] }
           ],
           riskProfile:null,
           milestones:[
@@ -476,8 +542,22 @@
           ],
           commitments:[],
           incidents:[
-            { id:"deal-collapses", chance:.08, title:"עסקה גדולה קורסת", copy:"אולפן נסוג מעסקה שכמעט נחתמה.", choices:[{label:"לחפש תחליף מהיר · -₪300",kind:"scramble"},{label:"להמשיך הלאה",kind:"pass",quiet:true}] },
-            { id:"studio-deal-cheap", chance:.08, title:"הזדמנות נדירה", copy:"מישהו רוצה למכור נתח מהר ובזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
+            { id:"deal-collapses", chance:.08, title:"עסקה גדולה קורסת", copy:"אולפן נסוג מעסקה שכמעט נחתמה.",
+              choices:[
+                { label:"לחפש עסקה חלופית · -₪2,500", kind:"scramble-breakthrough", effect:(s)=>{ s.cash-=2500; addLog("מצאת עסקה חלופית ברגע האחרון, במחיר כבד."); } },
+                { label:"להמשיך הלאה", kind:"pass", quiet:true }
+              ] },
+            { id:"studio-deal-cheap", chance:.08, title:"הזדמנות נדירה", copy:"מישהו רוצה למכור נתח מהר ובזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] },
+            { id:"exec-offer", chance:.07, title:"הצעת אקזקוטיב", copy:"מנהל/ת אולפן בכיר/ה מציע/ה תפקיד ייעוץ נלווה.",
+              choices:[
+                { label:"לקבל · הכנסה וקשרים", kind:"exec-consult", effect:(s)=>{ s.cash+=4000; s.contacts+=2; addLog("תפקיד הייעוץ הביא הכנסה וקשרים בכירים."); } },
+                { label:"לסרב · להתמקד בפרויקט הנוכחי", kind:"pass", quiet:true }
+              ] },
+            { id:"adjacent-scandal", chance:.06, title:"שערוריית תקשורת", copy:"שם שלך מוזכר בטעות בכתבה על שערוריית הפקה של פרויקט אחר.",
+              choices:[
+                { label:"להוציא הבהרה פומבית · -₪1,000", kind:"clarify-scandal", effect:(s)=>{ s.cash-=1000; addLog("ההבהרה הפומבית עלתה כסף אך מנעה נזק תדמיתי."); } },
+                { label:"להתעלם ולתת לזה לעבור", kind:"ignore-scandal", effect:(s)=>{ s.fame=Math.max(0,s.fame-3); addLog("ההתעלמות איפשרה לשמועה להתפשט — המוניטין נפגע."); }, quiet:true }
+              ] }
           ],
           riskProfile:null,
           milestones:[
@@ -529,8 +609,22 @@
               ], grantsOnComplete:{ fame:5 } }
           ],
           incidents:[
-            { id:"health-slowdown", chance:.08, title:"האטה בריאותית", copy:"הגוף מבקש לנוח יותר ממה שתכננת.", choices:[{label:"לקחת עזרה בתשלום · -₪300",kind:"scramble"},{label:"להאט לבד",kind:"pass",quiet:true}] },
-            { id:"archive-deal", chance:.08, title:"הצעה לארכיון", copy:"מישהו רוצה לרכוש חלק מהארכיון שלך מהר ובזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
+            { id:"health-slowdown", chance:.08, title:"האטה בריאותית", copy:"הגוף מבקש לנוח יותר ממה שתכננת.",
+              choices:[
+                { label:"לשכור עזרה · -₪1,500", kind:"scramble-legacy", effect:(s)=>{ s.cash-=1500; addLog("שכרת עזרה כדי להאט בלי לוותר על הקצב."); } },
+                { label:"להאט לבד", kind:"pass", quiet:true }
+              ] },
+            { id:"archive-deal", chance:.08, title:"הצעה לארכיון", copy:"מישהו רוצה לרכוש חלק מהארכיון שלך מהר ובזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] },
+            { id:"retrospective-feature", chance:.07, title:"כתבה רטרוספקטיבית", copy:"כתב/ת מבקש/ת לכתוב כתבה רטרוספקטיבית גדולה על הקריירה שלך.",
+              choices:[
+                { label:"לשתף פעולה במלואו", kind:"full-retrospective", effect:(s)=>{ s.fame+=3; s.followers+=1500; addLog("הכתבה הרטרוספקטיבית הזכירה אותך לדור חדש."); } },
+                { label:"לתת ריאיון קצר בלבד", kind:"pass", quiet:true }
+              ] },
+            { id:"former-student", chance:.06, title:"פנייה מתלמיד/ה לשעבר", copy:"תלמיד/ה לשעבר שהצליח/ה בזכותך פונה עם הצעה להשקיע יחד בפרויקט של יוצרים צעירים.",
+              choices:[
+                { label:"להשקיע · -₪5,000", kind:"invest-young", effect:(s)=>{ s.cash-=5000; s.fame+=2; addLog("ההשקעה בדור הבא חיזקה את המורשת שלך."); } },
+                { label:"לאחל בהצלחה ולהמשיך הלאה", kind:"pass", quiet:true }
+              ] }
           ],
           riskProfile:null,
           milestones:[
@@ -980,11 +1074,11 @@
           save(); render(); return true;
         }
 
-        if (choice.kind === "repair") {
+        if (choice.effect) { choice.effect(state); }
+        else if (choice.kind === "repair") {
           if (state.cash < 300) { notify("אין מספיק מזומן","אין כרגע כסף לתיקון.",[{label:"להמשיך",kind:"pass"}]); render(); return false; }
           state.cash -= 300; addLog("תיקנת את המצלמה ב-₪300.");
         } else if (choice.kind === "risk-camera") { addLog("המשכת עם הסיכון על המצלמה."); }
-        else if (choice.kind === "scramble") { state.cash -= 300; addLog("מצאת תחליף מהיר, בעלות."); }
         else if (choice.kind === "cheap-gear-take") { takeCheapGear(); }
         else if (choice.kind === "debt-pay") { const amt=Math.min(500,state.cash,state.debt); state.cash-=amt; state.debt-=amt; addLog("החזרת "+money(amt)+" מהחוב."); }
         else if (choice.kind === "debt-delay") { state.debt += 300; addLog("דחית את הבנק והחוב גדל."); }
