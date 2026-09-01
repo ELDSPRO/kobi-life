@@ -87,6 +87,9 @@
     .event-options { display:grid; gap:7px; }
     .event button { width:100%; color:#171307; border:0; background:var(--amber); text-align:right; }
     .event button.quiet { color:#dbe4f4; border:1px solid rgba(229,238,255,.15); background:rgba(255,255,255,.045); }
+    .event.brief { border-color:rgba(147,182,224,.7); }
+    .event.brief span { color:var(--blue); }
+    .event.brief .final-grid.recap { margin-top:2px; }
     @media (max-width:720px) { .action-row { align-items:start; } .next-move { align-items:start; display:grid; } }
     @media (max-width:520px) { .shell { width:min(100% - 20px,1120px); padding-top:15px; } .topbar { align-items:start; display:grid; } .turn { justify-content:space-between; width:100%; } .panel,.bag { padding:16px; } .bag-grid { grid-template-columns:1fr; } .action-meta { justify-items:start; text-align:right; } .final-grid { grid-template-columns:repeat(2,1fr); } }
   </style>
@@ -470,7 +473,7 @@
           commitment:null, activeCheckpoint:null,
           pathTags:[], bankruptcyStrikes:0,
           view:"hud", flight:null,
-          funding:{}, achievements:{}, event:null, ended:false, win:false, log:[], lastRecap:null
+          funding:{}, achievements:{}, event:null, ended:false, win:false, log:[], lastRecap:null, briefPending:false
         };
         const market = generateMarket(next.stageId);
         next.prices = market.prices; next.priceKinds = market.kinds; next.previousPrices = {...market.prices};
@@ -492,7 +495,7 @@
               priceKinds: saved.priceKinds || fresh.priceKinds, films: Array.isArray(saved.films) ? saved.films : [],
               pathTags: Array.isArray(saved.pathTags) ? saved.pathTags : [], commitment: saved.commitment || null,
               funding: {...(saved.funding||{})}, achievements: {...(saved.achievements||{})},
-              event: null, activeCheckpoint: saved.activeCheckpoint || null
+              event: null, briefPending: false, activeCheckpoint: saved.activeCheckpoint || null
             };
           }
         } catch (_) {}
@@ -522,6 +525,7 @@
       }
 
       function notify(title,copy,choices) { state.event = {title,copy,choices}; }
+      function closeBrief() { state.briefPending = false; save(); render(); return true; }
       function announce(title,copy) { notify(title,copy,[{label:"להמשיך",kind:"pass"}]); render(); return false; }
 
       function isWinner() { return false; }
@@ -602,6 +606,7 @@
         state.prices = market.prices; state.priceKinds = market.kinds;
         addLog("גיל "+Math.round(state.age)+": "+reason+(elapsed!==1?" ("+elapsed+" שנים).":""));
         state.lastRecap = { years:elapsed, interestPaid: state.debt-before, age: Math.round(state.age) };
+        state.briefPending = true;
         if (checkBankruptcy()) return true;
         if (checkStageProgress()) return true;
         if (state.stageId === "festivals") { maybeOfferFlight(); if (state.event) return false; }
@@ -880,13 +885,20 @@
         return `<div class="final-grid recap"><div><small>גיל</small><b>${r.age}</b></div><div><small>ריבית ששולמה</small><b>${money(r.interestPaid)}</b></div><div><small>משך</small><b>${r.years} שנים</b></div></div>`;
       }
 
+      function briefMarkup() {
+        const stage = currentStage();
+        return `<section class="event brief"><span>בריף השנה</span><h2>גיל ${Math.round(state.age)}</h2>
+          ${recapMarkup()}
+          ${recommendPanelMarkup(stage)}
+          <button class="quiet" data-action="brief:close">המשך ←</button>
+        </section>`;
+      }
+
       function hudView() {
         const stage = currentStage();
         const hasContent = (stage.goods.length||stage.gigs.length||stage.commitments.length);
         return `<section class="panel">
           ${goalPanelMarkup(stage)}
-          ${recommendPanelMarkup(stage)}
-          ${recapMarkup()}
           <div class="service-list">${hasContent ? marketRows() : '<p class="empty">השלב הזה עדיין בבנייה — חזרו בקרוב.</p>'}</div>
           ${goodsTable()}
           <p class="eyebrow" style="margin-top:16px">בנק</p>
@@ -914,6 +926,11 @@
           modal.innerHTML = `<section class="event"><span>${state.win?"סוף דרך — פרישה":"המסלול נעצר"}</span><h2>${state.win?"קובי הגיע/ה לפרישה אחרי קריירה שלמה.":"המסלול נעצר כאן."}</h2><p>${state.win?"עברת את כל שלבי הקריירה — מסטודנט/ית ועד פרישה.":"אפשר להתחיל מחדש עם הידע שצברת."}</p><div class="final-grid"><div><small>ציון</small><b>${money(final.score)}</b></div><div><small>גיל</small><b>${Math.round(state.age)}</b></div><div><small>שלב</small><b>${currentStage().name}</b></div></div><button data-action="new">מסלול חדש ←</button></section>`;
           return;
         }
+        if (state.briefPending && state.lastRecap) {
+          modal.classList.remove("hidden");
+          modal.innerHTML = briefMarkup();
+          return;
+        }
         if (!state.event) { modal.classList.add("hidden"); modal.innerHTML=""; return; }
         modal.classList.remove("hidden");
         modal.innerHTML = `<section class="event"><span>אירוע</span><h2>${state.event.title}</h2><p>${state.event.copy}</p><div class="event-options">${state.event.choices.map((c,i)=>`<button class="${c.quiet?"quiet":""}" data-action="event" data-id="${i}">${c.label}</button>`).join("")}</div></section>`;
@@ -939,6 +956,7 @@
           if (action.indexOf("commit:")===0) startCommitment(action.slice(7));
           if (action.indexOf("bank:")===0) bank(action.slice(5));
           if (action==="event") resolveEvent(Number(id));
+          if (action==="brief:close") closeBrief();
           if (action==="finish") { finish(false); save(); render(); }
           if (action==="new") { state = createState(); save(); render(); }
         });
@@ -949,7 +967,7 @@
       globalThis.kobiFilmTrader = {
         getState: () => clone(state),
         newGame: () => { state = createState(); return clone(state); },
-        openView, buy, sell, doGig, startCommitment, resolveEvent, bank, acceptFlight, declineFlight,
+        openView, buy, sell, doGig, startCommitment, resolveEvent, bank, acceptFlight, declineFlight, closeBrief,
         finish: () => { finish(false); return clone(state); },
         STAGES, CITIES,
         __testJumpToStage: (id) => {
