@@ -143,6 +143,8 @@
       }
       const BANKRUPTCY_STRIKE_LIMIT = 3;
       const STAGE_GRACE_YEARS = 3;
+      const DEBT_COLLECTOR_MIN_DEBT = 3000;
+      const DEBT_COLLECTOR_YEARS = 3;
 
       const UNIVERSAL_INCIDENTS = [
         { id:"bank-call", chance:.10, when:(s)=>s.debt>0, title:"הבנק מתקשר", copy:"החוב צבר ריבית והפקיד/ה מבקש/ת תשלום קטן עכשיו.", choices:[{label:"לשלם ₪500 מהחוב",kind:"debt-pay"},{label:"לדחות · החוב גדל ב-₪300",kind:"debt-delay",quiet:true}] },
@@ -516,6 +518,7 @@
           assets:{ usedCamera:false, editComputer:false, diploma:false },
           films:[],
           commitment:null, activeCheckpoint:null, filmDraft:{},
+          debtCollectorStreak:0, debtCollectorIgnores:0,
           pathTags:[], bankruptcyStrikes:0,
           view:"hud", marketTab:"work", flight:null,
           funding:{}, achievements:{}, event:null, ended:false, win:false, log:[], lastRecap:null
@@ -629,6 +632,22 @@
         return false;
       }
 
+      function checkDebtCollector() {
+        if (state.ended || state.event) return false;
+        if (state.debtCollectorStreak < DEBT_COLLECTOR_YEARS) return false;
+        const repeat = state.debtCollectorIgnores > 0;
+        const payAmountNow = Math.min(payAmount(), state.cash, state.debt);
+        notify("הגובה מגיע",
+          repeat
+            ? "זו כבר לא הפעם הראשונה. הפעם הגובה לא מסתפק באזהרה."
+            : "שנים בלי לגעת בחוב. גובה מטעם הבנק רוצה לדבר איתך — עדיין באדיבות, אבל זו אזהרה אמיתית.",
+          [
+            { label:"לשלם עכשיו · "+money(payAmountNow), kind:"collector-pay" },
+            { label:"להתעלם", kind:"collector-ignore", quiet:true }
+          ]);
+        return true;
+      }
+
       function triggerIncident() {
         if (state.event) return;
         const stage = currentStage();
@@ -644,6 +663,7 @@
         state.age += elapsed; state.stageYear += elapsed; state.year += elapsed;
         const before = state.debt;
         state.debt = Math.ceil(state.debt * Math.pow(DEBT_ANNUAL_RATE, elapsed));
+        state.debtCollectorStreak = state.debt > DEBT_COLLECTOR_MIN_DEBT ? state.debtCollectorStreak + elapsed : 0;
         state.previousPrices = {...state.prices};
         const market = generateMarket(state.stageId);
         state.prices = market.prices; state.priceKinds = market.kinds;
@@ -652,6 +672,7 @@
         state.lastRecap = { years:roundedElapsed, interestPaid: state.debt-before, age: Math.round(state.age) };
         if (checkBankruptcy()) return true;
         if (checkStageProgress()) return true;
+        if (checkDebtCollector()) return true;
         if (state.stageId === "festivals") { maybeOfferFlight(); if (state.event) return false; }
         triggerIncident();
         return false;
@@ -786,11 +807,12 @@
       function bank(action) {
         if (state.ended||state.event) return false;
         const amount = 500;
-        if (action==="pay") { const paid=Math.min(payAmount(),state.cash,state.debt); if (!paid) return announce("אין מה להחזיר","צריך מזומן כדי להקטין את החוב."); state.cash-=paid; state.debt-=paid; addLog("החזרת "+money(paid)+" מהחוב."); }
+        if (action==="pay") { const paid=Math.min(payAmount(),state.cash,state.debt); if (!paid) return announce("אין מה להחזיר","צריך מזומן כדי להקטין את החוב."); state.cash-=paid; state.debt-=paid; state.debtCollectorStreak=0; state.debtCollectorIgnores=0; addLog("החזרת "+money(paid)+" מהחוב."); }
         if (action==="payAll") {
           if (!state.debt) return announce("אין חוב להחזיר","החוב כבר עומד על אפס.");
           if (state.cash < state.debt) return announce("אין מספיק מזומן","צריך "+money(state.debt-state.cash)+" נוספים כדי לסגור את כל החוב בבת אחת.");
           const paidAll = state.debt; state.cash -= paidAll; state.debt = 0;
+          state.debtCollectorStreak=0; state.debtCollectorIgnores=0;
           addLog("סגרת את כל החוב בבת אחת — "+money(paidAll)+".");
         }
         if (action==="deposit") { if (state.cash<amount) return announce("אין מספיק מזומן","צריך "+money(amount)+" כדי להפקיד."); state.cash-=amount; state.bank+=amount; addLog("הפקדת "+money(amount)+" בבנק."); }
@@ -858,6 +880,17 @@
         else if (choice.kind === "road-gig") { state.cash += 600; state.contacts += 1; advanceYear("עבודה ספונטנית בדרך.", 1); }
         else if (choice.kind === "emergency-loan") { state.cash += 2000; state.debt = Math.ceil((state.debt+2000)*1.10); state.bankruptcyStrikes += 1; addLog("לקחת הלוואת חירום — החוב גדל משמעותית."); }
         else if (choice.kind === "give-up") { finish(false); }
+        else if (choice.kind === "collector-pay") {
+          const paid = Math.min(payAmount(), state.cash, state.debt);
+          state.cash -= paid; state.debt -= paid; state.debtCollectorStreak = 0; state.debtCollectorIgnores = 0;
+          addLog(paid ? "שילמת "+money(paid)+" לגובה — הוא הסתפק בזה, לעת עתה." : "לא היה לך מה לשלם — הגובה עזב, אבל לא לנצח.");
+        }
+        else if (choice.kind === "collector-ignore") {
+          const penalty = Math.ceil(state.debt*0.05);
+          state.debt += penalty; state.debtCollectorStreak = 0; state.debtCollectorIgnores += 1;
+          if (state.debtCollectorIgnores >= 2) { state.bankruptcyStrikes += 1; addLog("התעלמת מהגובה שוב — החוב גדל ב-"+money(penalty)+", וזה כבר מתחיל להיראות כמו פשיטת רגל."); }
+          else { addLog("התעלמת מהגובה — החוב גדל ב-"+money(penalty)+"."); }
+        }
         else if (choice.kind === "accept-flight") { return acceptFlight(choice.cityId); }
         else if (choice.kind === "decline-flight") { return declineFlight(); }
 

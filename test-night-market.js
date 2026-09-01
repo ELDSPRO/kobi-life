@@ -23,6 +23,16 @@ function clearEvent(game) {
   if (state.event) game.resolveEvent(state.event.choices.length - 1);
 }
 
+// multi-year commitment jumps (checkpoints, filmSchool, indieFilm/legacyFilm) can cross the debt-collector's
+// 3-year-neglect threshold mid-flow, inserting a "הגובה מגיע" event before the real next checkpoint opens.
+// Call this right before asserting on state.event when the intervening gap could plausibly be >=3 years.
+function drainDebtCollector(game) {
+  const state = game.getState();
+  // "ignore" (not "pay") so draining this incidental interruption doesn't perturb the cash/debt trajectory
+  // the surrounding test is actually asserting on - it only touches state.debt itself, no cash side effect.
+  if (state.event && state.event.title === "הגובה מגיע") game.resolveEvent(1);
+}
+
 function run(htmlPath) {
   const path = htmlPath || "studio-mogul-dope-wars.html";
   const game = loadGame(path);
@@ -93,6 +103,10 @@ function run(htmlPath) {
   state = game.getState();
   assert.ok(state.pathTags.includes("spec-directing"), "the checkpoint choice is recorded");
   assert.ok(state.event, "the second checkpoint opens automatically after the first resolves");
+  // two more full years pass with zero chance to touch the bank mid-commitment -> the debt-collector's
+  // 3-year-neglect threshold trips here; draining it lets progressCommitment reach the real checkpoint
+  // right after, with no extra time cost (elapsedYears was already bumped before the interruption fired)
+  drainDebtCollector(game); state = game.getState();
   assert.strictEqual(state.event.title, "פרויקט גמר");
   assert.strictEqual(state.age, 25, "the commitment advanced to the second checkpoint at year 4");
 
@@ -106,9 +120,14 @@ function run(htmlPath) {
   assert.strictEqual(state.stageId, "student", "the diploma's fame grant alone is not enough to meet the higher milestone bar — the stage stays open for more play");
 
   // --- fallback path: required milestones never met before the grace deadline ---
-  // grace deadline is age 29 (ageRange[1]=26 + STAGE_GRACE_YEARS=3); at 0.4y/gig that's 20 gigs from age 21
+  // grace deadline is age 29 (ageRange[1]=26 + STAGE_GRACE_YEARS=3); at 0.4y/gig that's 20 gigs from age 21.
+  // never paying down debt over that stretch also trips the debt-collector every ~3 years of neglect -
+  // drain those (and any other incident) so the grind toward the real fallback event can continue.
   game.newGame();
-  for (let i = 0; i < 22; i++) {
+  for (let i = 0; i < 40; i++) {
+    const s = game.getState();
+    if (s.event && s.event.title === "השלב לא הושלם כמתוכנן") break; // the real fallback event - stop and let the assertions below inspect it
+    if (s.event) { game.resolveEvent(s.event.choices.length - 1); continue; } // drain a debt-collector visit or other incident, then keep grinding
     if (!game.doGig("waiter")) break; // waiter never grants fame, so first-credit stays unmet
   }
   state = game.getState();
@@ -162,25 +181,25 @@ function run(htmlPath) {
   state = game.getState();
   assert.strictEqual(state.event.title, "לבחור ז'אנר", "production opens on a genre pick before any time passes");
   assert.strictEqual(game.resolveEvent(0), true, "דרמה"); // genre-drama: fame+1, filmDraft.genre="דרמה"
-  state = game.getState();
+  drainDebtCollector(game); state = game.getState();
   assert.strictEqual(state.fame, 1, "a checkpoint choice's effect() applies immediately, not just its pathTag");
   assert.strictEqual(state.event.title, "התסריט מוכן");
   assert.strictEqual(game.resolveEvent(1), true, "להישאר רזים ויעילים"); // script-lean: fame+1
-  state = game.getState();
+  drainDebtCollector(game); state = game.getState();
   assert.strictEqual(state.fame, 2);
   assert.strictEqual(state.event.title, "מי מככב/ת?", "casting is its own real decision, not folded into the shoot checkpoint");
   assert.strictEqual(game.resolveEvent(0), true, "כוכב/ת מוכר/ת"); // cast-star: -2000 cash, fame+2, followers+500, sets filmDraft.starName
-  state = game.getState();
+  drainDebtCollector(game); state = game.getState();
   assert.strictEqual(state.fame, 4);
   assert.strictEqual(state.event.title, "הצילומים מסתיימים");
   assert.strictEqual(game.resolveEvent(1), true, "לעצור בתקציב"); // on-budget: cash+500
-  state = game.getState();
+  drainDebtCollector(game); state = game.getState();
   assert.strictEqual(state.event.title, "משמרות עריכה", "editing shifts are their own checkpoint after the shoot wraps");
   assert.strictEqual(game.resolveEvent(1), true, "לסגור בגרסה הראשונה"); // edit-rough: no effect
-  state = game.getState();
+  drainDebtCollector(game); state = game.getState();
   assert.strictEqual(state.event.title, "בחירת הפצה");
   assert.strictEqual(game.resolveEvent(0), true, "מסלול פסטיבלים"); // festival-track: achievements flag + fame+2
-  state = game.getState();
+  drainDebtCollector(game); state = game.getState();
   assert.strictEqual(state.achievements["festival-invite"], true, "the festival-track checkpoint choice sets the flag festivals-stage flights will read");
   assert.strictEqual(state.event.title, "הסרט יוצא לאקרנים", "the finished production ends on a poster reveal, right after distribution, no time elapsed between them");
   assert.ok(state.event.html && state.event.html.indexOf("poster-card") !== -1, "the poster checkpoint renders a real poster card, not plain text");
@@ -282,6 +301,56 @@ function run(htmlPath) {
   const noDebtState = noDebtCallGame.getState();
   assert.notStrictEqual(noDebtState.event && noDebtState.event.title, "הבנק מתקשר", "the bank has nothing to call about once debt is zero");
   assert.strictEqual(noDebtState.debt, 0, "a zero balance can't be pushed back into debt by a phantom collection call");
+
+  // --- debt collector: a time-based (not ratio-based) escalating threat for sustained neglect ---
+  const collectorGame = loadGame(path);
+  collectorGame.startCommitment("selfTaught");
+
+  collectorGame.__testSetState({ debt: 5000, debtCollectorStreak: 2.5 });
+  assert.strictEqual(collectorGame.doGig("waiter"), true);
+  let cState = collectorGame.getState();
+  assert.ok(!cState.event || cState.event.title !== "הגובה מגיע", "under the 3-year neglect threshold, the collector stays away");
+
+  collectorGame.__testSetState({ debt: 5000, debtCollectorStreak: 0, debtCollectorIgnores: 0 });
+  collectorGame.__testSetState({ debtCollectorStreak: 3 });
+  assert.strictEqual(collectorGame.doGig("waiter"), true);
+  cState = collectorGame.getState();
+  assert.strictEqual(cState.event && cState.event.title, "הגובה מגיע", "3 full years of unpaid debt above the floor summons the collector");
+  assert.strictEqual(cState.event.copy.indexOf("הפעם הראשונה"), -1, "the first visit reads as a warning, not a repeat-offender callout");
+
+  const debtBeforePay = cState.debt;
+  assert.strictEqual(collectorGame.resolveEvent(0), true, "collector-pay");
+  cState = collectorGame.getState();
+  assert.ok(cState.debt < debtBeforePay, "paying the collector actually reduces the debt");
+  assert.strictEqual(cState.debtCollectorStreak, 0, "a real payment resets the neglect clock");
+  assert.strictEqual(cState.debtCollectorIgnores, 0, "a real payment also clears the escalation count, not just the clock");
+
+  collectorGame.__testSetState({ debt: 1000, debtCollectorStreak: 10 });
+  assert.strictEqual(collectorGame.doGig("waiter"), true);
+  cState = collectorGame.getState();
+  assert.ok(!cState.event || cState.event.title !== "הגובה מגיע", "below the minimum debt floor, the collector has nothing worth collecting");
+  assert.strictEqual(cState.debtCollectorStreak, 0, "dropping under the floor resets the streak outright, same as paying");
+
+  collectorGame.__testSetState({ debt: 5000, debtCollectorStreak: 3, debtCollectorIgnores: 0 });
+  assert.strictEqual(collectorGame.doGig("waiter"), true);
+  cState = collectorGame.getState();
+  assert.strictEqual(cState.event.title, "הגובה מגיע");
+  const debtBeforeIgnore = cState.debt;
+  assert.strictEqual(collectorGame.resolveEvent(1), true, "collector-ignore, 1st time");
+  cState = collectorGame.getState();
+  assert.ok(cState.debt > debtBeforeIgnore, "ignoring costs a real debt penalty instead of being free");
+  assert.strictEqual(cState.debtCollectorIgnores, 1, "a single ignore is tracked but doesn't yet count as a bankruptcy strike");
+  assert.strictEqual(cState.bankruptcyStrikes, 0, "one ignore alone is a warning, not a strike");
+
+  collectorGame.__testSetState({ debtCollectorStreak: 3 }); // a second full neglect stretch, without ever paying in between
+  assert.strictEqual(collectorGame.doGig("waiter"), true);
+  cState = collectorGame.getState();
+  assert.strictEqual(cState.event.title, "הגובה מגיע");
+  assert.notStrictEqual(cState.event.copy.indexOf("הפעם הראשונה"), -1, "a repeat visit reads as an escalation, not a fresh warning");
+  assert.strictEqual(collectorGame.resolveEvent(1), true, "collector-ignore, 2nd time");
+  cState = collectorGame.getState();
+  assert.strictEqual(cState.debtCollectorIgnores, 2);
+  assert.strictEqual(cState.bankruptcyStrikes, 1, "a second consecutive ignore now counts toward the same bankruptcy-strike limit as the ratio-based crisis");
 }
 
 if (require.main === module) {
