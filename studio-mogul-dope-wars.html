@@ -261,9 +261,11 @@
           headline:"לבנות בסיס: מקצוע, ציוד ראשון, קרדיט ראשון",
           goods:[
             { id:"usedCamera",   name:"מצלמה יד שנייה", base:340, persistsAsAsset:true  },
-            { id:"scriptRights", name:"זכויות לתסריט",  base:110, persistsAsAsset:false },
             { id:"editComputer", name:"מחשב עריכה",     base:520, persistsAsAsset:true  },
-            { id:"mic",          name:"מיקרופון",       base:140, persistsAsAsset:false }
+            { id:"mic",          name:"מיקרופון",       base:140, persistsAsAsset:false },
+            { id:"tripod",       name:"חצובה משומשת",   base:120, persistsAsAsset:false },
+            { id:"scriptRights", name:"זכויות לתסריט",       base:110, persistsAsAsset:false, market:"deal" },
+            { id:"locationPermit", name:"רישיון צילום במיקום", base:180, persistsAsAsset:false, market:"deal" }
           ],
           gigs:[
             { id:"usher",      title:"סדרן/ית בקולנוע",          copy:"עבודה קבועה וזמינה, בלי דרישות.",             needs:{}, cash:900,  fame:0, contacts:0, followers:0 },
@@ -309,8 +311,10 @@
           goods:[
             { id:"proCamera",    name:"מצלמה מקצועית", base:1800, persistsAsAsset:true  },
             { id:"lightingKit",  name:"ערכת תאורה",     base:950,  persistsAsAsset:true  },
-            { id:"shootDaySlot", name:"יום צילום פנוי",  base:550,  persistsAsAsset:false },
-            { id:"crewFavor",    name:"טובה מצוות",      base:220,  persistsAsAsset:false }
+            { id:"usedBoomMic",  name:"מיקרופון בום משומש",  base:480, persistsAsAsset:false },
+            { id:"batteryKit",   name:"ערכת סוללות נטענות",   base:260, persistsAsAsset:false },
+            { id:"shootDaySlot", name:"יום צילום פנוי",  base:550,  persistsAsAsset:false, market:"deal" },
+            { id:"crewFavor",    name:"טובה מצוות",      base:220,  persistsAsAsset:false, market:"deal" }
           ],
           gigs:[
             { id:"camAssist",      title:"עוזר/ת צלם",           copy:"עבודה יציבה, בלי דרישות מיוחדות.",                needs:{}, cash:1600, fame:1, contacts:1, followers:0 },
@@ -342,8 +346,10 @@
           goods:[
             { id:"indieCameraPkg", name:"חבילת צילום עצמאית", base:2600, persistsAsAsset:true  },
             { id:"editSuite",      name:"עמדת עריכה מקצועית", base:1900, persistsAsAsset:true  },
-            { id:"postSlot",       name:"חלון פוסט-פרודקשן",   base:700,  persistsAsAsset:false },
-            { id:"distroLead",     name:"ליד להפצה",           base:450,  persistsAsAsset:false }
+            { id:"usedSoundMixer", name:"מיקסר סאונד משומש",   base:1100, persistsAsAsset:false },
+            { id:"backupDrive",    name:"כונן גיבוי חיצוני",   base:520,  persistsAsAsset:false },
+            { id:"postSlot",       name:"חלון פוסט-פרודקשן",   base:700,  persistsAsAsset:false, market:"deal" },
+            { id:"distroLead",     name:"ליד להפצה",           base:450,  persistsAsAsset:false, market:"deal" }
           ],
           gigs:[
             { id:"commercialGig", title:"עבודה מסחרית", copy:"מממנת את החיים בזמן שהסרט מתפתח.", needs:{}, cash:2600, fame:0, contacts:0, followers:0 },
@@ -423,10 +429,12 @@
           id:"festivals", order:3, name:"פסטיבלים", ageRange:[43,53],
           headline:"לקחת את הסרט אל העולם — ולהפוך אותו לקריירה בינלאומית",
           goods:[
-            { id:"distroRights",      name:"זכויות הפצה בינלאומיות", base:2200, persistsAsAsset:false },
-            { id:"screeningWindow",   name:"חלון הקרנה",              base:900,  persistsAsAsset:false },
-            { id:"streamingDeal",     name:"עסקת סטרימינג",           base:3400, persistsAsAsset:false },
-            { id:"salesAgentContract",name:"חוזה עם סוכן מכירות",      base:1600, persistsAsAsset:true  }
+            { id:"salesAgentContract",name:"חוזה עם סוכן מכירות",      base:1600, persistsAsAsset:true  },
+            { id:"dcpCopy",           name:"עותק הקרנה (DCP)",         base:1400, persistsAsAsset:false },
+            { id:"vipBadge",          name:"תג גישה VIP מפסטיבל קודם", base:950,  persistsAsAsset:false },
+            { id:"distroRights",      name:"זכויות הפצה בינלאומיות", base:2200, persistsAsAsset:false, market:"deal" },
+            { id:"screeningWindow",   name:"חלון הקרנה",              base:900,  persistsAsAsset:false, market:"deal" },
+            { id:"streamingDeal",     name:"עסקת סטרימינג",           base:3400, persistsAsAsset:false, market:"deal" }
           ],
           gigs:[
             { id:"festivalPanel", title:"פאנל בפסטיבל",       copy:"לא משלם הרבה, אבל בונה שם בינלאומי.", needs:{}, cash:900,  fame:2, contacts:2, followers:100 },
@@ -454,10 +462,12 @@
           id:"breakthrough", order:4, name:"פריצה", ageRange:[53,65],
           headline:"מפרויקט לפרויקט גדולים — לבנות הון וקריירה ברמת אולפן",
           goods:[
-            { id:"studioOptionDeal",       name:"אופציה מאולפן",       base:5000,  persistsAsAsset:false },
-            { id:"packageDeal",            name:"חבילת פרויקט",         base:7500,  persistsAsAsset:false },
             { id:"distributionStake",      name:"נתח בזכויות הפצה",     base:9000,  persistsAsAsset:true  },
-            { id:"productionCompanyShare", name:"חלק בחברת הפקה",       base:12000, persistsAsAsset:true  }
+            { id:"productionCompanyShare", name:"חלק בחברת הפקה",       base:12000, persistsAsAsset:true  },
+            { id:"usedLightingRig",        name:"מערכת תאורת סטודיו משומשת", base:6200, persistsAsAsset:false },
+            { id:"supportVehicle",         name:"רכב תמיכה להפקה",          base:8800, persistsAsAsset:false },
+            { id:"studioOptionDeal",       name:"אופציה מאולפן",       base:5000,  persistsAsAsset:false, market:"deal" },
+            { id:"packageDeal",            name:"חבילת פרויקט",         base:7500,  persistsAsAsset:false, market:"deal" }
           ],
           gigs:[
             { id:"showrunnerGig", title:"ניהול פרויקט אולפן", copy:"הכי הרבה מוניטין וקהל.",  needs:{}, cash:8000, fame:3, contacts:2, followers:500 },
@@ -487,9 +497,11 @@
           headline:"לסגור מעגל — הסרט האישי, ומה שנשאר אחריך",
           goods:[
             { id:"filmRightsLibrary", name:"ארכיון זכויות אישי", base:80000,  persistsAsAsset:true  },
-            { id:"mentorshipProgram", name:"תוכנית הנחיה",        base:15000,  persistsAsAsset:false },
-            { id:"retrospectiveDeal", name:"עסקת רטרוספקטיבה",    base:30000,  persistsAsAsset:false },
-            { id:"personalStudio",    name:"סטודיו אישי",          base:100000, persistsAsAsset:true  }
+            { id:"personalStudio",    name:"סטודיו אישי",          base:100000, persistsAsAsset:true  },
+            { id:"vintageCamera",     name:"מצלמת פילם וינטג׳",        base:22000, persistsAsAsset:false },
+            { id:"stillsArchiveBox",  name:"תיבת ארכיון תמונות סטילס", base:18000, persistsAsAsset:false },
+            { id:"mentorshipProgram", name:"תוכנית הנחיה",        base:15000,  persistsAsAsset:false, market:"deal" },
+            { id:"retrospectiveDeal", name:"עסקת רטרוספקטיבה",    base:30000,  persistsAsAsset:false, market:"deal" }
           ],
           gigs:[
             { id:"teachingGig",     title:"הוראה באקדמיה",       copy:"מוריש/ה את הידע הלאה.", needs:{}, cash:25000, fame:2, contacts:1, followers:300 },
@@ -1031,7 +1043,8 @@
         const unavailable = price == null;
         const already = good.persistsAsAsset && state.assets[good.id];
         const owned = good.persistsAsAsset ? (already?1:0) : (state.bag[good.id]||0);
-        return `<article class="action-row"><div><h3>${good.name}${trendBadge(good.id)}</h3><p>${good.persistsAsAsset ? "נכס קבוע" : ("סחורה · בתיק: "+owned)}</p></div><div class="action-meta"><b>${unavailable?"לא זמין":(already?"נרכש":money(price))}</b><span><button class="row-action" data-action="buy" data-id="${good.id}" ${unavailable||already?"disabled":""}>קנה</button> ${good.persistsAsAsset ? "" : `<button class="row-action quiet" data-action="sell" data-id="${good.id}" ${owned?"":"disabled"}>מכור</button>`}</span></div></article>`;
+        const kindLabel = good.persistsAsAsset ? "נכס קבוע" : good.market==="deal" ? ("עסקה · בתיק: "+owned) : ("יד שנייה · בתיק: "+owned);
+        return `<article class="action-row"><div><h3>${good.name}${trendBadge(good.id)}</h3><p>${kindLabel}</p></div><div class="action-meta"><b>${unavailable?"לא זמין":(already?"נרכש":money(price))}</b><span><button class="row-action" data-action="buy" data-id="${good.id}" ${unavailable||already?"disabled":""}>קנה</button> ${good.persistsAsAsset ? "" : `<button class="row-action quiet" data-action="sell" data-id="${good.id}" ${owned?"":"disabled"}>מכור</button>`}</span></div></article>`;
       }
 
       function shopRows() {
@@ -1040,8 +1053,13 @@
       }
 
       function secondhandRows() {
-        const goods = (currentStage().goods||[]).filter((g)=>!g.persistsAsAsset);
+        const goods = (currentStage().goods||[]).filter((g)=>!g.persistsAsAsset && g.market!=="deal");
         return goods.length ? goods.map(goodRow).join("") : '<p class="empty">אין עדיין פריטים בשוק היד-שנייה בשלב הזה.</p>';
+      }
+
+      function dealRows() {
+        const goods = (currentStage().goods||[]).filter((g)=>!g.persistsAsAsset && g.market==="deal");
+        return goods.length ? goods.map(goodRow).join("") : '<p class="empty">אין עדיין עסקאות זמינות בשלב הזה.</p>';
       }
 
       function bankRows() {
@@ -1067,7 +1085,8 @@
       const MARKET_TABS = [
         { id:"work", label:"עבודה" },
         { id:"shop", label:"חנות" },
-        { id:"secondhand", label:"שוק יד-2" },
+        { id:"secondhand", label:"יד שנייה" },
+        { id:"deals", label:"עסקאות" },
         { id:"financing", label:"מימון" }
       ];
 
@@ -1082,6 +1101,7 @@
         const tab = state.marketTab || "work";
         if (tab==="shop") return shopRows();
         if (tab==="secondhand") return secondhandRows();
+        if (tab==="deals") return dealRows();
         if (tab==="financing") return financingRows();
         return workRows();
       }
