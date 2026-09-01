@@ -38,6 +38,17 @@
     .milestone { padding:4px 9px; color:var(--muted); border:1px solid rgba(229,238,255,.15); border-radius:999px; background:rgba(255,255,255,.03); font-size:.65rem; font-weight:750; }
     .milestone.required { border-color:rgba(244,189,75,.4); }
     .milestone.done { color:var(--green); border-color:rgba(103,207,196,.5); background:rgba(103,207,196,.08); }
+    .milestone-progress { margin-top:10px; }
+    .progress-label { display:flex; justify-content:space-between; font-size:.68rem; color:var(--cream); font-weight:750; }
+    .progress-track { position:relative; height:8px; margin-top:4px; border-radius:5px; background:rgba(255,255,255,.08); overflow:hidden; }
+    .progress-fill { height:100%; background:var(--amber); border-radius:5px; }
+    .milestone-progress.done .progress-fill { background:var(--green); }
+    .milestone-progress.done .progress-label { color:var(--green); }
+    .market-table { width:100%; margin-top:8px; border-collapse:collapse; font-size:.78rem; }
+    .market-table th { padding:6px 4px; color:var(--amber); font-size:.62rem; font-weight:900; letter-spacing:.05em; text-align:right; border-bottom:1px solid rgba(229,238,255,.15); }
+    .market-table td { padding:9px 4px; border-bottom:1px solid rgba(229,238,255,.08); vertical-align:middle; color:var(--cream); }
+    .market-table td small { color:var(--muted); font-size:.66rem; }
+    .market-table td.actions { display:flex; gap:6px; justify-content:flex-end; white-space:nowrap; }
     .recommend-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
     .primary,.back,.service-row,.row-action,.footer-actions button,.event button { min-height:34px; padding:7px 11px; cursor:pointer; border-radius:7px; font-size:.74rem; font-weight:850; }
     .primary { color:#191307; border:0; background:var(--amber); }
@@ -100,7 +111,8 @@
       const FLIGHT_CITY_IDS = ["athens","berlin","london","newyork","losangeles"];
 
       const DEFAULT_RISK = { crashChance:.05, spikeChance:.05, unavailableChance:.03, crashRange:[.3,.5], spikeRange:[1.6,2.4] };
-      const DEBT_ANNUAL_RATE = 1.045;
+      const DEBT_ANNUAL_RATE = 1.03;
+      const BANK_ANNUAL_RATE = 1.015;
       const BANKRUPTCY_STRIKE_LIMIT = 3;
       const STAGE_GRACE_YEARS = 3;
 
@@ -218,8 +230,8 @@
           ],
           riskProfile:null,
           milestones:[
-            { id:"first-credit", label:"קרדיט מקצועי ראשון", check:(s)=>s.fame>=6,               required:true },
-            { id:"stable-cash",  label:"רשת ביטחון כלכלית",   check:(s)=>(s.cash+s.bank)>=5000,   required:true },
+            { id:"first-credit", label:"קרדיט מקצועי ראשון", check:(s)=>s.fame>=6,               required:true, progress:(s)=>({current:s.fame, target:6}) },
+            { id:"stable-cash",  label:"רשת ביטחון כלכלית",   check:(s)=>(s.cash+s.bank)>=5000,   required:true, progress:(s)=>({current:s.cash+s.bank, target:5000}) },
             { id:"own-gear",     label:"ציוד יד שני משלך",     check:(s)=>!!s.assets.usedCamera,   required:false },
             { id:"industry-tie", label:"קשר ראשון בתעשייה",    check:(s)=>s.contacts>=2,           required:false }
           ],
@@ -251,8 +263,8 @@
           ],
           riskProfile:null,
           milestones:[
-            { id:"industry-credit",  label:"קרדיט מבוסס בתעשייה", check:(s)=>s.fame>=40,               required:true },
-            { id:"industry-network", label:"רשת קשרים בתעשייה",   check:(s)=>s.contacts>=18,           required:true },
+            { id:"industry-credit",  label:"קרדיט מבוסס בתעשייה", check:(s)=>s.fame>=40,               required:true, progress:(s)=>({current:s.fame, target:40}) },
+            { id:"industry-network", label:"רשת קשרים בתעשייה",   check:(s)=>s.contacts>=18,           required:true, progress:(s)=>({current:s.contacts, target:18}) },
             { id:"pro-gear",         label:"ציוד מקצועי משלך",     check:(s)=>!!s.assets.proCamera,     required:false },
             { id:"cash-cushion",     label:"כרית ביטחון גדולה",    check:(s)=>(s.cash+s.bank)>=8000,    required:false }
           ],
@@ -301,8 +313,8 @@
           ],
           riskProfile:null,
           milestones:[
-            { id:"film-made", label:"סרט עצמאי ראשון הושלם", check:(s)=>s.films.length>=1,       required:true },
-            { id:"solvent",   label:"יציבות כלכלית בסיסית",   check:(s)=>(s.cash+s.bank)>=500,     required:true },
+            { id:"film-made", label:"סרט עצמאי ראשון הושלם", check:(s)=>s.films.length>=1,       required:true, progress:(s)=>({current:s.films.length, target:1}) },
+            { id:"solvent",   label:"יציבות כלכלית בסיסית",   check:(s)=>(s.cash+s.bank)>=500,     required:true, progress:(s)=>({current:s.cash+s.bank, target:500}) },
             { id:"festival-ready", label:"מוכן/ה לפסטיבלים", check:(s)=>!!s.achievements["festival-invite"], required:false },
             { id:"grew-audience",  label:"קהל שגדל",          check:(s)=>s.followers>=1000,        required:false }
           ],
@@ -332,8 +344,8 @@
           ],
           riskProfile:null,
           milestones:[
-            { id:"international-fame", label:"מוניטין בינלאומי", check:(s)=>s.fame>=60,      required:true },
-            { id:"global-audience",    label:"קהל גלובלי",       check:(s)=>s.followers>=3000, required:true },
+            { id:"international-fame", label:"מוניטין בינלאומי", check:(s)=>s.fame>=60,      required:true, progress:(s)=>({current:s.fame, target:60}) },
+            { id:"global-audience",    label:"קהל גלובלי",       check:(s)=>s.followers>=3000, required:true, progress:(s)=>({current:s.followers, target:3000}) },
             { id:"sales-agent",        label:"סוכן/ת מכירות",     check:(s)=>!!s.assets.salesAgentContract, required:false },
             { id:"toured",             label:"סבב פסטיבלים אמיתי", check:(s)=>Object.keys(s.achievements).filter((k)=>k.indexOf("visited-")===0).length>=2, required:false }
           ],
@@ -363,8 +375,8 @@
           ],
           riskProfile:null,
           milestones:[
-            { id:"studio-fame",  label:"מוניטין ברמת אולפן",  check:(s)=>s.fame>=90,               required:true },
-            { id:"real-wealth",  label:"הון משמעותי",          check:(s)=>(s.cash+s.bank)>=80000,   required:true },
+            { id:"studio-fame",  label:"מוניטין ברמת אולפן",  check:(s)=>s.fame>=90,               required:true, progress:(s)=>({current:s.fame, target:90}) },
+            { id:"real-wealth",  label:"הון משמעותי",          check:(s)=>(s.cash+s.bank)>=80000,   required:true, progress:(s)=>({current:s.cash+s.bank, target:80000}) },
             { id:"prod-company", label:"חלק בחברת הפקה",       check:(s)=>!!s.assets.productionCompanyShare, required:false },
             { id:"mass-audience",label:"קהל המוני",             check:(s)=>s.followers>=10000,       required:false }
           ],
@@ -408,8 +420,8 @@
           ],
           riskProfile:null,
           milestones:[
-            { id:"storied-career", label:"קריירה מלאה",         check:(s)=>s.fame>=100,          required:true },
-            { id:"capstone-film",  label:"הסרט האישי הושלם",    check:(s)=>s.films.length>=2,    required:true },
+            { id:"storied-career", label:"קריירה מלאה",         check:(s)=>s.fame>=100,          required:true, progress:(s)=>({current:s.fame, target:100}) },
+            { id:"capstone-film",  label:"הסרט האישי הושלם",    check:(s)=>s.films.length>=2,    required:true, progress:(s)=>({current:s.films.length, target:2}) },
             { id:"wealthy-retire", label:"פרישה עם הון",         check:(s)=>(s.cash+s.bank)>=150000, required:false },
             { id:"beloved",        label:"קהל שאוהב",            check:(s)=>s.followers>=15000,   required:false }
           ],
@@ -584,6 +596,7 @@
         state.age += elapsed; state.stageYear += elapsed; state.year += elapsed;
         const before = state.debt;
         state.debt = Math.ceil(state.debt * Math.pow(DEBT_ANNUAL_RATE, elapsed));
+        if (state.bank > 0) state.bank = Math.round(state.bank * Math.pow(BANK_ANNUAL_RATE, elapsed));
         state.previousPrices = {...state.prices};
         const market = generateMarket(state.stageId);
         state.prices = market.prices; state.priceKinds = market.kinds;
@@ -794,25 +807,35 @@
           const config = currentCommitmentConfig(state);
           html += `<article class="action-row"><div><h3>${config.name}</h3><p>בעיצומה · שנה ${Math.round(state.commitment.elapsedYears)} מתוך ${config.years}</p></div><div class="action-meta"><b>בתהליך</b></div></article>`;
         } else {
-          html += (stage.gigs||[]).map((gig) => {
+          const gigRow = (gig) => {
             const lack = missing(gig.needs);
             const meta = "+"+money(gig.cash)+(gig.fame?" · +"+gig.fame+" קרדיטים":"");
             return row(gig.title, gig.copy+(lack.length?" · חסר: "+lack.join(" · "):""), meta, "gig:"+gig.id, lack.length?"חסר ציוד":"לעבוד");
-          }).join("");
+          };
+          const careerGigs = (stage.gigs||[]).filter((g)=>g.fame>0||g.contacts>0);
+          const survivalGigs = (stage.gigs||[]).filter((g)=>!(g.fame>0||g.contacts>0));
+          if (survivalGigs.length) html += `<p class="eyebrow" style="margin-top:12px">עבודות הישרדות · כסף מהיר</p>` + survivalGigs.map(gigRow).join("");
+          if (careerGigs.length) html += `<p class="eyebrow" style="margin-top:12px">עבודות קריירה · קרדיט וקשרים</p>` + careerGigs.map(gigRow).join("");
         }
-        html += (stage.goods||[]).map((good) => {
+        return html;
+      }
+
+      function goodsTable() {
+        const stage = currentStage();
+        if (!(stage.goods||[]).length) return "";
+        const rows = stage.goods.map((good) => {
           const price = state.prices[good.id];
           const unavailable = price == null;
           const already = good.persistsAsAsset && state.assets[good.id];
           const owned = good.persistsAsAsset ? (already?1:0) : (state.bag[good.id]||0);
-          return `<article class="action-row"><div><h3>${good.name}${trendBadge(good.id)}</h3><p>${good.persistsAsAsset ? "נכס קבוע" : ("סחורה · בתיק: "+owned)}</p></div><div class="action-meta"><b>${unavailable?"לא זמין":(already?"נרכש":money(price))}</b><span><button class="row-action" data-action="buy" data-id="${good.id}" ${unavailable||already?"disabled":""}>קנה</button> ${good.persistsAsAsset ? "" : `<button class="row-action quiet" data-action="sell" data-id="${good.id}" ${owned?"":"disabled"}>מכור</button>`}</span></div></article>`;
+          return `<tr><td>${good.name}${trendBadge(good.id)}<br><small>${good.persistsAsAsset?"נכס קבוע":"סחורה"}</small></td><td>${unavailable?"—":money(price)}</td><td>${good.persistsAsAsset?(already?"נרכש":"—"):owned}</td><td class="actions"><button class="row-action" data-action="buy" data-id="${good.id}" ${unavailable||already?"disabled":""}>קנה</button>${good.persistsAsAsset?"":`<button class="row-action quiet" data-action="sell" data-id="${good.id}" ${owned?"":"disabled"}>מכור</button>`}</td></tr>`;
         }).join("");
-        return html;
+        return `<p class="eyebrow" style="margin-top:16px">שוק</p><table class="market-table"><thead><tr><th>פריט</th><th>מחיר</th><th>יש לי</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
       }
 
       function bankRows() {
         return row("להחזיר חוב","החוב גדל בכל שנה שעוברת · 10% מהחוב הנוכחי",money(payAmount()),"bank:pay","להחזיר")
-          + row("להפקיד","שומר כסף בצד",money(500),"bank:deposit","להפקיד")
+          + row("להפקיד","צובר ריבית · 1.5% לשנה",money(500),"bank:deposit","להפקיד")
           + row("למשוך פיקדון","כרגע בבנק: "+money(state.bank),money(500),"bank:withdraw","למשוך");
       }
 
@@ -831,9 +854,18 @@
         }).join("")}</nav>`;
       }
 
+      function progressBarMarkup(m) {
+        const p = m.progress(state);
+        const pct = Math.max(0, Math.min(100, Math.round((p.current/p.target)*100)));
+        const fmt = (n) => Math.round(n).toLocaleString("he-IL");
+        return `<div class="milestone-progress ${pct>=100?"done":""}"><div class="progress-label"><span>${pct>=100?"✓ ":""}${m.label}</span><span>${fmt(p.current)} / ${fmt(p.target)}</span></div><div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div></div>`;
+      }
       function goalPanelMarkup(stage) {
-        const items = (stage.milestones||[]).map((m)=>`<span class="milestone ${m.check(state)?"done":""} ${m.required?"required":""}">${m.check(state)?"✓ ":""}${m.label}</span>`).join("");
-        return `<div class="next-move"><div><small>המטרה הנוכחית · ${stage.name} (${stage.ageRange[0]}–${stage.ageRange[1]})</small><b>${stage.headline}</b><div class="milestone-list">${items||'<span class="milestone">אין עדיין יעדים מוגדרים</span>'}</div></div></div>`;
+        const milestones = stage.milestones||[];
+        const bars = milestones.filter((m)=>m.required && m.progress).map(progressBarMarkup).join("");
+        const chips = milestones.filter((m)=>!m.required).map((m)=>`<span class="milestone ${m.check(state)?"done":""}">${m.check(state)?"✓ ":""}${m.label}</span>`).join("");
+        const empty = !bars && !chips ? '<span class="milestone">אין עדיין יעדים מוגדרים</span>' : "";
+        return `<div class="next-move"><div><small>המטרה הנוכחית · ${stage.name} (${stage.ageRange[0]}–${stage.ageRange[1]})</small><b>${stage.headline}</b>${bars}${chips?`<div class="milestone-list">${chips}</div>`:""}${empty}</div></div>`;
       }
 
       function recommendPanelMarkup(stage) {
@@ -856,6 +888,7 @@
           ${recommendPanelMarkup(stage)}
           ${recapMarkup()}
           <div class="service-list">${hasContent ? marketRows() : '<p class="empty">השלב הזה עדיין בבנייה — חזרו בקרוב.</p>'}</div>
+          ${goodsTable()}
           <p class="eyebrow" style="margin-top:16px">בנק</p>
           <div class="service-list">${bankRows()}</div>
           <div class="footer-actions"><button data-action="finish">לוותר על המסלול</button><button data-action="bag">תיק הפקה</button></div>
