@@ -46,10 +46,10 @@ function run(htmlPath) {
   const beforeGig = game.getState();
   assert.strictEqual(game.doGig("waiter"), true, "a starter gig is playable without equipment");
   state = game.getState();
-  assert.strictEqual(state.age, 22, "a gig advances exactly one year");
+  assert.strictEqual(state.age, 21.4, "a gig advances 0.4 of a year (about five months), not a full year");
   assert.ok(state.cash > beforeGig.cash, "a gig pays cash");
-  const expectedDebt = Math.ceil(8000 * Math.pow(1.045, 1));
-  assert.strictEqual(state.debt, expectedDebt, "debt compounds at the annual rate, not the old weekly rate");
+  const expectedDebt = Math.ceil(8000 * Math.pow(1.028, 0.4));
+  assert.strictEqual(state.debt, expectedDebt, "debt compounds at the annual rate applied to the gig's fractional-year duration");
 
   // --- buy: asset vs. bag, capacity ---
   assert.strictEqual(game.buy("usedCamera"), true, "an asset-flagged good can be bought");
@@ -106,8 +106,9 @@ function run(htmlPath) {
   assert.strictEqual(state.stageId, "student", "the diploma's fame grant alone is not enough to meet the higher milestone bar — the stage stays open for more play");
 
   // --- fallback path: required milestones never met before the grace deadline ---
+  // grace deadline is age 29 (ageRange[1]=26 + STAGE_GRACE_YEARS=3); at 0.4y/gig that's 20 gigs from age 21
   game.newGame();
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 22; i++) {
     if (!game.doGig("waiter")) break; // waiter never grants fame, so first-credit stays unmet
   }
   state = game.getState();
@@ -154,24 +155,42 @@ function run(htmlPath) {
   assert.strictEqual(state.bag.crewFavor, undefined, "the gating good is liquidated on transition since indie (still a stub) has no matching good");
   assert.ok(state.log.some((line) => line.indexOf("מומש אוטומטית") === 0));
 
-  // --- indie stage: commitment with checkpoint effects, films.push on completion, milestone transition ---
+  // --- indie stage: the full film-production flow (genre -> script -> cast -> shoot -> edit -> distribution -> poster), films.push on completion, milestone transition ---
   game.newGame();
   game.__testJumpToStage("indie");
   assert.strictEqual(game.startCommitment("indieFilm"), true);
   state = game.getState();
-  assert.strictEqual(state.event.title, "התסריט מוכן", "the first indie checkpoint opens after the entry-debt jump");
-  assert.strictEqual(game.resolveEvent(1), true, "להישאר רזים ויעילים"); // script-lean: fame+1, no cash cost
+  assert.strictEqual(state.event.title, "לבחור ז'אנר", "production opens on a genre pick before any time passes");
+  assert.strictEqual(game.resolveEvent(0), true, "דרמה"); // genre-drama: fame+1, filmDraft.genre="דרמה"
   state = game.getState();
   assert.strictEqual(state.fame, 1, "a checkpoint choice's effect() applies immediately, not just its pathTag");
+  assert.strictEqual(state.event.title, "התסריט מוכן");
+  assert.strictEqual(game.resolveEvent(1), true, "להישאר רזים ויעילים"); // script-lean: fame+1
+  state = game.getState();
+  assert.strictEqual(state.fame, 2);
+  assert.strictEqual(state.event.title, "מי מככב/ת?", "casting is its own real decision, not folded into the shoot checkpoint");
+  assert.strictEqual(game.resolveEvent(0), true, "כוכב/ת מוכר/ת"); // cast-star: -2000 cash, fame+2, followers+500, sets filmDraft.starName
+  state = game.getState();
+  assert.strictEqual(state.fame, 4);
   assert.strictEqual(state.event.title, "הצילומים מסתיימים");
   assert.strictEqual(game.resolveEvent(1), true, "לעצור בתקציב"); // on-budget: cash+500
+  state = game.getState();
+  assert.strictEqual(state.event.title, "משמרות עריכה", "editing shifts are their own checkpoint after the shoot wraps");
+  assert.strictEqual(game.resolveEvent(1), true, "לסגור בגרסה הראשונה"); // edit-rough: no effect
   state = game.getState();
   assert.strictEqual(state.event.title, "בחירת הפצה");
   assert.strictEqual(game.resolveEvent(0), true, "מסלול פסטיבלים"); // festival-track: achievements flag + fame+2
   state = game.getState();
   assert.strictEqual(state.achievements["festival-invite"], true, "the festival-track checkpoint choice sets the flag festivals-stage flights will read");
+  assert.strictEqual(state.event.title, "הסרט יוצא לאקרנים", "the finished production ends on a poster reveal, right after distribution, no time elapsed between them");
+  assert.ok(state.event.html && state.event.html.indexOf("poster-card") !== -1, "the poster checkpoint renders a real poster card, not plain text");
+  assert.ok(state.event.html.indexOf("גיא") !== -1, "the poster credits the cast choice actually made (fixed RNG picks a reproducible actor name)");
+  assert.strictEqual(game.resolveEvent(0), true, "להמשיך ←"); // poster-ack: no effect, just closes the reveal
+  state = game.getState();
   assert.strictEqual(state.films.length, 1, "completing the indieFilm commitment records a real film asset");
-  assert.strictEqual(state.fame, 7, "1 (script-lean) + 2 (festival-track) + 4 (grantsOnComplete) = 7");
+  assert.strictEqual(state.films[0].genre, "דרמה", "the film record carries the genre actually chosen, not a hardcoded default");
+  assert.strictEqual(state.films[0].starring, "גיא", "the film record carries the cast choice actually made");
+  assert.strictEqual(state.fame, 10, "1(drama)+1(script-lean)+2(cast-star)+0(on-budget)+0(edit-rough)+2(festival-track)+4(grantsOnComplete) = 10");
   assert.strictEqual(state.stageId, "festivals", "both required milestones (a finished film, basic solvency) are met on completion");
 
   // --- __testJumpToStage seam (needed by the future festivals-stage test block) ---
@@ -202,10 +221,19 @@ function run(htmlPath) {
   game.__testJumpToStage("legacy");
   game.__testSetState({ fame: 95, films: [{ title: "הסרט העצמאי הראשון" }] });
   assert.strictEqual(game.startCommitment("legacyFilm"), true);
-  assert.strictEqual(game.resolveEvent(0), true, "הסיפור הכי אישי שלך"); // fame+2 -> 97
-  assert.strictEqual(game.resolveEvent(0), true, "הקרנת יחיד בפסטיבל הבית"); // fame+3 -> 100, then +5 on completion -> 105
+  state = game.getState();
+  assert.strictEqual(state.event.title, "לבחור ז'אנר", "the capstone film still opens on a genre pick, even in its leaner two-decision flow");
+  assert.strictEqual(game.resolveEvent(0), true, "דרמה"); // genre-drama: fame+1 -> 96
+  assert.strictEqual(game.resolveEvent(0), true, "הסיפור הכי אישי שלך"); // fame+2 -> 98
+  assert.strictEqual(game.resolveEvent(0), true, "הקרנת יחיד בפסטיבל הבית"); // fame+3 -> 101
+  state = game.getState();
+  assert.strictEqual(state.event.title, "הסרט יוצא לאקרנים", "the capstone film also ends on a poster reveal");
+  assert.ok(state.event.html && state.event.html.indexOf("קובי") !== -1, "with no cast checkpoint of its own, the legacy poster credits the player as star");
+  assert.strictEqual(game.resolveEvent(0), true, "להמשיך ←"); // poster-ack -> completeCommitment grants +5 -> 106
   state = game.getState();
   assert.strictEqual(state.films.length, 2, "the legacy film is a second real film asset");
+  assert.strictEqual(state.films[1].starring, "קובי");
+  assert.strictEqual(state.fame, 106, "95 + 1(drama) + 2(personal-story) + 3(solo-screening) + 5(grantsOnComplete) = 106");
   assert.strictEqual(state.ended, true, "meeting legacy's required milestones ends the run — there is no seventh stage");
   assert.strictEqual(state.win, true, "reaching the end of the career ladder is a win, not a timer running out");
   assert.ok(state.final && state.final.score > 0, "a final score is computed on completion");
@@ -220,6 +248,40 @@ function run(htmlPath) {
   const unavailState = unavailGame.getState();
   assertAllKind(unavailState, studentGoods, "unavailable");
   studentGoods.forEach((g) => assert.strictEqual(unavailState.prices[g.id], null, g.id + " has no price while unavailable"));
+
+  // --- bank: pay off the full debt balance in one action ---
+  const payoffGame = loadGame(path);
+  payoffGame.startCommitment("selfTaught");
+  payoffGame.__testSetState({ cash: 20000, debt: 8000 });
+  assert.strictEqual(payoffGame.bank("payAll"), true, "a full payoff succeeds when cash covers the whole debt");
+  let payoffState = payoffGame.getState();
+  assert.strictEqual(payoffState.debt, 0, "the entire debt balance is cleared, not just a fraction of it");
+  assert.strictEqual(payoffState.cash, 12000, "the exact debt amount is deducted from cash, no more");
+
+  payoffGame.__testSetState({ cash: 100, debt: 5000 });
+  assert.strictEqual(payoffGame.bank("payAll"), false, "a full payoff is refused when cash can't cover the whole debt");
+  clearEvent(payoffGame);
+  assert.strictEqual(payoffGame.getState().debt, 5000, "a refused payoff leaves the debt untouched");
+
+  payoffGame.__testSetState({ debt: 0 });
+  assert.strictEqual(payoffGame.bank("payAll"), false, "paying off an already-zero debt is refused rather than a silent no-op");
+  clearEvent(payoffGame);
+
+  // --- the "bank calls" incident only fires while there's real debt to collect on ---
+  // roll 0.20 lands on bank-call's band when debt>0 (pool: gig-falls-through[0,.08) cheap-gear[.08,.16) bank-call[.16,.26) road-gig[.26,.34)),
+  // and on road-gig's shifted band when debt=0 filters bank-call out of the pool entirely
+  const bankCallGame = loadGame(path, () => 0.20);
+  bankCallGame.startCommitment("selfTaught");
+  bankCallGame.doGig("waiter");
+  assert.strictEqual(bankCallGame.getState().event.title, "הבנק מתקשר", "the bank still calls about real debt");
+
+  const noDebtCallGame = loadGame(path, () => 0.20);
+  noDebtCallGame.startCommitment("selfTaught");
+  noDebtCallGame.__testSetState({ debt: 0 });
+  noDebtCallGame.doGig("waiter");
+  const noDebtState = noDebtCallGame.getState();
+  assert.notStrictEqual(noDebtState.event && noDebtState.event.title, "הבנק מתקשר", "the bank has nothing to call about once debt is zero");
+  assert.strictEqual(noDebtState.debt, 0, "a zero balance can't be pushed back into debt by a phantom collection call");
 }
 
 if (require.main === module) {

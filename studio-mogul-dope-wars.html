@@ -12,7 +12,7 @@
     button { font:inherit; }
     button:focus-visible { outline:2px solid var(--amber); outline-offset:3px; }
     .shell { width:min(1120px,calc(100% - 34px)); margin:0 auto; padding:26px 0 38px; }
-    .topbar { display:flex; align-items:center; justify-content:space-between; gap:18px; padding-bottom:15px; border-bottom:1px solid rgba(229,238,255,.14); }
+    .topbar { position:sticky; top:0; z-index:8; display:flex; align-items:center; justify-content:space-between; gap:18px; padding:12px 0; border-bottom:1px solid rgba(229,238,255,.14); background:rgba(8,12,20,.92); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
     .brand { color:var(--amber); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:1.1rem; font-weight:900; letter-spacing:.13em; }
     .turn { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:14px; align-items:baseline; }
     .turn div { color:var(--muted); font-size:.69rem; text-align:left; }
@@ -43,6 +43,10 @@
     .primary { color:#191307; border:0; background:var(--amber); }
     .back { color:#cbd5e6; border:1px solid rgba(229,238,255,.15); background:rgba(255,255,255,.045); }
     .service-list { border-top:1px solid rgba(229,238,255,.12); }
+    .market-tabs { display:flex; gap:4px; margin:16px 0 0; }
+    .market-tab { flex:1; min-height:38px; padding:9px 6px; cursor:pointer; color:var(--muted); border:0; border-bottom:2px solid transparent; background:transparent; font-size:.74rem; font-weight:850; white-space:nowrap; }
+    .market-tab.active { color:var(--amber); border-bottom-color:var(--amber); }
+    .market-tab:not(.active):hover { color:var(--cream); }
     .action-row { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:15px; min-height:73px; padding:12px 0; border-bottom:1px solid rgba(229,238,255,.11); }
     .action-row h3 { margin:0; font-size:.94rem; }
     .action-row p { margin:4px 0 0; color:var(--muted); font-size:.72rem; line-height:1.4; }
@@ -76,6 +80,11 @@
     .event-options { display:grid; gap:7px; }
     .event button { width:100%; color:#171307; border:0; background:var(--amber); text-align:right; }
     .event button.quiet { color:#dbe4f4; border:1px solid rgba(229,238,255,.15); background:rgba(255,255,255,.045); }
+    .poster-card { width:min(260px,100%); margin:6px auto 17px; padding:18px; border:2px solid var(--amber); border-radius:12px; background:linear-gradient(160deg,var(--panel-2),var(--ink)); text-align:center; }
+    .poster-card .poster-genre { display:block; letter-spacing:.1em; color:var(--amber); font-size:.62rem; font-weight:900; text-transform:uppercase; }
+    .poster-card .poster-title { margin:8px 0; color:var(--cream); font-size:1.15rem; }
+    .poster-card .poster-tagline { margin:0; color:var(--muted); font-size:.72rem; font-style:italic; }
+    .poster-card .poster-credits { display:block; margin-top:8px; color:var(--muted); font-size:.65rem; }
     @media (max-width:720px) { .action-row { align-items:start; } .next-move { align-items:start; display:grid; } }
     @media (max-width:520px) { .shell { width:min(100% - 20px,1120px); padding-top:15px; } .topbar { align-items:start; display:grid; } .turn { justify-content:space-between; width:100%; } .panel,.bag { padding:16px; } .bag-grid { grid-template-columns:1fr; } .action-meta { justify-items:start; text-align:right; } .final-grid { grid-template-columns:repeat(2,1fr); } }
   </style>
@@ -100,12 +109,43 @@
       const FLIGHT_CITY_IDS = ["athens","berlin","london","newyork","losangeles"];
 
       const DEFAULT_RISK = { crashChance:.05, spikeChance:.05, unavailableChance:.03, crashRange:[.3,.5], spikeRange:[1.6,2.4] };
-      const DEBT_ANNUAL_RATE = 1.045;
+      const DEBT_ANNUAL_RATE = 1.028;
+      const BLACK_MARKET_LOAN = { cash:1500, debt:2100 };
+
+      const FILM_GENRE_CHOICES = [
+        { id:"drama", label:"דרמה", effect:(s)=>{ s.fame+=1; s.filmDraft.genre="דרמה"; } },
+        { id:"comedy", label:"קומדיה", effect:(s)=>{ s.followers+=300; s.filmDraft.genre="קומדיה"; } },
+        { id:"documentary", label:"תיעודי", effect:(s)=>{ s.contacts+=1; s.filmDraft.genre="תיעודי"; } }
+      ];
+      const FILM_GENRE_TITLES = {
+        "דרמה": ["אור שבור","המרחק שבינינו","מה שלא נאמר"],
+        "קומדיה": ["טעות באיפור","כולם מחכים לשף","פחות או יותר משפחה"],
+        "תיעודי": ["מה שנשאר","קול מהשטח","הסיפור שלא סופר"]
+      };
+      const FILM_GENRE_TAGLINES = {
+        "דרמה": "לפעמים הכי קשה זה לא לזוז.",
+        "קומדיה": "כולם רצו סוף אחר.",
+        "תיעודי": "האמת הייתה שם כל הזמן."
+      };
+      const FILM_ACTOR_NAMES = ["דנה","עידן","נועה","גיא","שירה","אורי"];
+
+      function genreCheckpointChoices() {
+        return FILM_GENRE_CHOICES.map((g)=>({ label:g.label, kind:"genre-"+g.id, effect:g.effect }));
+      }
+
+      function posterHtml(draft) {
+        const genre = draft.genre || "דרמה";
+        const titles = FILM_GENRE_TITLES[genre] || FILM_GENRE_TITLES["דרמה"];
+        if (!draft.title) draft.title = titles[Math.floor(Math.random()*titles.length)];
+        const tagline = FILM_GENRE_TAGLINES[genre] || "";
+        const starring = draft.starName || "קובי";
+        return `<div class="poster-card"><small class="poster-genre">${genre}</small><h3 class="poster-title">${draft.title}</h3><p class="poster-tagline">${tagline}</p><span class="poster-credits">בימוי: קובי · בכיכוב: ${starring}</span></div>`;
+      }
       const BANKRUPTCY_STRIKE_LIMIT = 3;
       const STAGE_GRACE_YEARS = 3;
 
       const UNIVERSAL_INCIDENTS = [
-        { id:"bank-call", chance:.10, title:"הבנק מתקשר", copy:"החוב צבר ריבית והפקיד/ה מבקש/ת תשלום קטן עכשיו.", choices:[{label:"לשלם ₪500 מהחוב",kind:"debt-pay"},{label:"לדחות · החוב גדל ב-₪400",kind:"debt-delay",quiet:true}] },
+        { id:"bank-call", chance:.10, when:(s)=>s.debt>0, title:"הבנק מתקשר", copy:"החוב צבר ריבית והפקיד/ה מבקש/ת תשלום קטן עכשיו.", choices:[{label:"לשלם ₪500 מהחוב",kind:"debt-pay"},{label:"לדחות · החוב גדל ב-₪300",kind:"debt-delay",quiet:true}] },
         { id:"road-gig", chance:.08, title:"עבודה בדרך", copy:"מישהו מחפש עזרה דחופה. זו דרך מהירה למזומן, אבל היא עולה שנה.", choices:[{label:"לקחת · +₪600",kind:"road-gig"},{label:"להמשיך במסלול",kind:"pass",quiet:true}] }
       ];
 
@@ -173,7 +213,7 @@
           return { title:"ממשיכים בסרט האישי", copy:"שנה "+Math.round(s.commitment.elapsedYears)+" מתוך "+s.commitment.totalYears+".", action:null, alternatives:[] };
         }
         if (!hasChosenEntryPath()) {
-          return { title:"לצלם את הסרט האישי האחרון", copy:"סיכום של קריירה שלמה, בשתי הכרעות בלבד.", action:{type:"commitment",id:"legacyFilm"}, actionLabel:"להתחיל את הסרט", alternatives:[] };
+          return { title:"לצלם את הסרט האישי האחרון", copy:"סיכום של קריירה שלמה — עוד סרט אחד, מהז'אנר ועד הפוסטר.", action:{type:"commitment",id:"legacyFilm"}, actionLabel:"להתחיל את הסרט", alternatives:[] };
         }
         if (s.fame < 100) {
           return { title:"להשלים מורשת", copy:"עוד קצת מוניטין, וזה יסתגר.", action:{type:"gig",id:"consultingLegacy"}, actionLabel:"לעבוד בייעוץ אסטרטגי", alternatives:[{type:"gig",id:"teachingGig",label:"הוראה"}] };
@@ -276,23 +316,38 @@
             { id:"workshopTeach", title:"הנחיית סדנה",   copy:"פחות כסף, אבל בונה שם וקשרים.",     needs:{}, cash:1800, fame:1, contacts:2, followers:0 }
           ],
           commitments:[
-            { id:"indieFilm", name:"לצלם סרט אינדי ראשון", copy:"הפרויקט שיהפוך אותך למי שאת/ה — 3 שנים, שלוש הכרעות אמיתיות.", years:3, entryDebt:6000,
+            { id:"indieFilm", name:"לצלם סרט אינדי ראשון", copy:"הפרויקט שיהפוך אותך למי שאת/ה — 3 שנים, מסלול הפקה שלם משלך.", years:3, entryDebt:6000,
+              immediateEffect:(s)=>{ s.filmDraft = {}; },
               checkpoints:[
+                { atYear:0, id:"genre", title:"לבחור ז'אנר", copy:"עוד לפני שכותבים מילה — על איזה סוג סרט מדובר?",
+                  choices: genreCheckpointChoices() },
                 { atYear:1, id:"script", title:"התסריט מוכן", copy:"שנה ראשונה מסתיימת. איך סוגרים את התסריט?",
                   choices:[
                     { label:"תסריט שאפתני יותר · -₪1,500", kind:"script-ambitious", effect:(s)=>{ s.cash-=1500; s.fame+=1; } },
                     { label:"להישאר רזים ויעילים",          kind:"script-lean",      effect:(s)=>{ s.fame+=1; } }
+                  ] },
+                { atYear:1.6, id:"cast", title:"מי מככב/ת?", copy:"זה הזמן ללהק. מי עומד/ת מול המצלמה?",
+                  choices:[
+                    { label:"כוכב/ת מוכר/ת · -₪2,000", kind:"cast-star", effect:(s)=>{ s.cash-=2000; s.fame+=2; s.followers+=500; s.filmDraft.starName = FILM_ACTOR_NAMES[Math.floor(Math.random()*FILM_ACTOR_NAMES.length)]; } },
+                    { label:"פרצוף חדש מהשוק", kind:"cast-newface", effect:(s)=>{ s.fame+=1; s.filmDraft.starName = "פנים חדשות"; } }
                   ] },
                 { atYear:2, id:"shoot", title:"הצילומים מסתיימים", copy:"שנה שנייה מסתיימת. איך סוגרים את הצילומים?",
                   choices:[
                     { label:"עוד יום צילום · -₪1,200", kind:"extra-shoot-day", effect:(s)=>{ s.cash-=1200; s.fame+=1; } },
                     { label:"לעצור בתקציב",              kind:"on-budget",       effect:(s)=>{ s.cash+=500; } }
                   ] },
+                { atYear:2.6, id:"edit", title:"משמרות עריכה", copy:"הגרסה הראשונה מוכנה. ממשיכים ללטש, או סוגרים כאן?",
+                  choices:[
+                    { label:"עוד לילות עריכה · -₪800", kind:"edit-polish", effect:(s)=>{ s.cash-=800; s.fame+=1; } },
+                    { label:"לסגור בגרסה הראשונה",      kind:"edit-rough",  effect:(s)=>{} }
+                  ] },
                 { atYear:3, id:"distribution", title:"בחירת הפצה", copy:"השנה השלישית מסתיימת. הסרט מוכן — לאן הוא הולך?",
                   choices:[
                     { label:"מסלול פסטיבלים", kind:"festival-track",  effect:(s)=>{ s.achievements["festival-invite"]=true; s.fame+=2; } },
                     { label:"ישר לסטרימינג",   kind:"streaming-track", effect:(s)=>{ s.followers+=600; s.cash+=1500; } }
-                  ] }
+                  ] },
+                { atYear:3, id:"poster", title:"הסרט יוצא לאקרנים", copy:"ההפקה הסתיימה — הנה איך זה יצא.",
+                  html:(s)=>posterHtml(s.filmDraft), choices:[{label:"להמשיך ←",kind:"poster-ack"}] }
               ], grantsOnComplete:{ fame:4 } }
           ],
           incidents:[
@@ -388,8 +443,11 @@
             { id:"consultingLegacy",title:"ייעוץ אסטרטגי",        copy:"הכי משתלם כלכלית.",      needs:{}, cash:40000, fame:1, contacts:2, followers:0 }
           ],
           commitments:[
-            { id:"legacyFilm", name:"הסרט האישי האחרון", copy:"סיכום של קריירה שלמה — שנתיים, שתי הכרעות.", years:2, entryDebt:0,
+            { id:"legacyFilm", name:"הסרט האישי האחרון", copy:"סיכום של קריירה שלמה — שנתיים, ועוד סרט אחד להיפרד איתו.", years:2, entryDebt:0,
+              immediateEffect:(s)=>{ s.filmDraft = {}; },
               checkpoints:[
+                { atYear:0, id:"genre", title:"לבחור ז'אנר", copy:"על איזה סוג סרט מדובר, בפעם האחרונה?",
+                  choices: genreCheckpointChoices() },
                 { atYear:1, id:"theme", title:"לבחור נושא אישי", copy:"על מה הסרט הזה, באמת?",
                   choices:[
                     { label:"הסיפור הכי אישי שלך", kind:"personal-story", effect:(s)=>{ s.fame+=2; } },
@@ -399,7 +457,9 @@
                   choices:[
                     { label:"הקרנת יחיד בפסטיבל הבית", kind:"solo-screening", effect:(s)=>{ s.fame+=3; } },
                     { label:"לשחרר בחינם לציבור",       kind:"free-release",   effect:(s)=>{ s.followers+=3000; } }
-                  ] }
+                  ] },
+                { atYear:2, id:"poster", title:"הסרט יוצא לאקרנים", copy:"ההפקה הסתיימה — הנה איך זה יצא.",
+                  html:(s)=>posterHtml(s.filmDraft), choices:[{label:"להמשיך ←",kind:"poster-ack"}] }
               ], grantsOnComplete:{ fame:5 } }
           ],
           incidents:[
@@ -455,9 +515,9 @@
           capacity:10, bag:{}, prices:{}, previousPrices:{}, priceKinds:{},
           assets:{ usedCamera:false, editComputer:false, diploma:false },
           films:[],
-          commitment:null, activeCheckpoint:null,
+          commitment:null, activeCheckpoint:null, filmDraft:{},
           pathTags:[], bankruptcyStrikes:0,
-          view:"hud", flight:null,
+          view:"hud", marketTab:"work", flight:null,
           funding:{}, achievements:{}, event:null, ended:false, win:false, log:[], lastRecap:null
         };
         const market = generateMarket(next.stageId);
@@ -509,7 +569,7 @@
         return (currentStage().commitments||[]).find((c)=>c.id===s.commitment.id) || null;
       }
 
-      function notify(title,copy,choices) { state.event = {title,copy,choices}; }
+      function notify(title,copy,choices,html) { state.event = {title,copy,choices,html}; }
       function announce(title,copy) { notify(title,copy,[{label:"להמשיך",kind:"pass"}]); render(); return false; }
 
       function isWinner() { return false; }
@@ -580,15 +640,16 @@
       }
 
       function advanceYear(reason, years) {
-        const elapsed = Math.max(0.5, Number(years)||1);
+        const elapsed = Math.max(0.1, Number(years)||1);
         state.age += elapsed; state.stageYear += elapsed; state.year += elapsed;
         const before = state.debt;
         state.debt = Math.ceil(state.debt * Math.pow(DEBT_ANNUAL_RATE, elapsed));
         state.previousPrices = {...state.prices};
         const market = generateMarket(state.stageId);
         state.prices = market.prices; state.priceKinds = market.kinds;
-        addLog("גיל "+Math.round(state.age)+": "+reason+(elapsed!==1?" ("+elapsed+" שנים).":""));
-        state.lastRecap = { years:elapsed, interestPaid: state.debt-before, age: Math.round(state.age) };
+        const roundedElapsed = Math.round(elapsed*10)/10;
+        addLog("גיל "+Math.round(state.age)+": "+reason+(elapsed!==1?" ("+roundedElapsed+" שנים).":""));
+        state.lastRecap = { years:roundedElapsed, interestPaid: state.debt-before, age: Math.round(state.age) };
         if (checkBankruptcy()) return true;
         if (checkStageProgress()) return true;
         if (state.stageId === "festivals") { maybeOfferFlight(); if (state.event) return false; }
@@ -639,15 +700,23 @@
         const years = Math.max(0, targetYear - state.commitment.elapsedYears);
         state.commitment.elapsedYears = targetYear;
         if (years > 0) { const ended = advanceYear(config.name+" ממשיכה.", years); if (ended || state.ended || state.event) return; }
-        if (next) { state.activeCheckpoint = { commitmentId:config.id, checkpointId:next.id }; notify(next.title, next.copy, next.choices); return; }
+        if (next) { state.activeCheckpoint = { commitmentId:config.id, checkpointId:next.id }; notify(next.title, next.copy, next.choices, typeof next.html==="function" ? next.html(state) : next.html); return; }
         completeCommitment(config);
       }
 
       function completeCommitment(config) {
         if (config.grantsOnComplete && config.grantsOnComplete.fame) state.fame += config.grantsOnComplete.fame;
         if (config.id === "filmSchool") state.assets.diploma = true;
-        if (config.id === "indieFilm") state.films.push({ title:"הסרט העצמאי הראשון", completedAge: Math.round(state.age) });
-        if (config.id === "legacyFilm") state.films.push({ title:"הסרט האישי האחרון", completedAge: Math.round(state.age) });
+        if (config.id === "indieFilm" || config.id === "legacyFilm") {
+          const draft = state.filmDraft || {};
+          state.films.push({
+            title: draft.title || (config.id==="indieFilm" ? "הסרט העצמאי הראשון" : "הסרט האישי האחרון"),
+            genre: draft.genre || "דרמה",
+            starring: draft.starName || "קובי",
+            completedAge: Math.round(state.age)
+          });
+          state.filmDraft = {};
+        }
         state.pathTags.push(config.id);
         addLog("סיימת: "+config.name+".");
         state.commitment = null;
@@ -708,7 +777,7 @@
         const lack = missing(gig.needs);
         if (lack.length) return announce("חסר ציוד לעבודה הזאת","צריך: "+lack.join(" · ")+".");
         state.cash += gig.cash; state.fame += (gig.fame||0); state.contacts += (gig.contacts||0); state.followers += (gig.followers||0);
-        advanceYear("עבדת כ"+gig.title+".", 1);
+        advanceYear("עבדת כ"+gig.title+".", 0.4);
         save(); render(); return true;
       }
 
@@ -718,8 +787,29 @@
         if (state.ended||state.event) return false;
         const amount = 500;
         if (action==="pay") { const paid=Math.min(payAmount(),state.cash,state.debt); if (!paid) return announce("אין מה להחזיר","צריך מזומן כדי להקטין את החוב."); state.cash-=paid; state.debt-=paid; addLog("החזרת "+money(paid)+" מהחוב."); }
+        if (action==="payAll") {
+          if (!state.debt) return announce("אין חוב להחזיר","החוב כבר עומד על אפס.");
+          if (state.cash < state.debt) return announce("אין מספיק מזומן","צריך "+money(state.debt-state.cash)+" נוספים כדי לסגור את כל החוב בבת אחת.");
+          const paidAll = state.debt; state.cash -= paidAll; state.debt = 0;
+          addLog("סגרת את כל החוב בבת אחת — "+money(paidAll)+".");
+        }
         if (action==="deposit") { if (state.cash<amount) return announce("אין מספיק מזומן","צריך "+money(amount)+" כדי להפקיד."); state.cash-=amount; state.bank+=amount; addLog("הפקדת "+money(amount)+" בבנק."); }
         if (action==="withdraw") { const drawn=Math.min(amount,state.bank); if (!drawn) return announce("אין פיקדון למשוך","עדיין לא הופקד כסף בבנק."); state.bank-=drawn; state.cash+=drawn; addLog("משכת "+money(drawn)+" מהבנק."); }
+        save(); render(); return true;
+      }
+
+      function setMarketTab(tab) {
+        if (state.ended||state.event) return false;
+        if (!MARKET_TABS.some((t)=>t.id===tab)) return false;
+        state.marketTab = tab;
+        save(); render(); return true;
+      }
+
+      function takeBlackMarketLoan() {
+        if (state.ended||state.event) return false;
+        state.cash += BLACK_MARKET_LOAN.cash;
+        state.debt += BLACK_MARKET_LOAN.debt;
+        addLog("לקחת הלוואת חוץ-בנקאית — "+money(BLACK_MARKET_LOAN.cash)+" מזומן תמורת "+money(BLACK_MARKET_LOAN.debt)+" חוב.");
         save(); render(); return true;
       }
 
@@ -764,9 +854,9 @@
         else if (choice.kind === "scramble") { state.cash -= 300; addLog("מצאת תחליף מהיר, בעלות."); }
         else if (choice.kind === "cheap-gear-take") { takeCheapGear(); }
         else if (choice.kind === "debt-pay") { const amt=Math.min(500,state.cash,state.debt); state.cash-=amt; state.debt-=amt; addLog("החזרת "+money(amt)+" מהחוב."); }
-        else if (choice.kind === "debt-delay") { state.debt += 400; addLog("דחית את הבנק והחוב גדל."); }
+        else if (choice.kind === "debt-delay") { state.debt += 300; addLog("דחית את הבנק והחוב גדל."); }
         else if (choice.kind === "road-gig") { state.cash += 600; state.contacts += 1; advanceYear("עבודה ספונטנית בדרך.", 1); }
-        else if (choice.kind === "emergency-loan") { state.cash += 2000; state.debt = Math.ceil((state.debt+2000)*1.15); state.bankruptcyStrikes += 1; addLog("לקחת הלוואת חירום — החוב גדל משמעותית."); }
+        else if (choice.kind === "emergency-loan") { state.cash += 2000; state.debt = Math.ceil((state.debt+2000)*1.10); state.bankruptcyStrikes += 1; addLog("לקחת הלוואת חירום — החוב גדל משמעותית."); }
         else if (choice.kind === "give-up") { finish(false); }
         else if (choice.kind === "accept-flight") { return acceptFlight(choice.cityId); }
         else if (choice.kind === "decline-flight") { return declineFlight(); }
@@ -775,7 +865,7 @@
         save(); render(); return true;
       }
 
-      function row(title,copy,meta,action,label) { return `<article class="action-row"><div><h3>${title}</h3><p>${copy}</p></div><div class="action-meta"><b>${meta}</b><button class="row-action" data-action="${action}">${label}</button></div></article>`; }
+      function row(title,copy,meta,action,label,disabled) { return `<article class="action-row"><div><h3>${title}</h3><p>${copy}</p></div><div class="action-meta"><b>${meta}</b><button class="row-action" data-action="${action}" ${disabled?"disabled":""}>${label}</button></div></article>`; }
 
       function trendBadge(id) {
         const kind = state.priceKinds && state.priceKinds[id];
@@ -784,7 +874,7 @@
         return "";
       }
 
-      function marketRows() {
+      function workRows() {
         const stage = currentStage();
         let html = "";
         if (!hasChosenEntryPath() && stage.commitments && stage.commitments.length) {
@@ -800,20 +890,67 @@
             return row(gig.title, gig.copy+(lack.length?" · חסר: "+lack.join(" · "):""), meta, "gig:"+gig.id, lack.length?"חסר ציוד":"לעבוד");
           }).join("");
         }
-        html += (stage.goods||[]).map((good) => {
-          const price = state.prices[good.id];
-          const unavailable = price == null;
-          const already = good.persistsAsAsset && state.assets[good.id];
-          const owned = good.persistsAsAsset ? (already?1:0) : (state.bag[good.id]||0);
-          return `<article class="action-row"><div><h3>${good.name}${trendBadge(good.id)}</h3><p>${good.persistsAsAsset ? "נכס קבוע" : ("סחורה · בתיק: "+owned)}</p></div><div class="action-meta"><b>${unavailable?"לא זמין":(already?"נרכש":money(price))}</b><span><button class="row-action" data-action="buy" data-id="${good.id}" ${unavailable||already?"disabled":""}>קנה</button> ${good.persistsAsAsset ? "" : `<button class="row-action quiet" data-action="sell" data-id="${good.id}" ${owned?"":"disabled"}>מכור</button>`}</span></div></article>`;
-        }).join("");
-        return html;
+        return html || '<p class="empty">אין כרגע עבודות זמינות בשלב הזה.</p>';
+      }
+
+      function goodRow(good) {
+        const price = state.prices[good.id];
+        const unavailable = price == null;
+        const already = good.persistsAsAsset && state.assets[good.id];
+        const owned = good.persistsAsAsset ? (already?1:0) : (state.bag[good.id]||0);
+        return `<article class="action-row"><div><h3>${good.name}${trendBadge(good.id)}</h3><p>${good.persistsAsAsset ? "נכס קבוע" : ("סחורה · בתיק: "+owned)}</p></div><div class="action-meta"><b>${unavailable?"לא זמין":(already?"נרכש":money(price))}</b><span><button class="row-action" data-action="buy" data-id="${good.id}" ${unavailable||already?"disabled":""}>קנה</button> ${good.persistsAsAsset ? "" : `<button class="row-action quiet" data-action="sell" data-id="${good.id}" ${owned?"":"disabled"}>מכור</button>`}</span></div></article>`;
+      }
+
+      function shopRows() {
+        const goods = (currentStage().goods||[]).filter((g)=>g.persistsAsAsset);
+        return goods.length ? goods.map(goodRow).join("") : '<p class="empty">אין עדיין ציוד חדש למכירה בשלב הזה.</p>';
+      }
+
+      function secondhandRows() {
+        const goods = (currentStage().goods||[]).filter((g)=>!g.persistsAsAsset);
+        return goods.length ? goods.map(goodRow).join("") : '<p class="empty">אין עדיין פריטים בשוק היד-שנייה בשלב הזה.</p>';
       }
 
       function bankRows() {
-        return row("להחזיר חוב","החוב גדל בכל שנה שעוברת · 10% מהחוב הנוכחי",money(payAmount()),"bank:pay","להחזיר")
-          + row("להפקיד","שומר כסף בצד",money(500),"bank:deposit","להפקיד")
+        const hasDebt = state.debt > 0;
+        let html = row("להחזיר חוב","10% מהחוב הנוכחי — כל תשלום מקטין גם את הריבית הבאה",money(payAmount()),"bank:pay","להחזיר",!hasDebt);
+        if (hasDebt) {
+          html += row("לסגור את כל החוב","תשלום חד-פעמי של מלוא היתרה בבת אחת",money(state.debt),"bank:payAll","לסגור הכל",state.cash<state.debt);
+        }
+        html += row("להפקיד","שומר כסף בצד",money(500),"bank:deposit","להפקיד")
           + row("למשוך פיקדון","כרגע בבנק: "+money(state.bank),money(500),"bank:withdraw","למשוך");
+        return html;
+      }
+
+      function blackMarketRows() {
+        return row("הלוואת חוץ-בנקאית","מזומן מהיר עכשיו, בלי שאלות — אבל תוספת חוב הרבה יותר כבדה מהבנק",
+          "+"+money(BLACK_MARKET_LOAN.cash)+" · חוב +"+money(BLACK_MARKET_LOAN.debt),"loanshark","לקחת הלוואה");
+      }
+
+      function financingRows() {
+        return `<p class="eyebrow">בנק</p>${bankRows()}<p class="eyebrow" style="margin-top:16px">שוק שחור</p>${blackMarketRows()}`;
+      }
+
+      const MARKET_TABS = [
+        { id:"work", label:"עבודה" },
+        { id:"shop", label:"חנות" },
+        { id:"secondhand", label:"שוק יד-2" },
+        { id:"financing", label:"מימון" }
+      ];
+
+      function marketTabsMarkup() {
+        const active = state.marketTab || "work";
+        return `<nav class="market-tabs" role="tablist" aria-label="שוק">${MARKET_TABS.map((t)=>
+          `<button class="market-tab ${t.id===active?"active":""}" role="tab" aria-selected="${t.id===active}" data-action="tab:${t.id}">${t.label}</button>`
+        ).join("")}</nav>`;
+      }
+
+      function marketBody() {
+        const tab = state.marketTab || "work";
+        if (tab==="shop") return shopRows();
+        if (tab==="secondhand") return secondhandRows();
+        if (tab==="financing") return financingRows();
+        return workRows();
       }
 
       function actionAttr(action) {
@@ -850,14 +987,12 @@
 
       function hudView() {
         const stage = currentStage();
-        const hasContent = (stage.goods.length||stage.gigs.length||stage.commitments.length);
         return `<section class="panel">
           ${goalPanelMarkup(stage)}
           ${recommendPanelMarkup(stage)}
           ${recapMarkup()}
-          <div class="service-list">${hasContent ? marketRows() : '<p class="empty">השלב הזה עדיין בבנייה — חזרו בקרוב.</p>'}</div>
-          <p class="eyebrow" style="margin-top:16px">בנק</p>
-          <div class="service-list">${bankRows()}</div>
+          ${marketTabsMarkup()}
+          <div class="service-list">${marketBody()}</div>
           <div class="footer-actions"><button data-action="finish">לוותר על המסלול</button><button data-action="bag">תיק הפקה</button></div>
         </section>`;
       }
@@ -883,12 +1018,12 @@
         }
         if (!state.event) { modal.classList.add("hidden"); modal.innerHTML=""; return; }
         modal.classList.remove("hidden");
-        modal.innerHTML = `<section class="event"><span>אירוע</span><h2>${state.event.title}</h2><p>${state.event.copy}</p><div class="event-options">${state.event.choices.map((c,i)=>`<button class="${c.quiet?"quiet":""}" data-action="event" data-id="${i}">${c.label}</button>`).join("")}</div></section>`;
+        modal.innerHTML = `<section class="event"><span>אירוע</span><h2>${state.event.title}</h2>${state.event.html || `<p>${state.event.copy}</p>`}<div class="event-options">${state.event.choices.map((c,i)=>`<button class="${c.quiet?"quiet":""}" data-action="event" data-id="${i}">${c.label}</button>`).join("")}</div></section>`;
       }
 
       function render() {
         if (!app) return;
-        const head = `<header class="topbar"><div class="brand">KOBI / קריירה</div><div class="turn"><div>גיל<b>${Math.round(state.age)}</b></div><div>שנה<b>${state.year}</b></div><div>מזומן<b>${money(state.cash)}</b></div><div class="debt">חוב<b>${money(state.debt)}</b><button class="mini-pay" data-action="bank:pay">להחזיר</button></div><div class="fame">קרדיטים<b>${state.fame}</b></div><div class="followers">עוקבים<b>${state.followers.toLocaleString("he-IL")}</b></div><div class="contacts">קשרים<b>${state.contacts}</b></div><div>תיק<b>${bagCount()} / ${state.capacity}</b></div></div></header>${stageTrackMarkup()}`;
+        const head = `<header class="topbar"><div class="brand">KOBI / קריירה</div><div class="turn"><div>גיל<b>${Math.round(state.age)}</b></div><div>שנה<b>${Math.round(state.year)}</b></div><div>מזומן<b>${money(state.cash)}</b></div><div class="debt">חוב<b>${money(state.debt)}</b>${state.debt>0?'<button class="mini-pay" data-action="bank:pay">להחזיר</button>':""}</div><div class="fame">קרדיטים<b>${state.fame}</b></div><div class="followers">עוקבים<b>${state.followers.toLocaleString("he-IL")}</b></div><div class="contacts">קשרים<b>${state.contacts}</b></div><div>תיק<b>${bagCount()} / ${state.capacity}</b></div></div></header>${stageTrackMarkup()}`;
         const body = state.view==="bag" ? bagView() : hudView();
         app.innerHTML = `<div class="shell">${head}${body}</div>`;
         renderModal();
@@ -905,6 +1040,8 @@
           if (action.indexOf("gig:")===0) doGig(action.slice(4));
           if (action.indexOf("commit:")===0) startCommitment(action.slice(7));
           if (action.indexOf("bank:")===0) bank(action.slice(5));
+          if (action.indexOf("tab:")===0) setMarketTab(action.slice(4));
+          if (action==="loanshark") takeBlackMarketLoan();
           if (action==="event") resolveEvent(Number(id));
           if (action==="finish") { finish(false); save(); render(); }
           if (action==="new") { state = createState(); save(); render(); }
@@ -917,6 +1054,7 @@
         getState: () => clone(state),
         newGame: () => { state = createState(); return clone(state); },
         openView, buy, sell, doGig, startCommitment, resolveEvent, bank, acceptFlight, declineFlight,
+        setMarketTab, takeBlackMarketLoan,
         finish: () => { finish(false); return clone(state); },
         STAGES, CITIES,
         __testJumpToStage: (id) => {
