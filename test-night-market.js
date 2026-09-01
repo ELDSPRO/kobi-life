@@ -2,11 +2,20 @@ const fs = require("fs");
 const vm = require("vm");
 const assert = require("assert");
 
+function makeMemoryStorage() {
+  const store = {};
+  return {
+    getItem: (k) => (Object.prototype.hasOwnProperty.call(store, k) ? store[k] : null),
+    setItem: (k, v) => { store[k] = String(v); },
+    removeItem: (k) => { delete store[k]; }
+  };
+}
+
 function loadGame(htmlPath, randomFn) {
   const html = fs.readFileSync(htmlPath, "utf8");
   const match = html.match(/<script>([\s\S]*?)<\/script>\s*<\/body>/);
   assert.ok(match, "the game has a playable inline script");
-  const context = { console, Math: Object.create(Math), JSON, Intl };
+  const context = { console, Math: Object.create(Math), JSON, Intl, localStorage: makeMemoryStorage() };
   context.Math.random = randomFn || (() => 0.5);
   context.globalThis = context;
   vm.createContext(context);
@@ -124,6 +133,33 @@ function run(htmlPath) {
   const judgeGame2 = loadGame(path);
   judgeGame2.__testJumpToStage("legacy");
   assert.strictEqual(judgeGame2.doGig("festivalJudge"), true, "the festival-judge gig is also playable in legacy");
+
+  // --- rabinovichGrant: an alternate, lower-debt indie-film path with a real-world funding-politics checkpoint ---
+  const grantGame = loadGame(path);
+  grantGame.__testJumpToStage("indie");
+  assert.strictEqual(grantGame.startCommitment("rabinovichGrant"), true);
+  let gstate2 = grantGame.getState();
+  assert.strictEqual(gstate2.event.title, "סעיף בחוזה המענק", "the loyalty-clause checkpoint opens first");
+  assert.strictEqual(grantGame.resolveEvent(0), true, "sign-clause"); // accept the grant's clause
+  gstate2 = grantGame.getState();
+  assert.strictEqual(gstate2.event.title, "הסרט משוחרר");
+  assert.strictEqual(grantGame.resolveEvent(0), true, "festival-track-grant");
+  gstate2 = grantGame.getState();
+  assert.strictEqual(gstate2.films.length, 1, "completing the grant path records a real film, same milestone as indieFilm");
+  assert.ok(gstate2.awards.some((a)=>a.title.indexOf("קרן ציבורית")>=0), "completing it adds an award-cabinet entry");
+
+  // --- political incident: a minister denounces the film sight-unseen, backlash pairs with acclaim either way ---
+  const politicsGame = loadGame(path, () => 0.01); // low roll: both the 8% incident-fire chance and this incident (first in the indie pool) trigger deterministically
+  politicsGame.__testJumpToStage("indie");
+  politicsGame.__testSetState({ cash: 5000 });
+  assert.strictEqual(politicsGame.doGig("commercialGig"), true);
+  const pstate = politicsGame.getState();
+  assert.strictEqual(pstate.event.title, "שר/ה מגנה את הסרט שלך");
+  const beforeClap = pstate;
+  assert.strictEqual(politicsGame.resolveEvent(0), true, "clap-back");
+  const afterClap = politicsGame.getState();
+  assert.ok(afterClap.followers > beforeClap.followers, "clapping back grows the audience despite (or because of) the controversy");
+  assert.ok(afterClap.awards.some((a)=>a.title === "פרס על אף המחלוקת"));
 
   // --- stage-intro modal: shown at game start and re-opened on every real stage transition ---
   const introGame = loadGame(path);
@@ -298,7 +334,31 @@ function run(htmlPath) {
   assert.strictEqual(state.films.length, 2, "the legacy film is a second real film asset");
   assert.strictEqual(state.ended, true, "meeting legacy's required milestones ends the run — there is no seventh stage");
   assert.strictEqual(state.win, true, "reaching the end of the career ladder is a win, not a timer running out");
-  assert.ok(state.final && state.final.score > 0, "a final score is computed on completion");
+  assert.ok(state.final && state.final.achievement > 0, "a final achievement score is computed on completion");
+  assert.strictEqual(typeof state.final.financial, "number", "a separate financial score is also computed — money is not the score");
+
+  // --- local high-score table: recorded on finish(), sorted best-first, capped at 10 ---
+  // a fresh instance, since `game` above already finished once earlier (the bankruptcy-strikes-exhausted test) and scores persist across game.newGame() within the same session, by design
+  const winScoreGame = loadGame(path);
+  winScoreGame.__testJumpToStage("legacy");
+  winScoreGame.__testSetState({ fame: 95, films: [{ title: "הסרט העצמאי הראשון" }] });
+  winScoreGame.startCommitment("legacyFilm");
+  winScoreGame.resolveEvent(0);
+  winScoreGame.resolveEvent(0);
+  const winState = winScoreGame.getState();
+  let scores = winScoreGame.loadScores();
+  assert.strictEqual(scores.length, 1, "finishing a run records exactly one score entry");
+  assert.strictEqual(scores[0].achievement, winState.final.achievement, "the recorded score matches the run's final achievement score");
+  assert.strictEqual(scores[0].financial, winState.final.financial);
+  assert.strictEqual(scores[0].win, true);
+  assert.strictEqual(scores[0].stage, "מורשת ופרישה");
+
+  const scoreGame = loadGame(path);
+  scoreGame.__testSetState({ cash: 50, bank: 0, bankruptcyStrikes: 3, debt: 100000 });
+  assert.strictEqual(scoreGame.startCommitment("filmSchool"), true, "the fourth debt crisis ends the run (loss) and should still record a score");
+  const lossScores = scoreGame.loadScores();
+  assert.strictEqual(lossScores.length, 1);
+  assert.strictEqual(lossScores[0].win, false, "a loss records win:false, not just wins");
 
   // --- RNG-injected price events (crash / spike / unavailable) ---
   const studentGoods = game.STAGES[0].goods;

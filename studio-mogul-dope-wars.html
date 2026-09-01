@@ -249,7 +249,7 @@
           ],
           riskProfile:null,
           milestones:[
-            { id:"first-credit", label:"קרדיט מקצועי ראשון", check:(s)=>s.fame>=6,               required:true, progress:(s)=>({current:s.fame, target:6}) },
+            { id:"first-credit", label:"הכרה מקצועית ראשונה", check:(s)=>s.fame>=6,               required:true, progress:(s)=>({current:s.fame, target:6}) },
             { id:"stable-cash",  label:"רשת ביטחון כלכלית",   check:(s)=>(s.cash+s.bank)>=5000,   required:true, progress:(s)=>({current:s.cash+s.bank, target:5000}) },
             { id:"own-gear",     label:"ציוד יד שני משלך",     check:(s)=>!!s.assets.usedCamera,   required:false },
             { id:"industry-tie", label:"קשר ראשון בתעשייה",    check:(s)=>s.contacts>=2,           required:false }
@@ -282,7 +282,7 @@
           ],
           riskProfile:null,
           milestones:[
-            { id:"industry-credit",  label:"קרדיט מבוסס בתעשייה", check:(s)=>s.fame>=40,               required:true, progress:(s)=>({current:s.fame, target:40}) },
+            { id:"industry-credit",  label:"הכרה מבוססת בתעשייה", check:(s)=>s.fame>=40,               required:true, progress:(s)=>({current:s.fame, target:40}) },
             { id:"industry-network", label:"רשת קשרים בתעשייה",   check:(s)=>s.contacts>=18,           required:true, progress:(s)=>({current:s.contacts, target:18}) },
             { id:"pro-gear",         label:"ציוד מקצועי משלך",     check:(s)=>!!s.assets.proCamera,     required:false },
             { id:"cash-cushion",     label:"כרית ביטחון גדולה",    check:(s)=>(s.cash+s.bank)>=8000,    required:false }
@@ -324,9 +324,27 @@
                     { label:"מסלול פסטיבלים", kind:"festival-track",  effect:(s)=>{ s.achievements["festival-invite"]=true; s.fame+=2; } },
                     { label:"ישר לסטרימינג",   kind:"streaming-track", effect:(s)=>{ s.followers+=600; s.cash+=1500; } }
                   ] }
-              ], grantsOnComplete:{ fame:4 } }
+              ], grantsOnComplete:{ fame:4 } },
+            { id:"rabinovichGrant", name:"מענק קרן רבינוביץ", copy:"מימון ציבורי לסרט העצמאי — פחות חוב על הגב, אבל יש תנאים לחתום עליהם. 2 שנים, שתי הכרעות.", years:2, entryDebt:2000,
+              checkpoints:[
+                { atYear:1, id:"loyalty-clause", title:"סעיף בחוזה המענק", copy:"הקרן מבקשת חתימה שהסרט \"לא יפגע בכבוד המדינה\" — סעיף אמיתי שהיה בתוקף עד 2023, עד שיוצרים הצליחו להוריד אותו.",
+                  choices:[
+                    { label:"לחתום ולקבל את המענק", kind:"sign-clause", effect:(s)=>{ s.cash+=3000; } },
+                    { label:"לסרב ולממן לבד",         kind:"refuse-clause", effect:(s)=>{ s.fame+=2; s.debt+=4000; } }
+                  ] },
+                { atYear:2, id:"grant-release", title:"הסרט משוחרר", copy:"השנה השנייה מסתיימת. איך יוצאים לעולם?",
+                  choices:[
+                    { label:"מסלול פסטיבלים", kind:"festival-track-grant",  effect:(s)=>{ s.achievements["festival-invite"]=true; s.fame+=2; } },
+                    { label:"הפצה ישירה",       kind:"direct-release-grant", effect:(s)=>{ s.followers+=1200; } }
+                  ] }
+              ], grantsOnComplete:{ fame:3 } }
           ],
           incidents:[
+            { id:"minister-denounces", chance:.08, title:"שר/ה מגנה את הסרט שלך", copy:"שר/ת התרבות מגנה בפומבי את הסרט שלך כ\"פוגע בכבוד המדינה\" — ומודה בראיון שלא ראה/תה אותו. התקשורת מתלהטת, והטלפון לא מפסיק לצלצל.",
+              choices:[
+                { label:"לענות בראיון חריף", kind:"clap-back" },
+                { label:"לשתוק ולתת לסרט לדבר", kind:"stay-quiet", quiet:true }
+              ] },
             { id:"funding-falls-through", chance:.08, title:"מקור מימון נסוג", copy:"משקיע/ה שהבטיח/ה חלק מהתקציב נעלם/ת.", choices:[{label:"למצוא תחליף מהיר · -₪300",kind:"scramble"},{label:"להמשיך בלי זה",kind:"pass",quiet:true}] },
             { id:"gear-deal-indie", chance:.08, title:"הזדמנות ציוד מוזל", copy:"סטודיו שסוגר מוכר ציוד מהר וזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
           ],
@@ -455,6 +473,7 @@
       ];
 
       const STORAGE_KEY = "kobi-career-v2";
+      const SCORES_KEY = "kobi-career-v2-scores";
       const app = typeof document !== "undefined" ? document.getElementById("app") : null;
       const modal = typeof document !== "undefined" ? document.getElementById("modal") : null;
       const money = (value) => new Intl.NumberFormat("he-IL", { style:"currency", currency:"ILS", maximumFractionDigits:0 }).format(Math.round(value));
@@ -491,7 +510,7 @@
           commitment:null, activeCheckpoint:null,
           pathTags:[], bankruptcyStrikes:0,
           view:"hud", flight:null,
-          funding:{}, achievements:{}, event:null, ended:false, win:false, log:[], lastRecap:null, briefPending:false, pendingAction:null, stageIntroPending:true
+          funding:{}, achievements:{}, awards:[], event:null, ended:false, win:false, log:[], lastRecap:null, briefPending:false, pendingAction:null, stageIntroPending:true
         };
         const market = generateMarket(next.stageId);
         next.prices = market.prices; next.priceKinds = market.kinds; next.previousPrices = {...market.prices};
@@ -511,6 +530,7 @@
               bag: saved.bag || {}, assets: {...fresh.assets, ...(saved.assets||{})},
               prices: {...fresh.prices, ...(saved.prices||{})}, previousPrices: saved.previousPrices || fresh.prices,
               priceKinds: saved.priceKinds || fresh.priceKinds, films: Array.isArray(saved.films) ? saved.films : [],
+              awards: Array.isArray(saved.awards) ? saved.awards : [],
               pathTags: Array.isArray(saved.pathTags) ? saved.pathTags : [], commitment: saved.commitment || null,
               funding: {...(saved.funding||{})}, achievements: {...(saved.achievements||{})},
               event: null, briefPending: false, pendingAction: null, stageIntroPending: false, activeCheckpoint: saved.activeCheckpoint || null
@@ -520,6 +540,7 @@
       }
       function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {} }
       function addLog(text) { state.log.unshift(text); state.log = state.log.slice(0,200); }
+      function pushAward(title) { state.awards.push({ title, age: Math.round(state.age), stage: currentStage().name }); }
 
       function goodName(id) { const g = currentStage().goods.find((x)=>x.id===id); return g ? g.name : id; }
       function assetName(id) { for (const s of STAGES) { const g=(s.goods||[]).find((x)=>x.id===id); if (g) return g.name; } return id; }
@@ -549,10 +570,23 @@
 
       function isWinner() { return false; }
 
+      function loadScores() { try { return JSON.parse(localStorage.getItem(SCORES_KEY)) || []; } catch (_) { return []; } }
+      function saveScore(entry) {
+        try {
+          const list = loadScores();
+          list.push(entry);
+          list.sort((a,b)=>b.achievement-a.achievement);
+          localStorage.setItem(SCORES_KEY, JSON.stringify(list.slice(0,10)));
+        } catch (_) {}
+      }
+
       function finish(win) {
         state.ended = true; state.win = !!win; state.event = null;
         const bagValue = Object.entries(state.bag).reduce((sum,[id,qty])=>sum+sellPrice(id)*qty,0);
-        state.final = { bagValue, score: state.cash+state.bank+bagValue-state.debt+state.fame*100+state.followers*2+state.contacts*350 };
+        const financial = state.cash+state.bank+bagValue-state.debt;
+        const achievement = state.fame*100+state.followers*2+state.contacts*350+state.films.length*2000;
+        state.final = { bagValue, financial, achievement };
+        saveScore({ achievement, financial, age: Math.round(state.age), win: state.win, stage: currentStage().name });
         addLog(win ? "הגעת/הגעה לפרישה — מסלול קריירה שלם." : "המסלול נעצר כאן.");
       }
 
@@ -683,8 +717,9 @@
       function completeCommitment(config) {
         if (config.grantsOnComplete && config.grantsOnComplete.fame) state.fame += config.grantsOnComplete.fame;
         if (config.id === "filmSchool") state.assets.diploma = true;
-        if (config.id === "indieFilm") state.films.push({ title:"הסרט העצמאי הראשון", completedAge: Math.round(state.age) });
-        if (config.id === "legacyFilm") state.films.push({ title:"הסרט האישי האחרון", completedAge: Math.round(state.age) });
+        if (config.id === "indieFilm") { state.films.push({ title:"הסרט העצמאי הראשון", completedAge: Math.round(state.age) }); pushAward("סיום: הסרט העצמאי הראשון"); }
+        if (config.id === "legacyFilm") { state.films.push({ title:"הסרט האישי האחרון", completedAge: Math.round(state.age) }); pushAward("סיום: הסרט האישי האחרון"); }
+        if (config.id === "rabinovichGrant") { state.films.push({ title:"הסרט העצמאי — מענק ציבורי", completedAge: Math.round(state.age) }); pushAward("סיום סרט במימון קרן ציבורית"); }
         state.pathTags.push(config.id);
         addLog("סיימת: "+config.name+".");
         state.commitment = null;
@@ -827,6 +862,8 @@
         else if (choice.kind === "give-up") { finish(false); }
         else if (choice.kind === "accept-flight") { return acceptFlight(choice.cityId); }
         else if (choice.kind === "decline-flight") { return declineFlight(); }
+        else if (choice.kind === "clap-back") { state.followers += 2000; state.fame += 2; addLog("ענית בראיון חריף — הסערה רק הגדילה את החשיפה."); pushAward("פרס על אף המחלוקת"); }
+        else if (choice.kind === "stay-quiet") { state.fame += 3; addLog("שתקת ונתת לסרט לדבר בעצמו."); pushAward("פרס על אף המחלוקת"); }
 
         if (state.commitment && !state.event && !state.ended) progressCommitment();
         save(); render(); return true;
@@ -853,13 +890,13 @@
         } else {
           const gigRow = (gig) => {
             const lack = missing(gig.needs);
-            const meta = "+"+money(gig.cash)+(gig.fame?" · +"+gig.fame+" קרדיטים":"");
+            const meta = "+"+money(gig.cash)+(gig.fame?" · +"+gig.fame+" הכרה":"");
             return row(gig.title, gig.copy+(lack.length?" · חסר: "+lack.join(" · "):""), meta, "gig:"+gig.id, lack.length?"חסר ציוד":"לעבוד");
           };
           const careerGigs = (stage.gigs||[]).filter((g)=>g.fame>0||g.contacts>0);
           const survivalGigs = (stage.gigs||[]).filter((g)=>!(g.fame>0||g.contacts>0));
           if (survivalGigs.length) html += `<p class="eyebrow" style="margin-top:12px">עבודות הישרדות · כסף מהיר</p>` + survivalGigs.map(gigRow).join("");
-          if (careerGigs.length) html += `<p class="eyebrow" style="margin-top:12px">עבודות קריירה · קרדיט וקשרים</p>` + careerGigs.map(gigRow).join("");
+          if (careerGigs.length) html += `<p class="eyebrow" style="margin-top:12px">עבודות קריירה · הכרה וקשרים</p>` + careerGigs.map(gigRow).join("");
         }
         return html;
       }
@@ -954,7 +991,7 @@
         const nextAge = Math.round(state.age+1);
         const nextDebt = Math.ceil(state.debt * DEBT_ANNUAL_RATE);
         const chips = [
-          gig.fame ? `<span class="milestone">+${gig.fame} קרדיטים</span>` : "",
+          gig.fame ? `<span class="milestone">+${gig.fame} הכרה</span>` : "",
           gig.contacts ? `<span class="milestone">+${gig.contacts} קשרים</span>` : "",
           gig.followers ? `<span class="milestone">+${gig.followers.toLocaleString("he-IL")} עוקבים</span>` : ""
         ].filter(Boolean).join("");
@@ -1001,9 +1038,12 @@
       function renderModal() {
         if (!modal) return;
         if (state.ended) {
-          const final = state.final || {score:0};
+          const final = state.final || {financial:0, achievement:0};
+          const scores = loadScores();
+          const scoreRows = scores.map((s,i)=>`<div class="bag-item"><span>#${i+1} · ${s.stage} · גיל ${s.age}${s.win?" · ניצחון":""}</span><b>${money(s.achievement)}</b></div>`).join("");
+          const awardRows = state.awards.map((a)=>`<div class="bag-item"><span>${a.title} · ${a.stage}, גיל ${a.age}</span><b>🏆</b></div>`).join("");
           modal.classList.remove("hidden");
-          modal.innerHTML = `<section class="event"><span>${state.win?"סוף דרך — פרישה":"המסלול נעצר"}</span><h2>${state.win?"קובי הגיע/ה לפרישה אחרי קריירה שלמה.":"המסלול נעצר כאן."}</h2><p>${state.win?"עברת את כל שלבי הקריירה — מסטודנט/ית ועד פרישה.":"אפשר להתחיל מחדש עם הידע שצברת."}</p><div class="final-grid"><div><small>ציון</small><b>${money(final.score)}</b></div><div><small>גיל</small><b>${Math.round(state.age)}</b></div><div><small>שלב</small><b>${currentStage().name}</b></div></div><button data-action="new">מסלול חדש ←</button></section>`;
+          modal.innerHTML = `<section class="event"><span>${state.win?"סוף דרך — פרישה":"המסלול נעצר"}</span><h2>${state.win?"קובי הגיע/ה לפרישה אחרי קריירה שלמה.":"המסלול נעצר כאן."}</h2><p>${state.win?"עברת את כל שלבי הקריירה — מסטודנט/ית ועד פרישה.":"אפשר להתחיל מחדש עם הידע שצברת."}</p><div class="final-grid" style="grid-template-columns:repeat(2,1fr)"><div><small>הישג מקצועי</small><b>${money(final.achievement)}</b></div><div><small>מצב כלכלי</small><b>${money(final.financial)}</b></div><div><small>גיל</small><b>${Math.round(state.age)}</b></div><div><small>שלב</small><b>${currentStage().name}</b></div></div>${awardRows?`<p class="eyebrow" style="margin-top:14px">ארון פרסים</p><div class="bag-grid" style="grid-template-columns:1fr">${awardRows}</div>`:""}<p class="eyebrow" style="margin-top:14px">שיאים</p><div class="bag-grid" style="grid-template-columns:1fr">${scoreRows||'<p class="empty">עדיין אין שיאים.</p>'}</div><button data-action="new">מסלול חדש ←</button></section>`;
           return;
         }
         if (state.pendingAction) {
@@ -1028,7 +1068,7 @@
 
       function render() {
         if (!app) return;
-        const head = `<header class="topbar"><div class="brand">KOBI / קריירה</div><div class="turn"><div>גיל<b>${Math.round(state.age)}</b></div><div>שנה<b>${state.year}</b></div><div>מזומן<b>${money(state.cash)}</b></div><div class="debt">חוב<b>${money(state.debt)}</b><button class="mini-pay" data-action="bank:pay">להחזיר</button></div><div class="fame">קרדיטים<b>${state.fame}</b></div><div class="followers">עוקבים<b>${state.followers.toLocaleString("he-IL")}</b></div><div class="contacts">קשרים<b>${state.contacts}</b></div><div>תיק<b>${bagCount()} / ${state.capacity}</b></div></div></header>${stageTrackMarkup()}`;
+        const head = `<header class="topbar"><div class="brand">KOBI / קריירה</div><div class="turn"><div>גיל<b>${Math.round(state.age)}</b></div><div>שנה<b>${state.year}</b></div><div>מזומן<b>${money(state.cash)}</b></div><div class="debt">חוב<b>${money(state.debt)}</b><button class="mini-pay" data-action="bank:pay">להחזיר</button></div><div class="fame">הכרה<b>${state.fame}</b></div><div class="followers">עוקבים<b>${state.followers.toLocaleString("he-IL")}</b></div><div class="contacts">קשרים<b>${state.contacts}</b></div><div>תיק<b>${bagCount()} / ${state.capacity}</b></div></div></header>${stageTrackMarkup()}`;
         const body = state.view==="bag" ? bagView() : state.view==="log" ? logView() : hudView();
         app.innerHTML = `<div class="shell">${head}${body}</div>`;
         renderModal();
@@ -1062,7 +1102,7 @@
         getState: () => clone(state),
         newGame: () => { state = createState(); return clone(state); },
         openView, buy, sell, doGig, startCommitment, resolveEvent, bank, acceptFlight, declineFlight, closeBrief,
-        openGigForecast, confirmGig, cancelPendingAction, closeStageIntro,
+        openGigForecast, confirmGig, cancelPendingAction, closeStageIntro, loadScores,
         finish: () => { finish(false); return clone(state); },
         STAGES, CITIES,
         __testJumpToStage: (id) => {
