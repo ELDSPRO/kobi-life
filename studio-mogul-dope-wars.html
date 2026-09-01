@@ -224,7 +224,7 @@
           ],
           gigs:[
             { id:"usher",      title:"סדרן/ית בקולנוע",          copy:"עבודה קבועה וזמינה, בלי דרישות.",             needs:{}, cash:900,  fame:0, contacts:0, followers:0 },
-            { id:"waiter",     title:"מלצר/ית",                  copy:"הכי משתלם כלכלית, בלי קשרים בתעשייה.",         needs:{}, cash:1200, fame:0, contacts:1, followers:0 },
+            { id:"waiter",     title:"מלצר/ית",                  copy:"הכי משתלם כלכלית, בלי קשרים בתעשייה.",         needs:{}, cash:1200, fame:0, contacts:0, followers:0 },
             { id:"photostore", title:"עובד/ת חנות צילום",         copy:"פחות כסף, אבל טעימה ראשונה מהתעשייה.",         needs:{}, cash:1000, fame:1, contacts:1, followers:0 },
             { id:"prodAssist", title:"עוזר/ת הפקה סטודנטיאלית",   copy:"הכי פחות כסף, הכי הרבה קרדיט וקשרים.",         needs:{}, cash:700,  fame:2, contacts:2, followers:30 }
           ],
@@ -385,7 +385,8 @@
           ],
           gigs:[
             { id:"showrunnerGig", title:"ניהול פרויקט אולפן", copy:"הכי הרבה מוניטין וקהל.",  needs:{}, cash:8000, fame:3, contacts:2, followers:500 },
-            { id:"execProducing", title:"הפקה בכירה",         copy:"הכי הרבה כסף וקשרים.",     needs:{}, cash:6000, fame:2, contacts:3, followers:200 }
+            { id:"execProducing", title:"הפקה בכירה",         copy:"הכי הרבה כסף וקשרים.",     needs:{}, cash:6000, fame:2, contacts:3, followers:200 },
+            { id:"festivalJudge", title:"שופט/ת בפסטיבל בינלאומי", copy:"הזמנה יוקרתית לשפוט בפסטיבלים בעולם — מחזקת מוניטין וקשרים.", needs:{}, cash:7000, fame:4, contacts:4, followers:800 }
           ],
           commitments:[],
           incidents:[
@@ -416,7 +417,8 @@
           ],
           gigs:[
             { id:"teachingGig",     title:"הוראה באקדמיה",       copy:"מוריש/ה את הידע הלאה.", needs:{}, cash:25000, fame:2, contacts:1, followers:300 },
-            { id:"consultingLegacy",title:"ייעוץ אסטרטגי",        copy:"הכי משתלם כלכלית.",      needs:{}, cash:40000, fame:1, contacts:2, followers:0 }
+            { id:"consultingLegacy",title:"ייעוץ אסטרטגי",        copy:"הכי משתלם כלכלית.",      needs:{}, cash:40000, fame:1, contacts:2, followers:0 },
+            { id:"festivalJudge",   title:"שופט/ת כבוד בפסטיבלים", copy:"מוזמנ/ת כשופט/ת כבוד לפסטיבלים המובילים בעולם.", needs:{}, cash:20000, fame:3, contacts:2, followers:500 }
           ],
           commitments:[
             { id:"legacyFilm", name:"הסרט האישי האחרון", copy:"סיכום של קריירה שלמה — שנתיים, שתי הכרעות.", years:2, entryDebt:0,
@@ -517,7 +519,7 @@
         } catch (_) {}
       }
       function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {} }
-      function addLog(text) { state.log.unshift(text); state.log = state.log.slice(0,6); }
+      function addLog(text) { state.log.unshift(text); state.log = state.log.slice(0,200); }
 
       function goodName(id) { const g = currentStage().goods.find((x)=>x.id===id); return g ? g.name : id; }
       function assetName(id) { for (const s of STAGES) { const g=(s.goods||[]).find((x)=>x.id===id); if (g) return g.name; } return id; }
@@ -632,19 +634,18 @@
         return false;
       }
 
-      function pickUninvitedCity() {
-        const pool = CITIES.filter((c)=>FLIGHT_CITY_IDS.includes(c.id) && !state.achievements["visited-"+c.id]);
-        if (!pool.length) return null;
-        return pool[Math.floor(Math.random()*pool.length)];
+      function uninvitedCities() {
+        return CITIES.filter((c)=>FLIGHT_CITY_IDS.includes(c.id) && !state.achievements["visited-"+c.id]);
       }
 
       function maybeOfferFlight() {
         if (state.event) return;
         if (Math.random() > 0.3) return;
-        const city = pickUninvitedCity();
-        if (!city) return;
-        notify("הוזמנת לפסטיבל "+city.name, "עלות "+money(city.fare)+" ושנה מהחיים. לטוס או להישאר להפצה מקומית?",
-          [{label:"לטוס", kind:"accept-flight", cityId:city.id}, {label:"להישאר ולהפיץ מקומית", kind:"decline-flight", quiet:true}]);
+        const pool = uninvitedCities();
+        if (!pool.length) return;
+        const cityChoices = pool.map((c)=>({label:"לטוס ל"+c.name+" · "+money(c.fare), kind:"accept-flight", cityId:c.id}));
+        notify("הוזמנת לפסטיבל", "יש הזמנה השנה — לאן לטוס? כל טיסה עולה כסף ושנה מהחיים.",
+          [...cityChoices, {label:"להישאר ולהפיץ מקומית", kind:"decline-flight", quiet:true}]);
       }
 
       function acceptFlight(cityId) {
@@ -975,8 +976,15 @@
           ${goodsTable()}
           <p class="eyebrow" style="margin-top:16px">בנק</p>
           <div class="service-list">${bankRows()}</div>
-          <div class="footer-actions"><button data-action="finish">לוותר על המסלול</button><button data-action="bag">תיק הפקה</button></div>
+          <div class="footer-actions"><button data-action="finish">לוותר על המסלול</button><button data-action="log">יומן קריירה</button><button data-action="bag">תיק הפקה</button></div>
         </section>`;
+      }
+
+      function logView() {
+        const rows = state.log.map((line)=>`<div class="bag-item"><span>${line}</span></div>`).join("");
+        return `<section class="panel bag"><header class="service-top"><div><p class="eyebrow">היסטוריה</p><h1>יומן קריירה</h1></div><button class="back" data-action="hud">חזרה ←</button></header>
+          <div class="bag-grid" style="grid-template-columns:1fr">${rows||'<p class="empty">עוד אין רשומות.</p>'}</div>
+          <div class="footer-actions"><button data-action="finish">לוותר על המסלול</button><button data-action="hud">למסך הראשי</button></div></section>`;
       }
 
       function bagView() {
@@ -1021,7 +1029,7 @@
       function render() {
         if (!app) return;
         const head = `<header class="topbar"><div class="brand">KOBI / קריירה</div><div class="turn"><div>גיל<b>${Math.round(state.age)}</b></div><div>שנה<b>${state.year}</b></div><div>מזומן<b>${money(state.cash)}</b></div><div class="debt">חוב<b>${money(state.debt)}</b><button class="mini-pay" data-action="bank:pay">להחזיר</button></div><div class="fame">קרדיטים<b>${state.fame}</b></div><div class="followers">עוקבים<b>${state.followers.toLocaleString("he-IL")}</b></div><div class="contacts">קשרים<b>${state.contacts}</b></div><div>תיק<b>${bagCount()} / ${state.capacity}</b></div></div></header>${stageTrackMarkup()}`;
-        const body = state.view==="bag" ? bagView() : hudView();
+        const body = state.view==="bag" ? bagView() : state.view==="log" ? logView() : hudView();
         app.innerHTML = `<div class="shell">${head}${body}</div>`;
         renderModal();
       }
@@ -1032,6 +1040,7 @@
           const action = button.dataset.action, id = button.dataset.id;
           if (action==="hud") openView("hud");
           if (action==="bag") openView("bag");
+          if (action==="log") openView("log");
           if (action==="buy") buy(id);
           if (action==="sell") sell(id);
           if (action.indexOf("gig:")===0) openGigForecast(action.slice(4));

@@ -106,6 +106,25 @@ function run(htmlPath) {
   assert.ok(gstate.event, "the missing-equipment notice opens instead of a forecast");
   assert.strictEqual(gstate.pendingAction, null);
 
+  // --- career log: unbounded history (was capped at 6), reachable via its own view ---
+  const logGame = loadGame(path);
+  assert.strictEqual(logGame.startCommitment("selfTaught"), true);
+  for (let i = 0; i < 10; i++) { logGame.doGig("waiter"); logGame.closeBrief(); clearEvent(logGame); } // waiter never grants fame, so a few of these cross the student stage's grace deadline and open a fallback event — drain it each time, same as the earlier fallback-path test
+  assert.ok(logGame.getState().log.length > 6, "the log is no longer capped at 6 entries");
+  assert.strictEqual(logGame.openView("log"), true, "the log has its own reachable view");
+  assert.strictEqual(logGame.getState().view, "log");
+
+  // --- festival-judge gig: a later-career prestige gig, breakthrough and legacy stages ---
+  const judgeGame = loadGame(path);
+  judgeGame.__testJumpToStage("breakthrough");
+  const beforeJudge = judgeGame.getState();
+  assert.strictEqual(judgeGame.doGig("festivalJudge"), true, "the festival-judge gig is playable in breakthrough");
+  assert.ok(judgeGame.getState().cash > beforeJudge.cash, "it pays out");
+
+  const judgeGame2 = loadGame(path);
+  judgeGame2.__testJumpToStage("legacy");
+  assert.strictEqual(judgeGame2.doGig("festivalJudge"), true, "the festival-judge gig is also playable in legacy");
+
   // --- stage-intro modal: shown at game start and re-opened on every real stage transition ---
   const introGame = loadGame(path);
   assert.strictEqual(introGame.getState().stageIntroPending, true, "a brand-new game opens with the stage-intro modal");
@@ -249,15 +268,18 @@ function run(htmlPath) {
   assert.strictEqual(jumped.age, 65, "jumping to a stage resets age to that stage's starting age");
 
   // --- festivals stage: rare flight invites, gated by a fixed RNG that clears the 30% offer threshold ---
+  // the player picks which city to fly to (or declines) — every unvisited flight city is offered, not one random pick
   const flightGame = loadGame(path, () => 0.01);
   flightGame.__testJumpToStage("festivals");
   flightGame.__testSetState({ cash: 5000 });
   assert.strictEqual(flightGame.doGig("consultingGig"), true);
   let fstate = flightGame.getState();
   assert.ok(fstate.event, "a flight invite can appear on any year-advancing action once the stage is festivals");
-  assert.strictEqual(fstate.event.title.indexOf("הוזמנת לפסטיבל "), 0);
+  assert.strictEqual(fstate.event.title, "הוזמנת לפסטיבל");
+  assert.strictEqual(fstate.event.choices.length, 6, "all 5 flight cities are offered as choices, plus declining");
+  assert.strictEqual(fstate.event.choices[fstate.event.choices.length - 1].kind, "decline-flight", "declining is always the last, quiet choice");
   const cityId = fstate.event.choices[0].cityId;
-  assert.strictEqual(cityId, "athens", "the city pick is reproducible under a fixed RNG");
+  assert.strictEqual(cityId, "athens", "cities are offered in a fixed order, athens first");
   const beforeFlight = fstate;
   assert.strictEqual(flightGame.resolveEvent(0), true, "accepting the flight");
   fstate = flightGame.getState();
