@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#080c14">
   <title>קובי / קריירה</title>
   <style>
-    :root { --ink:#080c14; --panel:#141c2c; --panel-2:#1d2840; --line:#34415a; --cream:#f7f2e8; --muted:#9ca8ba; --amber:#f4bd4b; --green:#67cfc4; --blue:#93b6e0; --rose:#e28c83; }
+    :root { --ink:#080c14; --panel:#141c2c; --panel-2:#1d2840; --line:#34415a; --cream:#f7f2e8; --muted:#9ca8ba; --amber:#f4bd4b; --green:#67cfc4; --blue:#93b6e0; --rose:#e28c83; --violet:#b79aef; }
     * { box-sizing:border-box; }
     body { min-width:320px; min-height:100vh; margin:0; color:var(--cream); background:radial-gradient(800px 460px at 12% 0%,rgba(77,63,166,.24),transparent 68%),radial-gradient(580px 340px at 96% 7%,rgba(43,114,138,.14),transparent 68%),var(--ink); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif; }
     button { font:inherit; }
@@ -38,6 +38,17 @@
     .milestone { padding:4px 9px; color:var(--muted); border:1px solid rgba(229,238,255,.15); border-radius:999px; background:rgba(255,255,255,.03); font-size:.65rem; font-weight:750; }
     .milestone.required { border-color:rgba(244,189,75,.4); }
     .milestone.done { color:var(--green); border-color:rgba(103,207,196,.5); background:rgba(103,207,196,.08); }
+    .milestone-progress { margin-top:10px; }
+    .progress-label { display:flex; justify-content:space-between; font-size:.68rem; color:var(--cream); font-weight:750; }
+    .progress-track { position:relative; height:8px; margin-top:4px; border-radius:5px; background:rgba(255,255,255,.08); overflow:hidden; }
+    .progress-fill { height:100%; background:var(--amber); border-radius:5px; }
+    .milestone-progress.done .progress-fill { background:var(--green); }
+    .milestone-progress.done .progress-label { color:var(--green); }
+    .market-table { width:100%; margin-top:8px; border-collapse:collapse; font-size:.78rem; }
+    .market-table th { padding:6px 4px; color:var(--amber); font-size:.62rem; font-weight:900; letter-spacing:.05em; text-align:right; border-bottom:1px solid rgba(229,238,255,.15); }
+    .market-table td { padding:9px 4px; border-bottom:1px solid rgba(229,238,255,.08); vertical-align:middle; color:var(--cream); }
+    .market-table td small { color:var(--muted); font-size:.66rem; }
+    .market-table td.actions { display:flex; gap:6px; justify-content:flex-end; white-space:nowrap; }
     .recommend-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
     .primary,.back,.service-row,.row-action,.footer-actions button,.event button { min-height:34px; padding:7px 11px; cursor:pointer; border-radius:7px; font-size:.74rem; font-weight:850; }
     .primary { color:#191307; border:0; background:var(--amber); }
@@ -85,8 +96,27 @@
     .poster-card .poster-title { margin:8px 0; color:var(--cream); font-size:1.15rem; }
     .poster-card .poster-tagline { margin:0; color:var(--muted); font-size:.72rem; font-style:italic; }
     .poster-card .poster-credits { display:block; margin-top:8px; color:var(--muted); font-size:.65rem; }
+    .event.brief { border-color:rgba(147,182,224,.7); }
+    .event.brief span { color:var(--blue); }
+    .event.brief .final-grid.recap { margin-top:2px; }
+    .event.forecast { border-color:rgba(103,207,196,.7); }
+    .event.forecast span { color:var(--green); }
+    .event.intro { border-color:rgba(183,154,239,.7); }
+    .event.intro span { color:var(--violet); }
+    .event.intro .primary { margin-bottom:7px; }
     @media (max-width:720px) { .action-row { align-items:start; } .next-move { align-items:start; display:grid; } }
-    @media (max-width:520px) { .shell { width:min(100% - 20px,1120px); padding-top:15px; } .topbar { align-items:start; display:grid; } .turn { justify-content:space-between; width:100%; } .panel,.bag { padding:16px; } .bag-grid { grid-template-columns:1fr; } .action-meta { justify-items:start; text-align:right; } .final-grid { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:520px) {
+      .shell { width:min(100% - 20px,1120px); padding-top:15px; }
+      .topbar { align-items:start; display:grid; }
+      .turn { display:grid; grid-template-columns:repeat(4,1fr); justify-content:normal; gap:10px 6px; width:100%; }
+      .turn div { text-align:center; }
+      .panel,.bag { padding:16px; }
+      .bag-grid { grid-template-columns:1fr; }
+      .action-meta { justify-items:start; text-align:right; }
+      .final-grid { grid-template-columns:repeat(2,1fr); }
+      .primary,.back,.service-row,.row-action,.footer-actions button,.event button { min-height:44px; }
+      .market-table td.actions { gap:8px; }
+    }
   </style>
 </head>
 <body>
@@ -110,6 +140,8 @@
 
       const DEFAULT_RISK = { crashChance:.05, spikeChance:.05, unavailableChance:.03, crashRange:[.3,.5], spikeRange:[1.6,2.4] };
       const DEBT_ANNUAL_RATE = 1.028;
+      const GIG_YEARS = 0.4;
+      const BANK_ANNUAL_RATE = 1.015;
       const BLACK_MARKET_LOAN = { cash:1500, debt:2100 };
 
       const FILM_GENRE_CHOICES = [
@@ -148,7 +180,17 @@
 
       const UNIVERSAL_INCIDENTS = [
         { id:"bank-call", chance:.10, when:(s)=>s.debt>0, title:"הבנק מתקשר", copy:"החוב צבר ריבית והפקיד/ה מבקש/ת תשלום קטן עכשיו.", choices:[{label:"לשלם ₪500 מהחוב",kind:"debt-pay"},{label:"לדחות · החוב גדל ב-₪300",kind:"debt-delay",quiet:true}] },
-        { id:"road-gig", chance:.08, title:"עבודה בדרך", copy:"מישהו מחפש עזרה דחופה. זו דרך מהירה למזומן, אבל היא עולה שנה.", choices:[{label:"לקחת · +₪600",kind:"road-gig"},{label:"להמשיך במסלול",kind:"pass",quiet:true}] }
+        { id:"road-gig", chance:.08, title:"עבודה בדרך", copy:"מישהו מחפש עזרה דחופה. זו דרך מהירה למזומן, אבל היא עולה שנה.", choices:[{label:"לקחת · +₪600",kind:"road-gig"},{label:"להמשיך במסלול",kind:"pass",quiet:true}] },
+        { id:"friend-in-trouble", chance:.07, title:"חבר/ה בצרות", copy:"חבר/ה קרוב/ה נקלע/ת לקשיים כלכליים ומבקש/ת הלוואה קטנה.",
+          choices:[
+            { label:"לעזור · -₪400", kind:"help-friend", effect:(s)=>{ s.cash-=400; s.contacts+=1; addLog("עזרת לחבר/ה בכסף — הקשר התחזק."); } },
+            { label:"להתנצל ולסרב", kind:"pass", quiet:true }
+          ] },
+        { id:"viral-moment", chance:.07, title:"רגע ויראלי", copy:"פוסט או קליפ שלך מתפשט ברשת בלי אזהרה מוקדמת.",
+          choices:[
+            { label:"לרכוב על הגל", kind:"ride-viral", effect:(s)=>{ s.followers+=800; s.fame+=1; addLog("רכבת על הגל הוויראלי — החשיפה עלתה משמעותית."); } },
+            { label:"להתעלם ולהמשיך בשקט", kind:"pass", quiet:true }
+          ] }
       ];
 
       function studentRecommend(s) {
@@ -229,13 +271,15 @@
           headline:"לבנות בסיס: מקצוע, ציוד ראשון, קרדיט ראשון",
           goods:[
             { id:"usedCamera",   name:"מצלמה יד שנייה", base:340, persistsAsAsset:true  },
-            { id:"scriptRights", name:"זכויות לתסריט",  base:110, persistsAsAsset:false },
             { id:"editComputer", name:"מחשב עריכה",     base:520, persistsAsAsset:true  },
-            { id:"mic",          name:"מיקרופון",       base:140, persistsAsAsset:false }
+            { id:"mic",          name:"מיקרופון",       base:140, persistsAsAsset:false },
+            { id:"tripod",       name:"חצובה משומשת",   base:120, persistsAsAsset:false },
+            { id:"scriptRights", name:"זכויות לתסריט",       base:110, persistsAsAsset:false, market:"deal" },
+            { id:"locationPermit", name:"רישיון צילום במיקום", base:180, persistsAsAsset:false, market:"deal" }
           ],
           gigs:[
             { id:"usher",      title:"סדרן/ית בקולנוע",          copy:"עבודה קבועה וזמינה, בלי דרישות.",             needs:{}, cash:900,  fame:0, contacts:0, followers:0 },
-            { id:"waiter",     title:"מלצר/ית",                  copy:"הכי משתלם כלכלית, בלי קשרים בתעשייה.",         needs:{}, cash:1200, fame:0, contacts:1, followers:0 },
+            { id:"waiter",     title:"מלצר/ית",                  copy:"הכי משתלם כלכלית, בלי קשרים בתעשייה.",         needs:{}, cash:1200, fame:0, contacts:0, followers:0 },
             { id:"photostore", title:"עובד/ת חנות צילום",         copy:"פחות כסף, אבל טעימה ראשונה מהתעשייה.",         needs:{}, cash:1000, fame:1, contacts:1, followers:0 },
             { id:"prodAssist", title:"עוזר/ת הפקה סטודנטיאלית",   copy:"הכי פחות כסף, הכי הרבה קרדיט וקשרים.",         needs:{}, cash:700,  fame:2, contacts:2, followers:30 }
           ],
@@ -255,13 +299,27 @@
           ],
           incidents:[
             { id:"camera-repair", chance:.08, when:(s)=>s.assets.usedCamera, title:"המצלמה צריכה תיקון", copy:"המצלמה קיבלה מכה. אפשר לשלם על תיקון, או להמשיך עם הסיכון שתפסיק לעבוד.", choices:[{label:"לתקן ב-₪300",kind:"repair"},{label:"לא לתקן · לסכן את המצלמה",kind:"risk-camera",quiet:true}] },
-            { id:"gig-falls-through", chance:.08, title:"עבודה נופלת", copy:"עבודה שסמכת עליה בוטלה ברגע האחרון.", choices:[{label:"לחפש תחליף מהיר · -₪300",kind:"scramble"},{label:"להמשיך בלי הכנסה השנה",kind:"pass",quiet:true}] },
-            { id:"cheap-gear", chance:.08, title:"הזדמנות ציוד מוזל", copy:"מישהו מוכר ציוד מהר וזול — אבל צריך להחליט עכשיו.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
+            { id:"gig-falls-through", chance:.08, title:"עבודה נופלת", copy:"עבודה שסמכת עליה בוטלה ברגע האחרון.",
+              choices:[
+                { label:"לחפש תחליף מהיר · -₪300", kind:"scramble-student", effect:(s)=>{ s.cash-=300; addLog("מצאת עבודה חלופית ברגע האחרון, בעלות של ₪300."); } },
+                { label:"להמשיך בלי הכנסה השנה", kind:"pass", quiet:true }
+              ] },
+            { id:"cheap-gear", chance:.08, title:"הזדמנות ציוד מוזל", copy:"מישהו מוכר ציוד מהר וזול — אבל צריך להחליט עכשיו.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] },
+            { id:"friends-project", chance:.07, title:"הזמנה לפרויקט חברים", copy:"קבוצת סטודנטים מזמינה אותך להצטרף לפרויקט הגמר שלהם — בלי תשלום, אבל עם קרדיט אמיתי.",
+              choices:[
+                { label:"להצטרף · קרדיט וקשר", kind:"join-project", effect:(s)=>{ s.fame+=1; s.contacts+=1; addLog("הצטרפת לפרויקט חברים — קרדיט וקשר חדש, בלי תשלום."); } },
+                { label:"לוותר · אין זמן פנוי", kind:"pass", quiet:true }
+              ] },
+            { id:"small-scholarship", chance:.06, title:"מלגה קטנה", copy:"האוניברסיטה מציעה מלגה חד-פעמית לתלמיד/ה מצטיין/ת.",
+              choices:[
+                { label:"להגיש בקשה · +₪500", kind:"apply-scholarship", effect:(s)=>{ s.cash+=500; addLog("קיבלת מלגה חד-פעמית."); } },
+                { label:"לוותר · אין זמן לטפסים", kind:"pass", quiet:true }
+              ] }
           ],
           riskProfile:null,
           milestones:[
-            { id:"first-credit", label:"קרדיט מקצועי ראשון", check:(s)=>s.fame>=6,               required:true },
-            { id:"stable-cash",  label:"רשת ביטחון כלכלית",   check:(s)=>(s.cash+s.bank)>=5000,   required:true },
+            { id:"first-credit", label:"הכרה מקצועית ראשונה", check:(s)=>s.fame>=6,               required:true, progress:(s)=>({current:s.fame, target:6}) },
+            { id:"stable-cash",  label:"רשת ביטחון כלכלית",   check:(s)=>(s.cash+s.bank)>=5000,   required:true, progress:(s)=>({current:s.cash+s.bank, target:5000}) },
             { id:"own-gear",     label:"ציוד יד שני משלך",     check:(s)=>!!s.assets.usedCamera,   required:false },
             { id:"industry-tie", label:"קשר ראשון בתעשייה",    check:(s)=>s.contacts>=2,           required:false }
           ],
@@ -277,8 +335,10 @@
           goods:[
             { id:"proCamera",    name:"מצלמה מקצועית", base:1800, persistsAsAsset:true  },
             { id:"lightingKit",  name:"ערכת תאורה",     base:950,  persistsAsAsset:true  },
-            { id:"shootDaySlot", name:"יום צילום פנוי",  base:550,  persistsAsAsset:false },
-            { id:"crewFavor",    name:"טובה מצוות",      base:220,  persistsAsAsset:false }
+            { id:"usedBoomMic",  name:"מיקרופון בום משומש",  base:480, persistsAsAsset:false },
+            { id:"batteryKit",   name:"ערכת סוללות נטענות",   base:260, persistsAsAsset:false },
+            { id:"shootDaySlot", name:"יום צילום פנוי",  base:550,  persistsAsAsset:false, market:"deal" },
+            { id:"crewFavor",    name:"טובה מצוות",      base:220,  persistsAsAsset:false, market:"deal" }
           ],
           gigs:[
             { id:"camAssist",      title:"עוזר/ת צלם",           copy:"עבודה יציבה, בלי דרישות מיוחדות.",                needs:{}, cash:1600, fame:1, contacts:1, followers:0 },
@@ -288,13 +348,27 @@
           ],
           commitments:[],
           incidents:[
-            { id:"contract-delay", chance:.08, title:"תשלום מתעכב", copy:"לקוח מעכב תשלום על עבודה שכבר בוצעה.", choices:[{label:"לרדוף אחרי התשלום · -₪300",kind:"scramble"},{label:"למחוק את החוב מהזיכרון",kind:"pass",quiet:true}] },
-            { id:"gear-deal", chance:.08, title:"הזדמנות ציוד מוזל", copy:"עמית שעוזב את התחום מוכר ציוד מהר וזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
+            { id:"contract-delay", chance:.08, title:"תשלום מתעכב", copy:"לקוח מעכב תשלום על עבודה שכבר בוצעה.",
+              choices:[
+                { label:"לרדוף אחרי התשלום · -₪600", kind:"chase-payment", effect:(s)=>{ s.cash-=600; addLog("רדפת אחרי התשלום המתעכב — עלה זמן וכסף."); } },
+                { label:"למחוק את החוב מהזיכרון", kind:"pass", quiet:true }
+              ] },
+            { id:"gear-deal", chance:.08, title:"הזדמנות ציוד מוזל", copy:"עמית שעוזב את התחום מוכר ציוד מהר וזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] },
+            { id:"warm-intro", chance:.07, title:"המלצה חמה", copy:"עמית/ה בתעשייה ממליץ/ה עליך בפני מפיק/ה מוכר/ת.",
+              choices:[
+                { label:"לנצל את ההיכרות", kind:"warm-intro-take", effect:(s)=>{ s.contacts+=2; s.fame+=1; addLog("המלצה חמה פתחה דלת לקשר חדש בתעשייה."); } },
+                { label:"להישאר בצד", kind:"pass", quiet:true }
+              ] },
+            { id:"minor-injury", chance:.06, title:"תאונת עבודה קלה", copy:"פציעה קלה בסט. אפשר לטפל בזה כמו שצריך, או להמשיך לעבוד.",
+              choices:[
+                { label:"לטפל · -₪400", kind:"treat-injury", effect:(s)=>{ s.cash-=400; addLog("טיפלת בפציעה כמו שצריך."); } },
+                { label:"להמשיך לעבוד פצוע/ה", kind:"push-through-injury", effect:(s)=>{ s.fame=Math.max(0,s.fame-1); addLog("המשכת לעבוד פצוע/ה — זה עלה במוניטין, לא בכסף."); }, quiet:true }
+              ] }
           ],
           riskProfile:null,
           milestones:[
-            { id:"industry-credit",  label:"קרדיט מבוסס בתעשייה", check:(s)=>s.fame>=40,               required:true },
-            { id:"industry-network", label:"רשת קשרים בתעשייה",   check:(s)=>s.contacts>=18,           required:true },
+            { id:"industry-credit",  label:"הכרה מבוססת בתעשייה", check:(s)=>s.fame>=40,               required:true, progress:(s)=>({current:s.fame, target:40}) },
+            { id:"industry-network", label:"רשת קשרים בתעשייה",   check:(s)=>s.contacts>=18,           required:true, progress:(s)=>({current:s.contacts, target:18}) },
             { id:"pro-gear",         label:"ציוד מקצועי משלך",     check:(s)=>!!s.assets.proCamera,     required:false },
             { id:"cash-cushion",     label:"כרית ביטחון גדולה",    check:(s)=>(s.cash+s.bank)>=8000,    required:false }
           ],
@@ -310,8 +384,10 @@
           goods:[
             { id:"indieCameraPkg", name:"חבילת צילום עצמאית", base:2600, persistsAsAsset:true  },
             { id:"editSuite",      name:"עמדת עריכה מקצועית", base:1900, persistsAsAsset:true  },
-            { id:"postSlot",       name:"חלון פוסט-פרודקשן",   base:700,  persistsAsAsset:false },
-            { id:"distroLead",     name:"ליד להפצה",           base:450,  persistsAsAsset:false }
+            { id:"usedSoundMixer", name:"מיקסר סאונד משומש",   base:1100, persistsAsAsset:false },
+            { id:"backupDrive",    name:"כונן גיבוי חיצוני",   base:520,  persistsAsAsset:false },
+            { id:"postSlot",       name:"חלון פוסט-פרודקשן",   base:700,  persistsAsAsset:false, market:"deal" },
+            { id:"distroLead",     name:"ליד להפצה",           base:450,  persistsAsAsset:false, market:"deal" }
           ],
           gigs:[
             { id:"commercialGig", title:"עבודה מסחרית", copy:"מממנת את החיים בזמן שהסרט מתפתח.", needs:{}, cash:2600, fame:0, contacts:0, followers:0 },
@@ -350,16 +426,48 @@
                   ] },
                 { atYear:3, id:"poster", title:"הסרט יוצא לאקרנים", copy:"ההפקה הסתיימה — הנה איך זה יצא.",
                   html:(s)=>posterHtml(s.filmDraft), choices:[{label:"להמשיך ←",kind:"poster-ack"}] }
-              ], grantsOnComplete:{ fame:4 } }
+              ], grantsOnComplete:{ fame:4 } },
+            { id:"rabinovichGrant", name:"מענק קרן רבינוביץ", copy:"מימון ציבורי לסרט העצמאי — פחות חוב על הגב, אבל יש תנאים לחתום עליהם. 2 שנים, שתי הכרעות.", years:2, entryDebt:2000,
+              checkpoints:[
+                { atYear:1, id:"loyalty-clause", title:"סעיף בחוזה המענק", copy:"הקרן מבקשת חתימה שהסרט \"לא יפגע בכבוד המדינה\" — סעיף אמיתי שהיה בתוקף עד 2023, עד שיוצרים הצליחו להוריד אותו.",
+                  choices:[
+                    { label:"לחתום ולקבל את המענק", kind:"sign-clause", effect:(s)=>{ s.cash+=3000; } },
+                    { label:"לסרב ולממן לבד",         kind:"refuse-clause", effect:(s)=>{ s.fame+=2; s.debt+=4000; } }
+                  ] },
+                { atYear:2, id:"grant-release", title:"הסרט משוחרר", copy:"השנה השנייה מסתיימת. איך יוצאים לעולם?",
+                  choices:[
+                    { label:"מסלול פסטיבלים", kind:"festival-track-grant",  effect:(s)=>{ s.achievements["festival-invite"]=true; s.fame+=2; } },
+                    { label:"הפצה ישירה",       kind:"direct-release-grant", effect:(s)=>{ s.followers+=1200; } }
+                  ] }
+              ], grantsOnComplete:{ fame:3 } }
           ],
           incidents:[
-            { id:"funding-falls-through", chance:.08, title:"מקור מימון נסוג", copy:"משקיע/ה שהבטיח/ה חלק מהתקציב נעלם/ת.", choices:[{label:"למצוא תחליף מהיר · -₪300",kind:"scramble"},{label:"להמשיך בלי זה",kind:"pass",quiet:true}] },
-            { id:"gear-deal-indie", chance:.08, title:"הזדמנות ציוד מוזל", copy:"סטודיו שסוגר מוכר ציוד מהר וזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
+            { id:"minister-denounces", chance:.08, title:"שר/ה מגנה את הסרט שלך", copy:"שר/ת התרבות מגנה בפומבי את הסרט שלך כ\"פוגע בכבוד המדינה\" — ומודה בראיון שלא ראה/תה אותו. התקשורת מתלהטת, והטלפון לא מפסיק לצלצל.",
+              choices:[
+                { label:"לענות בראיון חריף", kind:"clap-back" },
+                { label:"לשתוק ולתת לסרט לדבר", kind:"stay-quiet", quiet:true }
+              ] },
+            { id:"funding-falls-through", chance:.08, title:"מקור מימון נסוג", copy:"משקיע/ה שהבטיח/ה חלק מהתקציב נעלם/ת.",
+              choices:[
+                { label:"למצוא מימון חלופי · -₪800", kind:"scramble-indie", effect:(s)=>{ s.cash-=800; addLog("מצאת מימון חלופי ברגע האחרון, ביוקר."); } },
+                { label:"להמשיך בלי זה", kind:"pass", quiet:true }
+              ] },
+            { id:"gear-deal-indie", chance:.08, title:"הזדמנות ציוד מוזל", copy:"סטודיו שסוגר מוכר ציוד מהר וזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] },
+            { id:"harsh-early-screening", chance:.07, title:"ביקורת קשה מראש-הצגה", copy:"הקרנת בדיקה ראשונה מקבלת תגובות קשות מהקהל.",
+              choices:[
+                { label:"לחזור לחדר עריכה · -₪600", kind:"reedit", effect:(s)=>{ s.cash-=600; s.fame+=1; addLog("חזרת לעריכה ותיקנת את הבעיות — עלה כסף, אבל השתפר."); } },
+                { label:"להשאיר כמו שזה", kind:"ignore-critique", effect:(s)=>{ s.fame=Math.max(0,s.fame-2); addLog("השארת את הגרסה כמו שהיא — הביקורות הבאות היו קשות."); }, quiet:true }
+              ] },
+            { id:"collab-offer", chance:.06, title:"הצעת שיתוף פעולה", copy:"יוצר/ת עצמאי/ת אחר/ת מציע/ה שיתוף פעולה בקידום.",
+              choices:[
+                { label:"לשתף פעולה", kind:"collab-promote", effect:(s)=>{ s.followers+=600; s.contacts+=1; addLog("שיתוף הפעולה הרחיב את הקהל של שניכם."); } },
+                { label:"להעדיף לעבוד לבד", kind:"pass", quiet:true }
+              ] }
           ],
           riskProfile:null,
           milestones:[
-            { id:"film-made", label:"סרט עצמאי ראשון הושלם", check:(s)=>s.films.length>=1,       required:true },
-            { id:"solvent",   label:"יציבות כלכלית בסיסית",   check:(s)=>(s.cash+s.bank)>=500,     required:true },
+            { id:"film-made", label:"סרט עצמאי ראשון הושלם", check:(s)=>s.films.length>=1,       required:true, progress:(s)=>({current:s.films.length, target:1}) },
+            { id:"solvent",   label:"יציבות כלכלית בסיסית",   check:(s)=>(s.cash+s.bank)>=500,     required:true, progress:(s)=>({current:s.cash+s.bank, target:500}) },
             { id:"festival-ready", label:"מוכן/ה לפסטיבלים", check:(s)=>!!s.achievements["festival-invite"], required:false },
             { id:"grew-audience",  label:"קהל שגדל",          check:(s)=>s.followers>=1000,        required:false }
           ],
@@ -373,10 +481,12 @@
           id:"festivals", order:3, name:"פסטיבלים", ageRange:[43,53],
           headline:"לקחת את הסרט אל העולם — ולהפוך אותו לקריירה בינלאומית",
           goods:[
-            { id:"distroRights",      name:"זכויות הפצה בינלאומיות", base:2200, persistsAsAsset:false },
-            { id:"screeningWindow",   name:"חלון הקרנה",              base:900,  persistsAsAsset:false },
-            { id:"streamingDeal",     name:"עסקת סטרימינג",           base:3400, persistsAsAsset:false },
-            { id:"salesAgentContract",name:"חוזה עם סוכן מכירות",      base:1600, persistsAsAsset:true  }
+            { id:"salesAgentContract",name:"חוזה עם סוכן מכירות",      base:1600, persistsAsAsset:true  },
+            { id:"dcpCopy",           name:"עותק הקרנה (DCP)",         base:1400, persistsAsAsset:false },
+            { id:"vipBadge",          name:"תג גישה VIP מפסטיבל קודם", base:950,  persistsAsAsset:false },
+            { id:"distroRights",      name:"זכויות הפצה בינלאומיות", base:2200, persistsAsAsset:false, market:"deal" },
+            { id:"screeningWindow",   name:"חלון הקרנה",              base:900,  persistsAsAsset:false, market:"deal" },
+            { id:"streamingDeal",     name:"עסקת סטרימינג",           base:3400, persistsAsAsset:false, market:"deal" }
           ],
           gigs:[
             { id:"festivalPanel", title:"פאנל בפסטיבל",       copy:"לא משלם הרבה, אבל בונה שם בינלאומי.", needs:{}, cash:900,  fame:2, contacts:2, followers:100 },
@@ -384,13 +494,27 @@
           ],
           commitments:[],
           incidents:[
-            { id:"deal-falls-through", chance:.08, title:"עסקה נופלת ברגע האחרון", copy:"מפיץ שהתחייב נסוג מהעסקה.", choices:[{label:"למצוא פתרון מהיר · -₪300",kind:"scramble"},{label:"להמשיך הלאה",kind:"pass",quiet:true}] },
-            { id:"festival-deal-cheap", chance:.08, title:"הזדמנות במסדרונות הפסטיבל", copy:"מישהו רוצה למכור זכויות מהר ובזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
+            { id:"deal-falls-through", chance:.08, title:"עסקה נופלת ברגע האחרון", copy:"מפיץ שהתחייב נסוג מהעסקה.",
+              choices:[
+                { label:"למצוא מפיץ חלופי · -₪1,200", kind:"scramble-festivals", effect:(s)=>{ s.cash-=1200; addLog("מצאת מפיץ חלופי ברגע האחרון, ביוקר משמעותי."); } },
+                { label:"להמשיך הלאה", kind:"pass", quiet:true }
+              ] },
+            { id:"festival-deal-cheap", chance:.08, title:"הזדמנות במסדרונות הפסטיבל", copy:"מישהו רוצה למכור זכויות מהר ובזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] },
+            { id:"international-interview", chance:.07, title:"ריאיון בינלאומי", copy:"עיתונאי/ת בינלאומי/ת מבקש/ת ריאיון על הסרט.",
+              choices:[
+                { label:"לתת ריאיון", kind:"give-interview", effect:(s)=>{ s.fame+=2; s.followers+=500; addLog("הריאיון הבינלאומי חיזק את המוניטין."); } },
+                { label:"לסרב · לשמור על פרטיות", kind:"pass", quiet:true }
+              ] },
+            { id:"slot-cancelled", chance:.06, title:"תור בפסטיבל מתבטל", copy:"פסטיבל מרכזי מבטל את מקום ההקרנה שלך ברגע האחרון בגלל לוח זמנים.",
+              choices:[
+                { label:"ללחוץ על הקשרים לפיצוי", kind:"push-contacts", effect:(s)=>{ s.contacts=Math.max(0,s.contacts-1); s.cash+=800; addLog("קיבלת פיצוי כספי, אבל הקשר עם הפסטיבל נפגע."); } },
+                { label:"לקבל את זה ולהמשיך", kind:"pass", quiet:true }
+              ] }
           ],
           riskProfile:null,
           milestones:[
-            { id:"international-fame", label:"מוניטין בינלאומי", check:(s)=>s.fame>=60,      required:true },
-            { id:"global-audience",    label:"קהל גלובלי",       check:(s)=>s.followers>=3000, required:true },
+            { id:"international-fame", label:"מוניטין בינלאומי", check:(s)=>s.fame>=60,      required:true, progress:(s)=>({current:s.fame, target:60}) },
+            { id:"global-audience",    label:"קהל גלובלי",       check:(s)=>s.followers>=3000, required:true, progress:(s)=>({current:s.followers, target:3000}) },
             { id:"sales-agent",        label:"סוכן/ת מכירות",     check:(s)=>!!s.assets.salesAgentContract, required:false },
             { id:"toured",             label:"סבב פסטיבלים אמיתי", check:(s)=>Object.keys(s.achievements).filter((k)=>k.indexOf("visited-")===0).length>=2, required:false }
           ],
@@ -404,24 +528,41 @@
           id:"breakthrough", order:4, name:"פריצה", ageRange:[53,65],
           headline:"מפרויקט לפרויקט גדולים — לבנות הון וקריירה ברמת אולפן",
           goods:[
-            { id:"studioOptionDeal",       name:"אופציה מאולפן",       base:5000,  persistsAsAsset:false },
-            { id:"packageDeal",            name:"חבילת פרויקט",         base:7500,  persistsAsAsset:false },
             { id:"distributionStake",      name:"נתח בזכויות הפצה",     base:9000,  persistsAsAsset:true  },
-            { id:"productionCompanyShare", name:"חלק בחברת הפקה",       base:12000, persistsAsAsset:true  }
+            { id:"productionCompanyShare", name:"חלק בחברת הפקה",       base:12000, persistsAsAsset:true  },
+            { id:"usedLightingRig",        name:"מערכת תאורת סטודיו משומשת", base:6200, persistsAsAsset:false },
+            { id:"supportVehicle",         name:"רכב תמיכה להפקה",          base:8800, persistsAsAsset:false },
+            { id:"studioOptionDeal",       name:"אופציה מאולפן",       base:5000,  persistsAsAsset:false, market:"deal" },
+            { id:"packageDeal",            name:"חבילת פרויקט",         base:7500,  persistsAsAsset:false, market:"deal" }
           ],
           gigs:[
             { id:"showrunnerGig", title:"ניהול פרויקט אולפן", copy:"הכי הרבה מוניטין וקהל.",  needs:{}, cash:8000, fame:3, contacts:2, followers:500 },
-            { id:"execProducing", title:"הפקה בכירה",         copy:"הכי הרבה כסף וקשרים.",     needs:{}, cash:6000, fame:2, contacts:3, followers:200 }
+            { id:"execProducing", title:"הפקה בכירה",         copy:"הכי הרבה כסף וקשרים.",     needs:{}, cash:6000, fame:2, contacts:3, followers:200 },
+            { id:"festivalJudge", title:"שופט/ת בפסטיבל בינלאומי", copy:"הזמנה יוקרתית לשפוט בפסטיבלים בעולם — מחזקת מוניטין וקשרים.", needs:{}, cash:7000, fame:4, contacts:4, followers:800 }
           ],
           commitments:[],
           incidents:[
-            { id:"deal-collapses", chance:.08, title:"עסקה גדולה קורסת", copy:"אולפן נסוג מעסקה שכמעט נחתמה.", choices:[{label:"לחפש תחליף מהיר · -₪300",kind:"scramble"},{label:"להמשיך הלאה",kind:"pass",quiet:true}] },
-            { id:"studio-deal-cheap", chance:.08, title:"הזדמנות נדירה", copy:"מישהו רוצה למכור נתח מהר ובזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
+            { id:"deal-collapses", chance:.08, title:"עסקה גדולה קורסת", copy:"אולפן נסוג מעסקה שכמעט נחתמה.",
+              choices:[
+                { label:"לחפש עסקה חלופית · -₪2,500", kind:"scramble-breakthrough", effect:(s)=>{ s.cash-=2500; addLog("מצאת עסקה חלופית ברגע האחרון, במחיר כבד."); } },
+                { label:"להמשיך הלאה", kind:"pass", quiet:true }
+              ] },
+            { id:"studio-deal-cheap", chance:.08, title:"הזדמנות נדירה", copy:"מישהו רוצה למכור נתח מהר ובזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] },
+            { id:"exec-offer", chance:.07, title:"הצעת אקזקוטיב", copy:"מנהל/ת אולפן בכיר/ה מציע/ה תפקיד ייעוץ נלווה.",
+              choices:[
+                { label:"לקבל · הכנסה וקשרים", kind:"exec-consult", effect:(s)=>{ s.cash+=4000; s.contacts+=2; addLog("תפקיד הייעוץ הביא הכנסה וקשרים בכירים."); } },
+                { label:"לסרב · להתמקד בפרויקט הנוכחי", kind:"pass", quiet:true }
+              ] },
+            { id:"adjacent-scandal", chance:.06, title:"שערוריית תקשורת", copy:"שם שלך מוזכר בטעות בכתבה על שערוריית הפקה של פרויקט אחר.",
+              choices:[
+                { label:"להוציא הבהרה פומבית · -₪1,000", kind:"clarify-scandal", effect:(s)=>{ s.cash-=1000; addLog("ההבהרה הפומבית עלתה כסף אך מנעה נזק תדמיתי."); } },
+                { label:"להתעלם ולתת לזה לעבור", kind:"ignore-scandal", effect:(s)=>{ s.fame=Math.max(0,s.fame-3); addLog("ההתעלמות איפשרה לשמועה להתפשט — המוניטין נפגע."); }, quiet:true }
+              ] }
           ],
           riskProfile:null,
           milestones:[
-            { id:"studio-fame",  label:"מוניטין ברמת אולפן",  check:(s)=>s.fame>=90,               required:true },
-            { id:"real-wealth",  label:"הון משמעותי",          check:(s)=>(s.cash+s.bank)>=80000,   required:true },
+            { id:"studio-fame",  label:"מוניטין ברמת אולפן",  check:(s)=>s.fame>=90,               required:true, progress:(s)=>({current:s.fame, target:90}) },
+            { id:"real-wealth",  label:"הון משמעותי",          check:(s)=>(s.cash+s.bank)>=80000,   required:true, progress:(s)=>({current:s.cash+s.bank, target:80000}) },
             { id:"prod-company", label:"חלק בחברת הפקה",       check:(s)=>!!s.assets.productionCompanyShare, required:false },
             { id:"mass-audience",label:"קהל המוני",             check:(s)=>s.followers>=10000,       required:false }
           ],
@@ -436,13 +577,16 @@
           headline:"לסגור מעגל — הסרט האישי, ומה שנשאר אחריך",
           goods:[
             { id:"filmRightsLibrary", name:"ארכיון זכויות אישי", base:80000,  persistsAsAsset:true  },
-            { id:"mentorshipProgram", name:"תוכנית הנחיה",        base:15000,  persistsAsAsset:false },
-            { id:"retrospectiveDeal", name:"עסקת רטרוספקטיבה",    base:30000,  persistsAsAsset:false },
-            { id:"personalStudio",    name:"סטודיו אישי",          base:100000, persistsAsAsset:true  }
+            { id:"personalStudio",    name:"סטודיו אישי",          base:100000, persistsAsAsset:true  },
+            { id:"vintageCamera",     name:"מצלמת פילם וינטג׳",        base:22000, persistsAsAsset:false },
+            { id:"stillsArchiveBox",  name:"תיבת ארכיון תמונות סטילס", base:18000, persistsAsAsset:false },
+            { id:"mentorshipProgram", name:"תוכנית הנחיה",        base:15000,  persistsAsAsset:false, market:"deal" },
+            { id:"retrospectiveDeal", name:"עסקת רטרוספקטיבה",    base:30000,  persistsAsAsset:false, market:"deal" }
           ],
           gigs:[
             { id:"teachingGig",     title:"הוראה באקדמיה",       copy:"מוריש/ה את הידע הלאה.", needs:{}, cash:25000, fame:2, contacts:1, followers:300 },
-            { id:"consultingLegacy",title:"ייעוץ אסטרטגי",        copy:"הכי משתלם כלכלית.",      needs:{}, cash:40000, fame:1, contacts:2, followers:0 }
+            { id:"consultingLegacy",title:"ייעוץ אסטרטגי",        copy:"הכי משתלם כלכלית.",      needs:{}, cash:40000, fame:1, contacts:2, followers:0 },
+            { id:"festivalJudge",   title:"שופט/ת כבוד בפסטיבלים", copy:"מוזמנ/ת כשופט/ת כבוד לפסטיבלים המובילים בעולם.", needs:{}, cash:20000, fame:3, contacts:2, followers:500 }
           ],
           commitments:[
             { id:"legacyFilm", name:"הסרט האישי האחרון", copy:"סיכום של קריירה שלמה — שנתיים, ועוד סרט אחד להיפרד איתו.", years:2, entryDebt:0,
@@ -465,13 +609,27 @@
               ], grantsOnComplete:{ fame:5 } }
           ],
           incidents:[
-            { id:"health-slowdown", chance:.08, title:"האטה בריאותית", copy:"הגוף מבקש לנוח יותר ממה שתכננת.", choices:[{label:"לקחת עזרה בתשלום · -₪300",kind:"scramble"},{label:"להאט לבד",kind:"pass",quiet:true}] },
-            { id:"archive-deal", chance:.08, title:"הצעה לארכיון", copy:"מישהו רוצה לרכוש חלק מהארכיון שלך מהר ובזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] }
+            { id:"health-slowdown", chance:.08, title:"האטה בריאותית", copy:"הגוף מבקש לנוח יותר ממה שתכננת.",
+              choices:[
+                { label:"לשכור עזרה · -₪1,500", kind:"scramble-legacy", effect:(s)=>{ s.cash-=1500; addLog("שכרת עזרה כדי להאט בלי לוותר על הקצב."); } },
+                { label:"להאט לבד", kind:"pass", quiet:true }
+              ] },
+            { id:"archive-deal", chance:.08, title:"הצעה לארכיון", copy:"מישהו רוצה לרכוש חלק מהארכיון שלך מהר ובזול.", choices:[{label:"לתפוס את ההזדמנות",kind:"cheap-gear-take"},{label:"לוותר",kind:"pass",quiet:true}] },
+            { id:"retrospective-feature", chance:.07, title:"כתבה רטרוספקטיבית", copy:"כתב/ת מבקש/ת לכתוב כתבה רטרוספקטיבית גדולה על הקריירה שלך.",
+              choices:[
+                { label:"לשתף פעולה במלואו", kind:"full-retrospective", effect:(s)=>{ s.fame+=3; s.followers+=1500; addLog("הכתבה הרטרוספקטיבית הזכירה אותך לדור חדש."); } },
+                { label:"לתת ריאיון קצר בלבד", kind:"pass", quiet:true }
+              ] },
+            { id:"former-student", chance:.06, title:"פנייה מתלמיד/ה לשעבר", copy:"תלמיד/ה לשעבר שהצליח/ה בזכותך פונה עם הצעה להשקיע יחד בפרויקט של יוצרים צעירים.",
+              choices:[
+                { label:"להשקיע · -₪5,000", kind:"invest-young", effect:(s)=>{ s.cash-=5000; s.fame+=2; addLog("ההשקעה בדור הבא חיזקה את המורשת שלך."); } },
+                { label:"לאחל בהצלחה ולהמשיך הלאה", kind:"pass", quiet:true }
+              ] }
           ],
           riskProfile:null,
           milestones:[
-            { id:"storied-career", label:"קריירה מלאה",         check:(s)=>s.fame>=100,          required:true },
-            { id:"capstone-film",  label:"הסרט האישי הושלם",    check:(s)=>s.films.length>=2,    required:true },
+            { id:"storied-career", label:"קריירה מלאה",         check:(s)=>s.fame>=100,          required:true, progress:(s)=>({current:s.fame, target:100}) },
+            { id:"capstone-film",  label:"הסרט האישי הושלם",    check:(s)=>s.films.length>=2,    required:true, progress:(s)=>({current:s.films.length, target:2}) },
             { id:"wealthy-retire", label:"פרישה עם הון",         check:(s)=>(s.cash+s.bank)>=150000, required:false },
             { id:"beloved",        label:"קהל שאוהב",            check:(s)=>s.followers>=15000,   required:false }
           ],
@@ -484,6 +642,7 @@
       ];
 
       const STORAGE_KEY = "kobi-career-v2";
+      const SCORES_KEY = "kobi-career-v2-scores";
       const app = typeof document !== "undefined" ? document.getElementById("app") : null;
       const modal = typeof document !== "undefined" ? document.getElementById("modal") : null;
       const money = (value) => new Intl.NumberFormat("he-IL", { style:"currency", currency:"ILS", maximumFractionDigits:0 }).format(Math.round(value));
@@ -491,6 +650,11 @@
 
       function currentStage() { return STAGES.find((s) => s.id === state.stageId) || STAGES[0]; }
       function round5(n) { return Math.max(25, Math.round(n / 5) * 5); }
+      function formatDuration(years) {
+        if (years >= 1) return years + (years===1 ? " שנה" : " שנים");
+        const seasons = Math.max(1, Math.round(years * 4));
+        return seasons + (seasons===1 ? " עונה" : " עונות");
+      }
 
       function priceRoll(base, rp) {
         const roll = Math.random();
@@ -521,7 +685,7 @@
           debtCollectorStreak:0, debtCollectorIgnores:0,
           pathTags:[], bankruptcyStrikes:0,
           view:"hud", marketTab:"work", flight:null,
-          funding:{}, achievements:{}, event:null, ended:false, win:false, log:[], lastRecap:null
+          funding:{}, achievements:{}, awards:[], event:null, ended:false, win:false, log:[], lastRecap:null, briefPending:false, pendingAction:null, stageIntroPending:true
         };
         const market = generateMarket(next.stageId);
         next.prices = market.prices; next.priceKinds = market.kinds; next.previousPrices = {...market.prices};
@@ -541,15 +705,17 @@
               bag: saved.bag || {}, assets: {...fresh.assets, ...(saved.assets||{})},
               prices: {...fresh.prices, ...(saved.prices||{})}, previousPrices: saved.previousPrices || fresh.prices,
               priceKinds: saved.priceKinds || fresh.priceKinds, films: Array.isArray(saved.films) ? saved.films : [],
+              awards: Array.isArray(saved.awards) ? saved.awards : [],
               pathTags: Array.isArray(saved.pathTags) ? saved.pathTags : [], commitment: saved.commitment || null,
               funding: {...(saved.funding||{})}, achievements: {...(saved.achievements||{})},
-              event: null, activeCheckpoint: saved.activeCheckpoint || null
+              event: null, briefPending: false, pendingAction: null, stageIntroPending: false, activeCheckpoint: saved.activeCheckpoint || null
             };
           }
         } catch (_) {}
       }
       function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {} }
-      function addLog(text) { state.log.unshift(text); state.log = state.log.slice(0,6); }
+      function addLog(text) { state.log.unshift(text); state.log = state.log.slice(0,200); }
+      function pushAward(title) { state.awards.push({ title, age: Math.round(state.age), stage: currentStage().name }); }
 
       function goodName(id) { const g = currentStage().goods.find((x)=>x.id===id); return g ? g.name : id; }
       function assetName(id) { for (const s of STAGES) { const g=(s.goods||[]).find((x)=>x.id===id); if (g) return g.name; } return id; }
@@ -573,14 +739,29 @@
       }
 
       function notify(title,copy,choices,html) { state.event = {title,copy,choices,html}; }
+      function closeBrief() { state.briefPending = false; save(); render(); return true; }
+      function closeStageIntro() { state.stageIntroPending = false; save(); render(); return true; }
       function announce(title,copy) { notify(title,copy,[{label:"להמשיך",kind:"pass"}]); render(); return false; }
 
       function isWinner() { return false; }
 
+      function loadScores() { try { return JSON.parse(localStorage.getItem(SCORES_KEY)) || []; } catch (_) { return []; } }
+      function saveScore(entry) {
+        try {
+          const list = loadScores();
+          list.push(entry);
+          list.sort((a,b)=>b.achievement-a.achievement);
+          localStorage.setItem(SCORES_KEY, JSON.stringify(list.slice(0,10)));
+        } catch (_) {}
+      }
+
       function finish(win) {
         state.ended = true; state.win = !!win; state.event = null;
         const bagValue = Object.entries(state.bag).reduce((sum,[id,qty])=>sum+sellPrice(id)*qty,0);
-        state.final = { bagValue, score: state.cash+state.bank+bagValue-state.debt+state.fame*100+state.followers*2+state.contacts*350 };
+        const financial = state.cash+state.bank+bagValue-state.debt;
+        const achievement = state.fame*100+state.followers*2+state.contacts*350+state.films.length*2000;
+        state.final = { bagValue, financial, achievement };
+        saveScore({ achievement, financial, age: Math.round(state.age), win: state.win, stage: currentStage().name });
         addLog(win ? "הגעת/הגעה לפרישה — מסלול קריירה שלם." : "המסלול נעצר כאן.");
       }
 
@@ -603,6 +784,7 @@
         if (!nextStage) { finish(true); return; }
         state.stageId = nextStage.id; state.stageYear = 0;
         state.nextMilestoneAge = nextStage.ageRange[1];
+        state.stageIntroPending = true;
         addLog("עברת לשלב: "+nextStage.name+".");
         const market = generateMarket(nextStage.id);
         state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices};
@@ -637,10 +819,10 @@
         if (state.debtCollectorStreak < DEBT_COLLECTOR_YEARS) return false;
         const repeat = state.debtCollectorIgnores > 0;
         const payAmountNow = Math.min(payAmount(), state.cash, state.debt);
-        notify("הגובה מגיע",
+        notify("אזהרה מההוצאה לפועל",
           repeat
-            ? "זו כבר לא הפעם הראשונה. הפעם הגובה לא מסתפק באזהרה."
-            : "שנים בלי לגעת בחוב. גובה מטעם הבנק רוצה לדבר איתך — עדיין באדיבות, אבל זו אזהרה אמיתית.",
+            ? "זו כבר לא הפעם הראשונה. הבנק פותח נגדך תיק בהוצאה לפועל — עיקולים אפשריים, לא רק מכתב."
+            : "שנים בלי לגעת בחוב. הבנק שולח התראה אחרונה לפני פתיחת תיק בהוצאה לפועל — עדיין אפשר למנוע את זה.",
           [
             { label:"לשלם עכשיו · "+money(payAmountNow), kind:"collector-pay" },
             { label:"להתעלם", kind:"collector-ignore", quiet:true }
@@ -664,12 +846,14 @@
         const before = state.debt;
         state.debt = Math.ceil(state.debt * Math.pow(DEBT_ANNUAL_RATE, elapsed));
         state.debtCollectorStreak = state.debt > DEBT_COLLECTOR_MIN_DEBT ? state.debtCollectorStreak + elapsed : 0;
+        if (state.bank > 0) state.bank = Math.round(state.bank * Math.pow(BANK_ANNUAL_RATE, elapsed));
         state.previousPrices = {...state.prices};
         const market = generateMarket(state.stageId);
         state.prices = market.prices; state.priceKinds = market.kinds;
         const roundedElapsed = Math.round(elapsed*10)/10;
-        addLog("גיל "+Math.round(state.age)+": "+reason+(elapsed!==1?" ("+roundedElapsed+" שנים).":""));
+        addLog("גיל "+Math.round(state.age)+": "+reason+(elapsed!==1?" ("+formatDuration(roundedElapsed)+").":""));
         state.lastRecap = { years:roundedElapsed, interestPaid: state.debt-before, age: Math.round(state.age) };
+        state.briefPending = true;
         if (checkBankruptcy()) return true;
         if (checkStageProgress()) return true;
         if (checkDebtCollector()) return true;
@@ -678,19 +862,18 @@
         return false;
       }
 
-      function pickUninvitedCity() {
-        const pool = CITIES.filter((c)=>FLIGHT_CITY_IDS.includes(c.id) && !state.achievements["visited-"+c.id]);
-        if (!pool.length) return null;
-        return pool[Math.floor(Math.random()*pool.length)];
+      function uninvitedCities() {
+        return CITIES.filter((c)=>FLIGHT_CITY_IDS.includes(c.id) && !state.achievements["visited-"+c.id]);
       }
 
       function maybeOfferFlight() {
         if (state.event) return;
         if (Math.random() > 0.3) return;
-        const city = pickUninvitedCity();
-        if (!city) return;
-        notify("הוזמנת לפסטיבל "+city.name, "עלות "+money(city.fare)+" ושנה מהחיים. לטוס או להישאר להפצה מקומית?",
-          [{label:"לטוס", kind:"accept-flight", cityId:city.id}, {label:"להישאר ולהפיץ מקומית", kind:"decline-flight", quiet:true}]);
+        const pool = uninvitedCities();
+        if (!pool.length) return;
+        const cityChoices = pool.map((c)=>({label:"לטוס ל"+c.name+" · "+money(c.fare), kind:"accept-flight", cityId:c.id}));
+        notify("הוזמנת לפסטיבל", "יש הזמנה השנה — לאן לטוס? כל טיסה עולה כסף ושנה מהחיים.",
+          [...cityChoices, {label:"להישאר ולהפיץ מקומית", kind:"decline-flight", quiet:true}]);
       }
 
       function acceptFlight(cityId) {
@@ -737,7 +920,9 @@
             completedAge: Math.round(state.age)
           });
           state.filmDraft = {};
+          pushAward(config.id==="indieFilm" ? "סיום: הסרט העצמאי הראשון" : "סיום: הסרט האישי האחרון");
         }
+        if (config.id === "rabinovichGrant") { state.films.push({ title:"הסרט העצמאי — מענק ציבורי", completedAge: Math.round(state.age) }); pushAward("סיום סרט במימון קרן ציבורית"); }
         state.pathTags.push(config.id);
         addLog("סיימת: "+config.name+".");
         state.commitment = null;
@@ -748,6 +933,7 @@
         if (state.ended || state.event || state.commitment) return false;
         const config = (currentStage().commitments||[]).find((c)=>c.id===id);
         if (!config) return false;
+        state.stageIntroPending = false;
         if (config.entryDebt) { state.debt += config.entryDebt; addLog("נכנסת ל"+config.name+" — החוב עלה ב-"+money(config.entryDebt)+"."); }
         if (config.immediateEffect) config.immediateEffect(state);
         if (!config.years) {
@@ -791,6 +977,25 @@
         addLog("מכרת "+goodName(id)+" ב-"+money(price)+"."); save(); render(); return true;
       }
 
+      function openGigForecast(id) {
+        if (state.ended||state.event||state.commitment||state.briefPending||state.pendingAction) return false;
+        const gig = (currentStage().gigs||[]).find((g)=>g.id===id);
+        if (!gig) return false;
+        const lack = missing(gig.needs);
+        if (lack.length) return announce("חסר ציוד לעבודה הזאת","צריך: "+lack.join(" · ")+".");
+        state.pendingAction = { kind:"gig", id };
+        save(); render(); return true;
+      }
+
+      function confirmGig() {
+        if (!state.pendingAction || state.pendingAction.kind!=="gig") return false;
+        const id = state.pendingAction.id;
+        state.pendingAction = null;
+        return doGig(id);
+      }
+
+      function cancelPendingAction() { state.pendingAction = null; save(); render(); return true; }
+
       function doGig(id) {
         if (state.ended||state.event||state.commitment) return false;
         const gig = (currentStage().gigs||[]).find((g)=>g.id===id);
@@ -798,7 +1003,7 @@
         const lack = missing(gig.needs);
         if (lack.length) return announce("חסר ציוד לעבודה הזאת","צריך: "+lack.join(" · ")+".");
         state.cash += gig.cash; state.fame += (gig.fame||0); state.contacts += (gig.contacts||0); state.followers += (gig.followers||0);
-        advanceYear("עבדת כ"+gig.title+".", 0.4);
+        advanceYear("עבדת כ"+gig.title+".", GIG_YEARS);
         save(); render(); return true;
       }
 
@@ -869,11 +1074,11 @@
           save(); render(); return true;
         }
 
-        if (choice.kind === "repair") {
+        if (choice.effect) { choice.effect(state); }
+        else if (choice.kind === "repair") {
           if (state.cash < 300) { notify("אין מספיק מזומן","אין כרגע כסף לתיקון.",[{label:"להמשיך",kind:"pass"}]); render(); return false; }
           state.cash -= 300; addLog("תיקנת את המצלמה ב-₪300.");
         } else if (choice.kind === "risk-camera") { addLog("המשכת עם הסיכון על המצלמה."); }
-        else if (choice.kind === "scramble") { state.cash -= 300; addLog("מצאת תחליף מהיר, בעלות."); }
         else if (choice.kind === "cheap-gear-take") { takeCheapGear(); }
         else if (choice.kind === "debt-pay") { const amt=Math.min(500,state.cash,state.debt); state.cash-=amt; state.debt-=amt; addLog("החזרת "+money(amt)+" מהחוב."); }
         else if (choice.kind === "debt-delay") { state.debt += 300; addLog("דחית את הבנק והחוב גדל."); }
@@ -883,16 +1088,18 @@
         else if (choice.kind === "collector-pay") {
           const paid = Math.min(payAmount(), state.cash, state.debt);
           state.cash -= paid; state.debt -= paid; state.debtCollectorStreak = 0; state.debtCollectorIgnores = 0;
-          addLog(paid ? "שילמת "+money(paid)+" לגובה — הוא הסתפק בזה, לעת עתה." : "לא היה לך מה לשלם — הגובה עזב, אבל לא לנצח.");
+          addLog(paid ? "שילמת "+money(paid)+" — התיק בהוצאה לפועל נסגר, לעת עתה." : "לא היה לך מה לשלם — התיק עדיין פתוח, אבל לא לנצח.");
         }
         else if (choice.kind === "collector-ignore") {
           const penalty = Math.ceil(state.debt*0.05);
           state.debt += penalty; state.debtCollectorStreak = 0; state.debtCollectorIgnores += 1;
-          if (state.debtCollectorIgnores >= 2) { state.bankruptcyStrikes += 1; addLog("התעלמת מהגובה שוב — החוב גדל ב-"+money(penalty)+", וזה כבר מתחיל להיראות כמו פשיטת רגל."); }
-          else { addLog("התעלמת מהגובה — החוב גדל ב-"+money(penalty)+"."); }
+          if (state.debtCollectorIgnores >= 2) { state.bankruptcyStrikes += 1; addLog("התעלמת שוב — התיק בהוצאה לפועל נפתח, החוב גדל ב-"+money(penalty)+", וזה כבר מתחיל להיראות כמו פשיטת רגל."); }
+          else { addLog("התעלמת מההתראה — החוב גדל ב-"+money(penalty)+"."); }
         }
         else if (choice.kind === "accept-flight") { return acceptFlight(choice.cityId); }
         else if (choice.kind === "decline-flight") { return declineFlight(); }
+        else if (choice.kind === "clap-back") { state.followers += 2000; state.fame += 2; addLog("ענית בראיון חריף — הסערה רק הגדילה את החשיפה."); pushAward("פרס על אף המחלוקת"); }
+        else if (choice.kind === "stay-quiet") { state.fame += 3; addLog("שתקת ונתת לסרט לדבר בעצמו."); pushAward("פרס על אף המחלוקת"); }
 
         if (state.commitment && !state.event && !state.ended) progressCommitment();
         save(); render(); return true;
@@ -917,11 +1124,15 @@
           const config = currentCommitmentConfig(state);
           html += `<article class="action-row"><div><h3>${config.name}</h3><p>בעיצומה · שנה ${Math.round(state.commitment.elapsedYears)} מתוך ${config.years}</p></div><div class="action-meta"><b>בתהליך</b></div></article>`;
         } else {
-          html += (stage.gigs||[]).map((gig) => {
+          const gigRow = (gig) => {
             const lack = missing(gig.needs);
-            const meta = "+"+money(gig.cash)+(gig.fame?" · +"+gig.fame+" קרדיטים":"");
+            const meta = "+"+money(gig.cash)+(gig.fame?" · +"+gig.fame+" הכרה":"");
             return row(gig.title, gig.copy+(lack.length?" · חסר: "+lack.join(" · "):""), meta, "gig:"+gig.id, lack.length?"חסר ציוד":"לעבוד");
-          }).join("");
+          };
+          const careerGigs = (stage.gigs||[]).filter((g)=>g.fame>0||g.contacts>0);
+          const survivalGigs = (stage.gigs||[]).filter((g)=>!(g.fame>0||g.contacts>0));
+          if (survivalGigs.length) html += `<p class="eyebrow" style="margin-top:12px">עבודות הישרדות · כסף מהיר</p>` + survivalGigs.map(gigRow).join("");
+          if (careerGigs.length) html += `<p class="eyebrow" style="margin-top:12px">עבודות קריירה · הכרה וקשרים</p>` + careerGigs.map(gigRow).join("");
         }
         return html || '<p class="empty">אין כרגע עבודות זמינות בשלב הזה.</p>';
       }
@@ -931,7 +1142,8 @@
         const unavailable = price == null;
         const already = good.persistsAsAsset && state.assets[good.id];
         const owned = good.persistsAsAsset ? (already?1:0) : (state.bag[good.id]||0);
-        return `<article class="action-row"><div><h3>${good.name}${trendBadge(good.id)}</h3><p>${good.persistsAsAsset ? "נכס קבוע" : ("סחורה · בתיק: "+owned)}</p></div><div class="action-meta"><b>${unavailable?"לא זמין":(already?"נרכש":money(price))}</b><span><button class="row-action" data-action="buy" data-id="${good.id}" ${unavailable||already?"disabled":""}>קנה</button> ${good.persistsAsAsset ? "" : `<button class="row-action quiet" data-action="sell" data-id="${good.id}" ${owned?"":"disabled"}>מכור</button>`}</span></div></article>`;
+        const kindLabel = good.persistsAsAsset ? "נכס קבוע" : good.market==="deal" ? ("עסקה · בתיק: "+owned) : ("יד שנייה · בתיק: "+owned);
+        return `<article class="action-row"><div><h3>${good.name}${trendBadge(good.id)}</h3><p>${kindLabel}</p></div><div class="action-meta"><b>${unavailable?"לא זמין":(already?"נרכש":money(price))}</b><span><button class="row-action" data-action="buy" data-id="${good.id}" ${unavailable||already?"disabled":""}>קנה</button> ${good.persistsAsAsset ? "" : `<button class="row-action quiet" data-action="sell" data-id="${good.id}" ${owned?"":"disabled"}>מכור</button>`}</span></div></article>`;
       }
 
       function shopRows() {
@@ -940,8 +1152,13 @@
       }
 
       function secondhandRows() {
-        const goods = (currentStage().goods||[]).filter((g)=>!g.persistsAsAsset);
+        const goods = (currentStage().goods||[]).filter((g)=>!g.persistsAsAsset && g.market!=="deal");
         return goods.length ? goods.map(goodRow).join("") : '<p class="empty">אין עדיין פריטים בשוק היד-שנייה בשלב הזה.</p>';
+      }
+
+      function dealRows() {
+        const goods = (currentStage().goods||[]).filter((g)=>!g.persistsAsAsset && g.market==="deal");
+        return goods.length ? goods.map(goodRow).join("") : '<p class="empty">אין עדיין עסקאות זמינות בשלב הזה.</p>';
       }
 
       function bankRows() {
@@ -950,7 +1167,7 @@
         if (hasDebt) {
           html += row("לסגור את כל החוב","תשלום חד-פעמי של מלוא היתרה בבת אחת",money(state.debt),"bank:payAll","לסגור הכל",state.cash<state.debt);
         }
-        html += row("להפקיד","שומר כסף בצד",money(500),"bank:deposit","להפקיד")
+        html += row("להפקיד","שומר כסף בצד · צובר ריבית 1.5% לשנה",money(500),"bank:deposit","להפקיד")
           + row("למשוך פיקדון","כרגע בבנק: "+money(state.bank),money(500),"bank:withdraw","למשוך");
         return html;
       }
@@ -967,7 +1184,8 @@
       const MARKET_TABS = [
         { id:"work", label:"עבודה" },
         { id:"shop", label:"חנות" },
-        { id:"secondhand", label:"שוק יד-2" },
+        { id:"secondhand", label:"יד שנייה" },
+        { id:"deals", label:"עסקאות" },
         { id:"financing", label:"מימון" }
       ];
 
@@ -982,6 +1200,7 @@
         const tab = state.marketTab || "work";
         if (tab==="shop") return shopRows();
         if (tab==="secondhand") return secondhandRows();
+        if (tab==="deals") return dealRows();
         if (tab==="financing") return financingRows();
         return workRows();
       }
@@ -1001,9 +1220,18 @@
         }).join("")}</nav>`;
       }
 
+      function progressBarMarkup(m) {
+        const p = m.progress(state);
+        const pct = Math.max(0, Math.min(100, Math.round((p.current/p.target)*100)));
+        const fmt = (n) => Math.round(n).toLocaleString("he-IL");
+        return `<div class="milestone-progress ${pct>=100?"done":""}"><div class="progress-label"><span>${pct>=100?"✓ ":""}${m.label}</span><span>${fmt(p.current)} / ${fmt(p.target)}</span></div><div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div></div>`;
+      }
       function goalPanelMarkup(stage) {
-        const items = (stage.milestones||[]).map((m)=>`<span class="milestone ${m.check(state)?"done":""} ${m.required?"required":""}">${m.check(state)?"✓ ":""}${m.label}</span>`).join("");
-        return `<div class="next-move"><div><small>המטרה הנוכחית · ${stage.name} (${stage.ageRange[0]}–${stage.ageRange[1]})</small><b>${stage.headline}</b><div class="milestone-list">${items||'<span class="milestone">אין עדיין יעדים מוגדרים</span>'}</div></div></div>`;
+        const milestones = stage.milestones||[];
+        const bars = milestones.filter((m)=>m.required && m.progress).map(progressBarMarkup).join("");
+        const chips = milestones.filter((m)=>!m.required).map((m)=>`<span class="milestone ${m.check(state)?"done":""}">${m.check(state)?"✓ ":""}${m.label}</span>`).join("");
+        const empty = !bars && !chips ? '<span class="milestone">אין עדיין יעדים מוגדרים</span>' : "";
+        return `<div class="next-move"><div><small>המטרה הנוכחית · ${stage.name} (${stage.ageRange[0]}–${stage.ageRange[1]})</small><b>${stage.headline}</b>${bars}${chips?`<div class="milestone-list">${chips}</div>`:""}${empty}</div></div>`;
       }
 
       function recommendPanelMarkup(stage) {
@@ -1015,7 +1243,48 @@
       function recapMarkup() {
         if (!state.lastRecap) return "";
         const r = state.lastRecap;
-        return `<div class="final-grid recap"><div><small>גיל</small><b>${r.age}</b></div><div><small>ריבית ששולמה</small><b>${money(r.interestPaid)}</b></div><div><small>משך</small><b>${r.years} שנים</b></div></div>`;
+        return `<div class="final-grid recap"><div><small>גיל</small><b>${r.age}</b></div><div><small>החוב גדל ב</small><b>${money(r.interestPaid)}</b></div><div><small>משך</small><b>${formatDuration(r.years)}</b></div></div>`;
+      }
+
+      function stageIntroMarkup() {
+        const stage = currentStage();
+        const milestoneChips = (stage.milestones||[]).filter((m)=>m.required).map((m)=>`<span class="milestone required">${m.label}</span>`).join("");
+        const showCommitments = !hasChosenEntryPath() && stage.commitments && stage.commitments.length;
+        const commitButtons = showCommitments ? stage.commitments.map((c)=>
+          `<button class="primary" data-action="commit:${c.id}">${c.name} · ${c.years?c.years+" שנים":"מיידי"}${c.entryDebt?" · חוב +"+money(c.entryDebt):" · בלי חוב"}</button>`
+        ).join("") : "";
+        return `<section class="event intro"><span>שלב חדש</span><h2>${stage.name}</h2>
+          <p>${stage.headline}</p>
+          ${milestoneChips?`<div class="milestone-list">${milestoneChips}</div>`:""}
+          ${commitButtons?`<p class="eyebrow" style="margin-top:14px">בחירת מסלול כניסה</p>${commitButtons}`:""}
+          <button class="quiet" data-action="stage-intro:close">${showCommitments?"אחליט אחר כך":"להתחיל ←"}</button>
+        </section>`;
+      }
+
+      function briefMarkup() {
+        const stage = currentStage();
+        return `<section class="event brief"><span>עדכון</span><h2>גיל ${Math.round(state.age)}</h2>
+          ${recapMarkup()}
+          ${recommendPanelMarkup(stage)}
+          <button class="quiet" data-action="brief:close">המשך ←</button>
+        </section>`;
+      }
+
+      function gigForecastMarkup() {
+        const gig = (currentStage().gigs||[]).find((g)=>g.id===state.pendingAction.id);
+        if (!gig) return "";
+        const chips = [
+          `<span class="milestone">+${money(gig.cash)}</span>`,
+          gig.fame ? `<span class="milestone">+${gig.fame} הכרה</span>` : "",
+          gig.contacts ? `<span class="milestone">+${gig.contacts} קשרים</span>` : "",
+          gig.followers ? `<span class="milestone">+${gig.followers.toLocaleString("he-IL")} עוקבים</span>` : ""
+        ].filter(Boolean).join("");
+        return `<section class="event forecast"><span>לפני שממשיכים</span><h2>${gig.title}</h2>
+          <p>${gig.copy}</p>
+          <div class="milestone-list">${chips}</div>
+          <button class="primary" data-action="gig-confirm">לבצע ←</button>
+          <button class="quiet" data-action="gig-cancel">ביטול</button>
+        </section>`;
       }
 
       function hudView() {
@@ -1026,8 +1295,15 @@
           ${recapMarkup()}
           ${marketTabsMarkup()}
           <div class="service-list">${marketBody()}</div>
-          <div class="footer-actions"><button data-action="finish">לוותר על המסלול</button><button data-action="bag">תיק הפקה</button></div>
+          <div class="footer-actions"><button data-action="finish">לוותר על המסלול</button><button data-action="log">יומן קריירה</button><button data-action="bag">תיק הפקה</button></div>
         </section>`;
+      }
+
+      function logView() {
+        const rows = state.log.map((line)=>`<div class="bag-item"><span>${line}</span></div>`).join("");
+        return `<section class="panel bag"><header class="service-top"><div><p class="eyebrow">היסטוריה</p><h1>יומן קריירה</h1></div><button class="back" data-action="hud">חזרה ←</button></header>
+          <div class="bag-grid" style="grid-template-columns:1fr">${rows||'<p class="empty">עוד אין רשומות.</p>'}</div>
+          <div class="footer-actions"><button data-action="finish">לוותר על המסלול</button><button data-action="hud">למסך הראשי</button></div></section>`;
       }
 
       function bagView() {
@@ -1044,9 +1320,27 @@
       function renderModal() {
         if (!modal) return;
         if (state.ended) {
-          const final = state.final || {score:0};
+          const final = state.final || {financial:0, achievement:0};
+          const scores = loadScores();
+          const scoreRows = scores.map((s,i)=>`<div class="bag-item"><span>#${i+1} · ${s.stage} · גיל ${s.age}${s.win?" · ניצחון":""}</span><b>${money(s.achievement)}</b></div>`).join("");
+          const awardRows = state.awards.map((a)=>`<div class="bag-item"><span>${a.title} · ${a.stage}, גיל ${a.age}</span><b>🏆</b></div>`).join("");
           modal.classList.remove("hidden");
-          modal.innerHTML = `<section class="event"><span>${state.win?"סוף דרך — פרישה":"המסלול נעצר"}</span><h2>${state.win?"קובי הגיע/ה לפרישה אחרי קריירה שלמה.":"המסלול נעצר כאן."}</h2><p>${state.win?"עברת את כל שלבי הקריירה — מסטודנט/ית ועד פרישה.":"אפשר להתחיל מחדש עם הידע שצברת."}</p><div class="final-grid"><div><small>ציון</small><b>${money(final.score)}</b></div><div><small>גיל</small><b>${Math.round(state.age)}</b></div><div><small>שלב</small><b>${currentStage().name}</b></div></div><button data-action="new">מסלול חדש ←</button></section>`;
+          modal.innerHTML = `<section class="event"><span>${state.win?"סוף דרך — פרישה":"המסלול נעצר"}</span><h2>${state.win?"קובי הגיע/ה לפרישה אחרי קריירה שלמה.":"המסלול נעצר כאן."}</h2><p>${state.win?"עברת את כל שלבי הקריירה — מסטודנט/ית ועד פרישה.":"אפשר להתחיל מחדש עם הידע שצברת."}</p><div class="final-grid" style="grid-template-columns:repeat(2,1fr)"><div><small>הישג מקצועי</small><b>${money(final.achievement)}</b></div><div><small>מצב כלכלי</small><b>${money(final.financial)}</b></div><div><small>גיל</small><b>${Math.round(state.age)}</b></div><div><small>שלב</small><b>${currentStage().name}</b></div></div>${awardRows?`<p class="eyebrow" style="margin-top:14px">ארון פרסים</p><div class="bag-grid" style="grid-template-columns:1fr">${awardRows}</div>`:""}<p class="eyebrow" style="margin-top:14px">שיאים</p><div class="bag-grid" style="grid-template-columns:1fr">${scoreRows||'<p class="empty">עדיין אין שיאים.</p>'}</div><button data-action="new">מסלול חדש ←</button></section>`;
+          return;
+        }
+        if (state.pendingAction) {
+          modal.classList.remove("hidden");
+          modal.innerHTML = state.pendingAction.kind==="gig" ? gigForecastMarkup() : "";
+          return;
+        }
+        if (state.briefPending && state.lastRecap) {
+          modal.classList.remove("hidden");
+          modal.innerHTML = briefMarkup();
+          return;
+        }
+        if (state.stageIntroPending) {
+          modal.classList.remove("hidden");
+          modal.innerHTML = stageIntroMarkup();
           return;
         }
         if (!state.event) { modal.classList.add("hidden"); modal.innerHTML=""; return; }
@@ -1057,7 +1351,7 @@
       function render() {
         if (!app) return;
         const head = `<header class="topbar"><div class="brand">KOBI / קריירה</div><div class="turn"><div>גיל<b>${Math.round(state.age)}</b></div><div>שנה<b>${Math.round(state.year)}</b></div><div>מזומן<b>${money(state.cash)}</b></div><div class="debt">חוב<b>${money(state.debt)}</b>${state.debt>0?'<button class="mini-pay" data-action="bank:pay">להחזיר</button>':""}</div><div class="fame">קרדיטים<b>${state.fame}</b></div><div class="followers">עוקבים<b>${state.followers.toLocaleString("he-IL")}</b></div><div class="contacts">קשרים<b>${state.contacts}</b></div><div>תיק<b>${bagCount()} / ${state.capacity}</b></div></div></header>${stageTrackMarkup()}`;
-        const body = state.view==="bag" ? bagView() : hudView();
+        const body = state.view==="bag" ? bagView() : state.view==="log" ? logView() : hudView();
         app.innerHTML = `<div class="shell">${head}${body}</div>`;
         renderModal();
       }
@@ -1068,14 +1362,19 @@
           const action = button.dataset.action, id = button.dataset.id;
           if (action==="hud") openView("hud");
           if (action==="bag") openView("bag");
+          if (action==="log") openView("log");
           if (action==="buy") buy(id);
           if (action==="sell") sell(id);
-          if (action.indexOf("gig:")===0) doGig(action.slice(4));
+          if (action.indexOf("gig:")===0) openGigForecast(action.slice(4));
           if (action.indexOf("commit:")===0) startCommitment(action.slice(7));
           if (action.indexOf("bank:")===0) bank(action.slice(5));
           if (action.indexOf("tab:")===0) setMarketTab(action.slice(4));
           if (action==="loanshark") takeBlackMarketLoan();
           if (action==="event") resolveEvent(Number(id));
+          if (action==="brief:close") closeBrief();
+          if (action==="stage-intro:close") closeStageIntro();
+          if (action==="gig-confirm") confirmGig();
+          if (action==="gig-cancel") cancelPendingAction();
           if (action==="finish") { finish(false); save(); render(); }
           if (action==="new") { state = createState(); save(); render(); }
         });
@@ -1087,7 +1386,8 @@
         getState: () => clone(state),
         newGame: () => { state = createState(); return clone(state); },
         openView, buy, sell, doGig, startCommitment, resolveEvent, bank, acceptFlight, declineFlight,
-        setMarketTab, takeBlackMarketLoan,
+        setMarketTab, takeBlackMarketLoan, closeBrief,
+        openGigForecast, confirmGig, cancelPendingAction, closeStageIntro, loadScores,
         finish: () => { finish(false); return clone(state); },
         STAGES, CITIES,
         __testJumpToStage: (id) => {
