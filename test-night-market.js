@@ -48,7 +48,7 @@ function run(htmlPath) {
   state = game.getState();
   assert.strictEqual(state.age, 22, "a gig advances exactly one year");
   assert.ok(state.cash > beforeGig.cash, "a gig pays cash");
-  const expectedDebt = Math.ceil(8000 * Math.pow(1.045, 1));
+  const expectedDebt = Math.ceil(8000 * Math.pow(1.03, 1));
   assert.strictEqual(state.debt, expectedDebt, "debt compounds at the annual rate, not the old weekly rate");
 
   // --- buy: asset vs. bag, capacity ---
