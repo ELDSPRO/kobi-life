@@ -720,10 +720,10 @@
         if (state.debtCollectorStreak < DEBT_COLLECTOR_YEARS) return false;
         const repeat = state.debtCollectorIgnores > 0;
         const payAmountNow = Math.min(payAmount(), state.cash, state.debt);
-        notify("הגובה מגיע",
+        notify("אזהרה מההוצאה לפועל",
           repeat
-            ? "זו כבר לא הפעם הראשונה. הפעם הגובה לא מסתפק באזהרה."
-            : "שנים בלי לגעת בחוב. גובה מטעם הבנק רוצה לדבר איתך — עדיין באדיבות, אבל זו אזהרה אמיתית.",
+            ? "זו כבר לא הפעם הראשונה. הבנק פותח נגדך תיק בהוצאה לפועל — עיקולים אפשריים, לא רק מכתב."
+            : "שנים בלי לגעת בחוב. הבנק שולח התראה אחרונה לפני פתיחת תיק בהוצאה לפועל — עדיין אפשר למנוע את זה.",
           [
             { label:"לשלם עכשיו · "+money(payAmountNow), kind:"collector-pay" },
             { label:"להתעלם", kind:"collector-ignore", quiet:true }
@@ -989,13 +989,13 @@
         else if (choice.kind === "collector-pay") {
           const paid = Math.min(payAmount(), state.cash, state.debt);
           state.cash -= paid; state.debt -= paid; state.debtCollectorStreak = 0; state.debtCollectorIgnores = 0;
-          addLog(paid ? "שילמת "+money(paid)+" לגובה — הוא הסתפק בזה, לעת עתה." : "לא היה לך מה לשלם — הגובה עזב, אבל לא לנצח.");
+          addLog(paid ? "שילמת "+money(paid)+" — התיק בהוצאה לפועל נסגר, לעת עתה." : "לא היה לך מה לשלם — התיק עדיין פתוח, אבל לא לנצח.");
         }
         else if (choice.kind === "collector-ignore") {
           const penalty = Math.ceil(state.debt*0.05);
           state.debt += penalty; state.debtCollectorStreak = 0; state.debtCollectorIgnores += 1;
-          if (state.debtCollectorIgnores >= 2) { state.bankruptcyStrikes += 1; addLog("התעלמת מהגובה שוב — החוב גדל ב-"+money(penalty)+", וזה כבר מתחיל להיראות כמו פשיטת רגל."); }
-          else { addLog("התעלמת מהגובה — החוב גדל ב-"+money(penalty)+"."); }
+          if (state.debtCollectorIgnores >= 2) { state.bankruptcyStrikes += 1; addLog("התעלמת שוב — התיק בהוצאה לפועל נפתח, החוב גדל ב-"+money(penalty)+", וזה כבר מתחיל להיראות כמו פשיטת רגל."); }
+          else { addLog("התעלמת מההתראה — החוב גדל ב-"+money(penalty)+"."); }
         }
         else if (choice.kind === "accept-flight") { return acceptFlight(choice.cityId); }
         else if (choice.kind === "decline-flight") { return declineFlight(); }
@@ -1144,7 +1144,7 @@
       function recapMarkup() {
         if (!state.lastRecap) return "";
         const r = state.lastRecap;
-        return `<div class="final-grid recap"><div><small>גיל</small><b>${r.age}</b></div><div><small>ריבית ששולמה</small><b>${money(r.interestPaid)}</b></div><div><small>משך</small><b>${r.years} שנים</b></div></div>`;
+        return `<div class="final-grid recap"><div><small>גיל</small><b>${r.age}</b></div><div><small>החוב גדל ב</small><b>${money(r.interestPaid)}</b></div><div><small>משך</small><b>${r.years} שנים</b></div></div>`;
       }
 
       function stageIntroMarkup() {
@@ -1164,7 +1164,7 @@
 
       function briefMarkup() {
         const stage = currentStage();
-        return `<section class="event brief"><span>בריף השנה</span><h2>גיל ${Math.round(state.age)}</h2>
+        return `<section class="event brief"><span>עדכון</span><h2>גיל ${Math.round(state.age)}</h2>
           ${recapMarkup()}
           ${recommendPanelMarkup(stage)}
           <button class="quiet" data-action="brief:close">המשך ←</button>

@@ -33,13 +33,13 @@ function clearEvent(game) {
 }
 
 // multi-year commitment jumps (checkpoints, filmSchool, indieFilm/legacyFilm) can cross the debt-collector's
-// 3-year-neglect threshold mid-flow, inserting a "הגובה מגיע" event before the real next checkpoint opens.
+// 3-year-neglect threshold mid-flow, inserting a "אזהרה מההוצאה לפועל" event before the real next checkpoint opens.
 // Call this right before asserting on state.event when the intervening gap could plausibly be >=3 years.
 function drainDebtCollector(game) {
   const state = game.getState();
   // "ignore" (not "pay") so draining this incidental interruption doesn't perturb the cash/debt trajectory
   // the surrounding test is actually asserting on - it only touches state.debt itself, no cash side effect.
-  if (state.event && state.event.title === "הגובה מגיע") game.resolveEvent(1);
+  if (state.event && state.event.title === "אזהרה מההוצאה לפועל") game.resolveEvent(1);
 }
 
 function run(htmlPath) {
@@ -461,13 +461,13 @@ function run(htmlPath) {
   collectorGame.__testSetState({ debt: 5000, debtCollectorStreak: 2.5 });
   assert.strictEqual(collectorGame.doGig("waiter"), true);
   let cState = collectorGame.getState();
-  assert.ok(!cState.event || cState.event.title !== "הגובה מגיע", "under the 3-year neglect threshold, the collector stays away");
+  assert.ok(!cState.event || cState.event.title !== "אזהרה מההוצאה לפועל", "under the 3-year neglect threshold, the collector stays away");
 
   collectorGame.__testSetState({ debt: 5000, debtCollectorStreak: 0, debtCollectorIgnores: 0 });
   collectorGame.__testSetState({ debtCollectorStreak: 3 });
   assert.strictEqual(collectorGame.doGig("waiter"), true);
   cState = collectorGame.getState();
-  assert.strictEqual(cState.event && cState.event.title, "הגובה מגיע", "3 full years of unpaid debt above the floor summons the collector");
+  assert.strictEqual(cState.event && cState.event.title, "אזהרה מההוצאה לפועל", "3 full years of unpaid debt above the floor summons the collector");
   assert.strictEqual(cState.event.copy.indexOf("הפעם הראשונה"), -1, "the first visit reads as a warning, not a repeat-offender callout");
 
   const debtBeforePay = cState.debt;
@@ -480,13 +480,13 @@ function run(htmlPath) {
   collectorGame.__testSetState({ debt: 1000, debtCollectorStreak: 10 });
   assert.strictEqual(collectorGame.doGig("waiter"), true);
   cState = collectorGame.getState();
-  assert.ok(!cState.event || cState.event.title !== "הגובה מגיע", "below the minimum debt floor, the collector has nothing worth collecting");
+  assert.ok(!cState.event || cState.event.title !== "אזהרה מההוצאה לפועל", "below the minimum debt floor, the collector has nothing worth collecting");
   assert.strictEqual(cState.debtCollectorStreak, 0, "dropping under the floor resets the streak outright, same as paying");
 
   collectorGame.__testSetState({ debt: 5000, debtCollectorStreak: 3, debtCollectorIgnores: 0 });
   assert.strictEqual(collectorGame.doGig("waiter"), true);
   cState = collectorGame.getState();
-  assert.strictEqual(cState.event.title, "הגובה מגיע");
+  assert.strictEqual(cState.event.title, "אזהרה מההוצאה לפועל");
   const debtBeforeIgnore = cState.debt;
   assert.strictEqual(collectorGame.resolveEvent(1), true, "collector-ignore, 1st time");
   cState = collectorGame.getState();
@@ -497,7 +497,7 @@ function run(htmlPath) {
   collectorGame.__testSetState({ debtCollectorStreak: 3 }); // a second full neglect stretch, without ever paying in between
   assert.strictEqual(collectorGame.doGig("waiter"), true);
   cState = collectorGame.getState();
-  assert.strictEqual(cState.event.title, "הגובה מגיע");
+  assert.strictEqual(cState.event.title, "אזהרה מההוצאה לפועל");
   assert.notStrictEqual(cState.event.copy.indexOf("הפעם הראשונה"), -1, "a repeat visit reads as an escalation, not a fresh warning");
   assert.strictEqual(collectorGame.resolveEvent(1), true, "collector-ignore, 2nd time");
   cState = collectorGame.getState();
