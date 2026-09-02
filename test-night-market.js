@@ -315,6 +315,30 @@ function run(htmlPath) {
   assert.strictEqual(state.bag.crewFavor, undefined, "the gating good is liquidated on transition since indie (still a stub) has no matching good");
   assert.ok(state.log.some((line) => line.indexOf("מומש אוטומטית") === 0));
 
+  // --- industry stage: rotating gigs/goods (pilot of the market-rotation mechanic) ---
+  // deterministic (keyed on stageYear, not RNG) so this needs no seeded Math.random to assert on exactly.
+  const rotGame = loadGame(path);
+  rotGame.__testJumpToStage("industry");
+  let rotState = rotGame.getState();
+  assert.deepStrictEqual(rotState.activeGigs, ["camAssist","gaffer","freelanceEditor","lineProducer","artDeptAssist","setDriver"],
+    "at stage-year 0, the core gigs are all active plus the first half of the rotating pool");
+  assert.strictEqual(rotState.prices.unionCard, null, "a rotating good outside this year's roster reads as unavailable");
+  assert.strictEqual(rotState.priceKinds.unionCard, "unavailable");
+  assert.ok(rotState.prices.usedMonitor > 0, "a rotating good inside this year's roster has a real price");
+
+  assert.strictEqual(rotGame.doGig("droneOperator"), false, "a rotating gig outside this year's roster is refused, same as a gated gig");
+  rotState = rotGame.getState();
+  assert.strictEqual(rotState.event.title, "לא זמינה השנה");
+  clearEvent(rotGame);
+
+  for (let i = 0; i < 3; i++) { rotGame.doGig("camAssist"); clearEvent(rotGame); } // 3*0.4y = 1.2y, crossing into stage-year 1's window
+  rotState = rotGame.getState();
+  assert.deepStrictEqual(rotState.activeGigs, ["camAssist","gaffer","freelanceEditor","lineProducer","droneOperator","craftServices"],
+    "a year later, the rotating half of the roster has fully swapped to the other two gigs");
+  assert.strictEqual(rotGame.doGig("artDeptAssist"), false, "the gig that was active last year is now the one that's rotated out");
+  clearEvent(rotGame);
+  assert.strictEqual(rotGame.doGig("droneOperator"), true, "the newly-rotated-in gig is playable");
+
   // --- indie stage: the full film-production flow (genre -> script -> cast -> shoot -> edit -> distribution -> poster), films.push on completion, milestone transition ---
   game.newGame();
   game.__testJumpToStage("indie");
