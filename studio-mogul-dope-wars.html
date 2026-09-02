@@ -143,6 +143,7 @@
       const GIG_YEARS = 0.4;
       const BANK_ANNUAL_RATE = 1.015;
       const BLACK_MARKET_LOAN = { cash:1500, debt:2100 };
+      const ROTATION_ROSTER = { goods:3, gigs:2 };
 
       const FILM_GENRE_CHOICES = [
         { id:"drama", label:"דרמה", effect:(s)=>{ s.fame+=1; s.filmDraft.genre="דרמה"; } },
@@ -243,10 +244,10 @@
       }
 
       function breakthroughRecommend(s) {
-        if (s.fame < 95) {
+        if (s.fame < 90) {
           return { title:"לצבור מוניטין ברמת אולפן", copy:"פרויקטים גדולים דורשים שם שכבר מוכיח את עצמו.", action:{type:"gig",id:"showrunnerGig"}, actionLabel:"לנהל פרויקט אולפן", alternatives:[{type:"gig",id:"execProducing",label:"הפקה בכירה"}] };
         }
-        if ((s.cash+s.bank) < 90000) {
+        if ((s.cash+s.bank) < 140000) {
           return { title:"לבנות הון משמעותי", copy:"ההצלחה המקצועית עוד לא הפכה להון אמיתי.", action:{type:"gig",id:"execProducing"}, actionLabel:"לעבוד בהפקה בכירה", alternatives:[] };
         }
         return { title:"מוכנים להתקדם", copy:"המוניטין וההון במקום — עוד פעולה תסיים את השלב.", action:{type:"gig",id:"showrunnerGig"}, actionLabel:"לנהל פרויקט אולפן", alternatives:[] };
@@ -275,13 +276,22 @@
             { id:"mic",          name:"מיקרופון",       base:140, persistsAsAsset:false },
             { id:"tripod",       name:"חצובה משומשת",   base:120, persistsAsAsset:false },
             { id:"scriptRights", name:"זכויות לתסריט",       base:110, persistsAsAsset:false, market:"deal" },
-            { id:"locationPermit", name:"רישיון צילום במיקום", base:180, persistsAsAsset:false, market:"deal" }
+            { id:"locationPermit", name:"רישיון צילום במיקום", base:180, persistsAsAsset:false, market:"deal" },
+            { id:"usedSlider",   name:"מסילת צילום משומשת",   base:160, persistsAsAsset:false, rotates:true },
+            { id:"clapperboard", name:"קלפרבורד קלאסי",        base:90,  persistsAsAsset:false, rotates:true },
+            { id:"reflectorKit", name:"ערכת רפלקטורים",        base:100, persistsAsAsset:false, rotates:true },
+            { id:"editingPlugin",name:"תוסף עריכה",            base:130, persistsAsAsset:false, market:"deal", rotates:true },
+            { id:"shortFilmSlot",name:"חלון הקרנה לסרט קצר",   base:200, persistsAsAsset:false, market:"deal", rotates:true }
           ],
           gigs:[
             { id:"usher",      title:"סדרן/ית בקולנוע",          copy:"עבודה קבועה וזמינה, בלי דרישות.",             needs:{}, cash:900,  fame:0, contacts:0, followers:0 },
             { id:"waiter",     title:"מלצר/ית",                  copy:"הכי משתלם כלכלית, בלי קשרים בתעשייה.",         needs:{}, cash:1200, fame:0, contacts:0, followers:0 },
             { id:"photostore", title:"עובד/ת חנות צילום",         copy:"פחות כסף, אבל טעימה ראשונה מהתעשייה.",         needs:{}, cash:1000, fame:1, contacts:1, followers:0 },
-            { id:"prodAssist", title:"עוזר/ת הפקה סטודנטיאלית",   copy:"הכי פחות כסף, הכי הרבה קרדיט וקשרים.",         needs:{}, cash:700,  fame:2, contacts:2, followers:30 }
+            { id:"prodAssist", title:"עוזר/ת הפקה סטודנטיאלית",   copy:"הכי פחות כסף, הכי הרבה קרדיט וקשרים.",         needs:{}, cash:700,  fame:2, contacts:2, followers:30 },
+            { id:"crewExtra",     title:"ניצב/ת בהפקה",              copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:600, fame:0, contacts:1, followers:0, rotates:true },
+            { id:"filmClubHost",  title:"מנחה מועדון קולנוע קמפוס",  copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:500, fame:1, contacts:1, followers:20, rotates:true },
+            { id:"editingHelp",   title:"עזרה בעריכה לפרויקט חבר/ה", copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:400, fame:1, contacts:0, followers:0, rotates:true },
+            { id:"workshopAssist",title:"עוזר/ת בסדנת צילום",        copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:750, fame:0, contacts:1, followers:0, rotates:true }
           ],
           commitments:[
             { id:"filmSchool", name:"לימודי קולנוע", copy:"התחייבות ארוכה — 4 שנים, שתי הכרעות באמצע.", years:4, entryDebt:16000,
@@ -338,13 +348,22 @@
             { id:"usedBoomMic",  name:"מיקרופון בום משומש",  base:480, persistsAsAsset:false },
             { id:"batteryKit",   name:"ערכת סוללות נטענות",   base:260, persistsAsAsset:false },
             { id:"shootDaySlot", name:"יום צילום פנוי",  base:550,  persistsAsAsset:false, market:"deal" },
-            { id:"crewFavor",    name:"טובה מצוות",      base:220,  persistsAsAsset:false, market:"deal" }
+            { id:"crewFavor",    name:"טובה מצוות",      base:220,  persistsAsAsset:false, market:"deal" },
+            { id:"usedMonitor",      name:"מוניטור צפייה משומש",       base:380, persistsAsAsset:false, rotates:true },
+            { id:"cableKit",         name:"ערכת כבלים מקצועית",         base:150, persistsAsAsset:false, rotates:true },
+            { id:"gearCase",         name:"תיק ציוד קשיח",              base:340, persistsAsAsset:false, rotates:true },
+            { id:"unionCard",        name:"כרטיס חבר באיגוד המקצועי",   base:600, persistsAsAsset:false, market:"deal", rotates:true },
+            { id:"equipmentInsurance",name:"ביטוח ציוד לעונה",          base:450, persistsAsAsset:false, market:"deal", rotates:true }
           ],
           gigs:[
             { id:"camAssist",      title:"עוזר/ת צלם",           copy:"עבודה יציבה, בלי דרישות מיוחדות.",                needs:{}, cash:1600, fame:1, contacts:1, followers:0 },
             { id:"gaffer",         title:"חשמלאי/ת תאורה",        copy:"פחות ידוע, אבל צוותי הפקה תמיד מחפשים.",           needs:{}, cash:1400, fame:1, contacts:2, followers:0 },
             { id:"freelanceEditor",title:"עורך/ת פרילנס",         copy:"דורש יום צילום פנוי לעבוד עליו.",                  needs:{shootDaySlot:1}, cash:2200, fame:2, contacts:1, followers:0 },
-            { id:"lineProducer",   title:"מפיק/ת קו",             copy:"הכי משתלם, דורש טובה שכבר צברת בתעשייה.",          needs:{crewFavor:1}, cash:1200, fame:3, contacts:3, followers:50 }
+            { id:"lineProducer",   title:"מפיק/ת קו",             copy:"הכי משתלם, דורש טובה שכבר צברת בתעשייה.",          needs:{crewFavor:1}, cash:1200, fame:3, contacts:3, followers:50 },
+            { id:"artDeptAssist",  title:"עוזר/ת במחלקת אמנות",   copy:"עבודה עונתית — לא תמיד מוצעת.",                    needs:{}, cash:1500, fame:1, contacts:1, followers:0, rotates:true },
+            { id:"setDriver",      title:"נהג/ת סט",              copy:"עבודה עונתית — לא תמיד מוצעת.",                    needs:{}, cash:1300, fame:0, contacts:1, followers:0, rotates:true },
+            { id:"droneOperator",  title:"מפעיל/ת רחפן צילום",     copy:"עבודה עונתית, משתלמת כשהיא זמינה.",                needs:{}, cash:2200, fame:2, contacts:1, followers:0, rotates:true },
+            { id:"craftServices",  title:"קייטרינג לסט",          copy:"עבודה עונתית — לא תמיד מוצעת.",                    needs:{}, cash:1100, fame:0, contacts:2, followers:0, rotates:true }
           ],
           commitments:[],
           incidents:[
@@ -367,7 +386,7 @@
           ],
           riskProfile:null,
           milestones:[
-            { id:"industry-credit",  label:"הכרה מבוססת בתעשייה", check:(s)=>s.fame>=40,               required:true, progress:(s)=>({current:s.fame, target:40}) },
+            { id:"industry-credit",  label:"הכרה מבוססת בתעשייה", check:(s)=>s.fame>=22,               required:true, progress:(s)=>({current:s.fame, target:22}) },
             { id:"industry-network", label:"רשת קשרים בתעשייה",   check:(s)=>s.contacts>=18,           required:true, progress:(s)=>({current:s.contacts, target:18}) },
             { id:"pro-gear",         label:"ציוד מקצועי משלך",     check:(s)=>!!s.assets.proCamera,     required:false },
             { id:"cash-cushion",     label:"כרית ביטחון גדולה",    check:(s)=>(s.cash+s.bank)>=8000,    required:false }
@@ -387,11 +406,20 @@
             { id:"usedSoundMixer", name:"מיקסר סאונד משומש",   base:1100, persistsAsAsset:false },
             { id:"backupDrive",    name:"כונן גיבוי חיצוני",   base:520,  persistsAsAsset:false },
             { id:"postSlot",       name:"חלון פוסט-פרודקשן",   base:700,  persistsAsAsset:false, market:"deal" },
-            { id:"distroLead",     name:"ליד להפצה",           base:450,  persistsAsAsset:false, market:"deal" }
+            { id:"distroLead",     name:"ליד להפצה",           base:450,  persistsAsAsset:false, market:"deal" },
+            { id:"usedTripodPro",       name:"חצובה מקצועית משומשת",  base:380, persistsAsAsset:false, rotates:true },
+            { id:"craftServicesKit",    name:"ציוד קייטרינג לסט",     base:250, persistsAsAsset:false, rotates:true },
+            { id:"colorGradingPass",    name:"מעבר צביעת צבע",        base:600, persistsAsAsset:false, market:"deal", rotates:true },
+            { id:"musicLicense",        name:"רישיון מוזיקה עצמאי",   base:350, persistsAsAsset:false, market:"deal", rotates:true },
+            { id:"productionInsurance", name:"ביטוח הפקה קצר-טווח",   base:700, persistsAsAsset:false, market:"deal", rotates:true }
           ],
           gigs:[
             { id:"commercialGig", title:"עבודה מסחרית", copy:"מממנת את החיים בזמן שהסרט מתפתח.", needs:{}, cash:2600, fame:0, contacts:0, followers:0 },
-            { id:"workshopTeach", title:"הנחיית סדנה",   copy:"פחות כסף, אבל בונה שם וקשרים.",     needs:{}, cash:1800, fame:1, contacts:2, followers:0 }
+            { id:"workshopTeach", title:"הנחיית סדנה",   copy:"פחות כסף, אבל בונה שם וקשרים.",     needs:{}, cash:1800, fame:1, contacts:2, followers:0 },
+            { id:"soundDesignGig",  title:"עיצוב סאונד לפרויקט אחר",     copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:1600, fame:1, contacts:1, followers:0,  rotates:true },
+            { id:"pitchConsult",    title:"ייעוץ פיץ' למפיקים חדשים",    copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:2000, fame:0, contacts:2, followers:0,  rotates:true },
+            { id:"shortFilmJudge",  title:"שיפוט תחרות סרטים קצרים",     copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:1200, fame:2, contacts:1, followers:50, rotates:true },
+            { id:"crowdfundingPush",title:"ניהול קמפיין מימון המונים",   copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:1900, fame:1, contacts:0, followers:150,rotates:true }
           ],
           commitments:[
             { id:"indieFilm", name:"לצלם סרט אינדי ראשון", copy:"הפרויקט שיהפוך אותך למי שאת/ה — 3 שנים, מסלול הפקה שלם משלך.", years:3, entryDebt:6000,
@@ -486,11 +514,20 @@
             { id:"vipBadge",          name:"תג גישה VIP מפסטיבל קודם", base:950,  persistsAsAsset:false },
             { id:"distroRights",      name:"זכויות הפצה בינלאומיות", base:2200, persistsAsAsset:false, market:"deal" },
             { id:"screeningWindow",   name:"חלון הקרנה",              base:900,  persistsAsAsset:false, market:"deal" },
-            { id:"streamingDeal",     name:"עסקת סטרימינג",           base:3400, persistsAsAsset:false, market:"deal" }
+            { id:"streamingDeal",     name:"עסקת סטרימינג",           base:3400, persistsAsAsset:false, market:"deal" },
+            { id:"pressKitPrint",     name:"ערכת עיתונות מודפסת",    base:700, persistsAsAsset:false, rotates:true },
+            { id:"afterPartyPass",    name:"כרטיס למסיבת אחרי",       base:400, persistsAsAsset:false, rotates:true },
+            { id:"merchandiseBatch",  name:"מלאי מרצ'נדייז לסרט",    base:850, persistsAsAsset:false, rotates:true },
+            { id:"subtitlingDeal",    name:"עסקת תרגום כתוביות",      base:1100, persistsAsAsset:false, market:"deal", rotates:true },
+            { id:"panelInvite",       name:"הזמנה לפאנל בתשלום",      base:1500, persistsAsAsset:false, market:"deal", rotates:true }
           ],
           gigs:[
             { id:"festivalPanel", title:"פאנל בפסטיבל",       copy:"לא משלם הרבה, אבל בונה שם בינלאומי.", needs:{}, cash:900,  fame:2, contacts:2, followers:100 },
-            { id:"consultingGig", title:"ייעוץ לפרויקט אחר",   copy:"הכי משתלם כלכלית בשלב הזה.",           needs:{}, cash:3200, fame:0, contacts:1, followers:0 }
+            { id:"consultingGig", title:"ייעוץ לפרויקט אחר",   copy:"הכי משתלם כלכלית בשלב הזה.",           needs:{}, cash:3200, fame:0, contacts:1, followers:0 },
+            { id:"juryAssist",          title:"עוזר/ת שיפוט בפסטיבל",      copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:1100, fame:1, contacts:2, followers:50,  rotates:true },
+            { id:"pressInterviewRound", title:"סבב ראיונות לעיתונות",      copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:700,  fame:2, contacts:0, followers:200, rotates:true },
+            { id:"workshopGuest",       title:"אורח/ת בסדנת פסטיבל",       copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:1300, fame:1, contacts:1, followers:0,  rotates:true },
+            { id:"distributorMeeting",  title:"פגישות עם מפיצים",          copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:1800, fame:0, contacts:2, followers:0,  rotates:true }
           ],
           commitments:[],
           incidents:[
@@ -533,12 +570,21 @@
             { id:"usedLightingRig",        name:"מערכת תאורת סטודיו משומשת", base:6200, persistsAsAsset:false },
             { id:"supportVehicle",         name:"רכב תמיכה להפקה",          base:8800, persistsAsAsset:false },
             { id:"studioOptionDeal",       name:"אופציה מאולפן",       base:5000,  persistsAsAsset:false, market:"deal" },
-            { id:"packageDeal",            name:"חבילת פרויקט",         base:7500,  persistsAsAsset:false, market:"deal" }
+            { id:"packageDeal",            name:"חבילת פרויקט",         base:7500,  persistsAsAsset:false, market:"deal" },
+            { id:"vfxPackage",             name:"חבילת אפקטים ויזואליים",  base:7200, persistsAsAsset:false, rotates:true },
+            { id:"soundstageRental",       name:"השכרת סאונדסטייג'",        base:5800, persistsAsAsset:false, rotates:true },
+            { id:"postProductionSuite",    name:"חבילת פוסט-פרודקשן מלאה",  base:6800, persistsAsAsset:false, market:"deal", rotates:true },
+            { id:"marketingCampaignDeal",  name:"קמפיין שיווק ממוקד",       base:5500, persistsAsAsset:false, market:"deal", rotates:true },
+            { id:"talentAgencyDeal",       name:"חוזה עם סוכנות טאלנטים",   base:6000, persistsAsAsset:false, market:"deal", rotates:true }
           ],
           gigs:[
             { id:"showrunnerGig", title:"ניהול פרויקט אולפן", copy:"הכי הרבה מוניטין וקהל.",  needs:{}, cash:8000, fame:3, contacts:2, followers:500 },
             { id:"execProducing", title:"הפקה בכירה",         copy:"הכי הרבה כסף וקשרים.",     needs:{}, cash:6000, fame:2, contacts:3, followers:200 },
-            { id:"festivalJudge", title:"שופט/ת בפסטיבל בינלאומי", copy:"הזמנה יוקרתית לשפוט בפסטיבלים בעולם — מחזקת מוניטין וקשרים.", needs:{}, cash:7000, fame:4, contacts:4, followers:800 }
+            { id:"festivalJudge", title:"שופט/ת בפסטיבל בינלאומי", copy:"הזמנה יוקרתית לשפוט בפסטיבלים בעולם — מחזקת מוניטין וקשרים.", needs:{}, cash:7000, fame:4, contacts:4, followers:800 },
+            { id:"brandPartnership", title:"שיתוף פעולה עם מותג",       copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:6500, fame:1, contacts:2, followers:600, rotates:true },
+            { id:"streamingPitch",   title:"פיץ' לפלטפורמת סטרימינג",   copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:7000, fame:3, contacts:2, followers:300, rotates:true },
+            { id:"crisisPR",         title:"ניהול משבר תקשורתי",        copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:5500, fame:2, contacts:3, followers:0,   rotates:true },
+            { id:"awardsCampaign",   title:"ניהול קמפיין פרסים",        copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:6800, fame:4, contacts:1, followers:400, rotates:true }
           ],
           commitments:[],
           incidents:[
@@ -561,8 +607,8 @@
           ],
           riskProfile:null,
           milestones:[
-            { id:"studio-fame",  label:"מוניטין ברמת אולפן",  check:(s)=>s.fame>=115,               required:true, progress:(s)=>({current:s.fame, target:115}) },
-            { id:"real-wealth",  label:"הון משמעותי",          check:(s)=>(s.cash+s.bank)>=105000,   required:true, progress:(s)=>({current:s.cash+s.bank, target:105000}) },
+            { id:"studio-fame",  label:"מוניטין ברמת אולפן",  check:(s)=>s.fame>=110,               required:true, progress:(s)=>({current:s.fame, target:110}) },
+            { id:"real-wealth",  label:"הון משמעותי",          check:(s)=>(s.cash+s.bank)>=160000,   required:true, progress:(s)=>({current:s.cash+s.bank, target:160000}) },
             { id:"prod-company", label:"חלק בחברת הפקה",       check:(s)=>!!s.assets.productionCompanyShare, required:false },
             { id:"mass-audience",label:"קהל המוני",             check:(s)=>s.followers>=10000,       required:false }
           ],
@@ -581,12 +627,21 @@
             { id:"vintageCamera",     name:"מצלמת פילם וינטג׳",        base:22000, persistsAsAsset:false },
             { id:"stillsArchiveBox",  name:"תיבת ארכיון תמונות סטילס", base:18000, persistsAsAsset:false },
             { id:"mentorshipProgram", name:"תוכנית הנחיה",        base:15000,  persistsAsAsset:false, market:"deal" },
-            { id:"retrospectiveDeal", name:"עסקת רטרוספקטיבה",    base:30000,  persistsAsAsset:false, market:"deal" }
+            { id:"retrospectiveDeal", name:"עסקת רטרוספקטיבה",    base:30000,  persistsAsAsset:false, market:"deal" },
+            { id:"rareFilmPrint",       name:"עותק פילם נדיר",           base:25000, persistsAsAsset:false, rotates:true },
+            { id:"privateScreeningKit", name:"ערכת הקרנה פרטית",         base:8000,  persistsAsAsset:false, rotates:true },
+            { id:"filmFestivalTribute", name:"ערב הוקרה בפסטיבל",        base:12000, persistsAsAsset:false, market:"deal", rotates:true },
+            { id:"biographyDeal",       name:"עסקת ביוגרפיה",            base:20000, persistsAsAsset:false, market:"deal", rotates:true },
+            { id:"charityGalaSlot",     name:"מקום בגאלת צדקה",          base:10000, persistsAsAsset:false, market:"deal", rotates:true }
           ],
           gigs:[
             { id:"teachingGig",     title:"הוראה באקדמיה",       copy:"מוריש/ה את הידע הלאה.", needs:{}, cash:25000, fame:2, contacts:1, followers:300 },
             { id:"consultingLegacy",title:"ייעוץ אסטרטגי",        copy:"הכי משתלם כלכלית.",      needs:{}, cash:40000, fame:1, contacts:2, followers:0 },
-            { id:"festivalJudge",   title:"שופט/ת כבוד בפסטיבלים", copy:"מוזמנ/ת כשופט/ת כבוד לפסטיבלים המובילים בעולם.", needs:{}, cash:20000, fame:3, contacts:2, followers:500 }
+            { id:"festivalJudge",   title:"שופט/ת כבוד בפסטיבלים", copy:"מוזמנ/ת כשופט/ת כבוד לפסטיבלים המובילים בעולם.", needs:{}, cash:20000, fame:3, contacts:2, followers:500 },
+            { id:"boardAdvisor",         title:"יועץ/ת דירקטוריון אולפן",     copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:35000, fame:1, contacts:2, followers:0,   rotates:true },
+            { id:"documentarySubject",   title:"נושא/ת לסרט תיעודי עליך",     copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:15000, fame:3, contacts:0, followers:800, rotates:true },
+            { id:"masterclassHost",      title:"מנחה מאסטרקלאס",              copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:22000, fame:2, contacts:1, followers:200, rotates:true },
+            { id:"philanthropyAdvisor",  title:"יועץ/ת פילנתרופיה תרבותית",   copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:30000, fame:1, contacts:2, followers:0,   rotates:true }
           ],
           commitments:[
             { id:"legacyFilm", name:"הסרט האישי האחרון", copy:"סיכום של קריירה שלמה — שנתיים, ועוד סרט אחד להיפרד איתו.", years:2, entryDebt:0,
@@ -664,12 +719,31 @@
         return { price: round5(base*(.72+Math.random()*.66)), kind:"normal" };
       }
 
-      function generateMarket(stageId) {
+      // A rotating item cycles through a wrapping window of `pool`, `rosterSize` at a time, shifting by a
+      // full window every stage-year — so the roster fully refreshes annually instead of drifting one item
+      // at a time. Deterministic (keyed on stageYear, not RNG) so it's stable to inspect/test and learnable
+      // by an attentive player, unlike the independent per-item crash/spike/unavailable price roll.
+      function activeRotatingIds(pool, stageYear, rosterSize) {
+        if (!pool.length) return new Set();
+        const size = Math.min(rosterSize, pool.length);
+        const start = (Math.floor(stageYear) * size) % pool.length;
+        const ids = [];
+        for (let i = 0; i < size; i++) ids.push(pool[(start+i) % pool.length].id);
+        return new Set(ids);
+      }
+
+      function generateMarket(stageId, stageYear) {
         const stage = STAGES.find((s) => s.id === stageId) || STAGES[0];
         const rp = stage.riskProfile || DEFAULT_RISK;
         const prices = {}, kinds = {};
-        (stage.goods||[]).forEach((g) => { const roll = priceRoll(g.base, rp); prices[g.id]=roll.price; kinds[g.id]=roll.kind; });
-        return { prices, kinds };
+        const activeGoodIds = activeRotatingIds((stage.goods||[]).filter((g)=>g.rotates), stageYear||0, ROTATION_ROSTER.goods);
+        (stage.goods||[]).forEach((g) => {
+          if (g.rotates && !activeGoodIds.has(g.id)) { prices[g.id]=null; kinds[g.id]="unavailable"; return; }
+          const roll = priceRoll(g.base, rp); prices[g.id]=roll.price; kinds[g.id]=roll.kind;
+        });
+        const activeGigIds = activeRotatingIds((stage.gigs||[]).filter((g)=>g.rotates), stageYear||0, ROTATION_ROSTER.gigs);
+        const activeGigs = (stage.gigs||[]).filter((g)=>!g.rotates || activeGigIds.has(g.id)).map((g)=>g.id);
+        return { prices, kinds, activeGigs };
       }
 
       function createState() {
@@ -678,7 +752,7 @@
           stageId:"student", stageYear:0, nextMilestoneAge:26,
           cash:2700, bank:0, debt:8000,
           fame:0, followers:0, contacts:0,
-          capacity:10, bag:{}, prices:{}, previousPrices:{}, priceKinds:{},
+          capacity:10, bag:{}, prices:{}, previousPrices:{}, priceKinds:{}, activeGigs:[],
           assets:{ usedCamera:false, editComputer:false, diploma:false },
           films:[],
           commitment:null, activeCheckpoint:null, filmDraft:{},
@@ -687,8 +761,8 @@
           view:"hud", marketTab:"work", flight:null,
           funding:{}, achievements:{}, awards:[], event:null, ended:false, win:false, log:[], lastRecap:null, briefPending:false, pendingAction:null, stageIntroPending:true
         };
-        const market = generateMarket(next.stageId);
-        next.prices = market.prices; next.priceKinds = market.kinds; next.previousPrices = {...market.prices};
+        const market = generateMarket(next.stageId, next.stageYear);
+        next.prices = market.prices; next.priceKinds = market.kinds; next.previousPrices = {...market.prices}; next.activeGigs = market.activeGigs;
         next.log = ["גיל 21: מתחילים עם חוב לימודים ותיק ריק. הזמן לבחור מסלול כניסה."];
         return next;
       }
@@ -707,6 +781,7 @@
               priceKinds: saved.priceKinds || fresh.priceKinds, films: Array.isArray(saved.films) ? saved.films : [],
               awards: Array.isArray(saved.awards) ? saved.awards : [],
               pathTags: Array.isArray(saved.pathTags) ? saved.pathTags : [], commitment: saved.commitment || null,
+              activeGigs: Array.isArray(saved.activeGigs) ? saved.activeGigs : fresh.activeGigs,
               funding: {...(saved.funding||{})}, achievements: {...(saved.achievements||{})},
               event: null, briefPending: false, pendingAction: null, stageIntroPending: false, activeCheckpoint: saved.activeCheckpoint || null
             };
@@ -786,8 +861,8 @@
         state.nextMilestoneAge = nextStage.ageRange[1];
         state.stageIntroPending = true;
         addLog("עברת לשלב: "+nextStage.name+".");
-        const market = generateMarket(nextStage.id);
-        state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices};
+        const market = generateMarket(nextStage.id, state.stageYear);
+        state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices}; state.activeGigs = market.activeGigs;
       }
 
       function offerFallback(stage) {
@@ -853,8 +928,8 @@
         state.debtCollectorStreak = state.debt > DEBT_COLLECTOR_MIN_DEBT ? state.debtCollectorStreak + elapsed : 0;
         if (state.bank > 0) state.bank = Math.round(state.bank * Math.pow(BANK_ANNUAL_RATE, elapsed));
         state.previousPrices = {...state.prices};
-        const market = generateMarket(state.stageId);
-        state.prices = market.prices; state.priceKinds = market.kinds;
+        const market = generateMarket(state.stageId, state.stageYear);
+        state.prices = market.prices; state.priceKinds = market.kinds; state.activeGigs = market.activeGigs;
         const roundedElapsed = Math.round(elapsed*10)/10;
         addLog("גיל "+Math.round(state.age)+": "+reason+(elapsed!==1?" ("+formatDuration(roundedElapsed)+").":""));
         state.lastRecap = { years:roundedElapsed, interestPaid: state.debt-before, age: Math.round(state.age) };
@@ -986,6 +1061,7 @@
         if (state.ended||state.event||state.commitment||state.briefPending||state.pendingAction) return false;
         const gig = (currentStage().gigs||[]).find((g)=>g.id===id);
         if (!gig) return false;
+        if (gig.rotates && !(state.activeGigs||[]).includes(id)) return announce("לא זמינה השנה","העבודה הזאת לא מוצעת השנה. נסה שוב בעונה הבאה.");
         const lack = missing(gig.needs);
         if (lack.length) return announce("חסר ציוד לעבודה הזאת","צריך: "+lack.join(" · ")+".");
         state.pendingAction = { kind:"gig", id };
@@ -1005,6 +1081,7 @@
         if (state.ended||state.event||state.commitment) return false;
         const gig = (currentStage().gigs||[]).find((g)=>g.id===id);
         if (!gig) return false;
+        if (gig.rotates && !(state.activeGigs||[]).includes(id)) return announce("לא זמינה השנה","העבודה הזאת לא מוצעת השנה. נסה שוב בעונה הבאה.");
         const lack = missing(gig.needs);
         if (lack.length) return announce("חסר ציוד לעבודה הזאת","צריך: "+lack.join(" · ")+".");
         state.cash += gig.cash; state.fame += (gig.fame||0); state.contacts += (gig.contacts||0); state.followers += (gig.followers||0);
@@ -1130,9 +1207,12 @@
           html += `<article class="action-row"><div><h3>${config.name}</h3><p>בעיצומה · שנה ${Math.round(state.commitment.elapsedYears)} מתוך ${config.years}</p></div><div class="action-meta"><b>בתהליך</b></div></article>`;
         } else {
           const gigRow = (gig) => {
+            const rotatedOut = gig.rotates && !(state.activeGigs||[]).includes(gig.id);
             const lack = missing(gig.needs);
             const meta = "+"+money(gig.cash)+(gig.fame?" · +"+gig.fame+" הכרה":"");
-            return row(gig.title, gig.copy+(lack.length?" · חסר: "+lack.join(" · "):""), meta, "gig:"+gig.id, lack.length?"חסר ציוד":"לעבוד");
+            const note = rotatedOut ? " · לא מוצעת השנה" : (lack.length?" · חסר: "+lack.join(" · "):"");
+            const label = rotatedOut ? "לא זמינה" : (lack.length?"חסר ציוד":"לעבוד");
+            return row(gig.title+(gig.rotates?' <small class="trend-up">מתחלף</small>':""), gig.copy+note, meta, "gig:"+gig.id, label);
           };
           const careerGigs = (stage.gigs||[]).filter((g)=>g.fame>0||g.contacts>0);
           const survivalGigs = (stage.gigs||[]).filter((g)=>!(g.fame>0||g.contacts>0));
@@ -1399,8 +1479,8 @@
           const stage = STAGES.find((s)=>s.id===id) || STAGES[0];
           state.stageId = stage.id; state.stageYear = 0; state.commitment = null; state.activeCheckpoint = null;
           if (stage.ageRange) state.age = stage.ageRange[0];
-          const market = generateMarket(stage.id);
-          state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices};
+          const market = generateMarket(stage.id, state.stageYear);
+          state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices}; state.activeGigs = market.activeGigs;
           return clone(state);
         },
         __testSetState: (patch) => { Object.assign(state, patch); return clone(state); }

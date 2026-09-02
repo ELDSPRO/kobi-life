@@ -311,9 +311,33 @@ function run(htmlPath) {
   assert.strictEqual(game.buy("crewFavor"), true, "the gating good can be bought");
   for (let i = 0; i < 14 && game.getState().stageId === "industry"; i++) { game.doGig("lineProducer"); clearEvent(game); } // needs:{crewFavor:1} only gates presence, not consumption — one purchase covers all fourteen; clearEvent drains any incident so the loop doesn't stall
   state = game.getState();
-  assert.strictEqual(state.stageId, "indie", "industry's own required milestones (fame>=40, contacts>=18) transition into indie");
+  assert.strictEqual(state.stageId, "indie", "industry's own required milestones (fame>=22, contacts>=18) transition into indie");
   assert.strictEqual(state.bag.crewFavor, undefined, "the gating good is liquidated on transition since indie (still a stub) has no matching good");
   assert.ok(state.log.some((line) => line.indexOf("מומש אוטומטית") === 0));
+
+  // --- industry stage: rotating gigs/goods (pilot of the market-rotation mechanic) ---
+  // deterministic (keyed on stageYear, not RNG) so this needs no seeded Math.random to assert on exactly.
+  const rotGame = loadGame(path);
+  rotGame.__testJumpToStage("industry");
+  let rotState = rotGame.getState();
+  assert.deepStrictEqual(rotState.activeGigs, ["camAssist","gaffer","freelanceEditor","lineProducer","artDeptAssist","setDriver"],
+    "at stage-year 0, the core gigs are all active plus the first half of the rotating pool");
+  assert.strictEqual(rotState.prices.unionCard, null, "a rotating good outside this year's roster reads as unavailable");
+  assert.strictEqual(rotState.priceKinds.unionCard, "unavailable");
+  assert.ok(rotState.prices.usedMonitor > 0, "a rotating good inside this year's roster has a real price");
+
+  assert.strictEqual(rotGame.doGig("droneOperator"), false, "a rotating gig outside this year's roster is refused, same as a gated gig");
+  rotState = rotGame.getState();
+  assert.strictEqual(rotState.event.title, "לא זמינה השנה");
+  clearEvent(rotGame);
+
+  for (let i = 0; i < 3; i++) { rotGame.doGig("camAssist"); clearEvent(rotGame); } // 3*0.4y = 1.2y, crossing into stage-year 1's window
+  rotState = rotGame.getState();
+  assert.deepStrictEqual(rotState.activeGigs, ["camAssist","gaffer","freelanceEditor","lineProducer","droneOperator","craftServices"],
+    "a year later, the rotating half of the roster has fully swapped to the other two gigs");
+  assert.strictEqual(rotGame.doGig("artDeptAssist"), false, "the gig that was active last year is now the one that's rotated out");
+  clearEvent(rotGame);
+  assert.strictEqual(rotGame.doGig("droneOperator"), true, "the newly-rotated-in gig is playable");
 
   // --- indie stage: the full film-production flow (genre -> script -> cast -> shoot -> edit -> distribution -> poster), films.push on completion, milestone transition ---
   game.newGame();
@@ -435,7 +459,9 @@ function run(htmlPath) {
   assert.strictEqual(lossScores[0].win, false, "a loss records win:false, not just wins");
 
   // --- RNG-injected price events (crash / spike / unavailable) ---
-  const studentGoods = game.STAGES[0].goods;
+  // excludes rotating goods: those force kind:"unavailable" whenever they're outside this year's roster,
+  // regardless of the price roll, which isn't what this block is testing (see the rotation block below).
+  const studentGoods = game.STAGES[0].goods.filter((g) => !g.rotates);
   const crashState = loadGame(path, () => 0.01).getState();
   assertAllKind(crashState, studentGoods, "crash");
   const spikeState = loadGame(path, () => 0.07).getState();
