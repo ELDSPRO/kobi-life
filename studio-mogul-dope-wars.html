@@ -143,6 +143,7 @@
       const GIG_YEARS = 0.4;
       const BANK_ANNUAL_RATE = 1.015;
       const BLACK_MARKET_LOAN = { cash:1500, debt:2100 };
+      const ROTATION_ROSTER = { goods:3, gigs:2 };
 
       const FILM_GENRE_CHOICES = [
         { id:"drama", label:"דרמה", effect:(s)=>{ s.fame+=1; s.filmDraft.genre="דרמה"; } },
@@ -338,13 +339,22 @@
             { id:"usedBoomMic",  name:"מיקרופון בום משומש",  base:480, persistsAsAsset:false },
             { id:"batteryKit",   name:"ערכת סוללות נטענות",   base:260, persistsAsAsset:false },
             { id:"shootDaySlot", name:"יום צילום פנוי",  base:550,  persistsAsAsset:false, market:"deal" },
-            { id:"crewFavor",    name:"טובה מצוות",      base:220,  persistsAsAsset:false, market:"deal" }
+            { id:"crewFavor",    name:"טובה מצוות",      base:220,  persistsAsAsset:false, market:"deal" },
+            { id:"usedMonitor",      name:"מוניטור צפייה משומש",       base:380, persistsAsAsset:false, rotates:true },
+            { id:"cableKit",         name:"ערכת כבלים מקצועית",         base:150, persistsAsAsset:false, rotates:true },
+            { id:"gearCase",         name:"תיק ציוד קשיח",              base:340, persistsAsAsset:false, rotates:true },
+            { id:"unionCard",        name:"כרטיס חבר באיגוד המקצועי",   base:600, persistsAsAsset:false, market:"deal", rotates:true },
+            { id:"equipmentInsurance",name:"ביטוח ציוד לעונה",          base:450, persistsAsAsset:false, market:"deal", rotates:true }
           ],
           gigs:[
             { id:"camAssist",      title:"עוזר/ת צלם",           copy:"עבודה יציבה, בלי דרישות מיוחדות.",                needs:{}, cash:1600, fame:1, contacts:1, followers:0 },
             { id:"gaffer",         title:"חשמלאי/ת תאורה",        copy:"פחות ידוע, אבל צוותי הפקה תמיד מחפשים.",           needs:{}, cash:1400, fame:1, contacts:2, followers:0 },
             { id:"freelanceEditor",title:"עורך/ת פרילנס",         copy:"דורש יום צילום פנוי לעבוד עליו.",                  needs:{shootDaySlot:1}, cash:2200, fame:2, contacts:1, followers:0 },
-            { id:"lineProducer",   title:"מפיק/ת קו",             copy:"הכי משתלם, דורש טובה שכבר צברת בתעשייה.",          needs:{crewFavor:1}, cash:1200, fame:3, contacts:3, followers:50 }
+            { id:"lineProducer",   title:"מפיק/ת קו",             copy:"הכי משתלם, דורש טובה שכבר צברת בתעשייה.",          needs:{crewFavor:1}, cash:1200, fame:3, contacts:3, followers:50 },
+            { id:"artDeptAssist",  title:"עוזר/ת במחלקת אמנות",   copy:"עבודה עונתית — לא תמיד מוצעת.",                    needs:{}, cash:1500, fame:1, contacts:1, followers:0, rotates:true },
+            { id:"setDriver",      title:"נהג/ת סט",              copy:"עבודה עונתית — לא תמיד מוצעת.",                    needs:{}, cash:1300, fame:0, contacts:1, followers:0, rotates:true },
+            { id:"droneOperator",  title:"מפעיל/ת רחפן צילום",     copy:"עבודה עונתית, משתלמת כשהיא זמינה.",                needs:{}, cash:2200, fame:2, contacts:1, followers:0, rotates:true },
+            { id:"craftServices",  title:"קייטרינג לסט",          copy:"עבודה עונתית — לא תמיד מוצעת.",                    needs:{}, cash:1100, fame:0, contacts:2, followers:0, rotates:true }
           ],
           commitments:[],
           incidents:[
@@ -664,12 +674,31 @@
         return { price: round5(base*(.72+Math.random()*.66)), kind:"normal" };
       }
 
-      function generateMarket(stageId) {
+      // A rotating item cycles through a wrapping window of `pool`, `rosterSize` at a time, shifting by a
+      // full window every stage-year — so the roster fully refreshes annually instead of drifting one item
+      // at a time. Deterministic (keyed on stageYear, not RNG) so it's stable to inspect/test and learnable
+      // by an attentive player, unlike the independent per-item crash/spike/unavailable price roll.
+      function activeRotatingIds(pool, stageYear, rosterSize) {
+        if (!pool.length) return new Set();
+        const size = Math.min(rosterSize, pool.length);
+        const start = (Math.floor(stageYear) * size) % pool.length;
+        const ids = [];
+        for (let i = 0; i < size; i++) ids.push(pool[(start+i) % pool.length].id);
+        return new Set(ids);
+      }
+
+      function generateMarket(stageId, stageYear) {
         const stage = STAGES.find((s) => s.id === stageId) || STAGES[0];
         const rp = stage.riskProfile || DEFAULT_RISK;
         const prices = {}, kinds = {};
-        (stage.goods||[]).forEach((g) => { const roll = priceRoll(g.base, rp); prices[g.id]=roll.price; kinds[g.id]=roll.kind; });
-        return { prices, kinds };
+        const activeGoodIds = activeRotatingIds((stage.goods||[]).filter((g)=>g.rotates), stageYear||0, ROTATION_ROSTER.goods);
+        (stage.goods||[]).forEach((g) => {
+          if (g.rotates && !activeGoodIds.has(g.id)) { prices[g.id]=null; kinds[g.id]="unavailable"; return; }
+          const roll = priceRoll(g.base, rp); prices[g.id]=roll.price; kinds[g.id]=roll.kind;
+        });
+        const activeGigIds = activeRotatingIds((stage.gigs||[]).filter((g)=>g.rotates), stageYear||0, ROTATION_ROSTER.gigs);
+        const activeGigs = (stage.gigs||[]).filter((g)=>!g.rotates || activeGigIds.has(g.id)).map((g)=>g.id);
+        return { prices, kinds, activeGigs };
       }
 
       function createState() {
@@ -678,7 +707,7 @@
           stageId:"student", stageYear:0, nextMilestoneAge:26,
           cash:2700, bank:0, debt:8000,
           fame:0, followers:0, contacts:0,
-          capacity:10, bag:{}, prices:{}, previousPrices:{}, priceKinds:{},
+          capacity:10, bag:{}, prices:{}, previousPrices:{}, priceKinds:{}, activeGigs:[],
           assets:{ usedCamera:false, editComputer:false, diploma:false },
           films:[],
           commitment:null, activeCheckpoint:null, filmDraft:{},
@@ -687,8 +716,8 @@
           view:"hud", marketTab:"work", flight:null,
           funding:{}, achievements:{}, awards:[], event:null, ended:false, win:false, log:[], lastRecap:null, briefPending:false, pendingAction:null, stageIntroPending:true
         };
-        const market = generateMarket(next.stageId);
-        next.prices = market.prices; next.priceKinds = market.kinds; next.previousPrices = {...market.prices};
+        const market = generateMarket(next.stageId, next.stageYear);
+        next.prices = market.prices; next.priceKinds = market.kinds; next.previousPrices = {...market.prices}; next.activeGigs = market.activeGigs;
         next.log = ["גיל 21: מתחילים עם חוב לימודים ותיק ריק. הזמן לבחור מסלול כניסה."];
         return next;
       }
@@ -707,6 +736,7 @@
               priceKinds: saved.priceKinds || fresh.priceKinds, films: Array.isArray(saved.films) ? saved.films : [],
               awards: Array.isArray(saved.awards) ? saved.awards : [],
               pathTags: Array.isArray(saved.pathTags) ? saved.pathTags : [], commitment: saved.commitment || null,
+              activeGigs: Array.isArray(saved.activeGigs) ? saved.activeGigs : fresh.activeGigs,
               funding: {...(saved.funding||{})}, achievements: {...(saved.achievements||{})},
               event: null, briefPending: false, pendingAction: null, stageIntroPending: false, activeCheckpoint: saved.activeCheckpoint || null
             };
@@ -786,8 +816,8 @@
         state.nextMilestoneAge = nextStage.ageRange[1];
         state.stageIntroPending = true;
         addLog("עברת לשלב: "+nextStage.name+".");
-        const market = generateMarket(nextStage.id);
-        state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices};
+        const market = generateMarket(nextStage.id, state.stageYear);
+        state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices}; state.activeGigs = market.activeGigs;
       }
 
       function offerFallback(stage) {
@@ -853,8 +883,8 @@
         state.debtCollectorStreak = state.debt > DEBT_COLLECTOR_MIN_DEBT ? state.debtCollectorStreak + elapsed : 0;
         if (state.bank > 0) state.bank = Math.round(state.bank * Math.pow(BANK_ANNUAL_RATE, elapsed));
         state.previousPrices = {...state.prices};
-        const market = generateMarket(state.stageId);
-        state.prices = market.prices; state.priceKinds = market.kinds;
+        const market = generateMarket(state.stageId, state.stageYear);
+        state.prices = market.prices; state.priceKinds = market.kinds; state.activeGigs = market.activeGigs;
         const roundedElapsed = Math.round(elapsed*10)/10;
         addLog("גיל "+Math.round(state.age)+": "+reason+(elapsed!==1?" ("+formatDuration(roundedElapsed)+").":""));
         state.lastRecap = { years:roundedElapsed, interestPaid: state.debt-before, age: Math.round(state.age) };
@@ -986,6 +1016,7 @@
         if (state.ended||state.event||state.commitment||state.briefPending||state.pendingAction) return false;
         const gig = (currentStage().gigs||[]).find((g)=>g.id===id);
         if (!gig) return false;
+        if (gig.rotates && !(state.activeGigs||[]).includes(id)) return announce("לא זמינה השנה","העבודה הזאת לא מוצעת השנה. נסה שוב בעונה הבאה.");
         const lack = missing(gig.needs);
         if (lack.length) return announce("חסר ציוד לעבודה הזאת","צריך: "+lack.join(" · ")+".");
         state.pendingAction = { kind:"gig", id };
@@ -1005,6 +1036,7 @@
         if (state.ended||state.event||state.commitment) return false;
         const gig = (currentStage().gigs||[]).find((g)=>g.id===id);
         if (!gig) return false;
+        if (gig.rotates && !(state.activeGigs||[]).includes(id)) return announce("לא זמינה השנה","העבודה הזאת לא מוצעת השנה. נסה שוב בעונה הבאה.");
         const lack = missing(gig.needs);
         if (lack.length) return announce("חסר ציוד לעבודה הזאת","צריך: "+lack.join(" · ")+".");
         state.cash += gig.cash; state.fame += (gig.fame||0); state.contacts += (gig.contacts||0); state.followers += (gig.followers||0);
@@ -1130,9 +1162,12 @@
           html += `<article class="action-row"><div><h3>${config.name}</h3><p>בעיצומה · שנה ${Math.round(state.commitment.elapsedYears)} מתוך ${config.years}</p></div><div class="action-meta"><b>בתהליך</b></div></article>`;
         } else {
           const gigRow = (gig) => {
+            const rotatedOut = gig.rotates && !(state.activeGigs||[]).includes(gig.id);
             const lack = missing(gig.needs);
             const meta = "+"+money(gig.cash)+(gig.fame?" · +"+gig.fame+" הכרה":"");
-            return row(gig.title, gig.copy+(lack.length?" · חסר: "+lack.join(" · "):""), meta, "gig:"+gig.id, lack.length?"חסר ציוד":"לעבוד");
+            const note = rotatedOut ? " · לא מוצעת השנה" : (lack.length?" · חסר: "+lack.join(" · "):"");
+            const label = rotatedOut ? "לא זמינה" : (lack.length?"חסר ציוד":"לעבוד");
+            return row(gig.title+(gig.rotates?' <small class="trend-up">מתחלף</small>':""), gig.copy+note, meta, "gig:"+gig.id, label);
           };
           const careerGigs = (stage.gigs||[]).filter((g)=>g.fame>0||g.contacts>0);
           const survivalGigs = (stage.gigs||[]).filter((g)=>!(g.fame>0||g.contacts>0));
@@ -1399,8 +1434,8 @@
           const stage = STAGES.find((s)=>s.id===id) || STAGES[0];
           state.stageId = stage.id; state.stageYear = 0; state.commitment = null; state.activeCheckpoint = null;
           if (stage.ageRange) state.age = stage.ageRange[0];
-          const market = generateMarket(stage.id);
-          state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices};
+          const market = generateMarket(stage.id, state.stageYear);
+          state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices}; state.activeGigs = market.activeGigs;
           return clone(state);
         },
         __testSetState: (patch) => { Object.assign(state, patch); return clone(state); }
