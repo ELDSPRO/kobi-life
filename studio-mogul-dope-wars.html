@@ -244,10 +244,10 @@
       }
 
       function breakthroughRecommend(s) {
-        if (s.fame < 60) {
+        if (s.fame < 90) {
           return { title:"לצבור מוניטין ברמת אולפן", copy:"פרויקטים גדולים דורשים שם שכבר מוכיח את עצמו.", action:{type:"gig",id:"showrunnerGig"}, actionLabel:"לנהל פרויקט אולפן", alternatives:[{type:"gig",id:"execProducing",label:"הפקה בכירה"}] };
         }
-        if ((s.cash+s.bank) < 30000) {
+        if ((s.cash+s.bank) < 140000) {
           return { title:"לבנות הון משמעותי", copy:"ההצלחה המקצועית עוד לא הפכה להון אמיתי.", action:{type:"gig",id:"execProducing"}, actionLabel:"לעבוד בהפקה בכירה", alternatives:[] };
         }
         return { title:"מוכנים להתקדם", copy:"המוניטין וההון במקום — עוד פעולה תסיים את השלב.", action:{type:"gig",id:"showrunnerGig"}, actionLabel:"לנהל פרויקט אולפן", alternatives:[] };
