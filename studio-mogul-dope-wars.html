@@ -211,10 +211,10 @@
       }
 
       function industryRecommend(s) {
-        if (s.fame < 16) {
+        if (s.fame < 22) {
           return { title:"לבנות קרדיט בתעשייה", copy:"הקרדיטים מהשלב הקודם לא מספיקים לבד — צריך רצף אמיתי של עבודות מקצועיות.", action:{type:"gig",id:"camAssist"}, actionLabel:"לעבוד כעוזר/ת צלם", alternatives:[{type:"gig",id:"gaffer",label:"חשמלאי/ת תאורה"}] };
         }
-        if (s.contacts < 6) {
+        if (s.contacts < 18) {
           return { title:"להרחיב רשת קשרים", copy:"בלי מספיק קשרים אין עם מי להרכיב צוות לסרט הראשון.", action:{type:"gig",id:"gaffer"}, actionLabel:"לעבוד כחשמלאי/ת תאורה", alternatives:[{type:"gig",id:"lineProducer",label:"מפיק/ת קו"}] };
         }
         return { title:"מוכנים להתקדם", copy:"היעדים המרכזיים של השלב הושלמו — עוד פעולה תסיים אותו.", action:{type:"gig",id:"camAssist"}, actionLabel:"לעבוד כעוזר/ת צלם", alternatives:[] };
@@ -234,7 +234,7 @@
       }
 
       function festivalsRecommend(s) {
-        if (s.fame < 30) {
+        if (s.fame < 60) {
           return { title:"להרחיב מוניטין בינלאומי", copy:"פאנלים והשתתפות בפסטיבלים בונים שם מעבר לגבולות — וטיסת-ציון נדירה תוצע מדי פעם משלב הזה בלבד.", action:{type:"gig",id:"festivalPanel"}, actionLabel:"להשתתף בפאנל", alternatives:[{type:"gig",id:"consultingGig",label:"ייעוץ"}] };
         }
         if (s.followers < 3000) {
