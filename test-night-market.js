@@ -459,7 +459,9 @@ function run(htmlPath) {
   assert.strictEqual(lossScores[0].win, false, "a loss records win:false, not just wins");
 
   // --- RNG-injected price events (crash / spike / unavailable) ---
-  const studentGoods = game.STAGES[0].goods;
+  // excludes rotating goods: those force kind:"unavailable" whenever they're outside this year's roster,
+  // regardless of the price roll, which isn't what this block is testing (see the rotation block below).
+  const studentGoods = game.STAGES[0].goods.filter((g) => !g.rotates);
   const crashState = loadGame(path, () => 0.01).getState();
   assertAllKind(crashState, studentGoods, "crash");
   const spikeState = loadGame(path, () => 0.07).getState();

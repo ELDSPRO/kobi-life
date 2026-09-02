@@ -276,13 +276,22 @@
             { id:"mic",          name:"מיקרופון",       base:140, persistsAsAsset:false },
             { id:"tripod",       name:"חצובה משומשת",   base:120, persistsAsAsset:false },
             { id:"scriptRights", name:"זכויות לתסריט",       base:110, persistsAsAsset:false, market:"deal" },
-            { id:"locationPermit", name:"רישיון צילום במיקום", base:180, persistsAsAsset:false, market:"deal" }
+            { id:"locationPermit", name:"רישיון צילום במיקום", base:180, persistsAsAsset:false, market:"deal" },
+            { id:"usedSlider",   name:"מסילת צילום משומשת",   base:160, persistsAsAsset:false, rotates:true },
+            { id:"clapperboard", name:"קלפרבורד קלאסי",        base:90,  persistsAsAsset:false, rotates:true },
+            { id:"reflectorKit", name:"ערכת רפלקטורים",        base:100, persistsAsAsset:false, rotates:true },
+            { id:"editingPlugin",name:"תוסף עריכה",            base:130, persistsAsAsset:false, market:"deal", rotates:true },
+            { id:"shortFilmSlot",name:"חלון הקרנה לסרט קצר",   base:200, persistsAsAsset:false, market:"deal", rotates:true }
           ],
           gigs:[
             { id:"usher",      title:"סדרן/ית בקולנוע",          copy:"עבודה קבועה וזמינה, בלי דרישות.",             needs:{}, cash:900,  fame:0, contacts:0, followers:0 },
             { id:"waiter",     title:"מלצר/ית",                  copy:"הכי משתלם כלכלית, בלי קשרים בתעשייה.",         needs:{}, cash:1200, fame:0, contacts:0, followers:0 },
             { id:"photostore", title:"עובד/ת חנות צילום",         copy:"פחות כסף, אבל טעימה ראשונה מהתעשייה.",         needs:{}, cash:1000, fame:1, contacts:1, followers:0 },
-            { id:"prodAssist", title:"עוזר/ת הפקה סטודנטיאלית",   copy:"הכי פחות כסף, הכי הרבה קרדיט וקשרים.",         needs:{}, cash:700,  fame:2, contacts:2, followers:30 }
+            { id:"prodAssist", title:"עוזר/ת הפקה סטודנטיאלית",   copy:"הכי פחות כסף, הכי הרבה קרדיט וקשרים.",         needs:{}, cash:700,  fame:2, contacts:2, followers:30 },
+            { id:"crewExtra",     title:"ניצב/ת בהפקה",              copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:600, fame:0, contacts:1, followers:0, rotates:true },
+            { id:"filmClubHost",  title:"מנחה מועדון קולנוע קמפוס",  copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:500, fame:1, contacts:1, followers:20, rotates:true },
+            { id:"editingHelp",   title:"עזרה בעריכה לפרויקט חבר/ה", copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:400, fame:1, contacts:0, followers:0, rotates:true },
+            { id:"workshopAssist",title:"עוזר/ת בסדנת צילום",        copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:750, fame:0, contacts:1, followers:0, rotates:true }
           ],
           commitments:[
             { id:"filmSchool", name:"לימודי קולנוע", copy:"התחייבות ארוכה — 4 שנים, שתי הכרעות באמצע.", years:4, entryDebt:16000,
@@ -397,11 +406,20 @@
             { id:"usedSoundMixer", name:"מיקסר סאונד משומש",   base:1100, persistsAsAsset:false },
             { id:"backupDrive",    name:"כונן גיבוי חיצוני",   base:520,  persistsAsAsset:false },
             { id:"postSlot",       name:"חלון פוסט-פרודקשן",   base:700,  persistsAsAsset:false, market:"deal" },
-            { id:"distroLead",     name:"ליד להפצה",           base:450,  persistsAsAsset:false, market:"deal" }
+            { id:"distroLead",     name:"ליד להפצה",           base:450,  persistsAsAsset:false, market:"deal" },
+            { id:"usedTripodPro",       name:"חצובה מקצועית משומשת",  base:380, persistsAsAsset:false, rotates:true },
+            { id:"craftServicesKit",    name:"ציוד קייטרינג לסט",     base:250, persistsAsAsset:false, rotates:true },
+            { id:"colorGradingPass",    name:"מעבר צביעת צבע",        base:600, persistsAsAsset:false, market:"deal", rotates:true },
+            { id:"musicLicense",        name:"רישיון מוזיקה עצמאי",   base:350, persistsAsAsset:false, market:"deal", rotates:true },
+            { id:"productionInsurance", name:"ביטוח הפקה קצר-טווח",   base:700, persistsAsAsset:false, market:"deal", rotates:true }
           ],
           gigs:[
             { id:"commercialGig", title:"עבודה מסחרית", copy:"מממנת את החיים בזמן שהסרט מתפתח.", needs:{}, cash:2600, fame:0, contacts:0, followers:0 },
-            { id:"workshopTeach", title:"הנחיית סדנה",   copy:"פחות כסף, אבל בונה שם וקשרים.",     needs:{}, cash:1800, fame:1, contacts:2, followers:0 }
+            { id:"workshopTeach", title:"הנחיית סדנה",   copy:"פחות כסף, אבל בונה שם וקשרים.",     needs:{}, cash:1800, fame:1, contacts:2, followers:0 },
+            { id:"soundDesignGig",  title:"עיצוב סאונד לפרויקט אחר",     copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:1600, fame:1, contacts:1, followers:0,  rotates:true },
+            { id:"pitchConsult",    title:"ייעוץ פיץ' למפיקים חדשים",    copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:2000, fame:0, contacts:2, followers:0,  rotates:true },
+            { id:"shortFilmJudge",  title:"שיפוט תחרות סרטים קצרים",     copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:1200, fame:2, contacts:1, followers:50, rotates:true },
+            { id:"crowdfundingPush",title:"ניהול קמפיין מימון המונים",   copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:1900, fame:1, contacts:0, followers:150,rotates:true }
           ],
           commitments:[
             { id:"indieFilm", name:"לצלם סרט אינדי ראשון", copy:"הפרויקט שיהפוך אותך למי שאת/ה — 3 שנים, מסלול הפקה שלם משלך.", years:3, entryDebt:6000,
@@ -496,11 +514,20 @@
             { id:"vipBadge",          name:"תג גישה VIP מפסטיבל קודם", base:950,  persistsAsAsset:false },
             { id:"distroRights",      name:"זכויות הפצה בינלאומיות", base:2200, persistsAsAsset:false, market:"deal" },
             { id:"screeningWindow",   name:"חלון הקרנה",              base:900,  persistsAsAsset:false, market:"deal" },
-            { id:"streamingDeal",     name:"עסקת סטרימינג",           base:3400, persistsAsAsset:false, market:"deal" }
+            { id:"streamingDeal",     name:"עסקת סטרימינג",           base:3400, persistsAsAsset:false, market:"deal" },
+            { id:"pressKitPrint",     name:"ערכת עיתונות מודפסת",    base:700, persistsAsAsset:false, rotates:true },
+            { id:"afterPartyPass",    name:"כרטיס למסיבת אחרי",       base:400, persistsAsAsset:false, rotates:true },
+            { id:"merchandiseBatch",  name:"מלאי מרצ'נדייז לסרט",    base:850, persistsAsAsset:false, rotates:true },
+            { id:"subtitlingDeal",    name:"עסקת תרגום כתוביות",      base:1100, persistsAsAsset:false, market:"deal", rotates:true },
+            { id:"panelInvite",       name:"הזמנה לפאנל בתשלום",      base:1500, persistsAsAsset:false, market:"deal", rotates:true }
           ],
           gigs:[
             { id:"festivalPanel", title:"פאנל בפסטיבל",       copy:"לא משלם הרבה, אבל בונה שם בינלאומי.", needs:{}, cash:900,  fame:2, contacts:2, followers:100 },
-            { id:"consultingGig", title:"ייעוץ לפרויקט אחר",   copy:"הכי משתלם כלכלית בשלב הזה.",           needs:{}, cash:3200, fame:0, contacts:1, followers:0 }
+            { id:"consultingGig", title:"ייעוץ לפרויקט אחר",   copy:"הכי משתלם כלכלית בשלב הזה.",           needs:{}, cash:3200, fame:0, contacts:1, followers:0 },
+            { id:"juryAssist",          title:"עוזר/ת שיפוט בפסטיבל",      copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:1100, fame:1, contacts:2, followers:50,  rotates:true },
+            { id:"pressInterviewRound", title:"סבב ראיונות לעיתונות",      copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:700,  fame:2, contacts:0, followers:200, rotates:true },
+            { id:"workshopGuest",       title:"אורח/ת בסדנת פסטיבל",       copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:1300, fame:1, contacts:1, followers:0,  rotates:true },
+            { id:"distributorMeeting",  title:"פגישות עם מפיצים",          copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:1800, fame:0, contacts:2, followers:0,  rotates:true }
           ],
           commitments:[],
           incidents:[
@@ -543,12 +570,21 @@
             { id:"usedLightingRig",        name:"מערכת תאורת סטודיו משומשת", base:6200, persistsAsAsset:false },
             { id:"supportVehicle",         name:"רכב תמיכה להפקה",          base:8800, persistsAsAsset:false },
             { id:"studioOptionDeal",       name:"אופציה מאולפן",       base:5000,  persistsAsAsset:false, market:"deal" },
-            { id:"packageDeal",            name:"חבילת פרויקט",         base:7500,  persistsAsAsset:false, market:"deal" }
+            { id:"packageDeal",            name:"חבילת פרויקט",         base:7500,  persistsAsAsset:false, market:"deal" },
+            { id:"vfxPackage",             name:"חבילת אפקטים ויזואליים",  base:7200, persistsAsAsset:false, rotates:true },
+            { id:"soundstageRental",       name:"השכרת סאונדסטייג'",        base:5800, persistsAsAsset:false, rotates:true },
+            { id:"postProductionSuite",    name:"חבילת פוסט-פרודקשן מלאה",  base:6800, persistsAsAsset:false, market:"deal", rotates:true },
+            { id:"marketingCampaignDeal",  name:"קמפיין שיווק ממוקד",       base:5500, persistsAsAsset:false, market:"deal", rotates:true },
+            { id:"talentAgencyDeal",       name:"חוזה עם סוכנות טאלנטים",   base:6000, persistsAsAsset:false, market:"deal", rotates:true }
           ],
           gigs:[
             { id:"showrunnerGig", title:"ניהול פרויקט אולפן", copy:"הכי הרבה מוניטין וקהל.",  needs:{}, cash:8000, fame:3, contacts:2, followers:500 },
             { id:"execProducing", title:"הפקה בכירה",         copy:"הכי הרבה כסף וקשרים.",     needs:{}, cash:6000, fame:2, contacts:3, followers:200 },
-            { id:"festivalJudge", title:"שופט/ת בפסטיבל בינלאומי", copy:"הזמנה יוקרתית לשפוט בפסטיבלים בעולם — מחזקת מוניטין וקשרים.", needs:{}, cash:7000, fame:4, contacts:4, followers:800 }
+            { id:"festivalJudge", title:"שופט/ת בפסטיבל בינלאומי", copy:"הזמנה יוקרתית לשפוט בפסטיבלים בעולם — מחזקת מוניטין וקשרים.", needs:{}, cash:7000, fame:4, contacts:4, followers:800 },
+            { id:"brandPartnership", title:"שיתוף פעולה עם מותג",       copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:6500, fame:1, contacts:2, followers:600, rotates:true },
+            { id:"streamingPitch",   title:"פיץ' לפלטפורמת סטרימינג",   copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:7000, fame:3, contacts:2, followers:300, rotates:true },
+            { id:"crisisPR",         title:"ניהול משבר תקשורתי",        copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:5500, fame:2, contacts:3, followers:0,   rotates:true },
+            { id:"awardsCampaign",   title:"ניהול קמפיין פרסים",        copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:6800, fame:4, contacts:1, followers:400, rotates:true }
           ],
           commitments:[],
           incidents:[
@@ -591,12 +627,21 @@
             { id:"vintageCamera",     name:"מצלמת פילם וינטג׳",        base:22000, persistsAsAsset:false },
             { id:"stillsArchiveBox",  name:"תיבת ארכיון תמונות סטילס", base:18000, persistsAsAsset:false },
             { id:"mentorshipProgram", name:"תוכנית הנחיה",        base:15000,  persistsAsAsset:false, market:"deal" },
-            { id:"retrospectiveDeal", name:"עסקת רטרוספקטיבה",    base:30000,  persistsAsAsset:false, market:"deal" }
+            { id:"retrospectiveDeal", name:"עסקת רטרוספקטיבה",    base:30000,  persistsAsAsset:false, market:"deal" },
+            { id:"rareFilmPrint",       name:"עותק פילם נדיר",           base:25000, persistsAsAsset:false, rotates:true },
+            { id:"privateScreeningKit", name:"ערכת הקרנה פרטית",         base:8000,  persistsAsAsset:false, rotates:true },
+            { id:"filmFestivalTribute", name:"ערב הוקרה בפסטיבל",        base:12000, persistsAsAsset:false, market:"deal", rotates:true },
+            { id:"biographyDeal",       name:"עסקת ביוגרפיה",            base:20000, persistsAsAsset:false, market:"deal", rotates:true },
+            { id:"charityGalaSlot",     name:"מקום בגאלת צדקה",          base:10000, persistsAsAsset:false, market:"deal", rotates:true }
           ],
           gigs:[
             { id:"teachingGig",     title:"הוראה באקדמיה",       copy:"מוריש/ה את הידע הלאה.", needs:{}, cash:25000, fame:2, contacts:1, followers:300 },
             { id:"consultingLegacy",title:"ייעוץ אסטרטגי",        copy:"הכי משתלם כלכלית.",      needs:{}, cash:40000, fame:1, contacts:2, followers:0 },
-            { id:"festivalJudge",   title:"שופט/ת כבוד בפסטיבלים", copy:"מוזמנ/ת כשופט/ת כבוד לפסטיבלים המובילים בעולם.", needs:{}, cash:20000, fame:3, contacts:2, followers:500 }
+            { id:"festivalJudge",   title:"שופט/ת כבוד בפסטיבלים", copy:"מוזמנ/ת כשופט/ת כבוד לפסטיבלים המובילים בעולם.", needs:{}, cash:20000, fame:3, contacts:2, followers:500 },
+            { id:"boardAdvisor",         title:"יועץ/ת דירקטוריון אולפן",     copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:35000, fame:1, contacts:2, followers:0,   rotates:true },
+            { id:"documentarySubject",   title:"נושא/ת לסרט תיעודי עליך",     copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:15000, fame:3, contacts:0, followers:800, rotates:true },
+            { id:"masterclassHost",      title:"מנחה מאסטרקלאס",              copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:22000, fame:2, contacts:1, followers:200, rotates:true },
+            { id:"philanthropyAdvisor",  title:"יועץ/ת פילנתרופיה תרבותית",   copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:30000, fame:1, contacts:2, followers:0,   rotates:true }
           ],
           commitments:[
             { id:"legacyFilm", name:"הסרט האישי האחרון", copy:"סיכום של קריירה שלמה — שנתיים, ועוד סרט אחד להיפרד איתו.", years:2, entryDebt:0,
