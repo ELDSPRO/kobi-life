@@ -367,7 +367,7 @@
           ],
           riskProfile:null,
           milestones:[
-            { id:"industry-credit",  label:"הכרה מבוססת בתעשייה", check:(s)=>s.fame>=40,               required:true, progress:(s)=>({current:s.fame, target:40}) },
+            { id:"industry-credit",  label:"הכרה מבוססת בתעשייה", check:(s)=>s.fame>=22,               required:true, progress:(s)=>({current:s.fame, target:22}) },
             { id:"industry-network", label:"רשת קשרים בתעשייה",   check:(s)=>s.contacts>=18,           required:true, progress:(s)=>({current:s.contacts, target:18}) },
             { id:"pro-gear",         label:"ציוד מקצועי משלך",     check:(s)=>!!s.assets.proCamera,     required:false },
             { id:"cash-cushion",     label:"כרית ביטחון גדולה",    check:(s)=>(s.cash+s.bank)>=8000,    required:false }

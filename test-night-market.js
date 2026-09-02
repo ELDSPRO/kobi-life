@@ -311,7 +311,7 @@ function run(htmlPath) {
   assert.strictEqual(game.buy("crewFavor"), true, "the gating good can be bought");
   for (let i = 0; i < 14 && game.getState().stageId === "industry"; i++) { game.doGig("lineProducer"); clearEvent(game); } // needs:{crewFavor:1} only gates presence, not consumption — one purchase covers all fourteen; clearEvent drains any incident so the loop doesn't stall
   state = game.getState();
-  assert.strictEqual(state.stageId, "indie", "industry's own required milestones (fame>=40, contacts>=18) transition into indie");
+  assert.strictEqual(state.stageId, "indie", "industry's own required milestones (fame>=22, contacts>=18) transition into indie");
   assert.strictEqual(state.bag.crewFavor, undefined, "the gating good is liquidated on transition since indie (still a stub) has no matching good");
   assert.ok(state.log.some((line) => line.indexOf("מומש אוטומטית") === 0));
 
