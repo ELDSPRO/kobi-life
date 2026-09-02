@@ -243,10 +243,10 @@
       }
 
       function breakthroughRecommend(s) {
-        if (s.fame < 60) {
+        if (s.fame < 95) {
           return { title:"לצבור מוניטין ברמת אולפן", copy:"פרויקטים גדולים דורשים שם שכבר מוכיח את עצמו.", action:{type:"gig",id:"showrunnerGig"}, actionLabel:"לנהל פרויקט אולפן", alternatives:[{type:"gig",id:"execProducing",label:"הפקה בכירה"}] };
         }
-        if ((s.cash+s.bank) < 30000) {
+        if ((s.cash+s.bank) < 90000) {
           return { title:"לבנות הון משמעותי", copy:"ההצלחה המקצועית עוד לא הפכה להון אמיתי.", action:{type:"gig",id:"execProducing"}, actionLabel:"לעבוד בהפקה בכירה", alternatives:[] };
         }
         return { title:"מוכנים להתקדם", copy:"המוניטין וההון במקום — עוד פעולה תסיים את השלב.", action:{type:"gig",id:"showrunnerGig"}, actionLabel:"לנהל פרויקט אולפן", alternatives:[] };
@@ -561,8 +561,8 @@
           ],
           riskProfile:null,
           milestones:[
-            { id:"studio-fame",  label:"מוניטין ברמת אולפן",  check:(s)=>s.fame>=90,               required:true, progress:(s)=>({current:s.fame, target:90}) },
-            { id:"real-wealth",  label:"הון משמעותי",          check:(s)=>(s.cash+s.bank)>=80000,   required:true, progress:(s)=>({current:s.cash+s.bank, target:80000}) },
+            { id:"studio-fame",  label:"מוניטין ברמת אולפן",  check:(s)=>s.fame>=115,               required:true, progress:(s)=>({current:s.fame, target:115}) },
+            { id:"real-wealth",  label:"הון משמעותי",          check:(s)=>(s.cash+s.bank)>=105000,   required:true, progress:(s)=>({current:s.cash+s.bank, target:105000}) },
             { id:"prod-company", label:"חלק בחברת הפקה",       check:(s)=>!!s.assets.productionCompanyShare, required:false },
             { id:"mass-audience",label:"קהל המוני",             check:(s)=>s.followers>=10000,       required:false }
           ],
