@@ -154,6 +154,68 @@ function run(htmlPath) {
   judgeGame2.__testJumpToStage("legacy");
   assert.strictEqual(judgeGame2.doGig("festivalJudge"), true, "the festival-judge gig is also playable in legacy");
 
+  // --- Studio Slate: breakthrough's repeatable greenlight -> complication -> release project cycle ---
+  // a purpose-built parallel to the commitments/checkpoints engine (not a reuse of it), since a project must
+  // be startable again and again, unlike a one-shot commitment. Verifies the full cycle, the outcome roll,
+  // and that it self-heals the same way progressCommitment() does when an incident interrupts mid-advanceYear.
+  const slateGame = loadGame(path, () => 0.5); // mid roll: lands on "solid" for the safe tier's odds band
+  slateGame.__testJumpToStage("breakthrough");
+  slateGame.__testSetState({ cash: 20000, bank: 0 });
+  assert.strictEqual(slateGame.startProject(), true, "a project can be started when none is active");
+  let sState = slateGame.getState();
+  assert.strictEqual(sState.event.title, "איזה פרויקט מפיקים?", "starting a project opens the tier-choice event immediately");
+  assert.strictEqual(sState.event.choices.length, 3, "three risk tiers are offered");
+  assert.strictEqual(slateGame.startProject(), false, "a second project can't start while one is already active");
+
+  const beforeTier = sState.cash;
+  assert.strictEqual(slateGame.resolveEvent(0), true, "safe tier"); // safe: cost 1500, no debt
+  sState = slateGame.getState();
+  assert.strictEqual(sState.cash, beforeTier - 1500, "the tier's upfront cost is charged immediately");
+  assert.strictEqual(sState.age, 53, "picking a tier costs no time");
+  assert.strictEqual(sState.event.title, "איזה סוג פרויקט זה?", "genre selection opens immediately after the tier, chained in the same greenlight step");
+
+  assert.strictEqual(slateGame.resolveEvent(0), true, "drama genre");
+  // fixed 0.5 mock -> Math.floor(0.5*3)=1, deterministically picks the 2nd of 3 complications every time
+  drainIncidental(slateGame, "מחלוקת יצירתית"); // drain past any incidental incident first
+  sState = slateGame.getState();
+  assert.strictEqual(sState.age, 54, "the jump from genre to the complication checkpoint costs the intended 1 year, even if an incident intervened first");
+  assert.strictEqual(sState.event.title, "מחלוקת יצירתית");
+
+  assert.strictEqual(slateGame.resolveEvent(1), true, "compromise, no extra cost"); // quiet choice, index 1 in all 3 complications
+  drainIncidental(slateGame, "הפרויקט יוצא לאקרנים");
+  sState = slateGame.getState();
+  assert.strictEqual(Math.round(sState.age * 10) / 10, 54.6, "the jump from complication to release costs the intended 0.6 years");
+  assert.ok(sState.event.html.indexOf("poster-card") !== -1, "the release event renders a real poster, reusing the same film-poster infrastructure as indieFilm/legacyFilm");
+  assert.ok(sState.event.html.indexOf("הצלחה סבירה") !== -1, "the rolled outcome (solid, for this seed + safe tier) is shown in the reveal");
+
+  const beforeRelease = slateGame.getState();
+  assert.strictEqual(slateGame.resolveEvent(0), true, "acknowledge the release");
+  sState = slateGame.getState();
+  assert.strictEqual(sState.fame, beforeRelease.fame + 5, "the 'solid' outcome's fame delta is applied on acknowledging the reveal, not before");
+  assert.strictEqual(sState.cash, beforeRelease.cash + 15000, "the 'solid' outcome's cash delta is applied");
+  assert.strictEqual(sState.followers, beforeRelease.followers + 500);
+  assert.strictEqual(sState.project, null, "the project clears once fully resolved, so a new one can be started");
+  assert.strictEqual(sState.log[0], "הפרויקט הסתיים: הצלחה סבירה.");
+
+  // --- Studio Slate: a blockbuster outcome pushes an award, same award-cabinet mechanism as other big moments ---
+  const blockbusterGame = loadGame(path, () => 0.99); // high roll lands on blockbuster for every tier's odds table
+  blockbusterGame.__testJumpToStage("breakthrough");
+  blockbusterGame.__testSetState({ cash: 20000, bank: 0 });
+  blockbusterGame.startProject();
+  blockbusterGame.resolveEvent(2); // tentpole tier: highest blockbuster odds
+  blockbusterGame.resolveEvent(0); // genre
+  // the complication is one of 3 randomized picks - not asserted on which; drain everything (incidents
+  // and whichever complication opened) via its last/quiet choice until the release event itself opens
+  let bState = blockbusterGame.getState();
+  while (bState.event && bState.event.title !== "הפרויקט יוצא לאקרנים") {
+    blockbusterGame.resolveEvent(bState.event.choices.length - 1);
+    bState = blockbusterGame.getState();
+  }
+  assert.ok(bState.event.html.indexOf("להיט קופתי ענק") !== -1, "a high roll on the tentpole tier lands the blockbuster outcome");
+  blockbusterGame.resolveEvent(0);
+  bState = blockbusterGame.getState();
+  assert.ok(bState.awards.some((a) => a.title.indexOf("להיט קופתי") === 0), "a blockbuster outcome adds an award-cabinet entry, same mechanism as other big career moments");
+
   // --- rabinovichGrant: an alternate, lower-debt indie-film path with a real-world funding-politics checkpoint ---
   // high roll: keeps this checkpoint sequence free of incidental incidents, which aren't the point of this test
   const grantGame = loadGame(path, () => 0.99);
