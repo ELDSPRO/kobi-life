@@ -561,8 +561,8 @@
           ],
           riskProfile:null,
           milestones:[
-            { id:"studio-fame",  label:"מוניטין ברמת אולפן",  check:(s)=>s.fame>=90,               required:true, progress:(s)=>({current:s.fame, target:90}) },
-            { id:"real-wealth",  label:"הון משמעותי",          check:(s)=>(s.cash+s.bank)>=80000,   required:true, progress:(s)=>({current:s.cash+s.bank, target:80000}) },
+            { id:"studio-fame",  label:"מוניטין ברמת אולפן",  check:(s)=>s.fame>=110,               required:true, progress:(s)=>({current:s.fame, target:110}) },
+            { id:"real-wealth",  label:"הון משמעותי",          check:(s)=>(s.cash+s.bank)>=160000,   required:true, progress:(s)=>({current:s.cash+s.bank, target:160000}) },
             { id:"prod-company", label:"חלק בחברת הפקה",       check:(s)=>!!s.assets.productionCompanyShare, required:false },
             { id:"mass-audience",label:"קהל המוני",             check:(s)=>s.followers>=10000,       required:false }
           ],
