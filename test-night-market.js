@@ -349,6 +349,52 @@ function run(htmlPath) {
   const afterClapCost = politicsCostGame.getState();
   assert.strictEqual(afterClapCost.contacts, 4, "clapping back costs one contact, not a purely free upside");
 
+  // --- passive income: no persistent assets owned -> no passive income and no breakdown ---
+  const noAssetGame = loadGame(path);
+  assert.strictEqual(noAssetGame.doGig("waiter"), true);
+  let naState = noAssetGame.getState();
+  assert.strictEqual(naState.lastRecap.passive, 0, "no owned yield-bearing assets means zero passive income");
+  assert.deepStrictEqual(naState.lastRecap.passiveBreakdown, [], "and an empty breakdown, so the recap renders no passive-income line");
+
+  // --- passive income: one flat-yield asset (productionCompanyShare, ₪2500/year) pays out scaled by elapsed years ---
+  const assetGame = loadGame(path);
+  assetGame.__testJumpToStage("breakthrough");
+  assetGame.__testSetState({ assets: { ...assetGame.getState().assets, productionCompanyShare: true }, cash: 20000 });
+  const bankBefore = assetGame.getState().bank;
+  assert.strictEqual(assetGame.doGig("execProducing"), true); // 0.4y
+  let aState = assetGame.getState();
+  assert.strictEqual(aState.lastRecap.passive, Math.round(2500*0.4), "one flat-yield asset pays its rate × the elapsed fraction of a year");
+  assert.strictEqual(aState.bank, bankBefore + Math.round(2500*0.4), "the payout lands in the bank, not cash");
+  assert.deepStrictEqual(aState.lastRecap.passiveBreakdown, [{ name:"חלק בחברת הפקה", amount:Math.round(2500*0.4) }]);
+
+  // --- passive income: per-film yields (filmRightsLibrary, distributionStake) scale with state.films.length ---
+  const filmYieldGame = loadGame(path);
+  filmYieldGame.__testJumpToStage("legacy");
+  filmYieldGame.__testSetState({
+    assets: { ...filmYieldGame.getState().assets, filmRightsLibrary: true },
+    films: [{ title:"a" }, { title:"b" }], cash: 20000
+  });
+  assert.strictEqual(filmYieldGame.doGig("consultingLegacy"), true); // 0.4y
+  let fyState = filmYieldGame.getState();
+  const expectedLibraryYield = Math.round(0.03*2*4000); // FILM_RIGHTS_YIELD_RATE × films.length × FILM_RIGHTS_ASSUMED_VALUE_PER_FILM
+  assert.strictEqual(fyState.lastRecap.passive, Math.round(expectedLibraryYield*0.4), "filmRightsLibrary's yield scales with the number of completed films");
+
+  // --- personalStudio: a one-time 20% discount on the next commitment's entry debt, not a cash yield ---
+  const studioGame = loadGame(path, () => 0.99); // high roll: keeps the two-year jump to filmSchool's first checkpoint free of incidental incidents
+  studioGame.__testJumpToStage("student");
+  studioGame.__testSetState({ assets: { ...studioGame.getState().assets, personalStudio: true }, debt: 8000 });
+  assert.strictEqual(studioGame.startCommitment("filmSchool"), true); // entryDebt 16000, discounted by personalStudio -> 12800
+  let stState = studioGame.getState();
+  assert.strictEqual(stState.personalStudioDiscountUsed, true, "starting a commitment with entryDebt consumes the one-time discount");
+  assert.strictEqual(stState.debt, 21982, "8000 + 16000*0.8 = 20800, compounded 2 years at 1.028 to reach the first checkpoint = 21982");
+
+  // the discount is one-time: a second commitment afterward pays the full entry debt
+  const studioGame2 = loadGame(path, () => 0.99);
+  studioGame2.__testJumpToStage("student");
+  studioGame2.__testSetState({ assets: { ...studioGame2.getState().assets, personalStudio: true }, debt: 8000, personalStudioDiscountUsed: true });
+  assert.strictEqual(studioGame2.startCommitment("filmSchool"), true);
+  assert.strictEqual(studioGame2.getState().debt, Math.ceil((8000+16000)*Math.pow(1.028,2)), "once already used, personalStudio no longer discounts a later commitment");
+
   // --- buy: asset vs. bag, capacity ---
   assert.strictEqual(game.buy("usedCamera"), true, "an asset-flagged good can be bought");
   state = game.getState();

@@ -201,6 +201,14 @@
       const FAME_DECAY_AFTER_YEARS = 4;
       const FAME_DECAY_RATE = 0.03;
       const INCIDENT_COOLDOWN_YEARS = 3;
+
+      // Passive-income first guesses for persistent (persistsAsAsset) goods. Everything not listed here
+      // yields 0 by default (equipment like proCamera/usedCamera, or diploma - not even a market good).
+      const FILM_RIGHTS_YIELD_RATE = 0.03;
+      const FILM_RIGHTS_ASSUMED_VALUE_PER_FILM = 4000;
+      const DISTRIBUTION_STAKE_YIELD_PER_FILM = 1500;
+      const PRODUCTION_COMPANY_SHARE_YIELD = 2500;
+      const PERSONAL_STUDIO_DISCOUNT = 0.2;
       const DEBT_COLLECTOR_MIN_DEBT = 3000;
       const DEBT_COLLECTOR_YEARS = 3;
 
@@ -612,8 +620,8 @@
           headline:"מפרויקט לפרויקט גדולים — לבנות הון וקריירה ברמת אולפן",
           cashScale:10,
           goods:[
-            { id:"distributionStake",      name:"נתח בזכויות הפצה",     base:9000,  persistsAsAsset:true, events:{ spike:"פלטפורמת סטרימינג חדשה נלחמת על תוכן", crash:"מיזוג אולפנים משחרר נתחי הפצה ישנים לשוק" } },
-            { id:"productionCompanyShare", name:"חלק בחברת הפקה",       base:12000, persistsAsAsset:true, events:{ spike:"הצלחת קופות מגדילה ביקוש לחלקים בחברות הפקה", crash:"שביתת תסריטאים מקפיאה השקעות בהפקה" } },
+            { id:"distributionStake",      name:"נתח בזכויות הפצה",     base:9000,  persistsAsAsset:true, events:{ spike:"פלטפורמת סטרימינג חדשה נלחמת על תוכן", crash:"מיזוג אולפנים משחרר נתחי הפצה ישנים לשוק" }, yield:(s)=>s.films.length*DISTRIBUTION_STAKE_YIELD_PER_FILM },
+            { id:"productionCompanyShare", name:"חלק בחברת הפקה",       base:12000, persistsAsAsset:true, events:{ spike:"הצלחת קופות מגדילה ביקוש לחלקים בחברות הפקה", crash:"שביתת תסריטאים מקפיאה השקעות בהפקה" }, yield:()=>PRODUCTION_COMPANY_SHARE_YIELD },
             { id:"usedLightingRig",        name:"מערכת תאורת סטודיו משומשת", base:6200, persistsAsAsset:false },
             { id:"supportVehicle",         name:"רכב תמיכה להפקה",          base:8800, persistsAsAsset:false },
             { id:"studioOptionDeal",       name:"אופציה מאולפן",       base:5000,  persistsAsAsset:false, market:"deal" },
@@ -670,7 +678,7 @@
           headline:"לסגור מעגל — הסרט האישי, ומה שנשאר אחריך",
           cashScale:15,
           goods:[
-            { id:"filmRightsLibrary", name:"ארכיון זכויות אישי", base:80000,  persistsAsAsset:true, events:{ spike:"אולפן גדול רודף אחרי ארכיוני זכויות ותיקים לרימייקים", crash:"יורש מוכר ארכיון משפחתי במהירות" } },
+            { id:"filmRightsLibrary", name:"ארכיון זכויות אישי", base:80000,  persistsAsAsset:true, events:{ spike:"אולפן גדול רודף אחרי ארכיוני זכויות ותיקים לרימייקים", crash:"יורש מוכר ארכיון משפחתי במהירות" }, yield:(s)=>Math.round(FILM_RIGHTS_YIELD_RATE*s.films.length*FILM_RIGHTS_ASSUMED_VALUE_PER_FILM) },
             { id:"personalStudio",    name:"סטודיו אישי",          base:100000, persistsAsAsset:true, events:{ spike:"ביקוש גואה לסטודיואים בוטיק עם מוניטין", crash:"גל סגירות סטודיואים קטנים בעקבות מיתון בענף" } },
             { id:"vintageCamera",     name:"מצלמת פילם וינטג׳",        base:22000, persistsAsAsset:false },
             { id:"stillsArchiveBox",  name:"תיבת ארכיון תמונות סטילס", base:18000, persistsAsAsset:false },
@@ -806,7 +814,7 @@
           films:[],
           commitment:null, activeCheckpoint:null, filmDraft:{},
           debtCollectorStreak:0, debtCollectorIgnores:0, yearsSinceProject:0,
-          seenIncidents:{}, queuedIncidents:[],
+          seenIncidents:{}, queuedIncidents:[], personalStudioDiscountUsed:false,
           pathTags:[], bankruptcyStrikes:0,
           view:"hud", marketTab:"work", flight:null,
           difficulty: difficultyId || null, settings,
@@ -846,6 +854,19 @@
 
       function goodName(id) { const g = currentStage().goods.find((x)=>x.id===id); return g ? g.name : id; }
       function assetName(id) { for (const s of STAGES) { const g=(s.goods||[]).find((x)=>x.id===id); if (g) return g.name; } return id; }
+      function passiveIncomeSources() {
+        const sources = [];
+        for (const s of STAGES) {
+          for (const g of (s.goods||[])) {
+            if (g.persistsAsAsset && g.yield && state.assets[g.id]) {
+              const amount = g.yield(state);
+              if (amount) sources.push({ id:g.id, name:g.name, amount });
+            }
+          }
+        }
+        return sources;
+      }
+
       function priceEventTitle(id, kind) {
         const good = currentStage().goods.find((x)=>x.id===id);
         const custom = good && good.events && good.events[kind];
@@ -1019,6 +1040,10 @@
         state.debt = Math.ceil(state.debt * Math.pow(DEBT_ANNUAL_RATE, elapsed));
         state.debtCollectorStreak = state.debt > DEBT_COLLECTOR_MIN_DEBT ? state.debtCollectorStreak + elapsed : 0;
         if (state.bank > 0) state.bank = Math.round(state.bank * Math.pow(BANK_ANNUAL_RATE, elapsed));
+        const passiveSources = passiveIncomeSources();
+        const passiveBreakdown = passiveSources.map((p)=>({ name:p.name, amount:Math.round(p.amount*elapsed) }));
+        const passive = passiveBreakdown.reduce((sum,p)=>sum+p.amount,0);
+        if (passive) state.bank += passive;
         const beforeSinceProject = state.yearsSinceProject;
         state.yearsSinceProject += elapsed;
         const wholeDecayYears = Math.max(0, Math.floor(state.yearsSinceProject - FAME_DECAY_AFTER_YEARS) - Math.floor(Math.max(0, beforeSinceProject - FAME_DECAY_AFTER_YEARS)));
@@ -1031,7 +1056,7 @@
           .map(([id,kind])=>({ id, kind, good: goodName(id), title: priceEventTitle(id,kind) }));
         const roundedElapsed = Math.round(elapsed*10)/10;
         addLog("גיל "+Math.round(state.age)+": "+reason+(elapsed!==1?" ("+formatDuration(roundedElapsed)+").":""));
-        state.lastRecap = { years:roundedElapsed, interestPaid: state.debt-before, age: Math.round(state.age), marketEvents };
+        state.lastRecap = { years:roundedElapsed, interestPaid: state.debt-before, age: Math.round(state.age), marketEvents, passive, passiveBreakdown };
         state.briefPending = true;
         if (checkBankruptcy()) return true;
         if (checkStageProgress()) return true;
@@ -1123,7 +1148,15 @@
         const config = (currentStage().commitments||[]).find((c)=>c.id===id);
         if (!config) return false;
         state.stageIntroPending = false;
-        if (config.entryDebt) { state.debt += config.entryDebt; addLog("נכנסת ל"+config.name+" — החוב עלה ב-"+money(config.entryDebt)+"."); }
+        if (config.entryDebt) {
+          let entryDebt = config.entryDebt;
+          if (state.assets.personalStudio && !state.personalStudioDiscountUsed) {
+            entryDebt = Math.round(entryDebt*(1-PERSONAL_STUDIO_DISCOUNT));
+            state.personalStudioDiscountUsed = true;
+            addLog("הסטודיו האישי הוזיל את ההתחייבות הבאה ב-"+Math.round(PERSONAL_STUDIO_DISCOUNT*100)+"%.");
+          }
+          state.debt += entryDebt; addLog("נכנסת ל"+config.name+" — החוב עלה ב-"+money(entryDebt)+".");
+        }
         if (config.immediateEffect) config.immediateEffect(state);
         if (!config.years) {
           state.pathTags.push(config.id);
@@ -1442,7 +1475,8 @@
         const r = state.lastRecap;
         const events = (r.marketEvents||[]).slice(0,3);
         const eventsList = events.length ? `<div class="milestone-list">${events.map((e)=>`<span class="milestone">${e.title} · ${e.good}</span>`).join("")}</div>` : "";
-        return `<div class="final-grid recap"><div><small>גיל</small><b>${r.age}</b></div><div><small>החוב גדל ב</small><b>${money(r.interestPaid)}</b></div><div><small>משך</small><b>${formatDuration(r.years)}</b></div></div>${eventsList}`;
+        const passiveLine = r.passive ? `<p class="progress-label" style="margin-top:8px"><span>הכנסה פסיבית: ${money(r.passive)} (${(r.passiveBreakdown||[]).map((p)=>p.name+" "+money(p.amount)).join(", ")})</span></p>` : "";
+        return `<div class="final-grid recap"><div><small>גיל</small><b>${r.age}</b></div><div><small>החוב גדל ב</small><b>${money(r.interestPaid)}</b></div><div><small>משך</small><b>${formatDuration(r.years)}</b></div></div>${eventsList}${passiveLine}`;
       }
 
       function stageIntroMarkup() {
