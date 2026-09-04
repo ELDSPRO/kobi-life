@@ -211,6 +211,9 @@
       const DISTRIBUTION_STAKE_YIELD_PER_FILM = 1500;
       const PRODUCTION_COMPANY_SHARE_YIELD = 2500;
       const PERSONAL_STUDIO_DISCOUNT = 0.2;
+      const RISK_CAMERA_SUCCESS_CHANCE = 0.5;
+      const RISK_CAMERA_FAIL_COST = 800;
+      const EDIT_RUSH_RISK_CHANCE = 0.5;
       const DEBT_COLLECTOR_MIN_DEBT = 3000;
       const DEBT_COLLECTOR_YEARS = 3;
 
@@ -344,12 +347,19 @@
             { id:"filmSchool", name:"לימודי קולנוע", copy:"התחייבות ארוכה — 4 שנים, שתי הכרעות באמצע.", years:4, entryDebt:16000,
               checkpoints:[
                 { atYear:2, id:"specialize", title:"בחירת התמחות", copy:"השנה השנייה מסתיימת. לאיזה כיוון פונים?",
-                  choices:[{label:"בימוי",kind:"spec-directing"},{label:"עריכה",kind:"spec-editing"},{label:"הפקה",kind:"spec-producing"}] },
+                  choices:[
+                    {label:"בימוי",kind:"spec-directing",effect:(s)=>{ s.contacts+=1; }},
+                    {label:"עריכה",kind:"spec-editing",effect:(s)=>{ s.contacts+=1; }},
+                    {label:"הפקה",kind:"spec-producing",effect:(s)=>{ s.contacts+=1; }}
+                  ] },
                 { atYear:4, id:"thesis", title:"פרויקט גמר", copy:"השנה האחרונה. איך מגישים את פרויקט הגמר?",
-                  choices:[{label:"פרויקט שאפתני · סיכון גבוה יותר",kind:"thesis-ambitious"},{label:"פרויקט בטוח · פחות רושם",kind:"thesis-safe"}] }
+                  choices:[
+                    {label:"פרויקט שאפתני · סיכון גבוה יותר",kind:"thesis-ambitious",effect:(s)=>{ s.fame+=2; }},
+                    {label:"פרויקט בטוח · פחות רושם",kind:"thesis-safe",effect:(s)=>{ s.fame+=2; }}
+                  ] }
               ], grantsOnComplete:{ fame:2 } },
             { id:"shortCourse", name:"קורס קצר", copy:"התחייבות קצרה — שנה וחצי, הכרעה אחת.", years:1.5, entryDebt:4000,
-              checkpoints:[ { atYear:1.5, id:"cert", title:"סיום קורס", copy:"הקורס מסתיים. מה הלאה?", choices:[{label:"להמשיך הלאה",kind:"cert-done"}] } ],
+              checkpoints:[ { atYear:1.5, id:"cert", title:"סיום קורס", copy:"הקורס מסתיים. מה הלאה?", choices:[{label:"להמשיך הלאה",kind:"cert-done",effect:(s)=>{ s.contacts+=1; }}] } ],
               grantsOnComplete:{ fame:1 } },
             { id:"selfTaught", name:"מסלול עצמאי", copy:"בלי לימודים ובלי חוב — לומדים תוך כדי עבודה.", years:0, entryDebt:0,
               immediateEffect: (s) => { s.pathTags.push("self-taught"); } }
@@ -484,8 +494,8 @@
                   choices: genreCheckpointChoices() },
                 { atYear:1, id:"script", title:"התסריט מוכן", copy:"שנה ראשונה מסתיימת. איך סוגרים את התסריט?",
                   choices:[
-                    { label:"תסריט שאפתני יותר · -₪1,500", kind:"script-ambitious", effect:(s)=>{ s.cash-=1500; s.fame+=1; } },
-                    { label:"להישאר רזים ויעילים",          kind:"script-lean",      effect:(s)=>{ s.fame+=1; } }
+                    { label:"תסריט שאפתני יותר · -₪1,500", kind:"script-ambitious", effect:(s)=>{ s.cash-=1500; s.fame+=3; } },
+                    { label:"להישאר רזים ויעילים · +₪500",  kind:"script-lean",      effect:(s)=>{ s.cash+=500; s.fame+=1; } }
                   ] },
                 { atYear:1.6, id:"cast", title:"מי מככב/ת?", copy:"זה הזמן ללהק. מי עומד/ת מול המצלמה?",
                   choices:[
@@ -500,7 +510,12 @@
                 { atYear:2.6, id:"edit", title:"משמרות עריכה", copy:"הגרסה הראשונה מוכנה. ממשיכים ללטש, או סוגרים כאן?",
                   choices:[
                     { label:"עוד לילות עריכה · -₪800", kind:"edit-polish", effect:(s)=>{ s.cash-=800; s.fame+=1; } },
-                    { label:"לסגור בגרסה הראשונה",      kind:"edit-rough",  effect:(s)=>{} }
+                    { label:"לסגור בגרסה הראשונה",      kind:"edit-rough",  effect:(s)=>{
+                        if (s.pathTags.includes("script-ambitious") && Math.random()<EDIT_RUSH_RISK_CHANCE) {
+                          s.fame = Math.max(0,s.fame-2);
+                          addLog("התסריט השאפתני לא קיבל מספיק עבודת עריכה — זה ניכר בתוצאה.");
+                        }
+                      } }
                   ] },
                 { atYear:3, id:"distribution", title:"בחירת הפצה", copy:"השנה השלישית מסתיימת. הסרט מוכן — לאן הוא הולך?",
                   choices:[
@@ -1338,7 +1353,10 @@
         else if (choice.kind === "repair") {
           if (state.cash < 300) { notify("אין מספיק מזומן","אין כרגע כסף לתיקון.",[{label:"להמשיך",kind:"pass"}]); render(); return false; }
           state.cash -= 300; addLog("תיקנת את המצלמה ב-₪300.");
-        } else if (choice.kind === "risk-camera") { addLog("המשכת עם הסיכון על המצלמה."); }
+        } else if (choice.kind === "risk-camera") {
+          if (Math.random() < RISK_CAMERA_SUCCESS_CHANCE) { state.assets.usedCamera = true; addLog("הסיכון השתלם — המצלמה שרדה בלי עלות."); }
+          else { state.cash -= RISK_CAMERA_FAIL_COST; addLog("הסיכון לא השתלם — המצלמה התקלקלה, תיקון חירום עלה "+money(RISK_CAMERA_FAIL_COST)+"."); }
+        }
         else if (choice.kind === "cheap-gear-take") { takeCheapGear(); }
         else if (choice.kind === "debt-pay") { const cs=currentStage().cashScale||1; const amt=Math.min(500*cs,state.cash,state.debt); state.cash-=amt; state.debt-=amt; addLog("החזרת "+money(amt)+" מהחוב."); }
         else if (choice.kind === "debt-delay") { state.debt += 300*(currentStage().cashScale||1); addLog("דחית את הבנק והחוב גדל."); }

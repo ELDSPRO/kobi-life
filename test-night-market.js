@@ -410,6 +410,67 @@ function run(htmlPath) {
   const leavingAtYear1 = rotationExitGame.__testNextYearRotationExits();
   assert.ok(!leavingAtYear1.includes("ערכת כבלים מקצועית"), "cableKit already rotated out, so it's not 'leaving next year' anymore");
 
+  // --- dead choices, now with real effects: shortCourse's cert-done checkpoint ---
+  const certGame = loadGame(path, () => 0.99); // high roll: keeps the 1.5-year jump to the only checkpoint free of incidental incidents
+  assert.strictEqual(certGame.startCommitment("shortCourse"), true);
+  let certState = certGame.getState();
+  assert.strictEqual(certState.event && certState.event.title, "סיום קורס");
+  assert.strictEqual(certGame.resolveEvent(0), true, "cert-done");
+  certState = certGame.getState();
+  assert.strictEqual(certState.contacts, 1, "completing the short course grants a contact - no longer a dead choice");
+
+  // --- risk-camera: a real 50/50 coin flip instead of a flavor-only no-op ---
+  // injects the incident's own choices directly (same technique as elsewhere in this file), so the outcome
+  // is isolated from whichever roll happens to trigger the incident in the first place
+  const cameraRepairChoices = [{label:"לתקן ב-₪300",kind:"repair"},{label:"לא לתקן · לסכן את המצלמה",kind:"risk-camera",quiet:true}];
+  const riskCameraSuccessGame = loadGame(path, () => 0.3); // < RISK_CAMERA_SUCCESS_CHANCE (0.5) -> success
+  riskCameraSuccessGame.__testSetState({ event:{ title:"המצלמה צריכה תיקון", copy:"", choices:cameraRepairChoices }, assets:{ ...riskCameraSuccessGame.getState().assets, usedCamera:false }, cash:5000 });
+  assert.strictEqual(riskCameraSuccessGame.resolveEvent(1), true, "risk-camera, success roll");
+  let rcState = riskCameraSuccessGame.getState();
+  assert.strictEqual(rcState.assets.usedCamera, true, "a successful risk keeps/confirms the camera");
+  assert.strictEqual(rcState.cash, 5000, "no cash cost on the success path");
+
+  const riskCameraFailGame = loadGame(path, () => 0.7); // >= RISK_CAMERA_SUCCESS_CHANCE -> failure
+  riskCameraFailGame.__testSetState({ event:{ title:"המצלמה צריכה תיקון", copy:"", choices:cameraRepairChoices }, cash:5000 });
+  assert.strictEqual(riskCameraFailGame.resolveEvent(1), true, "risk-camera, failure roll");
+  assert.strictEqual(riskCameraFailGame.getState().cash, 5000-800, "a failed risk costs ₪800");
+
+  // --- indieFilm's script checkpoint: ambitious is now a real trade-off (+3 fame, -₪1500, and a rushed-edit risk later) ---
+  function scriptChoicesFor(g) { return g.STAGES.find((s) => s.id === "indie").commitments.find((c) => c.id === "indieFilm").checkpoints.find((cp) => cp.id === "script").choices; }
+  const ambitiousGame = loadGame(path);
+  ambitiousGame.__testSetState({ event:{ title:"התסריט מוכן", copy:"", choices:scriptChoicesFor(ambitiousGame) }, cash:5000, fame:0 });
+  assert.strictEqual(ambitiousGame.resolveEvent(0), true, "script-ambitious");
+  let ambState = ambitiousGame.getState();
+  assert.strictEqual(ambState.fame, 3, "script-ambitious now grants +3 fame, not the old dead +1");
+  assert.strictEqual(ambState.cash, 5000-1500);
+
+  const leanGame = loadGame(path);
+  leanGame.__testSetState({ event:{ title:"התסריט מוכן", copy:"", choices:scriptChoicesFor(leanGame) }, cash:5000, fame:0 });
+  assert.strictEqual(leanGame.resolveEvent(1), true, "script-lean");
+  let leanState = leanGame.getState();
+  assert.strictEqual(leanState.fame, 1, "script-lean still grants +1 fame");
+  assert.strictEqual(leanState.cash, 5000+500, "script-lean now also grants +₪500, no longer a dead upside");
+
+  // --- the edit checkpoint: an ambitious script raises the odds edit-rough backfires; a lean one never does ---
+  // editChoices must come from the SAME instance resolveEvent runs on: the choice's effect() closes over
+  // that instance's own Math.random/addLog, so choices borrowed from a different loadGame() would silently
+  // roll against the wrong (default 0.5) RNG instead of this test's injected one
+  function editChoicesFor(g) { return g.STAGES.find((s) => s.id === "indie").commitments.find((c) => c.id === "indieFilm").checkpoints.find((cp) => cp.id === "edit").choices; }
+  const rushBackfireGame = loadGame(path, () => 0.3); // < EDIT_RUSH_RISK_CHANCE (0.5) -> the rush backfires
+  rushBackfireGame.__testSetState({ pathTags:["script-ambitious"], fame:10, commitment:null, event:{ title:"משמרות עריכה", copy:"", choices:editChoicesFor(rushBackfireGame) } });
+  assert.strictEqual(rushBackfireGame.resolveEvent(1), true, "edit-rough after an ambitious script, low roll");
+  assert.strictEqual(rushBackfireGame.getState().fame, 8, "an ambitious script plus rushing the edit now has a real downside (-2 fame)");
+
+  const rushSafeGame = loadGame(path, () => 0.7); // >= EDIT_RUSH_RISK_CHANCE -> the rush does not backfire
+  rushSafeGame.__testSetState({ pathTags:["script-ambitious"], fame:10, commitment:null, event:{ title:"משמרות עריכה", copy:"", choices:editChoicesFor(rushSafeGame) } });
+  assert.strictEqual(rushSafeGame.resolveEvent(1), true, "edit-rough after an ambitious script, high roll");
+  assert.strictEqual(rushSafeGame.getState().fame, 10, "the risk doesn't always land");
+
+  const rushLeanGame = loadGame(path, () => 0.3); // same low roll, but no script-ambitious tag -> the risk never applies
+  rushLeanGame.__testSetState({ pathTags:["script-lean"], fame:10, commitment:null, event:{ title:"משמרות עריכה", copy:"", choices:editChoicesFor(rushLeanGame) } });
+  assert.strictEqual(rushLeanGame.resolveEvent(1), true, "edit-rough after a lean script");
+  assert.strictEqual(rushLeanGame.getState().fame, 10, "without script-ambitious, edit-rough is never risky, regardless of the roll");
+
   // --- buy: asset vs. bag, capacity ---
   assert.strictEqual(game.buy("usedCamera"), true, "an asset-flagged good can be bought");
   state = game.getState();
@@ -456,6 +517,7 @@ function run(htmlPath) {
   assert.strictEqual(game.resolveEvent(0), true, "בימוי");
   state = game.getState();
   assert.ok(state.pathTags.includes("spec-directing"), "the checkpoint choice is recorded");
+  assert.strictEqual(state.contacts, 1, "specializing grants a contact, regardless of which specialization is picked");
   assert.ok(state.event, "the second checkpoint opens automatically after the first resolves");
   // two more full years pass with zero chance to touch the bank mid-commitment -> the debt-collector's
   // 3-year-neglect threshold trips here; draining it lets progressCommitment reach the real checkpoint
@@ -469,7 +531,7 @@ function run(htmlPath) {
   assert.ok(state.pathTags.includes("thesis-ambitious"), "the second checkpoint choice is recorded");
   assert.ok(state.pathTags.includes("filmSchool"), "completing the commitment tags the chosen entry path");
   assert.strictEqual(state.assets.diploma, true, "film school grants the diploma asset on completion");
-  assert.strictEqual(state.fame, 2, "film school grants fame on completion");
+  assert.strictEqual(state.fame, 4, "2(thesis choice) + 2(grantsOnComplete) = 4 - the thesis checkpoint is no longer a dead choice");
   assert.strictEqual(state.commitment, null, "the commitment clears once complete");
   assert.strictEqual(state.stageId, "student", "the diploma's fame grant alone is not enough to meet the higher milestone bar — the stage stays open for more play");
 
