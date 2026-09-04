@@ -260,7 +260,7 @@ function run(htmlPath) {
   assert.strictEqual(hState.debt, Math.round(8000*1.5), "hard scales the opening debt to ×1.5");
   assert.strictEqual(hState.settings.eventChanceMult, 1.3, "hard scales event chance to ×1.3");
   assert.strictEqual(hState.settings.blackMarketLoan.debt, Math.round(1500*1.55), "hard sets the black-market premium to 55%");
-  assert.strictEqual(hState.settings.defaultRisk.crashChance, 0.05*1.3, "hard scales the price-event (crash) chance too");
+  assert.strictEqual(hState.settings.defaultRisk.crashChance, 0.11*1.3, "hard scales the price-event (crash) chance too");
 
   // DEBT_ANNUAL_RATE itself must be identical across difficulties — only the opening amount differs
   assert.strictEqual(easyGame.startCommitment("selfTaught"), true);
@@ -275,6 +275,79 @@ function run(htmlPath) {
   assert.strictEqual(pickerGame.STAGES[0].order, 0, "sanity: student is stage order 0");
   assert.strictEqual(pickerGame.setDifficulty("normal"), true);
   assert.strictEqual(pickerGame.getState().settings.openingDebt, 8000, "explicitly choosing normal matches the implicit default exactly");
+
+  // --- cashScale: universal incident cash amounts scale by the current stage's cashScale (student ×1, legacy ×15) ---
+  // roll 0.50 lands on the friend-in-trouble universal incident in both stages (each stage's own always-on
+  // incident pool sums to the same .29 before the universal incidents are appended, so the bands line up)
+  const cashScaleStudentGame = loadGame(path, () => 0.50);
+  assert.strictEqual(cashScaleStudentGame.doGig("waiter"), true);
+  let csState = cashScaleStudentGame.getState();
+  assert.strictEqual(csState.event && csState.event.title, "חבר/ה בצרות", "sanity: this roll lands on friend-in-trouble in student stage");
+  const cashBeforeHelp = csState.cash;
+  assert.strictEqual(cashScaleStudentGame.resolveEvent(0), true, "help-friend");
+  csState = cashScaleStudentGame.getState();
+  assert.strictEqual(csState.cash, cashBeforeHelp - 400, "student stage (cashScale 1) applies the base -400 cost");
+
+  const cashScaleLegacyGame = loadGame(path, () => 0.50);
+  cashScaleLegacyGame.__testJumpToStage("legacy");
+  cashScaleLegacyGame.__testSetState({ debt: 8000 }); // keep bank-call in the pool so the bands match the computation above
+  assert.strictEqual(cashScaleLegacyGame.doGig("consultingLegacy"), true);
+  let clState = cashScaleLegacyGame.getState();
+  assert.strictEqual(clState.event && clState.event.title, "חבר/ה בצרות", "sanity: the same roll lands on the same universal incident in legacy stage");
+  const cashBeforeHelpLegacy = clState.cash;
+  assert.strictEqual(cashScaleLegacyGame.resolveEvent(0), true, "help-friend");
+  clState = cashScaleLegacyGame.getState();
+  assert.strictEqual(clState.cash, cashBeforeHelpLegacy - 400*15, "legacy stage (cashScale 15) scales the identical incident's cost to ×15");
+
+  // --- titled price events: a good's custom events:{spike,crash} text surfaces in the year recap ---
+  const eventTitleGame = loadGame(path, () => 0.01); // lands in the crash band (normal difficulty: [0,.11))
+  eventTitleGame.__testJumpToStage("industry");
+  let etState = eventTitleGame.getState();
+  assert.strictEqual(etState.priceKinds.proCamera, "crash", "sanity: this roll produces a crash on proCamera");
+  const industryStage = eventTitleGame.STAGES.find((s) => s.id === "industry");
+  assert.strictEqual(industryStage.goods.find((g) => g.id === "proCamera").events.crash, "אולפן נסגר, ציוד מוצף לשוק", "proCamera carries custom crash flavor text");
+  assert.strictEqual(eventTitleGame.doGig("camAssist"), true);
+  etState = eventTitleGame.getState();
+  const proCameraEvent = (etState.lastRecap.marketEvents || []).find((e) => e.id === "proCamera");
+  assert.ok(proCameraEvent, "the year recap records proCamera's price event");
+  assert.strictEqual(proCameraEvent.title, "אולפן נסגר, ציוד מוצף לשוק", "the recap uses the good's own custom title, not a generic one");
+
+  // --- seenIncidents: an incident does not repeat within 3 years, even with the identical roll ---
+  // --- followUp: an incident's followUp queues a successor that fires later, in the matching advanceYear, bypassing the normal roll ---
+  const cooldownGame = loadGame(path, () => 0.25); // lands on small-scholarship (student stage, usedCamera not yet owned so camera-repair is out of the pool)
+  assert.strictEqual(cooldownGame.startCommitment("selfTaught"), true);
+  assert.strictEqual(cooldownGame.doGig("waiter"), true);
+  let cdState = cooldownGame.getState();
+  assert.strictEqual(cdState.event && cdState.event.title, "מלגה קטנה", "sanity: this roll lands on small-scholarship the first time");
+  assert.strictEqual(cooldownGame.resolveEvent(1), true, "pass"); // decline; the top-level followUp still queues regardless of the choice made
+  cdState = cooldownGame.getState();
+  assert.ok(cdState.seenIncidents["small-scholarship"] != null, "firing the incident records it in seenIncidents");
+  assert.strictEqual(cdState.queuedIncidents.length, 1, "small-scholarship's followUp queues a successor");
+  assert.strictEqual(cdState.queuedIncidents[0].id, "scholarship-followup");
+
+  assert.strictEqual(cooldownGame.doGig("waiter"), true); // identical roll, well within the 3-year cooldown
+  cdState = cooldownGame.getState();
+  assert.strictEqual(cdState.event && cdState.event.title, "הבנק מתקשר", "with small-scholarship on cooldown the pool shifts, so the same roll now lands on the next incident instead of repeating it");
+
+  let followUpFired = false;
+  for (let i = 0; i < 12 && !followUpFired; i++) {
+    cooldownGame.doGig("waiter");
+    cdState = cooldownGame.getState();
+    if (cdState.event && cdState.event.title === "בדיקת מעקב מקרן המלגות") { followUpFired = true; break; }
+    if (cdState.event) cooldownGame.resolveEvent(cdState.event.choices.length - 1); // drain whatever incidental incident fired, quietly
+  }
+  assert.ok(followUpFired, "the queued follow-up incident eventually fires once its due age is reached, ahead of the normal random roll");
+
+  // --- minister-denounces: clap-back now costs a real contact, not a free win ---
+  const politicsCostGame = loadGame(path, () => 0.01); // low roll: reliably triggers minister-denounces in the indie stage (matches the existing politics test above)
+  politicsCostGame.__testJumpToStage("indie");
+  politicsCostGame.__testSetState({ cash: 5000, contacts: 5 });
+  assert.strictEqual(politicsCostGame.doGig("commercialGig"), true);
+  const pcState = politicsCostGame.getState();
+  assert.strictEqual(pcState.event.title, "שר/ה מגנה את הסרט שלך");
+  assert.strictEqual(politicsCostGame.resolveEvent(0), true, "clap-back");
+  const afterClapCost = politicsCostGame.getState();
+  assert.strictEqual(afterClapCost.contacts, 4, "clapping back costs one contact, not a purely free upside");
 
   // --- buy: asset vs. bag, capacity ---
   assert.strictEqual(game.buy("usedCamera"), true, "an asset-flagged good can be bought");
@@ -576,12 +649,13 @@ function run(htmlPath) {
   // --- RNG-injected price events (crash / spike / unavailable) ---
   // excludes rotating goods: those force kind:"unavailable" whenever they're outside this year's roster,
   // regardless of the price roll, which isn't what this block is testing (see the rotation block below).
+  // normal difficulty bands: crash [0,.11), spike [.11,.22), unavailable [.22,.25), normal [.25,1)
   const studentGoods = game.STAGES[0].goods.filter((g) => !g.rotates);
   const crashState = loadGame(path, () => 0.01).getState();
   assertAllKind(crashState, studentGoods, "crash");
-  const spikeState = loadGame(path, () => 0.07).getState();
+  const spikeState = loadGame(path, () => 0.15).getState();
   assertAllKind(spikeState, studentGoods, "spike");
-  const unavailGame = loadGame(path, () => 0.11);
+  const unavailGame = loadGame(path, () => 0.23);
   const unavailState = unavailGame.getState();
   assertAllKind(unavailState, studentGoods, "unavailable");
   studentGoods.forEach((g) => assert.strictEqual(unavailState.prices[g.id], null, g.id + " has no price while unavailable"));
