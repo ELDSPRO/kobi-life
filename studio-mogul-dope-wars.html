@@ -176,6 +176,8 @@
       }
       const BANKRUPTCY_STRIKE_LIMIT = 5;
       const STAGE_GRACE_YEARS = 3;
+      const FAME_DECAY_AFTER_YEARS = 4;
+      const FAME_DECAY_RATE = 0.03;
       const DEBT_COLLECTOR_MIN_DEBT = 3000;
       const DEBT_COLLECTOR_YEARS = 3;
 
@@ -260,8 +262,8 @@
         if (!hasChosenEntryPath()) {
           return { title:"לצלם את הסרט האישי האחרון", copy:"סיכום של קריירה שלמה — עוד סרט אחד, מהז'אנר ועד הפוסטר.", action:{type:"commitment",id:"legacyFilm"}, actionLabel:"להתחיל את הסרט", alternatives:[] };
         }
-        if (s.fame < 100) {
-          return { title:"להשלים מורשת", copy:"עוד קצת מוניטין, וזה יסתגר.", action:{type:"gig",id:"consultingLegacy"}, actionLabel:"לעבוד בייעוץ אסטרטגי", alternatives:[{type:"gig",id:"teachingGig",label:"הוראה"}] };
+        if (!s.achievements.mentored) {
+          return { title:"להנחיל את הידע הלאה", copy:"עוד לא הענקת הדרכה או שיפוט לדור הבא — זה החלק האחרון שנשאר לפני שסוגרים מעגל.", action:{type:"gig",id:"teachingGig"}, actionLabel:"ללמד", alternatives:[{type:"gig",id:"festivalJudge",label:"שיפוט כבוד"}] };
         }
         return { title:"מוכנים לסיים", copy:"קריירה שלמה מאחוריך — עוד פעולה תסגור את המסלול.", action:{type:"gig",id:"teachingGig"}, actionLabel:"ללמד", alternatives:[] };
       }
@@ -635,12 +637,12 @@
             { id:"charityGalaSlot",     name:"מקום בגאלת צדקה",          base:10000, persistsAsAsset:false, market:"deal", rotates:true }
           ],
           gigs:[
-            { id:"teachingGig",     title:"הוראה באקדמיה",       copy:"מוריש/ה את הידע הלאה.", needs:{}, cash:25000, fame:2, contacts:1, followers:300 },
+            { id:"teachingGig",     title:"הוראה באקדמיה",       copy:"מוריש/ה את הידע הלאה.", needs:{}, cash:25000, fame:2, contacts:1, followers:300, mentorGig:true },
             { id:"consultingLegacy",title:"ייעוץ אסטרטגי",        copy:"הכי משתלם כלכלית.",      needs:{}, cash:40000, fame:1, contacts:2, followers:0 },
-            { id:"festivalJudge",   title:"שופט/ת כבוד בפסטיבלים", copy:"מוזמנ/ת כשופט/ת כבוד לפסטיבלים המובילים בעולם.", needs:{}, cash:20000, fame:3, contacts:2, followers:500 },
+            { id:"festivalJudge",   title:"שופט/ת כבוד בפסטיבלים", copy:"מוזמנ/ת כשופט/ת כבוד לפסטיבלים המובילים בעולם.", needs:{}, cash:20000, fame:3, contacts:2, followers:500, mentorGig:true },
             { id:"boardAdvisor",         title:"יועץ/ת דירקטוריון אולפן",     copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:35000, fame:1, contacts:2, followers:0,   rotates:true },
             { id:"documentarySubject",   title:"נושא/ת לסרט תיעודי עליך",     copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:15000, fame:3, contacts:0, followers:800, rotates:true },
-            { id:"masterclassHost",      title:"מנחה מאסטרקלאס",              copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:22000, fame:2, contacts:1, followers:200, rotates:true },
+            { id:"masterclassHost",      title:"מנחה מאסטרקלאס",              copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:22000, fame:2, contacts:1, followers:200, rotates:true, mentorGig:true },
             { id:"philanthropyAdvisor",  title:"יועץ/ת פילנתרופיה תרבותית",   copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:30000, fame:1, contacts:2, followers:0,   rotates:true }
           ],
           commitments:[
@@ -683,7 +685,7 @@
           ],
           riskProfile:null,
           milestones:[
-            { id:"storied-career", label:"קריירה מלאה",         check:(s)=>s.fame>=100,          required:true, progress:(s)=>({current:s.fame, target:100}) },
+            { id:"mentee",         label:"הנחיה או שיפוט לדור הבא", check:(s)=>!!s.achievements.mentored, required:true, progress:(s)=>({current:s.achievements.mentored?1:0, target:1}) },
             { id:"capstone-film",  label:"הסרט האישי הושלם",    check:(s)=>s.films.length>=2,    required:true, progress:(s)=>({current:s.films.length, target:2}) },
             { id:"wealthy-retire", label:"פרישה עם הון",         check:(s)=>(s.cash+s.bank)>=150000, required:false },
             { id:"beloved",        label:"קהל שאוהב",            check:(s)=>s.followers>=15000,   required:false }
@@ -756,7 +758,7 @@
           assets:{ usedCamera:false, editComputer:false, diploma:false },
           films:[],
           commitment:null, activeCheckpoint:null, filmDraft:{},
-          debtCollectorStreak:0, debtCollectorIgnores:0,
+          debtCollectorStreak:0, debtCollectorIgnores:0, yearsSinceProject:0,
           pathTags:[], bankruptcyStrikes:0,
           view:"hud", marketTab:"work", flight:null,
           funding:{}, achievements:{}, awards:[], event:null, ended:false, win:false, log:[], lastRecap:null, briefPending:false, pendingAction:null, stageIntroPending:true
@@ -935,6 +937,10 @@
         state.debt = Math.ceil(state.debt * Math.pow(DEBT_ANNUAL_RATE, elapsed));
         state.debtCollectorStreak = state.debt > DEBT_COLLECTOR_MIN_DEBT ? state.debtCollectorStreak + elapsed : 0;
         if (state.bank > 0) state.bank = Math.round(state.bank * Math.pow(BANK_ANNUAL_RATE, elapsed));
+        const beforeSinceProject = state.yearsSinceProject;
+        state.yearsSinceProject += elapsed;
+        const wholeDecayYears = Math.max(0, Math.floor(state.yearsSinceProject - FAME_DECAY_AFTER_YEARS) - Math.floor(Math.max(0, beforeSinceProject - FAME_DECAY_AFTER_YEARS)));
+        if (wholeDecayYears > 0) state.fame = Math.floor(state.fame * Math.pow(1 - FAME_DECAY_RATE, wholeDecayYears));
         state.previousPrices = {...state.prices};
         const market = generateMarket(state.stageId, state.stageYear);
         state.prices = market.prices; state.priceKinds = market.kinds; state.activeGigs = market.activeGigs;
@@ -1006,6 +1012,7 @@
       }
 
       function completeCommitment(config) {
+        state.yearsSinceProject = 0;
         if (config.grantsOnComplete && config.grantsOnComplete.fame) state.fame += config.grantsOnComplete.fame;
         if (config.id === "filmSchool") state.assets.diploma = true;
         if (config.id === "indieFilm" || config.id === "legacyFilm") {
@@ -1102,6 +1109,7 @@
         const lack = missing(gig.needs);
         if (lack.length) return announce("חסר ציוד לעבודה הזאת","צריך: "+lack.join(" · ")+".");
         state.cash += gig.cash; state.fame += (gig.fame||0); state.contacts += (gig.contacts||0); state.followers += (gig.followers||0);
+        if (gig.mentorGig) state.achievements.mentored = true;
         advanceYear("עבדת כ"+gig.title+".", GIG_YEARS);
         save(); render(); return true;
       }

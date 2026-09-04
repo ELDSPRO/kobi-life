@@ -445,6 +445,35 @@ function run(htmlPath) {
   assert.ok(fstate.cash < beforeFlight.cash, "the flight fare was charged");
   assert.ok(fstate.fame > beforeFlight.fame, "the trip pays off in reputation");
 
+  // --- fame decay: reputation fades after 4 years without completing a project (any commitment), in any stage ---
+  // festivals' consultingGig grants fame:0, so repeating it isolates the decay effect from gig fame gains;
+  // fame:100 already clears festivals' own fame gate (60) but followers (0) stays well under its other gate (3000),
+  // so the stage never transitions mid-grind; high roll also keeps the rare flight-invite (only in festivals) from firing
+  const decayGame = loadGame(path, () => 0.99);
+  decayGame.__testJumpToStage("festivals");
+  decayGame.__testSetState({ fame: 100, cash: 5000, debt: 0 }); // debt:0 keeps the debt-collector and bankruptcy checks fully out of the way
+  for (let i = 0; i < 9; i++) { assert.strictEqual(decayGame.doGig("consultingGig"), true); clearEvent(decayGame); } // 9*0.4 = 3.6y, under the 4-year threshold
+  let dState = decayGame.getState();
+  assert.strictEqual(dState.fame, 100, "fame does not decay before 4 years without a completed project");
+  for (let i = 0; i < 4; i++) { assert.strictEqual(decayGame.doGig("consultingGig"), true); clearEvent(decayGame); } // +4*0.4 = 5.2y total, one whole year past the 4-year mark
+  dState = decayGame.getState();
+  assert.strictEqual(dState.fame, Math.floor(100 * Math.pow(1 - 0.03, 1)), "one whole year past the 4-year mark applies exactly one 3% decay tick");
+  assert.ok(dState.fame < 100, "sanity: the decay actually reduced fame");
+
+  // --- rule: legacyRecommend's guidance threshold must match the real "mentee" milestone gate exactly ---
+  // (the project's recurring bug class is a recommend() threshold sitting below the real milestone gate)
+  const gateGame = loadGame(path, () => 0.99);
+  gateGame.__testJumpToStage("legacy");
+  gateGame.__testSetState({ fame: 150, films: [{ title: "a" }, { title: "b" }], pathTags: ["legacyFilm"] }); // capstone-film already met; only mentee left
+  let gState = gateGame.getState();
+  const legacyStage = gateGame.STAGES.find((s) => s.id === "legacy");
+  assert.strictEqual(legacyStage.milestones.find((m) => m.id === "mentee").check(gState), false, "the real mentee gate: still unmet");
+  assert.strictEqual(legacyStage.recommend(gState).title, "להנחיל את הידע הלאה", "recommend still points at the mentee gap while it's genuinely unmet, not a false 'ready to finish'");
+  assert.strictEqual(gateGame.doGig("festivalJudge"), true, "festivalJudge is also tagged as a mentorship/judging gig");
+  gState = gateGame.getState();
+  assert.strictEqual(gState.achievements.mentored, true, "the gig satisfied the mentee milestone");
+  assert.strictEqual(gState.ended, true, "with capstone-film already met, satisfying mentee alone now ends the run — recommend's gate and the real gate agree exactly, with no third hidden requirement");
+
   // --- full-life win: legacy is the last stage, so meeting its required milestones ends the run in victory ---
   game.newGame();
   game.__testJumpToStage("legacy");
@@ -467,7 +496,11 @@ function run(htmlPath) {
   assert.strictEqual(state.films.length, 2, "the legacy film is a second real film asset");
   assert.strictEqual(state.films[1].starring, "קובי");
   assert.strictEqual(state.fame, 106, "95 + 1(drama) + 2(personal-story) + 3(solo-screening) + 5(grantsOnComplete) = 106");
-  assert.strictEqual(state.ended, true, "meeting legacy's required milestones ends the run — there is no seventh stage");
+  assert.strictEqual(state.ended, false, "completing the capstone film alone is not enough — the mentee milestone (a mentorship/judging gig) is still unmet");
+  assert.strictEqual(game.doGig("teachingGig"), true, "teaching is a mentorship gig that satisfies the mentee milestone"); // fame+2 -> 108
+  state = game.getState();
+  assert.strictEqual(state.achievements.mentored, true, "a mentorship/judging gig marks the mentee milestone");
+  assert.strictEqual(state.ended, true, "meeting both required milestones (capstone film + mentee) ends the run — there is no seventh stage");
   assert.strictEqual(state.win, true, "reaching the end of the career ladder is a win, not a timer running out");
   assert.ok(state.final && state.final.achievement > 0, "a final achievement score is computed on completion");
   assert.strictEqual(typeof state.final.financial, "number", "a separate financial score is also computed — money is not the score");
@@ -484,7 +517,8 @@ function run(htmlPath) {
   drainIncidental(winScoreGame, "העמדה מול קהל");
   winScoreGame.resolveEvent(0); // release
   drainIncidental(winScoreGame, "הסרט יוצא לאקרנים");
-  winScoreGame.resolveEvent(0); // poster-ack -> completeCommitment -> finish(true)
+  winScoreGame.resolveEvent(0); // poster-ack -> completeCommitment (mentee still unmet, run doesn't end yet)
+  winScoreGame.doGig("teachingGig"); // mentorGig -> mentee milestone met -> finish(true)
   const winState = winScoreGame.getState();
   let scores = winScoreGame.loadScores();
   assert.strictEqual(scores.length, 1, "finishing a run records exactly one score entry");
