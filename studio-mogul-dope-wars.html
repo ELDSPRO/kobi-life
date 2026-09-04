@@ -156,7 +156,7 @@
       const DIFFICULTY = {
         easy:   { id:"easy",   label:"קל",   debtMult:0.6, eventChanceMult:0.7, blackMarketPremium:0.4 },
         normal: { id:"normal", label:"רגיל", debtMult:1.0, eventChanceMult:1.0, blackMarketPremium:0.4 },
-        hard:   { id:"hard",   label:"קשה",  debtMult:1.5, eventChanceMult:1.3, blackMarketPremium:0.55 }
+        hard:   { id:"hard",   label:"קשה",  debtMult:3.0, eventChanceMult:2.5, blackMarketPremium:0.55 }
       };
       function buildSettings(difficultyId) {
         const d = DIFFICULTY[difficultyId] || DIFFICULTY.normal;

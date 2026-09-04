@@ -257,10 +257,10 @@ function run(htmlPath) {
   const hardGame = loadGame(path);
   assert.strictEqual(hardGame.setDifficulty("hard"), true);
   let hState = hardGame.getState();
-  assert.strictEqual(hState.debt, Math.round(8000*1.5), "hard scales the opening debt to ×1.5");
-  assert.strictEqual(hState.settings.eventChanceMult, 1.3, "hard scales event chance to ×1.3");
+  assert.strictEqual(hState.debt, Math.round(8000*3.0), "hard scales the opening debt to ×3.0 (tuned in the closing bankruptcy-rate gate check - see test-playthrough.js)");
+  assert.strictEqual(hState.settings.eventChanceMult, 2.5, "hard scales event chance to ×2.5 (tuned alongside debtMult)");
   assert.strictEqual(hState.settings.blackMarketLoan.debt, Math.round(1500*1.55), "hard sets the black-market premium to 55%");
-  assert.strictEqual(hState.settings.defaultRisk.crashChance, 0.11*1.3, "hard scales the price-event (crash) chance too");
+  assert.strictEqual(hState.settings.defaultRisk.crashChance, 0.11*2.5, "hard scales the price-event (crash) chance too");
 
   // DEBT_ANNUAL_RATE itself must be identical across difficulties — only the opening amount differs
   assert.strictEqual(easyGame.startCommitment("selfTaught"), true);
