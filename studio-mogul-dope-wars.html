@@ -785,6 +785,7 @@
               funding: {...(saved.funding||{})}, achievements: {...(saved.achievements||{})},
               event: null, briefPending: false, pendingAction: null, stageIntroPending: false, activeCheckpoint: saved.activeCheckpoint || null
             };
+            if (state.commitment && state.activeCheckpoint && !openCheckpointEvent(state.activeCheckpoint)) state.activeCheckpoint = null;
           }
         } catch (_) {}
       }
@@ -976,6 +977,15 @@
         save(); render(); return true;
       }
 
+      function openCheckpointEvent(cp) {
+        const config = (currentStage().commitments||[]).find((c)=>c.id===cp.commitmentId);
+        const checkpoint = config && config.checkpoints.find((c)=>c.id===cp.checkpointId);
+        if (!config || !checkpoint) return false;
+        state.activeCheckpoint = cp;
+        notify(checkpoint.title, checkpoint.copy, checkpoint.choices, typeof checkpoint.html==="function" ? checkpoint.html(state) : checkpoint.html);
+        return true;
+      }
+
       function progressCommitment() {
         const config = currentCommitmentConfig(state);
         if (!config || !state.commitment) return;
@@ -984,7 +994,7 @@
         const years = Math.max(0, targetYear - state.commitment.elapsedYears);
         state.commitment.elapsedYears = targetYear;
         if (years > 0) { const ended = advanceYear(config.name+" ממשיכה.", years); if (ended || state.ended || state.event) return; }
-        if (next) { state.activeCheckpoint = { commitmentId:config.id, checkpointId:next.id }; notify(next.title, next.copy, next.choices, typeof next.html==="function" ? next.html(state) : next.html); return; }
+        if (next) { openCheckpointEvent({ commitmentId:config.id, checkpointId:next.id }); return; }
         completeCommitment(config);
       }
 
@@ -1483,7 +1493,8 @@
           state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices}; state.activeGigs = market.activeGigs;
           return clone(state);
         },
-        __testSetState: (patch) => { Object.assign(state, patch); return clone(state); }
+        __testSetState: (patch) => { Object.assign(state, patch); return clone(state); },
+        __testReload: () => { load(); return clone(state); }
       };
     })();
   </script>

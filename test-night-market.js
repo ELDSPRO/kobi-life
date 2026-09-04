@@ -11,11 +11,11 @@ function makeMemoryStorage() {
   };
 }
 
-function loadGame(htmlPath, randomFn) {
+function loadGame(htmlPath, randomFn, storage) {
   const html = fs.readFileSync(htmlPath, "utf8");
   const match = html.match(/<script>([\s\S]*?)<\/script>\s*<\/body>/);
   assert.ok(match, "the game has a playable inline script");
-  const context = { console, Math: Object.create(Math), JSON, Intl, localStorage: makeMemoryStorage() };
+  const context = { console, Math: Object.create(Math), JSON, Intl, localStorage: storage || makeMemoryStorage() };
   context.Math.random = randomFn || (() => 0.5);
   context.globalThis = context;
   vm.createContext(context);
@@ -194,6 +194,27 @@ function run(htmlPath) {
   assert.strictEqual(istate.stageIntroPending, true, "a real stage transition re-opens the stage-intro modal for the new stage");
   assert.strictEqual(introGame.closeStageIntro(), true);
   assert.strictEqual(introGame.getState().stageIntroPending, false, "closing it clears the flag");
+
+  // --- reload mid-checkpoint: a pending checkpoint event must reopen after a page refresh, not softlock the run ---
+  // two separate script contexts sharing one localStorage simulates a real page refresh (a fresh context
+  // always starts from createState(), same as the browser reloading the script from scratch)
+  const sharedStorage = makeMemoryStorage();
+  const reloadGame1 = loadGame(path, () => 0.99, sharedStorage); // high roll keeps the year-advance to the next checkpoint free of incidental incidents
+  reloadGame1.__testJumpToStage("indie");
+  assert.strictEqual(reloadGame1.startCommitment("indieFilm"), true);
+  assert.strictEqual(reloadGame1.resolveEvent(0), true, "genre pick resolves immediately (atYear:0), advancing straight to the next checkpoint");
+  let rlState = reloadGame1.getState();
+  assert.strictEqual(rlState.event.title, "התסריט מוכן", "the script checkpoint is now pending, one year into the commitment");
+  assert.ok(rlState.commitment, "the commitment is still in progress, mid-checkpoint");
+
+  const reloadGame2 = loadGame(path, () => 0.99, sharedStorage); // fresh script context, same localStorage
+  assert.strictEqual(reloadGame2.getState().commitment, null, "before reloading, a brand-new context starts from createState()'s defaults");
+  const reopened = reloadGame2.__testReload();
+  assert.ok(reopened.commitment, "the in-progress commitment survives the reload");
+  assert.ok(reopened.event, "the pending checkpoint reopens as a real event after reload, instead of leaving the run stuck with no event and no way to act");
+  assert.strictEqual(reopened.event.title, "התסריט מוכן", "the reopened event is the exact checkpoint that was pending before the refresh");
+  assert.strictEqual(reloadGame2.resolveEvent(1), true, "the reopened checkpoint can be resolved normally, proving the run isn't softlocked");
+  assert.ok(reloadGame2.getState().pathTags.includes("script-lean"), "resolving the reopened checkpoint applies its choice like any other");
 
   // --- buy: asset vs. bag, capacity ---
   assert.strictEqual(game.buy("usedCamera"), true, "an asset-flagged good can be bought");
