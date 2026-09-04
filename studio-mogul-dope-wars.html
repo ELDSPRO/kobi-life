@@ -19,6 +19,8 @@
     .turn div { color:var(--muted); font-size:.69rem; text-align:left; }
     .turn b { display:block; margin-top:3px; color:var(--cream); font-size:1rem; }
     .turn .debt b { color:var(--rose); }
+    .turn .strikes b { color:var(--rose); }
+    .turn .grace b { color:var(--amber); }
     .turn .fame b { color:var(--green); }
     .turn .followers b { color:var(--amber); }
     .turn .contacts b { color:var(--blue); }
@@ -867,6 +869,38 @@
         return sources;
       }
 
+      function nextYearRotationExits() {
+        const stage = currentStage();
+        const thisYear = Math.floor(state.stageYear);
+        const nextYear = thisYear+1;
+        const goodsPool = (stage.goods||[]).filter((g)=>g.rotates);
+        const gigsPool = (stage.gigs||[]).filter((g)=>g.rotates);
+        const currentGoods = activeRotatingIds(goodsPool, thisYear, ROTATION_ROSTER.goods);
+        const nextGoods = activeRotatingIds(goodsPool, nextYear, ROTATION_ROSTER.goods);
+        const currentGigs = activeRotatingIds(gigsPool, thisYear, ROTATION_ROSTER.gigs);
+        const nextGigs = activeRotatingIds(gigsPool, nextYear, ROTATION_ROSTER.gigs);
+        const leaving = [];
+        goodsPool.forEach((g)=>{ if (currentGoods.has(g.id) && !nextGoods.has(g.id)) leaving.push(g.name); });
+        gigsPool.forEach((g)=>{ if (currentGigs.has(g.id) && !nextGigs.has(g.id)) leaving.push(g.title); });
+        return leaving;
+      }
+
+      function topbarExtrasMarkup() {
+        const stage = currentStage();
+        const chips = [`<div class="bank"><small>בבנק</small><b>${money(state.bank)}</b></div>`];
+        if (state.age >= stage.ageRange[1] && stage.fallbackPaths && stage.fallbackPaths.length) {
+          chips.push(`<div class="grace"><small>מועד הכרעה</small><b>גיל ${stage.ageRange[1]+STAGE_GRACE_YEARS}</b></div>`);
+        }
+        if (state.bankruptcyStrikes > 0) {
+          chips.push(`<div class="strikes"><small>פשיטות</small><b>${state.bankruptcyStrikes}/${BANKRUPTCY_STRIKE_LIMIT}</b></div>`);
+        }
+        const leaving = nextYearRotationExits();
+        if (leaving.length) {
+          chips.push(`<div class="rotation-exit"><small>יוצא מהרוטציה בשנה הבאה</small><b>${leaving.join(", ")}</b></div>`);
+        }
+        return chips.join("");
+      }
+
       function priceEventTitle(id, kind) {
         const good = currentStage().goods.find((x)=>x.id===id);
         const custom = good && good.events && good.events[kind];
@@ -1588,7 +1622,7 @@
 
       function render() {
         if (!app) return;
-        const head = `<header class="topbar"><div class="brand">KOBI / קריירה<span class="difficulty-chip">${(DIFFICULTY[state.difficulty]||DIFFICULTY.normal).label}</span></div><div class="turn"><div>גיל<b>${Math.round(state.age)}</b></div><div>שנה<b>${Math.round(state.year)}</b></div><div>מזומן<b>${money(state.cash)}</b></div><div class="debt">חוב<b>${money(state.debt)}</b>${state.debt>0?'<button class="mini-pay" data-action="bank:pay">להחזיר</button>':""}</div><div class="fame">קרדיטים<b>${state.fame}</b></div><div class="followers">עוקבים<b>${state.followers.toLocaleString("he-IL")}</b></div><div class="contacts">קשרים<b>${state.contacts}</b></div><div>תיק<b>${bagCount()} / ${state.capacity}</b></div></div></header>${stageTrackMarkup()}`;
+        const head = `<header class="topbar"><div class="brand">KOBI / קריירה<span class="difficulty-chip">${(DIFFICULTY[state.difficulty]||DIFFICULTY.normal).label}</span></div><div class="turn"><div>גיל<b>${Math.round(state.age)}</b></div><div>מזומן<b>${money(state.cash)}</b></div><div class="debt">חוב<b>${money(state.debt)}</b>${state.debt>0?'<button class="mini-pay" data-action="bank:pay">להחזיר</button>':""}</div>${topbarExtrasMarkup()}<div class="fame">קרדיטים<b>${state.fame}</b></div><div class="followers">עוקבים<b>${state.followers.toLocaleString("he-IL")}</b></div><div class="contacts">קשרים<b>${state.contacts}</b></div><div>תיק<b>${bagCount()} / ${state.capacity}</b></div></div></header>${stageTrackMarkup()}`;
         const body = state.view==="bag" ? bagView() : state.view==="log" ? logView() : hudView();
         app.innerHTML = `<div class="shell">${head}${body}</div>`;
         renderModal();
@@ -1627,6 +1661,7 @@
         openView, buy, sell, doGig, startCommitment, resolveEvent, bank, acceptFlight, declineFlight,
         setMarketTab, takeBlackMarketLoan, closeBrief,
         openGigForecast, confirmGig, cancelPendingAction, closeStageIntro, loadScores, requestGiveUp, setDifficulty,
+        __testNextYearRotationExits: nextYearRotationExits,
         finish: () => { finish(false); return clone(state); },
         STAGES, CITIES, DIFFICULTY,
         __testJumpToStage: (id) => {

@@ -395,6 +395,21 @@ function run(htmlPath) {
   assert.strictEqual(studioGame2.startCommitment("filmSchool"), true);
   assert.strictEqual(studioGame2.getState().debt, Math.ceil((8000+16000)*Math.pow(1.028,2)), "once already used, personalStudio no longer discounts a later commitment");
 
+  // --- top bar: "leaving the rotation next year" predicts exactly which rotating goods/gigs the roster will drop ---
+  // reuses the same industry-stage rotation facts already verified above: at stage-year 0 the active rotating
+  // half is {usedMonitor,cableKit,gearCase} (goods) and {artDeptAssist,setDriver} (gigs); at stage-year 1 it's
+  // {unionCard,equipmentInsurance,usedMonitor} and {droneOperator,craftServices} - so cableKit/gearCase and
+  // artDeptAssist/setDriver are exactly what's leaving, while usedMonitor stays active across the boundary.
+  const rotationExitGame = loadGame(path);
+  rotationExitGame.__testJumpToStage("industry");
+  const leavingAtYear0 = rotationExitGame.__testNextYearRotationExits();
+  const expectedLeaving = ["ערכת כבלים מקצועית","עוזר/ת במחלקת אמנות","נהג/ת סט","תיק ציוד קשיח"];
+  assert.strictEqual(leavingAtYear0.length, expectedLeaving.length, "exactly the four items rotating out are flagged, nothing more or less");
+  expectedLeaving.forEach((name) => assert.ok(leavingAtYear0.includes(name), name + " should be flagged as leaving the rotation next year"));
+  for (let i = 0; i < 3; i++) { rotationExitGame.doGig("camAssist"); clearEvent(rotationExitGame); } // cross into stage-year 1
+  const leavingAtYear1 = rotationExitGame.__testNextYearRotationExits();
+  assert.ok(!leavingAtYear1.includes("ערכת כבלים מקצועית"), "cableKit already rotated out, so it's not 'leaving next year' anymore");
+
   // --- buy: asset vs. bag, capacity ---
   assert.strictEqual(game.buy("usedCamera"), true, "an asset-flagged good can be bought");
   state = game.getState();
