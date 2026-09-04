@@ -216,6 +216,27 @@ function run(htmlPath) {
   assert.strictEqual(reloadGame2.resolveEvent(1), true, "the reopened checkpoint can be resolved normally, proving the run isn't softlocked");
   assert.ok(reloadGame2.getState().pathTags.includes("script-lean"), "resolving the reopened checkpoint applies its choice like any other");
 
+  // --- give up requires confirmation: it must not end the run on the first click ---
+  const giveUpGame = loadGame(path);
+  assert.strictEqual(giveUpGame.startCommitment("selfTaught"), true);
+  assert.strictEqual(giveUpGame.requestGiveUp(), true, "clicking give-up opens a confirmation dialog instead of ending the run immediately");
+  let guState = giveUpGame.getState();
+  assert.strictEqual(guState.ended, false, "opening the confirmation alone does not end the run");
+  assert.ok(guState.event, "a confirmation dialog is shown");
+  assert.strictEqual(guState.event.title, "לוותר על המסלול?");
+  assert.strictEqual(giveUpGame.requestGiveUp(), false, "a second confirmation can't open while one is already pending");
+
+  assert.strictEqual(giveUpGame.resolveEvent(1), true, "cancelling"); // "להישאר במסלול"
+  guState = giveUpGame.getState();
+  assert.strictEqual(guState.ended, false, "cancelling keeps the run going");
+  assert.strictEqual(guState.event, null, "cancelling closes the dialog with no other side effect");
+
+  assert.strictEqual(giveUpGame.requestGiveUp(), true, "give-up can be requested again after cancelling");
+  assert.strictEqual(giveUpGame.resolveEvent(0), true, "confirming give-up"); // "לוותר סופית"
+  guState = giveUpGame.getState();
+  assert.strictEqual(guState.ended, true, "confirming the dialog actually ends the run");
+  assert.strictEqual(guState.win, false, "giving up is recorded as a loss, not a win");
+
   // --- buy: asset vs. bag, capacity ---
   assert.strictEqual(game.buy("usedCamera"), true, "an asset-flagged good can be bought");
   state = game.getState();
