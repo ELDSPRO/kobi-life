@@ -14,6 +14,7 @@
     .shell { width:min(1120px,calc(100% - 34px)); margin:0 auto; padding:26px 0 38px; }
     .topbar { position:sticky; top:0; z-index:8; display:flex; align-items:center; justify-content:space-between; gap:18px; padding:12px 0; border-bottom:1px solid rgba(229,238,255,.14); background:rgba(8,12,20,.92); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
     .brand { color:var(--amber); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:1.1rem; font-weight:900; letter-spacing:.13em; }
+    .difficulty-chip { margin-inline-start:8px; padding:2px 7px; color:var(--violet); border:1px solid rgba(183,154,239,.4); border-radius:999px; background:rgba(183,154,239,.08); font-family:ui-sans-serif,system-ui,sans-serif; font-size:.58rem; font-weight:800; letter-spacing:0; vertical-align:middle; }
     .turn { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:14px; align-items:baseline; }
     .turn div { color:var(--muted); font-size:.69rem; text-align:left; }
     .turn b { display:block; margin-top:3px; color:var(--cream); font-size:1rem; }
@@ -144,6 +145,27 @@
       const BANK_ANNUAL_RATE = 1.015;
       const BLACK_MARKET_LOAN = { cash:1500, debt:2100 };
       const ROTATION_ROSTER = { goods:3, gigs:2 };
+      const BASE_OPENING_DEBT = 8000;
+
+      // Difficulty scales five things via state.settings, built once at game start (setDifficulty):
+      // default market-price risk, the opening debt, the narrative-incident chance, the price-event
+      // chance (both folded into eventChanceMult/defaultRisk), and the black-market loan's premium.
+      // DEBT_ANNUAL_RATE itself is never touched by difficulty.
+      const DIFFICULTY = {
+        easy:   { id:"easy",   label:"קל",   debtMult:0.6, eventChanceMult:0.7, blackMarketPremium:0.4 },
+        normal: { id:"normal", label:"רגיל", debtMult:1.0, eventChanceMult:1.0, blackMarketPremium:0.4 },
+        hard:   { id:"hard",   label:"קשה",  debtMult:1.5, eventChanceMult:1.3, blackMarketPremium:0.55 }
+      };
+      function buildSettings(difficultyId) {
+        const d = DIFFICULTY[difficultyId] || DIFFICULTY.normal;
+        return {
+          difficulty: d.id,
+          defaultRisk: { crashChance: DEFAULT_RISK.crashChance*d.eventChanceMult, spikeChance: DEFAULT_RISK.spikeChance*d.eventChanceMult, unavailableChance: DEFAULT_RISK.unavailableChance, crashRange: DEFAULT_RISK.crashRange, spikeRange: DEFAULT_RISK.spikeRange },
+          openingDebt: round5(BASE_OPENING_DEBT*d.debtMult),
+          eventChanceMult: d.eventChanceMult,
+          blackMarketLoan: { cash: BLACK_MARKET_LOAN.cash, debt: Math.round(BLACK_MARKET_LOAN.cash*(1+d.blackMarketPremium)) }
+        };
+      }
 
       const FILM_GENRE_CHOICES = [
         { id:"drama", label:"דרמה", effect:(s)=>{ s.fame+=1; s.filmDraft.genre="דרמה"; } },
@@ -734,9 +756,9 @@
         return new Set(ids);
       }
 
-      function generateMarket(stageId, stageYear) {
+      function generateMarket(stageId, stageYear, defaultRisk) {
         const stage = STAGES.find((s) => s.id === stageId) || STAGES[0];
-        const rp = stage.riskProfile || DEFAULT_RISK;
+        const rp = stage.riskProfile || defaultRisk || DEFAULT_RISK;
         const prices = {}, kinds = {};
         const activeGoodIds = activeRotatingIds((stage.goods||[]).filter((g)=>g.rotates), stageYear||0, ROTATION_ROSTER.goods);
         (stage.goods||[]).forEach((g) => {
@@ -748,11 +770,12 @@
         return { prices, kinds, activeGigs };
       }
 
-      function createState() {
+      function createState(difficultyId) {
+        const settings = buildSettings(difficultyId);
         const next = {
           age:21, year:1, retirementAge:81,
           stageId:"student", stageYear:0, nextMilestoneAge:26,
-          cash:2700, bank:0, debt:8000,
+          cash:2700, bank:0, debt:settings.openingDebt,
           fame:0, followers:0, contacts:0,
           capacity:10, bag:{}, prices:{}, previousPrices:{}, priceKinds:{}, activeGigs:[],
           assets:{ usedCamera:false, editComputer:false, diploma:false },
@@ -761,9 +784,10 @@
           debtCollectorStreak:0, debtCollectorIgnores:0, yearsSinceProject:0,
           pathTags:[], bankruptcyStrikes:0,
           view:"hud", marketTab:"work", flight:null,
+          difficulty: difficultyId || null, settings,
           funding:{}, achievements:{}, awards:[], event:null, ended:false, win:false, log:[], lastRecap:null, briefPending:false, pendingAction:null, stageIntroPending:true
         };
-        const market = generateMarket(next.stageId, next.stageYear);
+        const market = generateMarket(next.stageId, next.stageYear, settings.defaultRisk);
         next.prices = market.prices; next.priceKinds = market.kinds; next.previousPrices = {...market.prices}; next.activeGigs = market.activeGigs;
         next.log = ["גיל 21: מתחילים עם חוב לימודים ותיק ריק. הזמן לבחור מסלול כניסה."];
         return next;
@@ -823,6 +847,17 @@
 
       function isWinner() { return false; }
 
+      function setDifficulty(id) {
+        if (state.ended || state.event || state.difficulty || !DIFFICULTY[id]) return false;
+        state.difficulty = id;
+        state.settings = buildSettings(id);
+        state.debt = state.settings.openingDebt;
+        const market = generateMarket(state.stageId, state.stageYear, state.settings.defaultRisk);
+        state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices}; state.activeGigs = market.activeGigs;
+        addLog("רמת קושי: "+DIFFICULTY[id].label+".");
+        save(); render(); return true;
+      }
+
       function requestGiveUp() {
         if (state.ended || state.event) return false;
         notify("לוותר על המסלול?", "הקריירה תיפסק כאן והתוצאה תירשם כהפסד. אי אפשר לחזור אחורה.",
@@ -846,7 +881,7 @@
         const financial = state.cash+state.bank+bagValue-state.debt;
         const achievement = state.fame*100+state.followers*2+state.contacts*350+state.films.length*2000;
         state.final = { bagValue, financial, achievement };
-        saveScore({ achievement, financial, age: Math.round(state.age), win: state.win, stage: currentStage().name });
+        saveScore({ achievement, financial, age: Math.round(state.age), win: state.win, stage: currentStage().name, difficulty: state.difficulty || "normal" });
         addLog(win ? "הגעת/הגעה לפרישה — מסלול קריירה שלם." : "המסלול נעצר כאן.");
       }
 
@@ -871,7 +906,7 @@
         state.nextMilestoneAge = nextStage.ageRange[1];
         state.stageIntroPending = true;
         addLog("עברת לשלב: "+nextStage.name+".");
-        const market = generateMarket(nextStage.id, state.stageYear);
+        const market = generateMarket(nextStage.id, state.stageYear, state.settings.defaultRisk);
         state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices}; state.activeGigs = market.activeGigs;
       }
 
@@ -925,9 +960,10 @@
         const stage = currentStage();
         const pool = (stage.incidents||[]).concat(UNIVERSAL_INCIDENTS).filter((inc)=>!inc.when || inc.when(state));
         if (!pool.length) return;
+        const mult = state.settings.eventChanceMult;
         const roll = Math.random();
         let acc = 0;
-        for (const inc of pool) { acc += inc.chance; if (roll < acc) { notify(inc.title, inc.copy, inc.choices); return; } }
+        for (const inc of pool) { acc += inc.chance*mult; if (roll < acc) { notify(inc.title, inc.copy, inc.choices); return; } }
       }
 
       function advanceYear(reason, years) {
@@ -942,7 +978,7 @@
         const wholeDecayYears = Math.max(0, Math.floor(state.yearsSinceProject - FAME_DECAY_AFTER_YEARS) - Math.floor(Math.max(0, beforeSinceProject - FAME_DECAY_AFTER_YEARS)));
         if (wholeDecayYears > 0) state.fame = Math.floor(state.fame * Math.pow(1 - FAME_DECAY_RATE, wholeDecayYears));
         state.previousPrices = {...state.prices};
-        const market = generateMarket(state.stageId, state.stageYear);
+        const market = generateMarket(state.stageId, state.stageYear, state.settings.defaultRisk);
         state.prices = market.prices; state.priceKinds = market.kinds; state.activeGigs = market.activeGigs;
         const roundedElapsed = Math.round(elapsed*10)/10;
         addLog("גיל "+Math.round(state.age)+": "+reason+(elapsed!==1?" ("+formatDuration(roundedElapsed)+").":""));
@@ -1141,9 +1177,10 @@
 
       function takeBlackMarketLoan() {
         if (state.ended||state.event) return false;
-        state.cash += BLACK_MARKET_LOAN.cash;
-        state.debt += BLACK_MARKET_LOAN.debt;
-        addLog("לקחת הלוואת חוץ-בנקאית — "+money(BLACK_MARKET_LOAN.cash)+" מזומן תמורת "+money(BLACK_MARKET_LOAN.debt)+" חוב.");
+        const loan = state.settings.blackMarketLoan;
+        state.cash += loan.cash;
+        state.debt += loan.debt;
+        addLog("לקחת הלוואת חוץ-בנקאית — "+money(loan.cash)+" מזומן תמורת "+money(loan.debt)+" חוב.");
         save(); render(); return true;
       }
 
@@ -1283,8 +1320,9 @@
       }
 
       function blackMarketRows() {
+        const loan = state.settings.blackMarketLoan;
         return row("הלוואת חוץ-בנקאית","מזומן מהיר עכשיו, בלי שאלות — אבל תוספת חוב הרבה יותר כבדה מהבנק",
-          "+"+money(BLACK_MARKET_LOAN.cash)+" · חוב +"+money(BLACK_MARKET_LOAN.debt),"loanshark","לקחת הלוואה");
+          "+"+money(loan.cash)+" · חוב +"+money(loan.debt),"loanshark","לקחת הלוואה");
       }
 
       function financingRows() {
@@ -1363,9 +1401,14 @@
         const commitButtons = showCommitments ? stage.commitments.map((c)=>
           `<button class="primary" data-action="commit:${c.id}">${c.name} · ${c.years?c.years+" שנים":"מיידי"}${c.entryDebt?" · חוב +"+money(c.entryDebt):" · בלי חוב"}</button>`
         ).join("") : "";
+        const showDifficulty = stage.order===0 && !state.difficulty;
+        const difficultyButtons = showDifficulty ? Object.values(DIFFICULTY).map((d)=>
+          `<button class="primary" data-action="difficulty:${d.id}">${d.label}</button>`
+        ).join("") : "";
         return `<section class="event intro"><span>שלב חדש</span><h2>${stage.name}</h2>
           <p>${stage.headline}</p>
           ${milestoneChips?`<div class="milestone-list">${milestoneChips}</div>`:""}
+          ${showDifficulty?`<p class="eyebrow" style="margin-top:14px">רמת קושי</p>${difficultyButtons}`:""}
           ${commitButtons?`<p class="eyebrow" style="margin-top:14px">בחירת מסלול כניסה</p>${commitButtons}`:""}
           <button class="quiet" data-action="stage-intro:close">${showCommitments?"אחליט אחר כך":"להתחיל ←"}</button>
         </section>`;
@@ -1432,10 +1475,10 @@
         if (state.ended) {
           const final = state.final || {financial:0, achievement:0};
           const scores = loadScores();
-          const scoreRows = scores.map((s,i)=>`<div class="bag-item"><span>#${i+1} · ${s.stage} · גיל ${s.age}${s.win?" · ניצחון":""}</span><b>${money(s.achievement)}</b></div>`).join("");
+          const scoreRows = scores.map((s,i)=>`<div class="bag-item"><span>#${i+1} · ${s.stage} · גיל ${s.age}${s.win?" · ניצחון":""} · ${(DIFFICULTY[s.difficulty]||DIFFICULTY.normal).label}</span><b>${money(s.achievement)}</b></div>`).join("");
           const awardRows = state.awards.map((a)=>`<div class="bag-item"><span>${a.title} · ${a.stage}, גיל ${a.age}</span><b>🏆</b></div>`).join("");
           modal.classList.remove("hidden");
-          modal.innerHTML = `<section class="event"><span>${state.win?"סוף דרך — פרישה":"המסלול נעצר"}</span><h2>${state.win?"קובי הגיע/ה לפרישה אחרי קריירה שלמה.":"המסלול נעצר כאן."}</h2><p>${state.win?"עברת את כל שלבי הקריירה — מסטודנט/ית ועד פרישה.":"אפשר להתחיל מחדש עם הידע שצברת."}</p><div class="final-grid" style="grid-template-columns:repeat(2,1fr)"><div><small>הישג מקצועי</small><b>${money(final.achievement)}</b></div><div><small>מצב כלכלי</small><b>${money(final.financial)}</b></div><div><small>גיל</small><b>${Math.round(state.age)}</b></div><div><small>שלב</small><b>${currentStage().name}</b></div></div>${awardRows?`<p class="eyebrow" style="margin-top:14px">ארון פרסים</p><div class="bag-grid" style="grid-template-columns:1fr">${awardRows}</div>`:""}<p class="eyebrow" style="margin-top:14px">שיאים</p><div class="bag-grid" style="grid-template-columns:1fr">${scoreRows||'<p class="empty">עדיין אין שיאים.</p>'}</div><button data-action="new">מסלול חדש ←</button></section>`;
+          modal.innerHTML = `<section class="event"><span>${state.win?"סוף דרך — פרישה":"המסלול נעצר"}</span><h2>${state.win?"קובי הגיע/ה לפרישה אחרי קריירה שלמה.":"המסלול נעצר כאן."}</h2><p>${state.win?"עברת את כל שלבי הקריירה — מסטודנט/ית ועד פרישה.":"אפשר להתחיל מחדש עם הידע שצברת."}</p><div class="final-grid" style="grid-template-columns:repeat(2,1fr)"><div><small>הישג מקצועי</small><b>${money(final.achievement)}</b></div><div><small>מצב כלכלי</small><b>${money(final.financial)}</b></div><div><small>גיל</small><b>${Math.round(state.age)}</b></div><div><small>שלב</small><b>${currentStage().name}</b></div><div><small>רמת קושי</small><b>${(DIFFICULTY[state.difficulty]||DIFFICULTY.normal).label}</b></div></div>${awardRows?`<p class="eyebrow" style="margin-top:14px">ארון פרסים</p><div class="bag-grid" style="grid-template-columns:1fr">${awardRows}</div>`:""}<p class="eyebrow" style="margin-top:14px">שיאים</p><div class="bag-grid" style="grid-template-columns:1fr">${scoreRows||'<p class="empty">עדיין אין שיאים.</p>'}</div><button data-action="new">מסלול חדש ←</button></section>`;
           return;
         }
         if (state.pendingAction) {
@@ -1460,7 +1503,7 @@
 
       function render() {
         if (!app) return;
-        const head = `<header class="topbar"><div class="brand">KOBI / קריירה</div><div class="turn"><div>גיל<b>${Math.round(state.age)}</b></div><div>שנה<b>${Math.round(state.year)}</b></div><div>מזומן<b>${money(state.cash)}</b></div><div class="debt">חוב<b>${money(state.debt)}</b>${state.debt>0?'<button class="mini-pay" data-action="bank:pay">להחזיר</button>':""}</div><div class="fame">קרדיטים<b>${state.fame}</b></div><div class="followers">עוקבים<b>${state.followers.toLocaleString("he-IL")}</b></div><div class="contacts">קשרים<b>${state.contacts}</b></div><div>תיק<b>${bagCount()} / ${state.capacity}</b></div></div></header>${stageTrackMarkup()}`;
+        const head = `<header class="topbar"><div class="brand">KOBI / קריירה<span class="difficulty-chip">${(DIFFICULTY[state.difficulty]||DIFFICULTY.normal).label}</span></div><div class="turn"><div>גיל<b>${Math.round(state.age)}</b></div><div>שנה<b>${Math.round(state.year)}</b></div><div>מזומן<b>${money(state.cash)}</b></div><div class="debt">חוב<b>${money(state.debt)}</b>${state.debt>0?'<button class="mini-pay" data-action="bank:pay">להחזיר</button>':""}</div><div class="fame">קרדיטים<b>${state.fame}</b></div><div class="followers">עוקבים<b>${state.followers.toLocaleString("he-IL")}</b></div><div class="contacts">קשרים<b>${state.contacts}</b></div><div>תיק<b>${bagCount()} / ${state.capacity}</b></div></div></header>${stageTrackMarkup()}`;
         const body = state.view==="bag" ? bagView() : state.view==="log" ? logView() : hudView();
         app.innerHTML = `<div class="shell">${head}${body}</div>`;
         renderModal();
@@ -1479,6 +1522,7 @@
           if (action.indexOf("commit:")===0) startCommitment(action.slice(7));
           if (action.indexOf("bank:")===0) bank(action.slice(5));
           if (action.indexOf("tab:")===0) setMarketTab(action.slice(4));
+          if (action.indexOf("difficulty:")===0) setDifficulty(action.slice(11));
           if (action==="loanshark") takeBlackMarketLoan();
           if (action==="event") resolveEvent(Number(id));
           if (action==="brief:close") closeBrief();
@@ -1497,14 +1541,14 @@
         newGame: () => { state = createState(); return clone(state); },
         openView, buy, sell, doGig, startCommitment, resolveEvent, bank, acceptFlight, declineFlight,
         setMarketTab, takeBlackMarketLoan, closeBrief,
-        openGigForecast, confirmGig, cancelPendingAction, closeStageIntro, loadScores, requestGiveUp,
+        openGigForecast, confirmGig, cancelPendingAction, closeStageIntro, loadScores, requestGiveUp, setDifficulty,
         finish: () => { finish(false); return clone(state); },
-        STAGES, CITIES,
+        STAGES, CITIES, DIFFICULTY,
         __testJumpToStage: (id) => {
           const stage = STAGES.find((s)=>s.id===id) || STAGES[0];
           state.stageId = stage.id; state.stageYear = 0; state.commitment = null; state.activeCheckpoint = null;
           if (stage.ageRange) state.age = stage.ageRange[0];
-          const market = generateMarket(stage.id, state.stageYear);
+          const market = generateMarket(stage.id, state.stageYear, state.settings.defaultRisk);
           state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices}; state.activeGigs = market.activeGigs;
           return clone(state);
         },

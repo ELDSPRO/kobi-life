@@ -237,6 +237,45 @@ function run(htmlPath) {
   assert.strictEqual(guState.ended, true, "confirming the dialog actually ends the run");
   assert.strictEqual(guState.win, false, "giving up is recorded as a loss, not a win");
 
+  // --- difficulty: three levels, chosen once at the very start, scaling debt/events/black-market without touching DEBT_ANNUAL_RATE ---
+  const freshDifficultyGame = loadGame(path);
+  let fdState = freshDifficultyGame.getState();
+  assert.strictEqual(fdState.difficulty, null, "a brand-new run has no difficulty chosen yet");
+  assert.strictEqual(fdState.settings.difficulty, "normal", "before any explicit choice, settings already default to normal's numbers");
+  assert.strictEqual(fdState.debt, 8000, "normal's default opening debt matches today's number, unchanged");
+
+  const easyGame = loadGame(path);
+  assert.strictEqual(easyGame.setDifficulty("easy"), true);
+  let eState = easyGame.getState();
+  assert.strictEqual(eState.difficulty, "easy");
+  assert.strictEqual(eState.debt, Math.round(8000*0.6), "easy scales the opening debt to ×0.6");
+  assert.strictEqual(eState.settings.eventChanceMult, 0.7, "easy scales event chance to ×0.7");
+  assert.strictEqual(eState.settings.blackMarketLoan.debt, 2100, "easy keeps the black-market premium at today's rate");
+  assert.strictEqual(easyGame.setDifficulty("hard"), false, "difficulty can only be chosen once");
+  assert.strictEqual(easyGame.getState().difficulty, "easy", "a rejected re-choice leaves the original difficulty untouched");
+
+  const hardGame = loadGame(path);
+  assert.strictEqual(hardGame.setDifficulty("hard"), true);
+  let hState = hardGame.getState();
+  assert.strictEqual(hState.debt, Math.round(8000*1.5), "hard scales the opening debt to ×1.5");
+  assert.strictEqual(hState.settings.eventChanceMult, 1.3, "hard scales event chance to ×1.3");
+  assert.strictEqual(hState.settings.blackMarketLoan.debt, Math.round(1500*1.55), "hard sets the black-market premium to 55%");
+  assert.strictEqual(hState.settings.defaultRisk.crashChance, 0.05*1.3, "hard scales the price-event (crash) chance too");
+
+  // DEBT_ANNUAL_RATE itself must be identical across difficulties — only the opening amount differs
+  assert.strictEqual(easyGame.startCommitment("selfTaught"), true);
+  assert.strictEqual(hardGame.startCommitment("selfTaught"), true);
+  const easyDebtBefore = easyGame.getState().debt, hardDebtBefore = hardGame.getState().debt;
+  easyGame.doGig("waiter"); hardGame.doGig("waiter"); // 0.4y each, same annual rate applied to each one's own principal
+  assert.strictEqual(easyGame.getState().debt, Math.ceil(easyDebtBefore * Math.pow(1.028, 0.4)), "easy compounds at the same 1.028 annual rate as normal");
+  assert.strictEqual(hardGame.getState().debt, Math.ceil(hardDebtBefore * Math.pow(1.028, 0.4)), "hard compounds at the same 1.028 annual rate as normal — difficulty never touches DEBT_ANNUAL_RATE");
+
+  // the difficulty picker only appears once, in the very first stage's intro, before it's been chosen
+  const pickerGame = loadGame(path);
+  assert.strictEqual(pickerGame.STAGES[0].order, 0, "sanity: student is stage order 0");
+  assert.strictEqual(pickerGame.setDifficulty("normal"), true);
+  assert.strictEqual(pickerGame.getState().settings.openingDebt, 8000, "explicitly choosing normal matches the implicit default exactly");
+
   // --- buy: asset vs. bag, capacity ---
   assert.strictEqual(game.buy("usedCamera"), true, "an asset-flagged good can be bought");
   state = game.getState();
