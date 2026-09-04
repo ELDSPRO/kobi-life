@@ -11,11 +11,11 @@ function makeMemoryStorage() {
   };
 }
 
-function loadGame(htmlPath, randomFn) {
+function loadGame(htmlPath, randomFn, storage) {
   const html = fs.readFileSync(htmlPath, "utf8");
   const match = html.match(/<script>([\s\S]*?)<\/script>\s*<\/body>/);
   assert.ok(match, "the game has a playable inline script");
-  const context = { console, Math: Object.create(Math), JSON, Intl, localStorage: makeMemoryStorage() };
+  const context = { console, Math: Object.create(Math), JSON, Intl, localStorage: storage || makeMemoryStorage() };
   context.Math.random = randomFn || (() => 0.5);
   context.globalThis = context;
   vm.createContext(context);
@@ -195,6 +195,282 @@ function run(htmlPath) {
   assert.strictEqual(introGame.closeStageIntro(), true);
   assert.strictEqual(introGame.getState().stageIntroPending, false, "closing it clears the flag");
 
+  // --- reload mid-checkpoint: a pending checkpoint event must reopen after a page refresh, not softlock the run ---
+  // two separate script contexts sharing one localStorage simulates a real page refresh (a fresh context
+  // always starts from createState(), same as the browser reloading the script from scratch)
+  const sharedStorage = makeMemoryStorage();
+  const reloadGame1 = loadGame(path, () => 0.99, sharedStorage); // high roll keeps the year-advance to the next checkpoint free of incidental incidents
+  reloadGame1.__testJumpToStage("indie");
+  assert.strictEqual(reloadGame1.startCommitment("indieFilm"), true);
+  assert.strictEqual(reloadGame1.resolveEvent(0), true, "genre pick resolves immediately (atYear:0), advancing straight to the next checkpoint");
+  let rlState = reloadGame1.getState();
+  assert.strictEqual(rlState.event.title, "התסריט מוכן", "the script checkpoint is now pending, one year into the commitment");
+  assert.ok(rlState.commitment, "the commitment is still in progress, mid-checkpoint");
+
+  const reloadGame2 = loadGame(path, () => 0.99, sharedStorage); // fresh script context, same localStorage
+  assert.strictEqual(reloadGame2.getState().commitment, null, "before reloading, a brand-new context starts from createState()'s defaults");
+  const reopened = reloadGame2.__testReload();
+  assert.ok(reopened.commitment, "the in-progress commitment survives the reload");
+  assert.ok(reopened.event, "the pending checkpoint reopens as a real event after reload, instead of leaving the run stuck with no event and no way to act");
+  assert.strictEqual(reopened.event.title, "התסריט מוכן", "the reopened event is the exact checkpoint that was pending before the refresh");
+  assert.strictEqual(reloadGame2.resolveEvent(1), true, "the reopened checkpoint can be resolved normally, proving the run isn't softlocked");
+  assert.ok(reloadGame2.getState().pathTags.includes("script-lean"), "resolving the reopened checkpoint applies its choice like any other");
+
+  // --- give up requires confirmation: it must not end the run on the first click ---
+  const giveUpGame = loadGame(path);
+  assert.strictEqual(giveUpGame.startCommitment("selfTaught"), true);
+  assert.strictEqual(giveUpGame.requestGiveUp(), true, "clicking give-up opens a confirmation dialog instead of ending the run immediately");
+  let guState = giveUpGame.getState();
+  assert.strictEqual(guState.ended, false, "opening the confirmation alone does not end the run");
+  assert.ok(guState.event, "a confirmation dialog is shown");
+  assert.strictEqual(guState.event.title, "לוותר על המסלול?");
+  assert.strictEqual(giveUpGame.requestGiveUp(), false, "a second confirmation can't open while one is already pending");
+
+  assert.strictEqual(giveUpGame.resolveEvent(1), true, "cancelling"); // "להישאר במסלול"
+  guState = giveUpGame.getState();
+  assert.strictEqual(guState.ended, false, "cancelling keeps the run going");
+  assert.strictEqual(guState.event, null, "cancelling closes the dialog with no other side effect");
+
+  assert.strictEqual(giveUpGame.requestGiveUp(), true, "give-up can be requested again after cancelling");
+  assert.strictEqual(giveUpGame.resolveEvent(0), true, "confirming give-up"); // "לוותר סופית"
+  guState = giveUpGame.getState();
+  assert.strictEqual(guState.ended, true, "confirming the dialog actually ends the run");
+  assert.strictEqual(guState.win, false, "giving up is recorded as a loss, not a win");
+
+  // --- difficulty: three levels, chosen once at the very start, scaling debt/events/black-market without touching DEBT_ANNUAL_RATE ---
+  const freshDifficultyGame = loadGame(path);
+  let fdState = freshDifficultyGame.getState();
+  assert.strictEqual(fdState.difficulty, null, "a brand-new run has no difficulty chosen yet");
+  assert.strictEqual(fdState.settings.difficulty, "normal", "before any explicit choice, settings already default to normal's numbers");
+  assert.strictEqual(fdState.debt, 8000, "normal's default opening debt matches today's number, unchanged");
+
+  const easyGame = loadGame(path);
+  assert.strictEqual(easyGame.setDifficulty("easy"), true);
+  let eState = easyGame.getState();
+  assert.strictEqual(eState.difficulty, "easy");
+  assert.strictEqual(eState.debt, Math.round(8000*0.6), "easy scales the opening debt to ×0.6");
+  assert.strictEqual(eState.settings.eventChanceMult, 0.7, "easy scales event chance to ×0.7");
+  assert.strictEqual(eState.settings.blackMarketLoan.debt, 2100, "easy keeps the black-market premium at today's rate");
+  assert.strictEqual(easyGame.setDifficulty("hard"), false, "difficulty can only be chosen once");
+  assert.strictEqual(easyGame.getState().difficulty, "easy", "a rejected re-choice leaves the original difficulty untouched");
+
+  const hardGame = loadGame(path);
+  assert.strictEqual(hardGame.setDifficulty("hard"), true);
+  let hState = hardGame.getState();
+  assert.strictEqual(hState.debt, Math.round(8000*3.0), "hard scales the opening debt to ×3.0 (tuned in the closing bankruptcy-rate gate check - see test-playthrough.js)");
+  assert.strictEqual(hState.settings.eventChanceMult, 2.5, "hard scales event chance to ×2.5 (tuned alongside debtMult)");
+  assert.strictEqual(hState.settings.blackMarketLoan.debt, Math.round(1500*1.55), "hard sets the black-market premium to 55%");
+  assert.strictEqual(hState.settings.defaultRisk.crashChance, 0.11*2.5, "hard scales the price-event (crash) chance too");
+
+  // DEBT_ANNUAL_RATE itself must be identical across difficulties — only the opening amount differs
+  assert.strictEqual(easyGame.startCommitment("selfTaught"), true);
+  assert.strictEqual(hardGame.startCommitment("selfTaught"), true);
+  const easyDebtBefore = easyGame.getState().debt, hardDebtBefore = hardGame.getState().debt;
+  easyGame.doGig("waiter"); hardGame.doGig("waiter"); // 0.4y each, same annual rate applied to each one's own principal
+  assert.strictEqual(easyGame.getState().debt, Math.ceil(easyDebtBefore * Math.pow(1.028, 0.4)), "easy compounds at the same 1.028 annual rate as normal");
+  assert.strictEqual(hardGame.getState().debt, Math.ceil(hardDebtBefore * Math.pow(1.028, 0.4)), "hard compounds at the same 1.028 annual rate as normal — difficulty never touches DEBT_ANNUAL_RATE");
+
+  // the difficulty picker only appears once, in the very first stage's intro, before it's been chosen
+  const pickerGame = loadGame(path);
+  assert.strictEqual(pickerGame.STAGES[0].order, 0, "sanity: student is stage order 0");
+  assert.strictEqual(pickerGame.setDifficulty("normal"), true);
+  assert.strictEqual(pickerGame.getState().settings.openingDebt, 8000, "explicitly choosing normal matches the implicit default exactly");
+
+  // --- cashScale: universal incident cash amounts scale by the current stage's cashScale (student ×1, legacy ×15) ---
+  // roll 0.50 lands on the friend-in-trouble universal incident in both stages (each stage's own always-on
+  // incident pool sums to the same .29 before the universal incidents are appended, so the bands line up)
+  const cashScaleStudentGame = loadGame(path, () => 0.50);
+  assert.strictEqual(cashScaleStudentGame.doGig("waiter"), true);
+  let csState = cashScaleStudentGame.getState();
+  assert.strictEqual(csState.event && csState.event.title, "חבר/ה בצרות", "sanity: this roll lands on friend-in-trouble in student stage");
+  const cashBeforeHelp = csState.cash;
+  assert.strictEqual(cashScaleStudentGame.resolveEvent(0), true, "help-friend");
+  csState = cashScaleStudentGame.getState();
+  assert.strictEqual(csState.cash, cashBeforeHelp - 400, "student stage (cashScale 1) applies the base -400 cost");
+
+  const cashScaleLegacyGame = loadGame(path, () => 0.50);
+  cashScaleLegacyGame.__testJumpToStage("legacy");
+  cashScaleLegacyGame.__testSetState({ debt: 8000 }); // keep bank-call in the pool so the bands match the computation above
+  assert.strictEqual(cashScaleLegacyGame.doGig("consultingLegacy"), true);
+  let clState = cashScaleLegacyGame.getState();
+  assert.strictEqual(clState.event && clState.event.title, "חבר/ה בצרות", "sanity: the same roll lands on the same universal incident in legacy stage");
+  const cashBeforeHelpLegacy = clState.cash;
+  assert.strictEqual(cashScaleLegacyGame.resolveEvent(0), true, "help-friend");
+  clState = cashScaleLegacyGame.getState();
+  assert.strictEqual(clState.cash, cashBeforeHelpLegacy - 400*15, "legacy stage (cashScale 15) scales the identical incident's cost to ×15");
+
+  // --- titled price events: a good's custom events:{spike,crash} text surfaces in the year recap ---
+  const eventTitleGame = loadGame(path, () => 0.01); // lands in the crash band (normal difficulty: [0,.11))
+  eventTitleGame.__testJumpToStage("industry");
+  let etState = eventTitleGame.getState();
+  assert.strictEqual(etState.priceKinds.proCamera, "crash", "sanity: this roll produces a crash on proCamera");
+  const industryStage = eventTitleGame.STAGES.find((s) => s.id === "industry");
+  assert.strictEqual(industryStage.goods.find((g) => g.id === "proCamera").events.crash, "אולפן נסגר, ציוד מוצף לשוק", "proCamera carries custom crash flavor text");
+  assert.strictEqual(eventTitleGame.doGig("camAssist"), true);
+  etState = eventTitleGame.getState();
+  const proCameraEvent = (etState.lastRecap.marketEvents || []).find((e) => e.id === "proCamera");
+  assert.ok(proCameraEvent, "the year recap records proCamera's price event");
+  assert.strictEqual(proCameraEvent.title, "אולפן נסגר, ציוד מוצף לשוק", "the recap uses the good's own custom title, not a generic one");
+
+  // --- seenIncidents: an incident does not repeat within 3 years, even with the identical roll ---
+  // --- followUp: an incident's followUp queues a successor that fires later, in the matching advanceYear, bypassing the normal roll ---
+  const cooldownGame = loadGame(path, () => 0.25); // lands on small-scholarship (student stage, usedCamera not yet owned so camera-repair is out of the pool)
+  assert.strictEqual(cooldownGame.startCommitment("selfTaught"), true);
+  assert.strictEqual(cooldownGame.doGig("waiter"), true);
+  let cdState = cooldownGame.getState();
+  assert.strictEqual(cdState.event && cdState.event.title, "מלגה קטנה", "sanity: this roll lands on small-scholarship the first time");
+  assert.strictEqual(cooldownGame.resolveEvent(1), true, "pass"); // decline; the top-level followUp still queues regardless of the choice made
+  cdState = cooldownGame.getState();
+  assert.ok(cdState.seenIncidents["small-scholarship"] != null, "firing the incident records it in seenIncidents");
+  assert.strictEqual(cdState.queuedIncidents.length, 1, "small-scholarship's followUp queues a successor");
+  assert.strictEqual(cdState.queuedIncidents[0].id, "scholarship-followup");
+
+  assert.strictEqual(cooldownGame.doGig("waiter"), true); // identical roll, well within the 3-year cooldown
+  cdState = cooldownGame.getState();
+  assert.strictEqual(cdState.event && cdState.event.title, "הבנק מתקשר", "with small-scholarship on cooldown the pool shifts, so the same roll now lands on the next incident instead of repeating it");
+
+  let followUpFired = false;
+  for (let i = 0; i < 12 && !followUpFired; i++) {
+    cooldownGame.doGig("waiter");
+    cdState = cooldownGame.getState();
+    if (cdState.event && cdState.event.title === "בדיקת מעקב מקרן המלגות") { followUpFired = true; break; }
+    if (cdState.event) cooldownGame.resolveEvent(cdState.event.choices.length - 1); // drain whatever incidental incident fired, quietly
+  }
+  assert.ok(followUpFired, "the queued follow-up incident eventually fires once its due age is reached, ahead of the normal random roll");
+
+  // --- minister-denounces: clap-back now costs a real contact, not a free win ---
+  const politicsCostGame = loadGame(path, () => 0.01); // low roll: reliably triggers minister-denounces in the indie stage (matches the existing politics test above)
+  politicsCostGame.__testJumpToStage("indie");
+  politicsCostGame.__testSetState({ cash: 5000, contacts: 5 });
+  assert.strictEqual(politicsCostGame.doGig("commercialGig"), true);
+  const pcState = politicsCostGame.getState();
+  assert.strictEqual(pcState.event.title, "שר/ה מגנה את הסרט שלך");
+  assert.strictEqual(politicsCostGame.resolveEvent(0), true, "clap-back");
+  const afterClapCost = politicsCostGame.getState();
+  assert.strictEqual(afterClapCost.contacts, 4, "clapping back costs one contact, not a purely free upside");
+
+  // --- passive income: no persistent assets owned -> no passive income and no breakdown ---
+  const noAssetGame = loadGame(path);
+  assert.strictEqual(noAssetGame.doGig("waiter"), true);
+  let naState = noAssetGame.getState();
+  assert.strictEqual(naState.lastRecap.passive, 0, "no owned yield-bearing assets means zero passive income");
+  assert.deepStrictEqual(naState.lastRecap.passiveBreakdown, [], "and an empty breakdown, so the recap renders no passive-income line");
+
+  // --- passive income: one flat-yield asset (productionCompanyShare, ₪2500/year) pays out scaled by elapsed years ---
+  const assetGame = loadGame(path);
+  assetGame.__testJumpToStage("breakthrough");
+  assetGame.__testSetState({ assets: { ...assetGame.getState().assets, productionCompanyShare: true }, cash: 20000 });
+  const bankBefore = assetGame.getState().bank;
+  assert.strictEqual(assetGame.doGig("execProducing"), true); // 0.4y
+  let aState = assetGame.getState();
+  assert.strictEqual(aState.lastRecap.passive, Math.round(2500*0.4), "one flat-yield asset pays its rate × the elapsed fraction of a year");
+  assert.strictEqual(aState.bank, bankBefore + Math.round(2500*0.4), "the payout lands in the bank, not cash");
+  assert.deepStrictEqual(aState.lastRecap.passiveBreakdown, [{ name:"חלק בחברת הפקה", amount:Math.round(2500*0.4) }]);
+
+  // --- passive income: per-film yields (filmRightsLibrary, distributionStake) scale with state.films.length ---
+  const filmYieldGame = loadGame(path);
+  filmYieldGame.__testJumpToStage("legacy");
+  filmYieldGame.__testSetState({
+    assets: { ...filmYieldGame.getState().assets, filmRightsLibrary: true },
+    films: [{ title:"a" }, { title:"b" }], cash: 20000
+  });
+  assert.strictEqual(filmYieldGame.doGig("consultingLegacy"), true); // 0.4y
+  let fyState = filmYieldGame.getState();
+  const expectedLibraryYield = Math.round(0.03*2*4000); // FILM_RIGHTS_YIELD_RATE × films.length × FILM_RIGHTS_ASSUMED_VALUE_PER_FILM
+  assert.strictEqual(fyState.lastRecap.passive, Math.round(expectedLibraryYield*0.4), "filmRightsLibrary's yield scales with the number of completed films");
+
+  // --- personalStudio: a one-time 20% discount on the next commitment's entry debt, not a cash yield ---
+  const studioGame = loadGame(path, () => 0.99); // high roll: keeps the two-year jump to filmSchool's first checkpoint free of incidental incidents
+  studioGame.__testJumpToStage("student");
+  studioGame.__testSetState({ assets: { ...studioGame.getState().assets, personalStudio: true }, debt: 8000 });
+  assert.strictEqual(studioGame.startCommitment("filmSchool"), true); // entryDebt 16000, discounted by personalStudio -> 12800
+  let stState = studioGame.getState();
+  assert.strictEqual(stState.personalStudioDiscountUsed, true, "starting a commitment with entryDebt consumes the one-time discount");
+  assert.strictEqual(stState.debt, 21982, "8000 + 16000*0.8 = 20800, compounded 2 years at 1.028 to reach the first checkpoint = 21982");
+
+  // the discount is one-time: a second commitment afterward pays the full entry debt
+  const studioGame2 = loadGame(path, () => 0.99);
+  studioGame2.__testJumpToStage("student");
+  studioGame2.__testSetState({ assets: { ...studioGame2.getState().assets, personalStudio: true }, debt: 8000, personalStudioDiscountUsed: true });
+  assert.strictEqual(studioGame2.startCommitment("filmSchool"), true);
+  assert.strictEqual(studioGame2.getState().debt, Math.ceil((8000+16000)*Math.pow(1.028,2)), "once already used, personalStudio no longer discounts a later commitment");
+
+  // --- top bar: "leaving the rotation next year" predicts exactly which rotating goods/gigs the roster will drop ---
+  // reuses the same industry-stage rotation facts already verified above: at stage-year 0 the active rotating
+  // half is {usedMonitor,cableKit,gearCase} (goods) and {artDeptAssist,setDriver} (gigs); at stage-year 1 it's
+  // {unionCard,equipmentInsurance,usedMonitor} and {droneOperator,craftServices} - so cableKit/gearCase and
+  // artDeptAssist/setDriver are exactly what's leaving, while usedMonitor stays active across the boundary.
+  const rotationExitGame = loadGame(path);
+  rotationExitGame.__testJumpToStage("industry");
+  const leavingAtYear0 = rotationExitGame.__testNextYearRotationExits();
+  const expectedLeaving = ["ערכת כבלים מקצועית","עוזר/ת במחלקת אמנות","נהג/ת סט","תיק ציוד קשיח"];
+  assert.strictEqual(leavingAtYear0.length, expectedLeaving.length, "exactly the four items rotating out are flagged, nothing more or less");
+  expectedLeaving.forEach((name) => assert.ok(leavingAtYear0.includes(name), name + " should be flagged as leaving the rotation next year"));
+  for (let i = 0; i < 3; i++) { rotationExitGame.doGig("camAssist"); clearEvent(rotationExitGame); } // cross into stage-year 1
+  const leavingAtYear1 = rotationExitGame.__testNextYearRotationExits();
+  assert.ok(!leavingAtYear1.includes("ערכת כבלים מקצועית"), "cableKit already rotated out, so it's not 'leaving next year' anymore");
+
+  // --- dead choices, now with real effects: shortCourse's cert-done checkpoint ---
+  const certGame = loadGame(path, () => 0.99); // high roll: keeps the 1.5-year jump to the only checkpoint free of incidental incidents
+  assert.strictEqual(certGame.startCommitment("shortCourse"), true);
+  let certState = certGame.getState();
+  assert.strictEqual(certState.event && certState.event.title, "סיום קורס");
+  assert.strictEqual(certGame.resolveEvent(0), true, "cert-done");
+  certState = certGame.getState();
+  assert.strictEqual(certState.contacts, 1, "completing the short course grants a contact - no longer a dead choice");
+
+  // --- risk-camera: a real 50/50 coin flip instead of a flavor-only no-op ---
+  // injects the incident's own choices directly (same technique as elsewhere in this file), so the outcome
+  // is isolated from whichever roll happens to trigger the incident in the first place
+  const cameraRepairChoices = [{label:"לתקן ב-₪300",kind:"repair"},{label:"לא לתקן · לסכן את המצלמה",kind:"risk-camera",quiet:true}];
+  const riskCameraSuccessGame = loadGame(path, () => 0.3); // < RISK_CAMERA_SUCCESS_CHANCE (0.5) -> success
+  riskCameraSuccessGame.__testSetState({ event:{ title:"המצלמה צריכה תיקון", copy:"", choices:cameraRepairChoices }, assets:{ ...riskCameraSuccessGame.getState().assets, usedCamera:false }, cash:5000 });
+  assert.strictEqual(riskCameraSuccessGame.resolveEvent(1), true, "risk-camera, success roll");
+  let rcState = riskCameraSuccessGame.getState();
+  assert.strictEqual(rcState.assets.usedCamera, true, "a successful risk keeps/confirms the camera");
+  assert.strictEqual(rcState.cash, 5000, "no cash cost on the success path");
+
+  const riskCameraFailGame = loadGame(path, () => 0.7); // >= RISK_CAMERA_SUCCESS_CHANCE -> failure
+  riskCameraFailGame.__testSetState({ event:{ title:"המצלמה צריכה תיקון", copy:"", choices:cameraRepairChoices }, cash:5000 });
+  assert.strictEqual(riskCameraFailGame.resolveEvent(1), true, "risk-camera, failure roll");
+  assert.strictEqual(riskCameraFailGame.getState().cash, 5000-800, "a failed risk costs ₪800");
+
+  // --- indieFilm's script checkpoint: ambitious is now a real trade-off (+3 fame, -₪1500, and a rushed-edit risk later) ---
+  function scriptChoicesFor(g) { return g.STAGES.find((s) => s.id === "indie").commitments.find((c) => c.id === "indieFilm").checkpoints.find((cp) => cp.id === "script").choices; }
+  const ambitiousGame = loadGame(path);
+  ambitiousGame.__testSetState({ event:{ title:"התסריט מוכן", copy:"", choices:scriptChoicesFor(ambitiousGame) }, cash:5000, fame:0 });
+  assert.strictEqual(ambitiousGame.resolveEvent(0), true, "script-ambitious");
+  let ambState = ambitiousGame.getState();
+  assert.strictEqual(ambState.fame, 3, "script-ambitious now grants +3 fame, not the old dead +1");
+  assert.strictEqual(ambState.cash, 5000-1500);
+
+  const leanGame = loadGame(path);
+  leanGame.__testSetState({ event:{ title:"התסריט מוכן", copy:"", choices:scriptChoicesFor(leanGame) }, cash:5000, fame:0 });
+  assert.strictEqual(leanGame.resolveEvent(1), true, "script-lean");
+  let leanState = leanGame.getState();
+  assert.strictEqual(leanState.fame, 1, "script-lean still grants +1 fame");
+  assert.strictEqual(leanState.cash, 5000+500, "script-lean now also grants +₪500, no longer a dead upside");
+
+  // --- the edit checkpoint: an ambitious script raises the odds edit-rough backfires; a lean one never does ---
+  // editChoices must come from the SAME instance resolveEvent runs on: the choice's effect() closes over
+  // that instance's own Math.random/addLog, so choices borrowed from a different loadGame() would silently
+  // roll against the wrong (default 0.5) RNG instead of this test's injected one
+  function editChoicesFor(g) { return g.STAGES.find((s) => s.id === "indie").commitments.find((c) => c.id === "indieFilm").checkpoints.find((cp) => cp.id === "edit").choices; }
+  const rushBackfireGame = loadGame(path, () => 0.3); // < EDIT_RUSH_RISK_CHANCE (0.5) -> the rush backfires
+  rushBackfireGame.__testSetState({ pathTags:["script-ambitious"], fame:10, commitment:null, event:{ title:"משמרות עריכה", copy:"", choices:editChoicesFor(rushBackfireGame) } });
+  assert.strictEqual(rushBackfireGame.resolveEvent(1), true, "edit-rough after an ambitious script, low roll");
+  assert.strictEqual(rushBackfireGame.getState().fame, 8, "an ambitious script plus rushing the edit now has a real downside (-2 fame)");
+
+  const rushSafeGame = loadGame(path, () => 0.7); // >= EDIT_RUSH_RISK_CHANCE -> the rush does not backfire
+  rushSafeGame.__testSetState({ pathTags:["script-ambitious"], fame:10, commitment:null, event:{ title:"משמרות עריכה", copy:"", choices:editChoicesFor(rushSafeGame) } });
+  assert.strictEqual(rushSafeGame.resolveEvent(1), true, "edit-rough after an ambitious script, high roll");
+  assert.strictEqual(rushSafeGame.getState().fame, 10, "the risk doesn't always land");
+
+  const rushLeanGame = loadGame(path, () => 0.3); // same low roll, but no script-ambitious tag -> the risk never applies
+  rushLeanGame.__testSetState({ pathTags:["script-lean"], fame:10, commitment:null, event:{ title:"משמרות עריכה", copy:"", choices:editChoicesFor(rushLeanGame) } });
+  assert.strictEqual(rushLeanGame.resolveEvent(1), true, "edit-rough after a lean script");
+  assert.strictEqual(rushLeanGame.getState().fame, 10, "without script-ambitious, edit-rough is never risky, regardless of the roll");
+
   // --- buy: asset vs. bag, capacity ---
   assert.strictEqual(game.buy("usedCamera"), true, "an asset-flagged good can be bought");
   state = game.getState();
@@ -241,6 +517,7 @@ function run(htmlPath) {
   assert.strictEqual(game.resolveEvent(0), true, "בימוי");
   state = game.getState();
   assert.ok(state.pathTags.includes("spec-directing"), "the checkpoint choice is recorded");
+  assert.strictEqual(state.contacts, 1, "specializing grants a contact, regardless of which specialization is picked");
   assert.ok(state.event, "the second checkpoint opens automatically after the first resolves");
   // two more full years pass with zero chance to touch the bank mid-commitment -> the debt-collector's
   // 3-year-neglect threshold trips here; draining it lets progressCommitment reach the real checkpoint
@@ -254,7 +531,7 @@ function run(htmlPath) {
   assert.ok(state.pathTags.includes("thesis-ambitious"), "the second checkpoint choice is recorded");
   assert.ok(state.pathTags.includes("filmSchool"), "completing the commitment tags the chosen entry path");
   assert.strictEqual(state.assets.diploma, true, "film school grants the diploma asset on completion");
-  assert.strictEqual(state.fame, 2, "film school grants fame on completion");
+  assert.strictEqual(state.fame, 4, "2(thesis choice) + 2(grantsOnComplete) = 4 - the thesis checkpoint is no longer a dead choice");
   assert.strictEqual(state.commitment, null, "the commitment clears once complete");
   assert.strictEqual(state.stageId, "student", "the diploma's fame grant alone is not enough to meet the higher milestone bar — the stage stays open for more play");
 
@@ -403,6 +680,35 @@ function run(htmlPath) {
   assert.ok(fstate.cash < beforeFlight.cash, "the flight fare was charged");
   assert.ok(fstate.fame > beforeFlight.fame, "the trip pays off in reputation");
 
+  // --- fame decay: reputation fades after 4 years without completing a project (any commitment), in any stage ---
+  // festivals' consultingGig grants fame:0, so repeating it isolates the decay effect from gig fame gains;
+  // fame:100 already clears festivals' own fame gate (60) but followers (0) stays well under its other gate (3000),
+  // so the stage never transitions mid-grind; high roll also keeps the rare flight-invite (only in festivals) from firing
+  const decayGame = loadGame(path, () => 0.99);
+  decayGame.__testJumpToStage("festivals");
+  decayGame.__testSetState({ fame: 100, cash: 5000, debt: 0 }); // debt:0 keeps the debt-collector and bankruptcy checks fully out of the way
+  for (let i = 0; i < 9; i++) { assert.strictEqual(decayGame.doGig("consultingGig"), true); clearEvent(decayGame); } // 9*0.4 = 3.6y, under the 4-year threshold
+  let dState = decayGame.getState();
+  assert.strictEqual(dState.fame, 100, "fame does not decay before 4 years without a completed project");
+  for (let i = 0; i < 4; i++) { assert.strictEqual(decayGame.doGig("consultingGig"), true); clearEvent(decayGame); } // +4*0.4 = 5.2y total, one whole year past the 4-year mark
+  dState = decayGame.getState();
+  assert.strictEqual(dState.fame, Math.floor(100 * Math.pow(1 - 0.03, 1)), "one whole year past the 4-year mark applies exactly one 3% decay tick");
+  assert.ok(dState.fame < 100, "sanity: the decay actually reduced fame");
+
+  // --- rule: legacyRecommend's guidance threshold must match the real "mentee" milestone gate exactly ---
+  // (the project's recurring bug class is a recommend() threshold sitting below the real milestone gate)
+  const gateGame = loadGame(path, () => 0.99);
+  gateGame.__testJumpToStage("legacy");
+  gateGame.__testSetState({ fame: 150, films: [{ title: "a" }, { title: "b" }], pathTags: ["legacyFilm"] }); // capstone-film already met; only mentee left
+  let gState = gateGame.getState();
+  const legacyStage = gateGame.STAGES.find((s) => s.id === "legacy");
+  assert.strictEqual(legacyStage.milestones.find((m) => m.id === "mentee").check(gState), false, "the real mentee gate: still unmet");
+  assert.strictEqual(legacyStage.recommend(gState).title, "להנחיל את הידע הלאה", "recommend still points at the mentee gap while it's genuinely unmet, not a false 'ready to finish'");
+  assert.strictEqual(gateGame.doGig("festivalJudge"), true, "festivalJudge is also tagged as a mentorship/judging gig");
+  gState = gateGame.getState();
+  assert.strictEqual(gState.achievements.mentored, true, "the gig satisfied the mentee milestone");
+  assert.strictEqual(gState.ended, true, "with capstone-film already met, satisfying mentee alone now ends the run — recommend's gate and the real gate agree exactly, with no third hidden requirement");
+
   // --- full-life win: legacy is the last stage, so meeting its required milestones ends the run in victory ---
   game.newGame();
   game.__testJumpToStage("legacy");
@@ -425,7 +731,11 @@ function run(htmlPath) {
   assert.strictEqual(state.films.length, 2, "the legacy film is a second real film asset");
   assert.strictEqual(state.films[1].starring, "קובי");
   assert.strictEqual(state.fame, 106, "95 + 1(drama) + 2(personal-story) + 3(solo-screening) + 5(grantsOnComplete) = 106");
-  assert.strictEqual(state.ended, true, "meeting legacy's required milestones ends the run — there is no seventh stage");
+  assert.strictEqual(state.ended, false, "completing the capstone film alone is not enough — the mentee milestone (a mentorship/judging gig) is still unmet");
+  assert.strictEqual(game.doGig("teachingGig"), true, "teaching is a mentorship gig that satisfies the mentee milestone"); // fame+2 -> 108
+  state = game.getState();
+  assert.strictEqual(state.achievements.mentored, true, "a mentorship/judging gig marks the mentee milestone");
+  assert.strictEqual(state.ended, true, "meeting both required milestones (capstone film + mentee) ends the run — there is no seventh stage");
   assert.strictEqual(state.win, true, "reaching the end of the career ladder is a win, not a timer running out");
   assert.ok(state.final && state.final.achievement > 0, "a final achievement score is computed on completion");
   assert.strictEqual(typeof state.final.financial, "number", "a separate financial score is also computed — money is not the score");
@@ -442,7 +752,8 @@ function run(htmlPath) {
   drainIncidental(winScoreGame, "העמדה מול קהל");
   winScoreGame.resolveEvent(0); // release
   drainIncidental(winScoreGame, "הסרט יוצא לאקרנים");
-  winScoreGame.resolveEvent(0); // poster-ack -> completeCommitment -> finish(true)
+  winScoreGame.resolveEvent(0); // poster-ack -> completeCommitment (mentee still unmet, run doesn't end yet)
+  winScoreGame.doGig("teachingGig"); // mentorGig -> mentee milestone met -> finish(true)
   const winState = winScoreGame.getState();
   let scores = winScoreGame.loadScores();
   assert.strictEqual(scores.length, 1, "finishing a run records exactly one score entry");
@@ -461,12 +772,13 @@ function run(htmlPath) {
   // --- RNG-injected price events (crash / spike / unavailable) ---
   // excludes rotating goods: those force kind:"unavailable" whenever they're outside this year's roster,
   // regardless of the price roll, which isn't what this block is testing (see the rotation block below).
+  // normal difficulty bands: crash [0,.11), spike [.11,.22), unavailable [.22,.25), normal [.25,1)
   const studentGoods = game.STAGES[0].goods.filter((g) => !g.rotates);
   const crashState = loadGame(path, () => 0.01).getState();
   assertAllKind(crashState, studentGoods, "crash");
-  const spikeState = loadGame(path, () => 0.07).getState();
+  const spikeState = loadGame(path, () => 0.15).getState();
   assertAllKind(spikeState, studentGoods, "spike");
-  const unavailGame = loadGame(path, () => 0.11);
+  const unavailGame = loadGame(path, () => 0.23);
   const unavailState = unavailGame.getState();
   assertAllKind(unavailState, studentGoods, "unavailable");
   studentGoods.forEach((g) => assert.strictEqual(unavailState.prices[g.id], null, g.id + " has no price while unavailable"));

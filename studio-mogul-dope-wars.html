@@ -14,10 +14,13 @@
     .shell { width:min(1120px,calc(100% - 34px)); margin:0 auto; padding:26px 0 38px; }
     .topbar { position:sticky; top:0; z-index:8; display:flex; align-items:center; justify-content:space-between; gap:18px; padding:12px 0; border-bottom:1px solid rgba(229,238,255,.14); background:rgba(8,12,20,.92); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
     .brand { color:var(--amber); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:1.1rem; font-weight:900; letter-spacing:.13em; }
+    .difficulty-chip { margin-inline-start:8px; padding:2px 7px; color:var(--violet); border:1px solid rgba(183,154,239,.4); border-radius:999px; background:rgba(183,154,239,.08); font-family:ui-sans-serif,system-ui,sans-serif; font-size:.58rem; font-weight:800; letter-spacing:0; vertical-align:middle; }
     .turn { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:14px; align-items:baseline; }
     .turn div { color:var(--muted); font-size:.69rem; text-align:left; }
     .turn b { display:block; margin-top:3px; color:var(--cream); font-size:1rem; }
     .turn .debt b { color:var(--rose); }
+    .turn .strikes b { color:var(--rose); }
+    .turn .grace b { color:var(--amber); }
     .turn .fame b { color:var(--green); }
     .turn .followers b { color:var(--amber); }
     .turn .contacts b { color:var(--blue); }
@@ -81,7 +84,7 @@
     .service-top { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; }
     .footer-actions { display:flex; justify-content:space-between; gap:10px; margin-top:15px; }
     .footer-actions button { color:var(--muted); border:1px solid rgba(229,238,255,.15); background:rgba(255,255,255,.045); }
-    .footer-actions button:first-child { color:var(--rose); }
+    .footer-actions button:last-child { color:var(--rose); }
     .modal { position:fixed; z-index:10; inset:0; display:grid; place-items:center; padding:20px; background:rgba(0,0,0,.68); }
     .modal.hidden { display:none; }
     .event { width:min(500px,100%); padding:24px; border:1px solid rgba(244,189,75,.7); border-radius:16px; background:linear-gradient(145deg,#1c263b,#101621); box-shadow:0 28px 80px rgba(0,0,0,.6); }
@@ -138,12 +141,33 @@
       ];
       const FLIGHT_CITY_IDS = ["athens","berlin","london","newyork","losangeles"];
 
-      const DEFAULT_RISK = { crashChance:.05, spikeChance:.05, unavailableChance:.03, crashRange:[.3,.5], spikeRange:[1.6,2.4] };
+      const DEFAULT_RISK = { crashChance:.11, spikeChance:.11, unavailableChance:.03, crashRange:[.3,.5], spikeRange:[1.6,2.4] };
       const DEBT_ANNUAL_RATE = 1.028;
       const GIG_YEARS = 0.4;
       const BANK_ANNUAL_RATE = 1.015;
       const BLACK_MARKET_LOAN = { cash:1500, debt:2100 };
       const ROTATION_ROSTER = { goods:3, gigs:2 };
+      const BASE_OPENING_DEBT = 8000;
+
+      // Difficulty scales five things via state.settings, built once at game start (setDifficulty):
+      // default market-price risk, the opening debt, the narrative-incident chance, the price-event
+      // chance (both folded into eventChanceMult/defaultRisk), and the black-market loan's premium.
+      // DEBT_ANNUAL_RATE itself is never touched by difficulty.
+      const DIFFICULTY = {
+        easy:   { id:"easy",   label:"קל",   debtMult:0.6, eventChanceMult:0.7, blackMarketPremium:0.4 },
+        normal: { id:"normal", label:"רגיל", debtMult:1.0, eventChanceMult:1.0, blackMarketPremium:0.4 },
+        hard:   { id:"hard",   label:"קשה",  debtMult:3.0, eventChanceMult:2.5, blackMarketPremium:0.55 }
+      };
+      function buildSettings(difficultyId) {
+        const d = DIFFICULTY[difficultyId] || DIFFICULTY.normal;
+        return {
+          difficulty: d.id,
+          defaultRisk: { crashChance: DEFAULT_RISK.crashChance*d.eventChanceMult, spikeChance: DEFAULT_RISK.spikeChance*d.eventChanceMult, unavailableChance: DEFAULT_RISK.unavailableChance, crashRange: DEFAULT_RISK.crashRange, spikeRange: DEFAULT_RISK.spikeRange },
+          openingDebt: round5(BASE_OPENING_DEBT*d.debtMult),
+          eventChanceMult: d.eventChanceMult,
+          blackMarketLoan: { cash: BLACK_MARKET_LOAN.cash, debt: Math.round(BLACK_MARKET_LOAN.cash*(1+d.blackMarketPremium)) }
+        };
+      }
 
       const FILM_GENRE_CHOICES = [
         { id:"drama", label:"דרמה", effect:(s)=>{ s.fame+=1; s.filmDraft.genre="דרמה"; } },
@@ -176,17 +200,42 @@
       }
       const BANKRUPTCY_STRIKE_LIMIT = 5;
       const STAGE_GRACE_YEARS = 3;
+      const FAME_DECAY_AFTER_YEARS = 4;
+      const FAME_DECAY_RATE = 0.03;
+      const INCIDENT_COOLDOWN_YEARS = 3;
+
+      // Passive-income first guesses for persistent (persistsAsAsset) goods. Everything not listed here
+      // yields 0 by default (equipment like proCamera/usedCamera, or diploma - not even a market good).
+      const FILM_RIGHTS_YIELD_RATE = 0.03;
+      const FILM_RIGHTS_ASSUMED_VALUE_PER_FILM = 4000;
+      const DISTRIBUTION_STAKE_YIELD_PER_FILM = 1500;
+      const PRODUCTION_COMPANY_SHARE_YIELD = 2500;
+      const PERSONAL_STUDIO_DISCOUNT = 0.2;
+      const RISK_CAMERA_SUCCESS_CHANCE = 0.5;
+      const RISK_CAMERA_FAIL_COST = 800;
+      const EDIT_RUSH_RISK_CHANCE = 0.5;
       const DEBT_COLLECTOR_MIN_DEBT = 3000;
       const DEBT_COLLECTOR_YEARS = 3;
 
+      // Universal incidents scale their cash amounts by the current stage's cashScale, so a ₪500 favor in
+      // the student stage reads as a real number in legacy too - choices is a function of state so the
+      // displayed labels always match the amount actually applied, instead of a static label going stale.
       const UNIVERSAL_INCIDENTS = [
-        { id:"bank-call", chance:.10, when:(s)=>s.debt>0, title:"הבנק מתקשר", copy:"החוב צבר ריבית והפקיד/ה מבקש/ת תשלום קטן עכשיו.", choices:[{label:"לשלם ₪500 מהחוב",kind:"debt-pay"},{label:"לדחות · החוב גדל ב-₪300",kind:"debt-delay",quiet:true}] },
-        { id:"road-gig", chance:.08, title:"עבודה בדרך", copy:"מישהו מחפש עזרה דחופה. זו דרך מהירה למזומן, אבל היא עולה שנה.", choices:[{label:"לקחת · +₪600",kind:"road-gig"},{label:"להמשיך במסלול",kind:"pass",quiet:true}] },
+        { id:"bank-call", chance:.10, when:(s)=>s.debt>0, title:"הבנק מתקשר", copy:"החוב צבר ריבית והפקיד/ה מבקש/ת תשלום קטן עכשיו.",
+          choices:(s)=>{ const cs = currentStage().cashScale||1; return [
+            { label:"לשלם "+money(500*cs)+" מהחוב", kind:"debt-pay" },
+            { label:"לדחות · החוב גדל ב-"+money(300*cs), kind:"debt-delay", quiet:true }
+          ]; } },
+        { id:"road-gig", chance:.08, title:"עבודה בדרך", copy:"מישהו מחפש עזרה דחופה. זו דרך מהירה למזומן, אבל היא עולה שנה.",
+          choices:(s)=>{ const cs = currentStage().cashScale||1; return [
+            { label:"לקחת · +"+money(600*cs), kind:"road-gig" },
+            { label:"להמשיך במסלול", kind:"pass", quiet:true }
+          ]; } },
         { id:"friend-in-trouble", chance:.07, title:"חבר/ה בצרות", copy:"חבר/ה קרוב/ה נקלע/ת לקשיים כלכליים ומבקש/ת הלוואה קטנה.",
-          choices:[
-            { label:"לעזור · -₪400", kind:"help-friend", effect:(s)=>{ s.cash-=400; s.contacts+=1; addLog("עזרת לחבר/ה בכסף — הקשר התחזק."); } },
+          choices:(s)=>{ const cs = currentStage().cashScale||1; return [
+            { label:"לעזור · -"+money(400*cs), kind:"help-friend", effect:(s)=>{ s.cash-=400*(currentStage().cashScale||1); s.contacts+=1; addLog("עזרת לחבר/ה בכסף — הקשר התחזק."); } },
             { label:"להתנצל ולסרב", kind:"pass", quiet:true }
-          ] },
+          ]; } },
         { id:"viral-moment", chance:.07, title:"רגע ויראלי", copy:"פוסט או קליפ שלך מתפשט ברשת בלי אזהרה מוקדמת.",
           choices:[
             { label:"לרכוב על הגל", kind:"ride-viral", effect:(s)=>{ s.followers+=800; s.fame+=1; addLog("רכבת על הגל הוויראלי — החשיפה עלתה משמעותית."); } },
@@ -260,8 +309,8 @@
         if (!hasChosenEntryPath()) {
           return { title:"לצלם את הסרט האישי האחרון", copy:"סיכום של קריירה שלמה — עוד סרט אחד, מהז'אנר ועד הפוסטר.", action:{type:"commitment",id:"legacyFilm"}, actionLabel:"להתחיל את הסרט", alternatives:[] };
         }
-        if (s.fame < 100) {
-          return { title:"להשלים מורשת", copy:"עוד קצת מוניטין, וזה יסתגר.", action:{type:"gig",id:"consultingLegacy"}, actionLabel:"לעבוד בייעוץ אסטרטגי", alternatives:[{type:"gig",id:"teachingGig",label:"הוראה"}] };
+        if (!s.achievements.mentored) {
+          return { title:"להנחיל את הידע הלאה", copy:"עוד לא הענקת הדרכה או שיפוט לדור הבא — זה החלק האחרון שנשאר לפני שסוגרים מעגל.", action:{type:"gig",id:"teachingGig"}, actionLabel:"ללמד", alternatives:[{type:"gig",id:"festivalJudge",label:"שיפוט כבוד"}] };
         }
         return { title:"מוכנים לסיים", copy:"קריירה שלמה מאחוריך — עוד פעולה תסגור את המסלול.", action:{type:"gig",id:"teachingGig"}, actionLabel:"ללמד", alternatives:[] };
       }
@@ -270,9 +319,10 @@
         {
           id:"student", order:0, name:"סטודנט/ית לקולנוע", ageRange:[21,26],
           headline:"לבנות בסיס: מקצוע, ציוד ראשון, קרדיט ראשון",
+          cashScale:1,
           goods:[
-            { id:"usedCamera",   name:"מצלמה יד שנייה", base:340, persistsAsAsset:true  },
-            { id:"editComputer", name:"מחשב עריכה",     base:520, persistsAsAsset:true  },
+            { id:"usedCamera",   name:"מצלמה יד שנייה", base:340, persistsAsAsset:true, events:{ spike:"סטודנטים רבים רודפים אחרי ציוד לפני פרויקט גמר", crash:"חנות צילום מקומית סוגרת ומפנה מלאי" } },
+            { id:"editComputer", name:"מחשב עריכה",     base:520, persistsAsAsset:true, events:{ spike:"מחסור בשבבים מייקר מחשבי עריכה", crash:"שדרוג מעבדת מחשבים באוניברסיטה מציף את השוק" } },
             { id:"mic",          name:"מיקרופון",       base:140, persistsAsAsset:false },
             { id:"tripod",       name:"חצובה משומשת",   base:120, persistsAsAsset:false },
             { id:"scriptRights", name:"זכויות לתסריט",       base:110, persistsAsAsset:false, market:"deal" },
@@ -297,12 +347,19 @@
             { id:"filmSchool", name:"לימודי קולנוע", copy:"התחייבות ארוכה — 4 שנים, שתי הכרעות באמצע.", years:4, entryDebt:16000,
               checkpoints:[
                 { atYear:2, id:"specialize", title:"בחירת התמחות", copy:"השנה השנייה מסתיימת. לאיזה כיוון פונים?",
-                  choices:[{label:"בימוי",kind:"spec-directing"},{label:"עריכה",kind:"spec-editing"},{label:"הפקה",kind:"spec-producing"}] },
+                  choices:[
+                    {label:"בימוי",kind:"spec-directing",effect:(s)=>{ s.contacts+=1; }},
+                    {label:"עריכה",kind:"spec-editing",effect:(s)=>{ s.contacts+=1; }},
+                    {label:"הפקה",kind:"spec-producing",effect:(s)=>{ s.contacts+=1; }}
+                  ] },
                 { atYear:4, id:"thesis", title:"פרויקט גמר", copy:"השנה האחרונה. איך מגישים את פרויקט הגמר?",
-                  choices:[{label:"פרויקט שאפתני · סיכון גבוה יותר",kind:"thesis-ambitious"},{label:"פרויקט בטוח · פחות רושם",kind:"thesis-safe"}] }
+                  choices:[
+                    {label:"פרויקט שאפתני · סיכון גבוה יותר",kind:"thesis-ambitious",effect:(s)=>{ s.fame+=2; }},
+                    {label:"פרויקט בטוח · פחות רושם",kind:"thesis-safe",effect:(s)=>{ s.fame+=2; }}
+                  ] }
               ], grantsOnComplete:{ fame:2 } },
             { id:"shortCourse", name:"קורס קצר", copy:"התחייבות קצרה — שנה וחצי, הכרעה אחת.", years:1.5, entryDebt:4000,
-              checkpoints:[ { atYear:1.5, id:"cert", title:"סיום קורס", copy:"הקורס מסתיים. מה הלאה?", choices:[{label:"להמשיך הלאה",kind:"cert-done"}] } ],
+              checkpoints:[ { atYear:1.5, id:"cert", title:"סיום קורס", copy:"הקורס מסתיים. מה הלאה?", choices:[{label:"להמשיך הלאה",kind:"cert-done",effect:(s)=>{ s.contacts+=1; }}] } ],
               grantsOnComplete:{ fame:1 } },
             { id:"selfTaught", name:"מסלול עצמאי", copy:"בלי לימודים ובלי חוב — לומדים תוך כדי עבודה.", years:0, entryDebt:0,
               immediateEffect: (s) => { s.pathTags.push("self-taught"); } }
@@ -321,9 +378,15 @@
                 { label:"לוותר · אין זמן פנוי", kind:"pass", quiet:true }
               ] },
             { id:"small-scholarship", chance:.06, title:"מלגה קטנה", copy:"האוניברסיטה מציעה מלגה חד-פעמית לתלמיד/ה מצטיין/ת.",
+              followUp:{ id:"scholarship-followup", inYears:2 },
               choices:[
                 { label:"להגיש בקשה · +₪500", kind:"apply-scholarship", effect:(s)=>{ s.cash+=500; addLog("קיבלת מלגה חד-פעמית."); } },
                 { label:"לוותר · אין זמן לטפסים", kind:"pass", quiet:true }
+              ] },
+            { id:"scholarship-followup", chance:0, title:"בדיקת מעקב מקרן המלגות", copy:"קרן המלגות בודקת אם עדיין יש צורך בתמיכה נוספת.",
+              choices:[
+                { label:"לבקש תמיכה נוספת · +₪500", kind:"apply-scholarship", effect:(s)=>{ s.cash+=500; addLog("קיבלת תמיכה נוספת מקרן המלגות."); } },
+                { label:"לוותר הפעם", kind:"pass", quiet:true }
               ] }
           ],
           riskProfile:null,
@@ -342,9 +405,10 @@
         {
           id:"industry", order:1, name:"כניסה לתעשייה", ageRange:[26,34],
           headline:"להתבסס כאיש/אשת מקצוע: קרדיטים אמיתיים, ציוד מקצועי, קשרים שסוחבים",
+          cashScale:2,
           goods:[
-            { id:"proCamera",    name:"מצלמה מקצועית", base:1800, persistsAsAsset:true  },
-            { id:"lightingKit",  name:"ערכת תאורה",     base:950,  persistsAsAsset:true  },
+            { id:"proCamera",    name:"מצלמה מקצועית", base:1800, persistsAsAsset:true, events:{ spike:"שביתת צלמים מייבשת את ההיצע", crash:"אולפן נסגר, ציוד מוצף לשוק" } },
+            { id:"lightingKit",  name:"ערכת תאורה",     base:950,  persistsAsAsset:true, events:{ spike:"עונת צילומים עמוסה מייקרת ציוד תאורה", crash:"חברת השכרה מוכרת מלאי ישן" } },
             { id:"usedBoomMic",  name:"מיקרופון בום משומש",  base:480, persistsAsAsset:false },
             { id:"batteryKit",   name:"ערכת סוללות נטענות",   base:260, persistsAsAsset:false },
             { id:"shootDaySlot", name:"יום צילום פנוי",  base:550,  persistsAsAsset:false, market:"deal" },
@@ -400,9 +464,10 @@
         {
           id:"indie", order:2, name:"קול עצמאי", ageRange:[34,43],
           headline:"להפוך רעיון לסרט אמיתי — ולמצוא לו קהל",
+          cashScale:4,
           goods:[
-            { id:"indieCameraPkg", name:"חבילת צילום עצמאית", base:2600, persistsAsAsset:true  },
-            { id:"editSuite",      name:"עמדת עריכה מקצועית", base:1900, persistsAsAsset:true  },
+            { id:"indieCameraPkg", name:"חבילת צילום עצמאית", base:2600, persistsAsAsset:true, events:{ spike:"גל סרטי סטודנטים מעלה ביקוש לחבילות עצמאיות", crash:"קרן קולנוע עצמאית קורסת ומוכרת ציוד" } },
+            { id:"editSuite",      name:"עמדת עריכה מקצועית", base:1900, persistsAsAsset:true, events:{ spike:"עונת פסטיבלים מקרבת דדליינים לעריכה", crash:"סטודיו עריכה משדרג ומוכר עמדות ישנות" } },
             { id:"usedSoundMixer", name:"מיקסר סאונד משומש",   base:1100, persistsAsAsset:false },
             { id:"backupDrive",    name:"כונן גיבוי חיצוני",   base:520,  persistsAsAsset:false },
             { id:"postSlot",       name:"חלון פוסט-פרודקשן",   base:700,  persistsAsAsset:false, market:"deal" },
@@ -429,8 +494,8 @@
                   choices: genreCheckpointChoices() },
                 { atYear:1, id:"script", title:"התסריט מוכן", copy:"שנה ראשונה מסתיימת. איך סוגרים את התסריט?",
                   choices:[
-                    { label:"תסריט שאפתני יותר · -₪1,500", kind:"script-ambitious", effect:(s)=>{ s.cash-=1500; s.fame+=1; } },
-                    { label:"להישאר רזים ויעילים",          kind:"script-lean",      effect:(s)=>{ s.fame+=1; } }
+                    { label:"תסריט שאפתני יותר · -₪1,500", kind:"script-ambitious", effect:(s)=>{ s.cash-=1500; s.fame+=3; } },
+                    { label:"להישאר רזים ויעילים · +₪500",  kind:"script-lean",      effect:(s)=>{ s.cash+=500; s.fame+=1; } }
                   ] },
                 { atYear:1.6, id:"cast", title:"מי מככב/ת?", copy:"זה הזמן ללהק. מי עומד/ת מול המצלמה?",
                   choices:[
@@ -445,7 +510,12 @@
                 { atYear:2.6, id:"edit", title:"משמרות עריכה", copy:"הגרסה הראשונה מוכנה. ממשיכים ללטש, או סוגרים כאן?",
                   choices:[
                     { label:"עוד לילות עריכה · -₪800", kind:"edit-polish", effect:(s)=>{ s.cash-=800; s.fame+=1; } },
-                    { label:"לסגור בגרסה הראשונה",      kind:"edit-rough",  effect:(s)=>{} }
+                    { label:"לסגור בגרסה הראשונה",      kind:"edit-rough",  effect:(s)=>{
+                        if (s.pathTags.includes("script-ambitious") && Math.random()<EDIT_RUSH_RISK_CHANCE) {
+                          s.fame = Math.max(0,s.fame-2);
+                          addLog("התסריט השאפתני לא קיבל מספיק עבודת עריכה — זה ניכר בתוצאה.");
+                        }
+                      } }
                   ] },
                 { atYear:3, id:"distribution", title:"בחירת הפצה", copy:"השנה השלישית מסתיימת. הסרט מוכן — לאן הוא הולך?",
                   choices:[
@@ -472,7 +542,7 @@
           incidents:[
             { id:"minister-denounces", chance:.08, title:"שר/ה מגנה את הסרט שלך", copy:"שר/ת התרבות מגנה בפומבי את הסרט שלך כ\"פוגע בכבוד המדינה\" — ומודה בראיון שלא ראה/תה אותו. התקשורת מתלהטת, והטלפון לא מפסיק לצלצל.",
               choices:[
-                { label:"לענות בראיון חריף", kind:"clap-back" },
+                { label:"לענות בראיון חריף · -1 קשרים", kind:"clap-back" },
                 { label:"לשתוק ולתת לסרט לדבר", kind:"stay-quiet", quiet:true }
               ] },
             { id:"funding-falls-through", chance:.08, title:"מקור מימון נסוג", copy:"משקיע/ה שהבטיח/ה חלק מהתקציב נעלם/ת.",
@@ -508,8 +578,9 @@
         {
           id:"festivals", order:3, name:"פסטיבלים", ageRange:[43,53],
           headline:"לקחת את הסרט אל העולם — ולהפוך אותו לקריירה בינלאומית",
+          cashScale:6,
           goods:[
-            { id:"salesAgentContract",name:"חוזה עם סוכן מכירות",      base:1600, persistsAsAsset:true  },
+            { id:"salesAgentContract",name:"חוזה עם סוכן מכירות",      base:1600, persistsAsAsset:true, events:{ spike:"שוק המכירות הבינלאומי לוהט אחרי פסטיבל גדול", crash:"סוכנות מכירות ותיקה קורסת" } },
             { id:"dcpCopy",           name:"עותק הקרנה (DCP)",         base:1400, persistsAsAsset:false },
             { id:"vipBadge",          name:"תג גישה VIP מפסטיבל קודם", base:950,  persistsAsAsset:false },
             { id:"distroRights",      name:"זכויות הפצה בינלאומיות", base:2200, persistsAsAsset:false, market:"deal" },
@@ -564,9 +635,10 @@
         {
           id:"breakthrough", order:4, name:"פריצה", ageRange:[53,65],
           headline:"מפרויקט לפרויקט גדולים — לבנות הון וקריירה ברמת אולפן",
+          cashScale:10,
           goods:[
-            { id:"distributionStake",      name:"נתח בזכויות הפצה",     base:9000,  persistsAsAsset:true  },
-            { id:"productionCompanyShare", name:"חלק בחברת הפקה",       base:12000, persistsAsAsset:true  },
+            { id:"distributionStake",      name:"נתח בזכויות הפצה",     base:9000,  persistsAsAsset:true, events:{ spike:"פלטפורמת סטרימינג חדשה נלחמת על תוכן", crash:"מיזוג אולפנים משחרר נתחי הפצה ישנים לשוק" }, yield:(s)=>s.films.length*DISTRIBUTION_STAKE_YIELD_PER_FILM },
+            { id:"productionCompanyShare", name:"חלק בחברת הפקה",       base:12000, persistsAsAsset:true, events:{ spike:"הצלחת קופות מגדילה ביקוש לחלקים בחברות הפקה", crash:"שביתת תסריטאים מקפיאה השקעות בהפקה" }, yield:()=>PRODUCTION_COMPANY_SHARE_YIELD },
             { id:"usedLightingRig",        name:"מערכת תאורת סטודיו משומשת", base:6200, persistsAsAsset:false },
             { id:"supportVehicle",         name:"רכב תמיכה להפקה",          base:8800, persistsAsAsset:false },
             { id:"studioOptionDeal",       name:"אופציה מאולפן",       base:5000,  persistsAsAsset:false, market:"deal" },
@@ -621,9 +693,10 @@
         {
           id:"legacy", order:5, name:"מורשת ופרישה", ageRange:[65,81],
           headline:"לסגור מעגל — הסרט האישי, ומה שנשאר אחריך",
+          cashScale:15,
           goods:[
-            { id:"filmRightsLibrary", name:"ארכיון זכויות אישי", base:80000,  persistsAsAsset:true  },
-            { id:"personalStudio",    name:"סטודיו אישי",          base:100000, persistsAsAsset:true  },
+            { id:"filmRightsLibrary", name:"ארכיון זכויות אישי", base:80000,  persistsAsAsset:true, events:{ spike:"אולפן גדול רודף אחרי ארכיוני זכויות ותיקים לרימייקים", crash:"יורש מוכר ארכיון משפחתי במהירות" }, yield:(s)=>Math.round(FILM_RIGHTS_YIELD_RATE*s.films.length*FILM_RIGHTS_ASSUMED_VALUE_PER_FILM) },
+            { id:"personalStudio",    name:"סטודיו אישי",          base:100000, persistsAsAsset:true, events:{ spike:"ביקוש גואה לסטודיואים בוטיק עם מוניטין", crash:"גל סגירות סטודיואים קטנים בעקבות מיתון בענף" } },
             { id:"vintageCamera",     name:"מצלמת פילם וינטג׳",        base:22000, persistsAsAsset:false },
             { id:"stillsArchiveBox",  name:"תיבת ארכיון תמונות סטילס", base:18000, persistsAsAsset:false },
             { id:"mentorshipProgram", name:"תוכנית הנחיה",        base:15000,  persistsAsAsset:false, market:"deal" },
@@ -635,12 +708,12 @@
             { id:"charityGalaSlot",     name:"מקום בגאלת צדקה",          base:10000, persistsAsAsset:false, market:"deal", rotates:true }
           ],
           gigs:[
-            { id:"teachingGig",     title:"הוראה באקדמיה",       copy:"מוריש/ה את הידע הלאה.", needs:{}, cash:25000, fame:2, contacts:1, followers:300 },
+            { id:"teachingGig",     title:"הוראה באקדמיה",       copy:"מוריש/ה את הידע הלאה.", needs:{}, cash:25000, fame:2, contacts:1, followers:300, mentorGig:true },
             { id:"consultingLegacy",title:"ייעוץ אסטרטגי",        copy:"הכי משתלם כלכלית.",      needs:{}, cash:40000, fame:1, contacts:2, followers:0 },
-            { id:"festivalJudge",   title:"שופט/ת כבוד בפסטיבלים", copy:"מוזמנ/ת כשופט/ת כבוד לפסטיבלים המובילים בעולם.", needs:{}, cash:20000, fame:3, contacts:2, followers:500 },
+            { id:"festivalJudge",   title:"שופט/ת כבוד בפסטיבלים", copy:"מוזמנ/ת כשופט/ת כבוד לפסטיבלים המובילים בעולם.", needs:{}, cash:20000, fame:3, contacts:2, followers:500, mentorGig:true },
             { id:"boardAdvisor",         title:"יועץ/ת דירקטוריון אולפן",     copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:35000, fame:1, contacts:2, followers:0,   rotates:true },
             { id:"documentarySubject",   title:"נושא/ת לסרט תיעודי עליך",     copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:15000, fame:3, contacts:0, followers:800, rotates:true },
-            { id:"masterclassHost",      title:"מנחה מאסטרקלאס",              copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:22000, fame:2, contacts:1, followers:200, rotates:true },
+            { id:"masterclassHost",      title:"מנחה מאסטרקלאס",              copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:22000, fame:2, contacts:1, followers:200, rotates:true, mentorGig:true },
             { id:"philanthropyAdvisor",  title:"יועץ/ת פילנתרופיה תרבותית",   copy:"עבודה עונתית — לא תמיד מוצעת.", needs:{}, cash:30000, fame:1, contacts:2, followers:0,   rotates:true }
           ],
           commitments:[
@@ -683,7 +756,7 @@
           ],
           riskProfile:null,
           milestones:[
-            { id:"storied-career", label:"קריירה מלאה",         check:(s)=>s.fame>=100,          required:true, progress:(s)=>({current:s.fame, target:100}) },
+            { id:"mentee",         label:"הנחיה או שיפוט לדור הבא", check:(s)=>!!s.achievements.mentored, required:true, progress:(s)=>({current:s.achievements.mentored?1:0, target:1}) },
             { id:"capstone-film",  label:"הסרט האישי הושלם",    check:(s)=>s.films.length>=2,    required:true, progress:(s)=>({current:s.films.length, target:2}) },
             { id:"wealthy-retire", label:"פרישה עם הון",         check:(s)=>(s.cash+s.bank)>=150000, required:false },
             { id:"beloved",        label:"קהל שאוהב",            check:(s)=>s.followers>=15000,   required:false }
@@ -732,9 +805,9 @@
         return new Set(ids);
       }
 
-      function generateMarket(stageId, stageYear) {
+      function generateMarket(stageId, stageYear, defaultRisk) {
         const stage = STAGES.find((s) => s.id === stageId) || STAGES[0];
-        const rp = stage.riskProfile || DEFAULT_RISK;
+        const rp = stage.riskProfile || defaultRisk || DEFAULT_RISK;
         const prices = {}, kinds = {};
         const activeGoodIds = activeRotatingIds((stage.goods||[]).filter((g)=>g.rotates), stageYear||0, ROTATION_ROSTER.goods);
         (stage.goods||[]).forEach((g) => {
@@ -746,22 +819,25 @@
         return { prices, kinds, activeGigs };
       }
 
-      function createState() {
+      function createState(difficultyId) {
+        const settings = buildSettings(difficultyId);
         const next = {
           age:21, year:1, retirementAge:81,
           stageId:"student", stageYear:0, nextMilestoneAge:26,
-          cash:2700, bank:0, debt:8000,
+          cash:2700, bank:0, debt:settings.openingDebt,
           fame:0, followers:0, contacts:0,
           capacity:10, bag:{}, prices:{}, previousPrices:{}, priceKinds:{}, activeGigs:[],
           assets:{ usedCamera:false, editComputer:false, diploma:false },
           films:[],
           commitment:null, activeCheckpoint:null, filmDraft:{},
-          debtCollectorStreak:0, debtCollectorIgnores:0,
+          debtCollectorStreak:0, debtCollectorIgnores:0, yearsSinceProject:0,
+          seenIncidents:{}, queuedIncidents:[], personalStudioDiscountUsed:false,
           pathTags:[], bankruptcyStrikes:0,
           view:"hud", marketTab:"work", flight:null,
+          difficulty: difficultyId || null, settings,
           funding:{}, achievements:{}, awards:[], event:null, ended:false, win:false, log:[], lastRecap:null, briefPending:false, pendingAction:null, stageIntroPending:true
         };
-        const market = generateMarket(next.stageId, next.stageYear);
+        const market = generateMarket(next.stageId, next.stageYear, settings.defaultRisk);
         next.prices = market.prices; next.priceKinds = market.kinds; next.previousPrices = {...market.prices}; next.activeGigs = market.activeGigs;
         next.log = ["גיל 21: מתחילים עם חוב לימודים ותיק ריק. הזמן לבחור מסלול כניסה."];
         return next;
@@ -785,6 +861,7 @@
               funding: {...(saved.funding||{})}, achievements: {...(saved.achievements||{})},
               event: null, briefPending: false, pendingAction: null, stageIntroPending: false, activeCheckpoint: saved.activeCheckpoint || null
             };
+            if (state.commitment && state.activeCheckpoint && !openCheckpointEvent(state.activeCheckpoint)) state.activeCheckpoint = null;
           }
         } catch (_) {}
       }
@@ -794,6 +871,57 @@
 
       function goodName(id) { const g = currentStage().goods.find((x)=>x.id===id); return g ? g.name : id; }
       function assetName(id) { for (const s of STAGES) { const g=(s.goods||[]).find((x)=>x.id===id); if (g) return g.name; } return id; }
+      function passiveIncomeSources() {
+        const sources = [];
+        for (const s of STAGES) {
+          for (const g of (s.goods||[])) {
+            if (g.persistsAsAsset && g.yield && state.assets[g.id]) {
+              const amount = g.yield(state);
+              if (amount) sources.push({ id:g.id, name:g.name, amount });
+            }
+          }
+        }
+        return sources;
+      }
+
+      function nextYearRotationExits() {
+        const stage = currentStage();
+        const thisYear = Math.floor(state.stageYear);
+        const nextYear = thisYear+1;
+        const goodsPool = (stage.goods||[]).filter((g)=>g.rotates);
+        const gigsPool = (stage.gigs||[]).filter((g)=>g.rotates);
+        const currentGoods = activeRotatingIds(goodsPool, thisYear, ROTATION_ROSTER.goods);
+        const nextGoods = activeRotatingIds(goodsPool, nextYear, ROTATION_ROSTER.goods);
+        const currentGigs = activeRotatingIds(gigsPool, thisYear, ROTATION_ROSTER.gigs);
+        const nextGigs = activeRotatingIds(gigsPool, nextYear, ROTATION_ROSTER.gigs);
+        const leaving = [];
+        goodsPool.forEach((g)=>{ if (currentGoods.has(g.id) && !nextGoods.has(g.id)) leaving.push(g.name); });
+        gigsPool.forEach((g)=>{ if (currentGigs.has(g.id) && !nextGigs.has(g.id)) leaving.push(g.title); });
+        return leaving;
+      }
+
+      function topbarExtrasMarkup() {
+        const stage = currentStage();
+        const chips = [`<div class="bank"><small>בבנק</small><b>${money(state.bank)}</b></div>`];
+        if (state.age >= stage.ageRange[1] && stage.fallbackPaths && stage.fallbackPaths.length) {
+          chips.push(`<div class="grace"><small>מועד הכרעה</small><b>גיל ${stage.ageRange[1]+STAGE_GRACE_YEARS}</b></div>`);
+        }
+        if (state.bankruptcyStrikes > 0) {
+          chips.push(`<div class="strikes"><small>פשיטות</small><b>${state.bankruptcyStrikes}/${BANKRUPTCY_STRIKE_LIMIT}</b></div>`);
+        }
+        const leaving = nextYearRotationExits();
+        if (leaving.length) {
+          chips.push(`<div class="rotation-exit"><small>יוצא מהרוטציה בשנה הבאה</small><b>${leaving.join(", ")}</b></div>`);
+        }
+        return chips.join("");
+      }
+
+      function priceEventTitle(id, kind) {
+        const good = currentStage().goods.find((x)=>x.id===id);
+        const custom = good && good.events && good.events[kind];
+        if (custom) return custom;
+        return kind==="crash" ? "מבצע בשוק" : kind==="spike" ? "ביקוש גואה" : "";
+      }
       function bagCount() { return Object.values(state.bag).reduce((sum,qty)=>sum+qty,0); }
       function has(id,qty=1) { return (state.bag[id]||0) >= qty; }
       function missing(needs) { return Object.entries(needs||{}).filter(([id,qty])=>!has(id,qty)).map(([id,qty])=>goodName(id)+(qty>1?" ×"+qty:"")); }
@@ -820,6 +948,24 @@
 
       function isWinner() { return false; }
 
+      function setDifficulty(id) {
+        if (state.ended || state.event || state.difficulty || !DIFFICULTY[id]) return false;
+        state.difficulty = id;
+        state.settings = buildSettings(id);
+        state.debt = state.settings.openingDebt;
+        const market = generateMarket(state.stageId, state.stageYear, state.settings.defaultRisk);
+        state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices}; state.activeGigs = market.activeGigs;
+        addLog("רמת קושי: "+DIFFICULTY[id].label+".");
+        save(); render(); return true;
+      }
+
+      function requestGiveUp() {
+        if (state.ended || state.event) return false;
+        notify("לוותר על המסלול?", "הקריירה תיפסק כאן והתוצאה תירשם כהפסד. אי אפשר לחזור אחורה.",
+          [{label:"לוותר סופית", kind:"give-up-confirm"}, {label:"להישאר במסלול", kind:"cancel", quiet:true}]);
+        render(); return true;
+      }
+
       function loadScores() { try { return JSON.parse(localStorage.getItem(SCORES_KEY)) || []; } catch (_) { return []; } }
       function saveScore(entry) {
         try {
@@ -836,7 +982,7 @@
         const financial = state.cash+state.bank+bagValue-state.debt;
         const achievement = state.fame*100+state.followers*2+state.contacts*350+state.films.length*2000;
         state.final = { bagValue, financial, achievement };
-        saveScore({ achievement, financial, age: Math.round(state.age), win: state.win, stage: currentStage().name });
+        saveScore({ achievement, financial, age: Math.round(state.age), win: state.win, stage: currentStage().name, difficulty: state.difficulty || "normal" });
         addLog(win ? "הגעת/הגעה לפרישה — מסלול קריירה שלם." : "המסלול נעצר כאן.");
       }
 
@@ -861,7 +1007,7 @@
         state.nextMilestoneAge = nextStage.ageRange[1];
         state.stageIntroPending = true;
         addLog("עברת לשלב: "+nextStage.name+".");
-        const market = generateMarket(nextStage.id, state.stageYear);
+        const market = generateMarket(nextStage.id, state.stageYear, state.settings.defaultRisk);
         state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices}; state.activeGigs = market.activeGigs;
       }
 
@@ -910,14 +1056,30 @@
         return true;
       }
 
+      function allIncidents() { return (currentStage().incidents||[]).concat(UNIVERSAL_INCIDENTS); }
+
+      function fireIncident(inc) {
+        state.seenIncidents[inc.id] = state.age;
+        if (inc.followUp) state.queuedIncidents.push({ id: inc.followUp.id, dueAge: state.age + inc.followUp.inYears });
+        const choices = typeof inc.choices === "function" ? inc.choices(state) : inc.choices;
+        notify(inc.title, inc.copy, choices);
+      }
+
       function triggerIncident() {
         if (state.event) return;
-        const stage = currentStage();
-        const pool = (stage.incidents||[]).concat(UNIVERSAL_INCIDENTS).filter((inc)=>!inc.when || inc.when(state));
+        const dueIndex = (state.queuedIncidents||[]).findIndex((q)=>q.dueAge<=state.age);
+        if (dueIndex !== -1) {
+          const due = state.queuedIncidents.splice(dueIndex,1)[0];
+          const inc = allIncidents().find((i)=>i.id===due.id);
+          if (inc) { fireIncident(inc); return; }
+        }
+        const pool = allIncidents().filter((inc)=>!inc.when || inc.when(state))
+          .filter((inc)=>!(state.seenIncidents[inc.id]!=null && (state.age-state.seenIncidents[inc.id])<INCIDENT_COOLDOWN_YEARS));
         if (!pool.length) return;
+        const mult = state.settings.eventChanceMult;
         const roll = Math.random();
         let acc = 0;
-        for (const inc of pool) { acc += inc.chance; if (roll < acc) { notify(inc.title, inc.copy, inc.choices); return; } }
+        for (const inc of pool) { acc += inc.chance*mult; if (roll < acc) { fireIncident(inc); return; } }
       }
 
       function advanceYear(reason, years) {
@@ -927,12 +1089,23 @@
         state.debt = Math.ceil(state.debt * Math.pow(DEBT_ANNUAL_RATE, elapsed));
         state.debtCollectorStreak = state.debt > DEBT_COLLECTOR_MIN_DEBT ? state.debtCollectorStreak + elapsed : 0;
         if (state.bank > 0) state.bank = Math.round(state.bank * Math.pow(BANK_ANNUAL_RATE, elapsed));
+        const passiveSources = passiveIncomeSources();
+        const passiveBreakdown = passiveSources.map((p)=>({ name:p.name, amount:Math.round(p.amount*elapsed) }));
+        const passive = passiveBreakdown.reduce((sum,p)=>sum+p.amount,0);
+        if (passive) state.bank += passive;
+        const beforeSinceProject = state.yearsSinceProject;
+        state.yearsSinceProject += elapsed;
+        const wholeDecayYears = Math.max(0, Math.floor(state.yearsSinceProject - FAME_DECAY_AFTER_YEARS) - Math.floor(Math.max(0, beforeSinceProject - FAME_DECAY_AFTER_YEARS)));
+        if (wholeDecayYears > 0) state.fame = Math.floor(state.fame * Math.pow(1 - FAME_DECAY_RATE, wholeDecayYears));
         state.previousPrices = {...state.prices};
-        const market = generateMarket(state.stageId, state.stageYear);
+        const market = generateMarket(state.stageId, state.stageYear, state.settings.defaultRisk);
         state.prices = market.prices; state.priceKinds = market.kinds; state.activeGigs = market.activeGigs;
+        const marketEvents = Object.entries(market.kinds)
+          .filter(([id,kind])=>kind==="crash"||kind==="spike")
+          .map(([id,kind])=>({ id, kind, good: goodName(id), title: priceEventTitle(id,kind) }));
         const roundedElapsed = Math.round(elapsed*10)/10;
         addLog("גיל "+Math.round(state.age)+": "+reason+(elapsed!==1?" ("+formatDuration(roundedElapsed)+").":""));
-        state.lastRecap = { years:roundedElapsed, interestPaid: state.debt-before, age: Math.round(state.age) };
+        state.lastRecap = { years:roundedElapsed, interestPaid: state.debt-before, age: Math.round(state.age), marketEvents, passive, passiveBreakdown };
         state.briefPending = true;
         if (checkBankruptcy()) return true;
         if (checkStageProgress()) return true;
@@ -976,6 +1149,15 @@
         save(); render(); return true;
       }
 
+      function openCheckpointEvent(cp) {
+        const config = (currentStage().commitments||[]).find((c)=>c.id===cp.commitmentId);
+        const checkpoint = config && config.checkpoints.find((c)=>c.id===cp.checkpointId);
+        if (!config || !checkpoint) return false;
+        state.activeCheckpoint = cp;
+        notify(checkpoint.title, checkpoint.copy, checkpoint.choices, typeof checkpoint.html==="function" ? checkpoint.html(state) : checkpoint.html);
+        return true;
+      }
+
       function progressCommitment() {
         const config = currentCommitmentConfig(state);
         if (!config || !state.commitment) return;
@@ -984,11 +1166,12 @@
         const years = Math.max(0, targetYear - state.commitment.elapsedYears);
         state.commitment.elapsedYears = targetYear;
         if (years > 0) { const ended = advanceYear(config.name+" ממשיכה.", years); if (ended || state.ended || state.event) return; }
-        if (next) { state.activeCheckpoint = { commitmentId:config.id, checkpointId:next.id }; notify(next.title, next.copy, next.choices, typeof next.html==="function" ? next.html(state) : next.html); return; }
+        if (next) { openCheckpointEvent({ commitmentId:config.id, checkpointId:next.id }); return; }
         completeCommitment(config);
       }
 
       function completeCommitment(config) {
+        state.yearsSinceProject = 0;
         if (config.grantsOnComplete && config.grantsOnComplete.fame) state.fame += config.grantsOnComplete.fame;
         if (config.id === "filmSchool") state.assets.diploma = true;
         if (config.id === "indieFilm" || config.id === "legacyFilm") {
@@ -1014,7 +1197,15 @@
         const config = (currentStage().commitments||[]).find((c)=>c.id===id);
         if (!config) return false;
         state.stageIntroPending = false;
-        if (config.entryDebt) { state.debt += config.entryDebt; addLog("נכנסת ל"+config.name+" — החוב עלה ב-"+money(config.entryDebt)+"."); }
+        if (config.entryDebt) {
+          let entryDebt = config.entryDebt;
+          if (state.assets.personalStudio && !state.personalStudioDiscountUsed) {
+            entryDebt = Math.round(entryDebt*(1-PERSONAL_STUDIO_DISCOUNT));
+            state.personalStudioDiscountUsed = true;
+            addLog("הסטודיו האישי הוזיל את ההתחייבות הבאה ב-"+Math.round(PERSONAL_STUDIO_DISCOUNT*100)+"%.");
+          }
+          state.debt += entryDebt; addLog("נכנסת ל"+config.name+" — החוב עלה ב-"+money(entryDebt)+".");
+        }
         if (config.immediateEffect) config.immediateEffect(state);
         if (!config.years) {
           state.pathTags.push(config.id);
@@ -1085,6 +1276,7 @@
         const lack = missing(gig.needs);
         if (lack.length) return announce("חסר ציוד לעבודה הזאת","צריך: "+lack.join(" · ")+".");
         state.cash += gig.cash; state.fame += (gig.fame||0); state.contacts += (gig.contacts||0); state.followers += (gig.followers||0);
+        if (gig.mentorGig) state.achievements.mentored = true;
         advanceYear("עבדת כ"+gig.title+".", GIG_YEARS);
         save(); render(); return true;
       }
@@ -1116,9 +1308,10 @@
 
       function takeBlackMarketLoan() {
         if (state.ended||state.event) return false;
-        state.cash += BLACK_MARKET_LOAN.cash;
-        state.debt += BLACK_MARKET_LOAN.debt;
-        addLog("לקחת הלוואת חוץ-בנקאית — "+money(BLACK_MARKET_LOAN.cash)+" מזומן תמורת "+money(BLACK_MARKET_LOAN.debt)+" חוב.");
+        const loan = state.settings.blackMarketLoan;
+        state.cash += loan.cash;
+        state.debt += loan.debt;
+        addLog("לקחת הלוואת חוץ-בנקאית — "+money(loan.cash)+" מזומן תמורת "+money(loan.debt)+" חוב.");
         save(); render(); return true;
       }
 
@@ -1160,13 +1353,16 @@
         else if (choice.kind === "repair") {
           if (state.cash < 300) { notify("אין מספיק מזומן","אין כרגע כסף לתיקון.",[{label:"להמשיך",kind:"pass"}]); render(); return false; }
           state.cash -= 300; addLog("תיקנת את המצלמה ב-₪300.");
-        } else if (choice.kind === "risk-camera") { addLog("המשכת עם הסיכון על המצלמה."); }
+        } else if (choice.kind === "risk-camera") {
+          if (Math.random() < RISK_CAMERA_SUCCESS_CHANCE) { state.assets.usedCamera = true; addLog("הסיכון השתלם — המצלמה שרדה בלי עלות."); }
+          else { state.cash -= RISK_CAMERA_FAIL_COST; addLog("הסיכון לא השתלם — המצלמה התקלקלה, תיקון חירום עלה "+money(RISK_CAMERA_FAIL_COST)+"."); }
+        }
         else if (choice.kind === "cheap-gear-take") { takeCheapGear(); }
-        else if (choice.kind === "debt-pay") { const amt=Math.min(500,state.cash,state.debt); state.cash-=amt; state.debt-=amt; addLog("החזרת "+money(amt)+" מהחוב."); }
-        else if (choice.kind === "debt-delay") { state.debt += 300; addLog("דחית את הבנק והחוב גדל."); }
-        else if (choice.kind === "road-gig") { state.cash += 600; state.contacts += 1; advanceYear("עבודה ספונטנית בדרך.", 1); }
+        else if (choice.kind === "debt-pay") { const cs=currentStage().cashScale||1; const amt=Math.min(500*cs,state.cash,state.debt); state.cash-=amt; state.debt-=amt; addLog("החזרת "+money(amt)+" מהחוב."); }
+        else if (choice.kind === "debt-delay") { state.debt += 300*(currentStage().cashScale||1); addLog("דחית את הבנק והחוב גדל."); }
+        else if (choice.kind === "road-gig") { const cs=currentStage().cashScale||1; state.cash += 600*cs; state.contacts += 1; advanceYear("עבודה ספונטנית בדרך.", 1); }
         else if (choice.kind === "emergency-loan") { state.cash += 2000; state.debt = Math.ceil((state.debt+2000)*1.10); state.bankruptcyStrikes += 1; addLog("לקחת הלוואת חירום — החוב גדל משמעותית."); checkStrikeLimit(); }
-        else if (choice.kind === "give-up") { finish(false); }
+        else if (choice.kind === "give-up" || choice.kind === "give-up-confirm") { finish(false); }
         else if (choice.kind === "collector-pay") {
           const paid = Math.min(payAmount(), state.cash, state.debt);
           state.cash -= paid; state.debt -= paid; state.debtCollectorStreak = 0; state.debtCollectorIgnores = 0;
@@ -1180,7 +1376,7 @@
         }
         else if (choice.kind === "accept-flight") { return acceptFlight(choice.cityId); }
         else if (choice.kind === "decline-flight") { return declineFlight(); }
-        else if (choice.kind === "clap-back") { state.followers += 2000; state.fame += 2; addLog("ענית בראיון חריף — הסערה רק הגדילה את החשיפה."); pushAward("פרס על אף המחלוקת"); }
+        else if (choice.kind === "clap-back") { state.followers += 2000; state.fame += 2; state.contacts = Math.max(0,state.contacts-1); addLog("ענית בראיון חריף — הסערה הגדילה את החשיפה, אבל קשר אחד בתעשייה נפגע."); pushAward("פרס על אף המחלוקת"); }
         else if (choice.kind === "stay-quiet") { state.fame += 3; addLog("שתקת ונתת לסרט לדבר בעצמו."); pushAward("פרס על אף המחלוקת"); }
 
         if (state.commitment && !state.event && !state.ended) progressCommitment();
@@ -1191,8 +1387,8 @@
 
       function trendBadge(id) {
         const kind = state.priceKinds && state.priceKinds[id];
-        if (kind==="crash") return ' <small class="trend-down">↓ מבצע</small>';
-        if (kind==="spike") return ' <small class="trend-up">↑ ביקוש</small>';
+        if (kind==="crash") return ' <small class="trend-down" title="'+priceEventTitle(id,"crash")+'">↓ מבצע</small>';
+        if (kind==="spike") return ' <small class="trend-up" title="'+priceEventTitle(id,"spike")+'">↑ ביקוש</small>';
         return "";
       }
 
@@ -1258,8 +1454,9 @@
       }
 
       function blackMarketRows() {
+        const loan = state.settings.blackMarketLoan;
         return row("הלוואת חוץ-בנקאית","מזומן מהיר עכשיו, בלי שאלות — אבל תוספת חוב הרבה יותר כבדה מהבנק",
-          "+"+money(BLACK_MARKET_LOAN.cash)+" · חוב +"+money(BLACK_MARKET_LOAN.debt),"loanshark","לקחת הלוואה");
+          "+"+money(loan.cash)+" · חוב +"+money(loan.debt),"loanshark","לקחת הלוואה");
       }
 
       function financingRows() {
@@ -1328,7 +1525,10 @@
       function recapMarkup() {
         if (!state.lastRecap) return "";
         const r = state.lastRecap;
-        return `<div class="final-grid recap"><div><small>גיל</small><b>${r.age}</b></div><div><small>החוב גדל ב</small><b>${money(r.interestPaid)}</b></div><div><small>משך</small><b>${formatDuration(r.years)}</b></div></div>`;
+        const events = (r.marketEvents||[]).slice(0,3);
+        const eventsList = events.length ? `<div class="milestone-list">${events.map((e)=>`<span class="milestone">${e.title} · ${e.good}</span>`).join("")}</div>` : "";
+        const passiveLine = r.passive ? `<p class="progress-label" style="margin-top:8px"><span>הכנסה פסיבית: ${money(r.passive)} (${(r.passiveBreakdown||[]).map((p)=>p.name+" "+money(p.amount)).join(", ")})</span></p>` : "";
+        return `<div class="final-grid recap"><div><small>גיל</small><b>${r.age}</b></div><div><small>החוב גדל ב</small><b>${money(r.interestPaid)}</b></div><div><small>משך</small><b>${formatDuration(r.years)}</b></div></div>${eventsList}${passiveLine}`;
       }
 
       function stageIntroMarkup() {
@@ -1338,9 +1538,14 @@
         const commitButtons = showCommitments ? stage.commitments.map((c)=>
           `<button class="primary" data-action="commit:${c.id}">${c.name} · ${c.years?c.years+" שנים":"מיידי"}${c.entryDebt?" · חוב +"+money(c.entryDebt):" · בלי חוב"}</button>`
         ).join("") : "";
+        const showDifficulty = stage.order===0 && !state.difficulty;
+        const difficultyButtons = showDifficulty ? Object.values(DIFFICULTY).map((d)=>
+          `<button class="primary" data-action="difficulty:${d.id}">${d.label}</button>`
+        ).join("") : "";
         return `<section class="event intro"><span>שלב חדש</span><h2>${stage.name}</h2>
           <p>${stage.headline}</p>
           ${milestoneChips?`<div class="milestone-list">${milestoneChips}</div>`:""}
+          ${showDifficulty?`<p class="eyebrow" style="margin-top:14px">רמת קושי</p>${difficultyButtons}`:""}
           ${commitButtons?`<p class="eyebrow" style="margin-top:14px">בחירת מסלול כניסה</p>${commitButtons}`:""}
           <button class="quiet" data-action="stage-intro:close">${showCommitments?"אחליט אחר כך":"להתחיל ←"}</button>
         </section>`;
@@ -1380,7 +1585,7 @@
           ${recapMarkup()}
           ${marketTabsMarkup()}
           <div class="service-list">${marketBody()}</div>
-          <div class="footer-actions"><button data-action="finish">לוותר על המסלול</button><button data-action="log">יומן קריירה</button><button data-action="bag">תיק הפקה</button></div>
+          <div class="footer-actions"><button data-action="log">יומן קריירה</button><button data-action="bag">תיק הפקה</button><button data-action="finish">לוותר על המסלול</button></div>
         </section>`;
       }
 
@@ -1388,7 +1593,7 @@
         const rows = state.log.map((line)=>`<div class="bag-item"><span>${line}</span></div>`).join("");
         return `<section class="panel bag"><header class="service-top"><div><p class="eyebrow">היסטוריה</p><h1>יומן קריירה</h1></div><button class="back" data-action="hud">חזרה ←</button></header>
           <div class="bag-grid" style="grid-template-columns:1fr">${rows||'<p class="empty">עוד אין רשומות.</p>'}</div>
-          <div class="footer-actions"><button data-action="finish">לוותר על המסלול</button><button data-action="hud">למסך הראשי</button></div></section>`;
+          <div class="footer-actions"><button data-action="hud">למסך הראשי</button><button data-action="finish">לוותר על המסלול</button></div></section>`;
       }
 
       function bagView() {
@@ -1399,7 +1604,7 @@
           <div class="bag-grid">${bagRows||'<p class="empty">התיק ריק.</p>'}</div>
           <p class="eyebrow" style="margin-top:14px">נכסים קבועים</p>
           <div class="bag-grid">${assetRows||'<p class="empty">עוד אין נכסים קבועים.</p>'}</div>
-          <div class="footer-actions"><button data-action="finish">לוותר על המסלול</button><button data-action="hud">למסך הראשי</button></div></section>`;
+          <div class="footer-actions"><button data-action="hud">למסך הראשי</button><button data-action="finish">לוותר על המסלול</button></div></section>`;
       }
 
       function renderModal() {
@@ -1407,10 +1612,10 @@
         if (state.ended) {
           const final = state.final || {financial:0, achievement:0};
           const scores = loadScores();
-          const scoreRows = scores.map((s,i)=>`<div class="bag-item"><span>#${i+1} · ${s.stage} · גיל ${s.age}${s.win?" · ניצחון":""}</span><b>${money(s.achievement)}</b></div>`).join("");
+          const scoreRows = scores.map((s,i)=>`<div class="bag-item"><span>#${i+1} · ${s.stage} · גיל ${s.age}${s.win?" · ניצחון":""} · ${(DIFFICULTY[s.difficulty]||DIFFICULTY.normal).label}</span><b>${money(s.achievement)}</b></div>`).join("");
           const awardRows = state.awards.map((a)=>`<div class="bag-item"><span>${a.title} · ${a.stage}, גיל ${a.age}</span><b>🏆</b></div>`).join("");
           modal.classList.remove("hidden");
-          modal.innerHTML = `<section class="event"><span>${state.win?"סוף דרך — פרישה":"המסלול נעצר"}</span><h2>${state.win?"קובי הגיע/ה לפרישה אחרי קריירה שלמה.":"המסלול נעצר כאן."}</h2><p>${state.win?"עברת את כל שלבי הקריירה — מסטודנט/ית ועד פרישה.":"אפשר להתחיל מחדש עם הידע שצברת."}</p><div class="final-grid" style="grid-template-columns:repeat(2,1fr)"><div><small>הישג מקצועי</small><b>${money(final.achievement)}</b></div><div><small>מצב כלכלי</small><b>${money(final.financial)}</b></div><div><small>גיל</small><b>${Math.round(state.age)}</b></div><div><small>שלב</small><b>${currentStage().name}</b></div></div>${awardRows?`<p class="eyebrow" style="margin-top:14px">ארון פרסים</p><div class="bag-grid" style="grid-template-columns:1fr">${awardRows}</div>`:""}<p class="eyebrow" style="margin-top:14px">שיאים</p><div class="bag-grid" style="grid-template-columns:1fr">${scoreRows||'<p class="empty">עדיין אין שיאים.</p>'}</div><button data-action="new">מסלול חדש ←</button></section>`;
+          modal.innerHTML = `<section class="event"><span>${state.win?"סוף דרך — פרישה":"המסלול נעצר"}</span><h2>${state.win?"קובי הגיע/ה לפרישה אחרי קריירה שלמה.":"המסלול נעצר כאן."}</h2><p>${state.win?"עברת את כל שלבי הקריירה — מסטודנט/ית ועד פרישה.":"אפשר להתחיל מחדש עם הידע שצברת."}</p><div class="final-grid" style="grid-template-columns:repeat(2,1fr)"><div><small>הישג מקצועי</small><b>${money(final.achievement)}</b></div><div><small>מצב כלכלי</small><b>${money(final.financial)}</b></div><div><small>גיל</small><b>${Math.round(state.age)}</b></div><div><small>שלב</small><b>${currentStage().name}</b></div><div><small>רמת קושי</small><b>${(DIFFICULTY[state.difficulty]||DIFFICULTY.normal).label}</b></div></div>${awardRows?`<p class="eyebrow" style="margin-top:14px">ארון פרסים</p><div class="bag-grid" style="grid-template-columns:1fr">${awardRows}</div>`:""}<p class="eyebrow" style="margin-top:14px">שיאים</p><div class="bag-grid" style="grid-template-columns:1fr">${scoreRows||'<p class="empty">עדיין אין שיאים.</p>'}</div><button data-action="new">מסלול חדש ←</button></section>`;
           return;
         }
         if (state.pendingAction) {
@@ -1435,7 +1640,7 @@
 
       function render() {
         if (!app) return;
-        const head = `<header class="topbar"><div class="brand">KOBI / קריירה</div><div class="turn"><div>גיל<b>${Math.round(state.age)}</b></div><div>שנה<b>${Math.round(state.year)}</b></div><div>מזומן<b>${money(state.cash)}</b></div><div class="debt">חוב<b>${money(state.debt)}</b>${state.debt>0?'<button class="mini-pay" data-action="bank:pay">להחזיר</button>':""}</div><div class="fame">קרדיטים<b>${state.fame}</b></div><div class="followers">עוקבים<b>${state.followers.toLocaleString("he-IL")}</b></div><div class="contacts">קשרים<b>${state.contacts}</b></div><div>תיק<b>${bagCount()} / ${state.capacity}</b></div></div></header>${stageTrackMarkup()}`;
+        const head = `<header class="topbar"><div class="brand">KOBI / קריירה<span class="difficulty-chip">${(DIFFICULTY[state.difficulty]||DIFFICULTY.normal).label}</span></div><div class="turn"><div>גיל<b>${Math.round(state.age)}</b></div><div>מזומן<b>${money(state.cash)}</b></div><div class="debt">חוב<b>${money(state.debt)}</b>${state.debt>0?'<button class="mini-pay" data-action="bank:pay">להחזיר</button>':""}</div>${topbarExtrasMarkup()}<div class="fame">קרדיטים<b>${state.fame}</b></div><div class="followers">עוקבים<b>${state.followers.toLocaleString("he-IL")}</b></div><div class="contacts">קשרים<b>${state.contacts}</b></div><div>תיק<b>${bagCount()} / ${state.capacity}</b></div></div></header>${stageTrackMarkup()}`;
         const body = state.view==="bag" ? bagView() : state.view==="log" ? logView() : hudView();
         app.innerHTML = `<div class="shell">${head}${body}</div>`;
         renderModal();
@@ -1454,13 +1659,14 @@
           if (action.indexOf("commit:")===0) startCommitment(action.slice(7));
           if (action.indexOf("bank:")===0) bank(action.slice(5));
           if (action.indexOf("tab:")===0) setMarketTab(action.slice(4));
+          if (action.indexOf("difficulty:")===0) setDifficulty(action.slice(11));
           if (action==="loanshark") takeBlackMarketLoan();
           if (action==="event") resolveEvent(Number(id));
           if (action==="brief:close") closeBrief();
           if (action==="stage-intro:close") closeStageIntro();
           if (action==="gig-confirm") confirmGig();
           if (action==="gig-cancel") cancelPendingAction();
-          if (action==="finish") { finish(false); save(); render(); }
+          if (action==="finish") requestGiveUp();
           if (action==="new") { state = createState(); save(); render(); }
         });
       }
@@ -1472,18 +1678,20 @@
         newGame: () => { state = createState(); return clone(state); },
         openView, buy, sell, doGig, startCommitment, resolveEvent, bank, acceptFlight, declineFlight,
         setMarketTab, takeBlackMarketLoan, closeBrief,
-        openGigForecast, confirmGig, cancelPendingAction, closeStageIntro, loadScores,
+        openGigForecast, confirmGig, cancelPendingAction, closeStageIntro, loadScores, requestGiveUp, setDifficulty,
+        __testNextYearRotationExits: nextYearRotationExits,
         finish: () => { finish(false); return clone(state); },
-        STAGES, CITIES,
+        STAGES, CITIES, DIFFICULTY,
         __testJumpToStage: (id) => {
           const stage = STAGES.find((s)=>s.id===id) || STAGES[0];
           state.stageId = stage.id; state.stageYear = 0; state.commitment = null; state.activeCheckpoint = null;
           if (stage.ageRange) state.age = stage.ageRange[0];
-          const market = generateMarket(stage.id, state.stageYear);
+          const market = generateMarket(stage.id, state.stageYear, state.settings.defaultRisk);
           state.prices = market.prices; state.priceKinds = market.kinds; state.previousPrices = {...market.prices}; state.activeGigs = market.activeGigs;
           return clone(state);
         },
-        __testSetState: (patch) => { Object.assign(state, patch); return clone(state); }
+        __testSetState: (patch) => { Object.assign(state, patch); return clone(state); },
+        __testReload: () => { load(); return clone(state); }
       };
     })();
   </script>
